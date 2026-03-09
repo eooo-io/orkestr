@@ -1,0 +1,72 @@
+services:
+  php:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    volumes:
+      - .:/var/www/app
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+      - projects:/projects
+    depends_on:
+      - mariadb
+    networks:
+      - agentis
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/app
+      - ./docker/nginx/api.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - agentis
+
+  ui:
+    build:
+      context: ./ui
+      dockerfile: ../docker/node/Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./ui:/app
+      - /app/node_modules
+    command: npm run dev -- --host
+    networks:
+      - agentis
+
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: agentis
+      MARIADB_USER: agentis
+      MARIADB_PASSWORD: secret
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - agentis
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - agentis
+
+volumes:
+  mariadb_data:
+  projects:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PROJECTS_HOST_PATH:-.}
+
+networks:
+  agentis:
+    driver: bridge
