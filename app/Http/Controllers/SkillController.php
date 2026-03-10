@@ -8,6 +8,7 @@ use App\Models\Skill;
 use App\Models\Tag;
 use App\Services\AgentisManifestService;
 use App\Services\GitService;
+use App\Services\PromptLinter;
 use App\Services\SkillCompositionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -100,6 +101,13 @@ class SkillController extends Controller
         $this->writeFile($skill->project, $skill);
 
         return new SkillResource($skill->load('tags'));
+    }
+
+    public function lint(Skill $skill, PromptLinter $linter): JsonResponse
+    {
+        $issues = $linter->lint($skill->body ?? '');
+
+        return response()->json(['data' => $issues]);
     }
 
     public function destroy(Skill $skill): JsonResponse

@@ -7,7 +7,7 @@
 
 ## Current Status
 
-**Phase 17 is COMPLETE.** All phases 1–17 done.
+**Phase 18 is COMPLETE.** All phases 1–18 done.
 
 ---
 
@@ -233,12 +233,22 @@ Agents feature was largely pre-built (models, migrations, seeder, controller, UI
 
 ---
 
+## Phase 18: Prompt Linting — DONE
+
+- [x] #63 — Rule-based prompt linting with inline feedback
+  - `PromptLinter` service — 8 lint rules (vague instructions, weak constraints, conflicting directives, missing output format, excessive length, role confusion, missing examples, redundancy)
+  - Returns array of `{severity, rule, message, suggestion, line}` objects
+  - `GET /api/skills/{id}/lint` endpoint on SkillController
+  - `LintIssue` TypeScript type, `lintSkill()` API client function
+  - `LintPanel` component — "Run Lint" button, severity icons, color-coded cards (yellow warnings, blue suggestions), summary counts
+  - Integrated as third tab in SkillEditor alongside "Test" and "Versions"
+
+---
+
 ## Future Phases (Backlog)
 
 | Phase | Feature | Issues |
 |-------|---------|--------|
-| 17 | Git-Backed Skill Versioning | #61 |
-| 18 | Prompt Linting | #63 |
 | 19 | Team/Workspace Sharing | #64 |
 | 20 | Provider Diff Preview | #65 |
 | 21 | Skill Templates | #66 |

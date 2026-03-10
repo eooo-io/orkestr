@@ -35,6 +35,7 @@ Route::get('/skills/{skill}', [SkillController::class, 'show']);
 Route::put('/skills/{skill}', [SkillController::class, 'update']);
 Route::delete('/skills/{skill}', [SkillController::class, 'destroy']);
 Route::post('/skills/{skill}/duplicate', [SkillController::class, 'duplicate']);
+Route::get('/skills/{skill}/lint', [SkillController::class, 'lint']);
 
 // Live Test Runner (SSE)
 Route::post('/skills/{skill}/test', SkillTestController::class);

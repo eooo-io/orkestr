@@ -14,6 +14,7 @@ import { FrontmatterForm } from '@/components/skills/FrontmatterForm'
 import { ActionBar } from '@/components/skills/ActionBar'
 import { LiveTestPanel } from '@/components/skills/LiveTestPanel'
 import { VersionHistoryPanel } from '@/components/skills/VersionHistoryPanel'
+import { LintPanel } from '@/components/skills/LintPanel'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
 import type { Skill, GeneratedSkill } from '@/types'
 
@@ -38,7 +39,7 @@ export function SkillEditor() {
   const [projectSkills, setProjectSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'test' | 'versions'>('test')
+  const [activeTab, setActiveTab] = useState<'test' | 'versions' | 'lint'>('test')
   const [showGenerate, setShowGenerate] = useState(false)
   const { isDirty, setDirty, showToast, loadProjects } = useAppStore()
   const initialBody = useRef<string>('')
@@ -244,6 +245,16 @@ export function SkillEditor() {
             >
               Versions
             </button>
+            <button
+              onClick={() => setActiveTab('lint')}
+              className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === 'lint'
+                  ? 'border-b-2 border-primary text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Lint
+            </button>
           </div>
           <div className="flex-1 overflow-hidden">
             {activeTab === 'test' ? (
@@ -254,20 +265,27 @@ export function SkillEditor() {
                   Save the skill first to test it.
                 </div>
               )
+            ) : activeTab === 'versions' ? (
+              !isNew && skill.id ? (
+                <VersionHistoryPanel
+                  skillId={skill.id}
+                  onRestore={() => {
+                    fetchSkill(parseInt(id!)).then((s) => {
+                      setSkill(s)
+                      setDirty(false)
+                    })
+                  }}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                  Save the skill first to see versions.
+                </div>
+              )
             ) : !isNew && skill.id ? (
-              <VersionHistoryPanel
-                skillId={skill.id}
-                onRestore={() => {
-                  // Reload skill after restore
-                  fetchSkill(parseInt(id!)).then((s) => {
-                    setSkill(s)
-                    setDirty(false)
-                  })
-                }}
-              />
+              <LintPanel skillId={skill.id} />
             ) : (
               <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                Save the skill first to see versions.
+                Save the skill first to lint it.
               </div>
             )}
           </div>

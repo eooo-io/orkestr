@@ -8,6 +8,7 @@ import type {
   ProjectAgent,
   AgentComposed,
   GeneratedSkill,
+  LintIssue,
   GitLogEntry,
   SkillsShDiscoveredSkill,
   SkillsShSkillDetail,
@@ -83,6 +84,12 @@ export const duplicateSkill = (id: number, targetProjectId?: number) =>
     .post<ApiResponse<Skill>>(`/skills/${id}/duplicate`, {
       target_project_id: targetProjectId,
     })
+    .then((r) => r.data.data)
+
+// Lint
+export const lintSkill = (skillId: number) =>
+  api
+    .get<ApiResponse<LintIssue[]>>(`/skills/${skillId}/lint`)
     .then((r) => r.data.data)
 
 // Versions

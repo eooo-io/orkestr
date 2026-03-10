@@ -116,6 +116,14 @@ export interface AgentComposed {
   skill_count: number
 }
 
+export interface LintIssue {
+  severity: 'warning' | 'suggestion'
+  rule: string
+  message: string
+  suggestion: string
+  line: number | null
+}
+
 export interface GitLogEntry {
   hash: string
   short_hash: string
