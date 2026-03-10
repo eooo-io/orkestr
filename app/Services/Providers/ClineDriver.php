@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\File;
 
 class ClineDriver implements ProviderDriverInterface
 {
-    public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
+    public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
         $output = '';
 
@@ -25,7 +25,17 @@ class ClineDriver implements ProviderDriverInterface
         }
 
         $path = rtrim($project->resolved_path, '/') . '/.clinerules';
-        File::put($path, rtrim($output) . "\n");
+
+        return [$path => rtrim($output) . "\n"];
+    }
+
+    public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
+    {
+        $files = $this->generate($project, $skills, $composedAgents, $resolvedBodies);
+
+        foreach ($files as $path => $content) {
+            File::put($path, $content);
+        }
     }
 
     public function getOutputPaths(Project $project): array

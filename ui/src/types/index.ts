@@ -153,6 +153,14 @@ export interface BundleImportResult {
   errors: string[]
 }
 
+export interface SyncPreviewFile {
+  path: string
+  provider: string
+  current: string | null
+  proposed: string
+  status: 'added' | 'modified' | 'unchanged' | 'deleted'
+}
+
 export interface ApiResponse<T> {
   data: T
 }

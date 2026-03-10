@@ -9,15 +9,10 @@ use Symfony\Component\Yaml\Yaml;
 
 class CursorDriver implements ProviderDriverInterface
 {
-    public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
+    public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
         $dir = rtrim($project->resolved_path, '/') . '/.cursor/rules';
-        File::ensureDirectoryExists($dir);
-
-        // Remove existing .mdc files to handle deleted/renamed skills
-        foreach (File::glob($dir . '/*.mdc') as $existing) {
-            File::delete($existing);
-        }
+        $files = [];
 
         foreach ($skills as $skill) {
             $body = $resolvedBodies[$skill->id] ?? $skill->body;
@@ -33,7 +28,7 @@ class CursorDriver implements ProviderDriverInterface
             $yaml = Yaml::dump($frontmatter, 2, 2);
             $content = "---\n{$yaml}---\n\n{$body}\n";
 
-            File::put($dir . '/' . $skill->slug . '.mdc', $content);
+            $files[$dir . '/' . $skill->slug . '.mdc'] = $content;
         }
 
         foreach ($composedAgents as $composed) {
@@ -46,7 +41,27 @@ class CursorDriver implements ProviderDriverInterface
             $yaml = Yaml::dump($frontmatter, 2, 2);
             $content = "---\n{$yaml}---\n\n{$composed['content']}\n";
 
-            File::put($dir . '/agent-' . $slug . '.mdc', $content);
+            $files[$dir . '/agent-' . $slug . '.mdc'] = $content;
+        }
+
+        return $files;
+    }
+
+    public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
+    {
+        $dir = rtrim($project->resolved_path, '/') . '/.cursor/rules';
+        File::ensureDirectoryExists($dir);
+
+        // Remove existing .mdc files to handle deleted/renamed skills
+        foreach (File::glob($dir . '/*.mdc') as $existing) {
+            File::delete($existing);
+        }
+
+        $files = $this->generate($project, $skills, $composedAgents, $resolvedBodies);
+
+        foreach ($files as $path => $content) {
+            File::ensureDirectoryExists(dirname($path));
+            File::put($path, $content);
         }
     }
 

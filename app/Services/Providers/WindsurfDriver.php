@@ -8,6 +8,25 @@ use Illuminate\Support\Facades\File;
 
 class WindsurfDriver implements ProviderDriverInterface
 {
+    public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
+    {
+        $dir = rtrim($project->resolved_path, '/') . '/.windsurf/rules';
+        $files = [];
+
+        foreach ($skills as $skill) {
+            $body = $resolvedBodies[$skill->id] ?? $skill->body;
+            $content = "# {$skill->name}\n\n{$body}\n";
+            $files[$dir . '/' . $skill->slug . '.md'] = $content;
+        }
+
+        foreach ($composedAgents as $composed) {
+            $slug = $composed['agent']['slug'];
+            $files[$dir . '/agent-' . $slug . '.md'] = $composed['content'];
+        }
+
+        return $files;
+    }
+
     public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
     {
         $dir = rtrim($project->resolved_path, '/') . '/.windsurf/rules';
@@ -18,15 +37,11 @@ class WindsurfDriver implements ProviderDriverInterface
             File::delete($existing);
         }
 
-        foreach ($skills as $skill) {
-            $body = $resolvedBodies[$skill->id] ?? $skill->body;
-            $content = "# {$skill->name}\n\n{$body}\n";
-            File::put($dir . '/' . $skill->slug . '.md', $content);
-        }
+        $files = $this->generate($project, $skills, $composedAgents, $resolvedBodies);
 
-        foreach ($composedAgents as $composed) {
-            $slug = $composed['agent']['slug'];
-            File::put($dir . '/agent-' . $slug . '.md', $composed['content']);
+        foreach ($files as $path => $content) {
+            File::ensureDirectoryExists(dirname($path));
+            File::put($path, $content);
         }
     }
 

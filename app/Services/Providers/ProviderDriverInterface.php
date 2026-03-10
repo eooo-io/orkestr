@@ -8,6 +8,15 @@ use Illuminate\Support\Collection;
 interface ProviderDriverInterface
 {
     /**
+     * Generate the output content without writing to disk.
+     *
+     * @param  array<int, array{content: string, agent: array}>  $composedAgents
+     * @param  array<int, string>  $resolvedBodies  Skill ID => resolved body with includes
+     * @return array<string, string>  Map of file path => file content
+     */
+    public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array;
+
+    /**
      * Sync all skills and composed agents to the provider's output format.
      *
      * @param  array<int, array{content: string, agent: array}>  $composedAgents

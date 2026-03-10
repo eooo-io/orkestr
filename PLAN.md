@@ -7,7 +7,7 @@
 
 ## Current Status
 
-**Phase 19 is COMPLETE.** All phases 1–19 done.
+**Phase 20 is COMPLETE.** All phases 1–20 done.
 
 ---
 
@@ -254,6 +254,18 @@ Agents feature was largely pre-built (models, migrations, seeder, controller, UI
   - ExportModal — skill/agent checkboxes, select all, ZIP/JSON format toggle, file download
   - ImportBundleModal — drag-and-drop file upload, preview step, conflict mode selector, import summary
   - Integrated in ProjectDetail action bar with Export and Import buttons
+
+---
+
+## Phase 20: Provider Diff Preview — DONE
+
+- [x] #65 — Preview sync diff before writing to provider files
+  - Added `generate()` method to `ProviderDriverInterface` — returns `[path => content]` without writing
+  - Refactored all 6 provider drivers: `sync()` now calls `generate()` then writes, enabling dry-run mode
+  - `ProviderSyncService::preview()` — runs generate on all enabled providers, compares against disk, returns diffs
+  - `ProjectController::syncPreview()` — `POST /api/projects/{id}/sync/preview` endpoint
+  - `SyncPreviewModal` — tabbed interface with per-provider diffs, Monaco DiffEditor, status badges (added/modified/deleted/unchanged), summary counts
+  - "Preview Sync" button added to ProjectDetail next to existing Sync button
 
 ---
 

@@ -24,6 +24,7 @@ Route::put('/projects/{project}', [ProjectController::class, 'update']);
 Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
 Route::post('/projects/{project}/scan', [ProjectController::class, 'scan']);
 Route::post('/projects/{project}/sync', [ProjectController::class, 'sync']);
+Route::post('/projects/{project}/sync/preview', [ProjectController::class, 'syncPreview']);
 Route::get('/projects/{project}/git-log', [ProjectController::class, 'gitLog']);
 Route::get('/projects/{project}/git-diff', [ProjectController::class, 'gitDiff']);
 

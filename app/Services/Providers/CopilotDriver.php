@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\File;
 
 class CopilotDriver implements ProviderDriverInterface
 {
-    public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
+    public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
         $output = "# GitHub Copilot Instructions\n\n";
 
@@ -24,9 +24,19 @@ class CopilotDriver implements ProviderDriverInterface
             }
         }
 
-        $dir = rtrim($project->resolved_path, '/') . '/.github';
-        File::ensureDirectoryExists($dir);
-        File::put($dir . '/copilot-instructions.md', rtrim($output) . "\n");
+        $path = rtrim($project->resolved_path, '/') . '/.github/copilot-instructions.md';
+
+        return [$path => rtrim($output) . "\n"];
+    }
+
+    public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
+    {
+        $files = $this->generate($project, $skills, $composedAgents, $resolvedBodies);
+
+        foreach ($files as $path => $content) {
+            File::ensureDirectoryExists(dirname($path));
+            File::put($path, $content);
+        }
     }
 
     public function getOutputPaths(Project $project): array

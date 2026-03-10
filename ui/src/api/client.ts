@@ -14,6 +14,7 @@ import type {
   SkillsShSkillDetail,
   BundlePreview,
   BundleImportResult,
+  SyncPreviewFile,
   ApiResponse,
 } from '@/types'
 
@@ -61,6 +62,11 @@ export const deleteProject = (id: number) => api.delete(`/projects/${id}`)
 export const scanProject = (id: number) => api.post(`/projects/${id}/scan`)
 
 export const syncProject = (id: number) => api.post(`/projects/${id}/sync`)
+
+export const fetchSyncPreview = (projectId: number) =>
+  api
+    .post<ApiResponse<SyncPreviewFile[]>>(`/projects/${projectId}/sync/preview`)
+    .then((r) => r.data.data)
 
 // Skills
 export const fetchSkills = (projectId: number) =>

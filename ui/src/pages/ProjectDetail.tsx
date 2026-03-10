@@ -4,6 +4,7 @@ import {
   Plus,
   RefreshCw,
   ArrowUpFromLine,
+  Eye,
   LayoutGrid,
   List,
   Pencil,
@@ -24,6 +25,7 @@ import { AgentsTab } from '@/components/agents/AgentsTab'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
 import { ExportModal } from '@/components/bundles/ExportModal'
 import { ImportBundleModal } from '@/components/bundles/ImportBundleModal'
+import { SyncPreviewModal } from '@/components/sync/SyncPreviewModal'
 import { Button } from '@/components/ui/button'
 import type { Project, Skill, GeneratedSkill } from '@/types'
 
@@ -39,6 +41,7 @@ export function ProjectDetail() {
   const [showGenerate, setShowGenerate] = useState(false)
   const [showExport, setShowExport] = useState(false)
   const [showImportBundle, setShowImportBundle] = useState(false)
+  const [showSyncPreview, setShowSyncPreview] = useState(false)
   const navigate = useNavigate()
   const { setActiveProjectId, showToast, loadProjects } = useAppStore()
 
@@ -144,6 +147,10 @@ export function ProjectDetail() {
           <Button variant="outline" size="sm" onClick={handleScan}>
             <RefreshCw className="h-4 w-4 mr-1" />
             Scan
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowSyncPreview(true)}>
+            <Eye className="h-4 w-4 mr-1" />
+            Preview Sync
           </Button>
           <Button variant="outline" size="sm" onClick={handleSync}>
             <ArrowUpFromLine className="h-4 w-4 mr-1" />
@@ -319,6 +326,17 @@ export function ProjectDetail() {
           onImported={async () => {
             const sk = await fetchSkills(project.id)
             setSkills(sk)
+            loadProjects()
+          }}
+        />
+      )}
+
+      {showSyncPreview && (
+        <SyncPreviewModal
+          projectId={project.id}
+          onClose={() => setShowSyncPreview(false)}
+          onSynced={() => {
+            showToast(`Synced ${project.name}`)
             loadProjects()
           }}
         />

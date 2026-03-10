@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\File;
 
 class OpenAIDriver implements ProviderDriverInterface
 {
-    public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
+    public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
         $output = "# Instructions\n\n";
 
@@ -24,9 +24,19 @@ class OpenAIDriver implements ProviderDriverInterface
             }
         }
 
-        $dir = rtrim($project->resolved_path, '/') . '/.openai';
-        File::ensureDirectoryExists($dir);
-        File::put($dir . '/instructions.md', rtrim($output) . "\n");
+        $path = rtrim($project->resolved_path, '/') . '/.openai/instructions.md';
+
+        return [$path => rtrim($output) . "\n"];
+    }
+
+    public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
+    {
+        $files = $this->generate($project, $skills, $composedAgents, $resolvedBodies);
+
+        foreach ($files as $path => $content) {
+            File::ensureDirectoryExists(dirname($path));
+            File::put($path, $content);
+        }
     }
 
     public function getOutputPaths(Project $project): array

@@ -102,6 +102,13 @@ class ProjectController extends Controller
         return response()->json(['message' => 'Sync complete']);
     }
 
+    public function syncPreview(Project $project, ProviderSyncService $syncService): JsonResponse
+    {
+        $preview = $syncService->preview($project);
+
+        return response()->json(['data' => $preview]);
+    }
+
     public function gitLog(Request $request, Project $project, GitService $gitService): JsonResponse
     {
         $file = $request->query('file');
