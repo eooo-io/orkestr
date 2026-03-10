@@ -22,10 +22,20 @@ export interface Skill {
   max_tokens: number | null
   tools: string[]
   body: string
-  tags: Tag[]
-  current_version_number: number
+  tags: string[]
+  token_estimate: number
+  project?: Project
   created_at: string
   updated_at: string
+}
+
+export interface GeneratedSkill {
+  name: string
+  description: string
+  model: string | null
+  max_tokens: number | null
+  tags: string[]
+  body: string
 }
 
 export interface SkillVersion {
@@ -41,7 +51,7 @@ export interface SkillVersion {
 export interface Tag {
   id: number
   name: string
-  color: string | null
+  color: string
   skills_count?: number
 }
 
@@ -51,10 +61,58 @@ export interface LibrarySkill {
   name: string
   slug: string
   description: string | null
-  category: string
+  category: string | null
   tags: string[]
   frontmatter: Record<string, unknown>
   body: string
   source: string | null
   created_at: string
+}
+
+export interface Agent {
+  id: number
+  uuid: string
+  name: string
+  slug: string
+  role: string
+  description: string | null
+  base_instructions: string
+  icon: string | null
+  sort_order: number
+}
+
+export interface ProjectAgent extends Agent {
+  is_enabled: boolean
+  custom_instructions: string | null
+  skill_ids: number[]
+}
+
+export interface SkillsShDiscoveredSkill {
+  path: string
+  name: string
+}
+
+export interface SkillsShSkillDetail {
+  path: string
+  name: string
+  description: string | null
+  body: string
+  frontmatter: Record<string, unknown>
+}
+
+export interface AgentComposed {
+  content: string
+  token_estimate: number
+  agent: {
+    id: number
+    name: string
+    slug: string
+    role: string
+    icon: string | null
+  }
+  skill_count: number
+}
+
+export interface ApiResponse<T> {
+  data: T
 }
