@@ -7,6 +7,7 @@ use App\Jobs\ProjectScanJob;
 use App\Models\Project;
 use App\Models\ProjectProvider;
 use App\Rules\SafeProjectPath;
+use App\Services\GitService;
 use App\Services\ProviderSyncService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,12 +33,14 @@ class ProjectController extends Controller
             'path' => ['required', 'string', 'max:500', new SafeProjectPath],
             'providers' => 'nullable|array',
             'providers.*' => 'string|in:claude,cursor,copilot,windsurf,cline,openai',
+            'git_auto_commit' => 'nullable|boolean',
         ]);
 
         $project = Project::create([
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'path' => $validated['path'],
+            'git_auto_commit' => $validated['git_auto_commit'] ?? false,
         ]);
 
         if (! empty($validated['providers'])) {
@@ -62,6 +65,7 @@ class ProjectController extends Controller
             'path' => ['sometimes', 'required', 'string', 'max:500', new SafeProjectPath],
             'providers' => 'nullable|array',
             'providers.*' => 'string|in:claude,cursor,copilot,windsurf,cline,openai',
+            'git_auto_commit' => 'nullable|boolean',
         ]);
 
         $project->update(collect($validated)->except('providers')->toArray());
@@ -96,5 +100,52 @@ class ProjectController extends Controller
         $syncService->syncProject($project);
 
         return response()->json(['message' => 'Sync complete']);
+    }
+
+    public function gitLog(Request $request, Project $project, GitService $gitService): JsonResponse
+    {
+        $file = $request->query('file');
+
+        if (! $file) {
+            return response()->json(['message' => 'file parameter required'], 422);
+        }
+
+        try {
+            $log = $gitService->log($project->resolved_path, $file);
+            $branch = $gitService->currentBranch($project->resolved_path);
+
+            return response()->json([
+                'data' => $log,
+                'branch' => $branch,
+            ]);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function gitDiff(Request $request, Project $project, GitService $gitService): JsonResponse
+    {
+        $file = $request->query('file');
+        $ref = $request->query('ref');
+
+        if (! $file) {
+            return response()->json(['message' => 'file parameter required'], 422);
+        }
+
+        try {
+            $diff = $gitService->diff($project->resolved_path, $file, $ref);
+
+            $content = null;
+            if ($ref) {
+                $content = $gitService->showAtRef($project->resolved_path, $file, $ref);
+            }
+
+            return response()->json([
+                'diff' => $diff,
+                'content' => $content,
+            ]);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
 }

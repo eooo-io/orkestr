@@ -16,12 +16,14 @@ class Project extends Model
         'description',
         'path',
         'synced_at',
+        'git_auto_commit',
     ];
 
     protected function casts(): array
     {
         return [
             'synced_at' => 'datetime',
+            'git_auto_commit' => 'boolean',
         ];
     }
 

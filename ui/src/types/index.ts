@@ -5,6 +5,7 @@ export interface Project {
   description: string | null
   path: string
   providers: string[]
+  git_auto_commit: boolean
   skills_count: number
   synced_at: string | null
   created_at: string
@@ -113,6 +114,15 @@ export interface AgentComposed {
     icon: string | null
   }
   skill_count: number
+}
+
+export interface GitLogEntry {
+  hash: string
+  short_hash: string
+  message: string
+  author: string
+  date: string
+  branch: string | null
 }
 
 export interface ApiResponse<T> {

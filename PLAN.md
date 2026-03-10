@@ -7,7 +7,7 @@
 
 ## Current Status
 
-**Phase 16 is COMPLETE.** All phases 1–16 done.
+**Phase 17 is COMPLETE.** All phases 1–17 done.
 
 ---
 
@@ -216,6 +216,20 @@ Agents feature was largely pre-built (models, migrations, seeder, controller, UI
   - UI: Includes picker in FrontmatterForm (toggle buttons for sibling skills)
   - UI: Token estimate shows "(resolved)" when includes are active
   - SkillEditor loads project skills for includes picker
+
+---
+
+## Phase 17: Git-Backed Skill Versioning — DONE
+
+- [x] #61 — Commit skill changes to project git repos
+  - `GitService` — wraps shell git commands (commit, log, diff, showAtRef, currentBranch)
+  - Migration: `git_auto_commit` boolean on `projects` table
+  - `SkillController` — auto-commits skill file after write when project has git_auto_commit enabled
+  - `ProjectController` — new `gitLog` and `gitDiff` endpoints
+  - API: `GET /api/projects/{id}/git-log?file=` and `GET /api/projects/{id}/git-diff?file=&ref=`
+  - `ProjectResource` — exposes `git_auto_commit`
+  - Frontend: `GitLogEntry` type, `fetchGitLog` and `fetchGitDiff` API client functions
+  - Project store/update accepts `git_auto_commit`
 
 ---
 

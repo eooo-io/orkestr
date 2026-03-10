@@ -23,6 +23,8 @@ Route::put('/projects/{project}', [ProjectController::class, 'update']);
 Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
 Route::post('/projects/{project}/scan', [ProjectController::class, 'scan']);
 Route::post('/projects/{project}/sync', [ProjectController::class, 'sync']);
+Route::get('/projects/{project}/git-log', [ProjectController::class, 'gitLog']);
+Route::get('/projects/{project}/git-diff', [ProjectController::class, 'gitDiff']);
 
 // Skills (nested under project for create/index)
 Route::get('/projects/{project}/skills', [SkillController::class, 'index']);

@@ -8,6 +8,7 @@ import type {
   ProjectAgent,
   AgentComposed,
   GeneratedSkill,
+  GitLogEntry,
   SkillsShDiscoveredSkill,
   SkillsShSkillDetail,
   ApiResponse,
@@ -217,6 +218,23 @@ export const generateSkill = (description: string, constraints?: string) =>
 // Token Estimation (client-side, ~1 token per 4 chars)
 export const estimateTokens = (text: string): number =>
   Math.ceil(text.length / 4)
+
+// Git
+export const fetchGitLog = (projectId: number, file: string) =>
+  api
+    .get<{ data: GitLogEntry[]; branch: string | null }>(
+      `/projects/${projectId}/git-log`,
+      { params: { file } },
+    )
+    .then((r) => r.data)
+
+export const fetchGitDiff = (projectId: number, file: string, ref?: string) =>
+  api
+    .get<{ diff: string; content: string | null }>(
+      `/projects/${projectId}/git-diff`,
+      { params: { file, ref } },
+    )
+    .then((r) => r.data)
 
 // Settings
 export const fetchSettings = () =>

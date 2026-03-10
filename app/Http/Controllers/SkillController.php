@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\Skill;
 use App\Models\Tag;
 use App\Services\AgentisManifestService;
+use App\Services\GitService;
 use App\Services\SkillCompositionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class SkillController extends Controller
     public function __construct(
         protected AgentisManifestService $manifestService,
         protected SkillCompositionService $compositionService,
+        protected GitService $gitService,
     ) {}
 
     public function index(Project $project): AnonymousResourceCollection
@@ -185,5 +187,19 @@ class SkillController extends Controller
         ];
 
         $this->manifestService->writeSkillFile($project->resolved_path, $frontmatter, $skill->body ?? '');
+
+        // Auto-commit if enabled
+        if ($project->git_auto_commit) {
+            try {
+                $relativePath = ".agentis/skills/{$skill->slug}.md";
+                $this->gitService->commit(
+                    $project->resolved_path,
+                    $relativePath,
+                    "agentis: update {$skill->name}",
+                );
+            } catch (\RuntimeException) {
+                // Silently skip if git fails (not a git repo, etc.)
+            }
+        }
     }
 }
