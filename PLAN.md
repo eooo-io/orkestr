@@ -7,7 +7,7 @@
 
 ## Current Status
 
-**Phase 20 is COMPLETE.** All phases 1–20 done.
+**Phase 26 is COMPLETE.** All phases 1–26 done. Full roadmap implemented.
 
 ---
 
@@ -269,18 +269,70 @@ Agents feature was largely pre-built (models, migrations, seeder, controller, UI
 
 ---
 
-## Future Phases (Backlog)
+## Phase 21: Skill Templates — DONE
 
-| Phase | Feature | Issues |
-|-------|---------|--------|
-| 19 | Team/Workspace Sharing | #64 |
-| 20 | Provider Diff Preview | #65 |
-| 21 | Skill Templates | #66 |
-| 22 | Bulk Operations | #67 |
-| 23 | Command Palette | #68 |
-| 24 | Skill Marketplace | #69 |
-| 25 | Webhook/Event System | #71 |
-| 26 | Multi-Model Test Runner | #72 |
+- [x] #66 — Parameterized skill templates with `{{variable}}` substitution
+  - `TemplateResolver` service — resolves, extracts, and finds missing variables
+  - `skill_variables` table for per-project variable values, `template_variables` JSON column on skills
+  - `SkillVariableController` — GET/PUT endpoints for variable values
+  - `ProviderSyncService` and `AgentComposeService` resolve templates before output
+  - FrontmatterForm gains template variable definition editor
+  - TemplateVariablesPanel shows value inputs for saved skills with templates
+
+---
+
+## Phase 22: Bulk Operations — DONE
+
+- [x] #67 — Multi-select skills with batch tag, assign, move, delete
+  - `BulkSkillController` with 4 endpoints: bulk-tag, bulk-assign, bulk-delete, bulk-move
+  - SkillCard gains selectable checkbox overlay
+  - BulkActionBar floating bottom bar with action popovers
+  - ProjectDetail gains select mode with select all/none
+
+---
+
+## Phase 23: Command Palette — DONE
+
+- [x] #68 — Global Ctrl+K command palette for keyboard-driven navigation
+  - `useCommandPalette` hook with keyboard listener
+  - `CommandPalette` modal with fuzzy search across skills, projects, pages, actions
+  - Arrow key navigation, Enter to select, Escape to close
+  - Recent items in localStorage
+
+---
+
+## Phase 24: Skill Marketplace — DONE
+
+- [x] #69 — Self-hosted skill marketplace for publishing and discovery
+  - `marketplace_skills` table with FULLTEXT search, ratings, downloads
+  - `MarketplaceController` — browse, publish, install, vote endpoints
+  - Marketplace page with category sidebar, search, sort, pagination
+  - Publish/Install modals, MarketplaceCard with vote buttons
+
+---
+
+## Phase 25: Webhook/Event System — DONE
+
+- [x] #71 — Event-driven sync triggers and notifications
+  - `webhooks` and `webhook_deliveries` tables
+  - `WebhookDispatcher` with HMAC-SHA256 signing and queued delivery
+  - `WebhookController` — CRUD, delivery log, test endpoint
+  - `InboundWebhookController` — GitHub push webhook receiver triggers project scan
+  - SkillController and ProjectController fire webhook events
+  - WebhookSettings UI component with delivery log as project tab
+
+---
+
+## Phase 26: Multi-Model Test Runner — DONE
+
+- [x] #72 — Support OpenAI, Gemini, and Ollama in the test runner
+  - `LLMProviderInterface` with `stream()` and `models()` methods
+  - 4 providers: AnthropicProvider, OpenAIProvider, GeminiProvider, OllamaProvider
+  - `LLMProviderFactory` routes models to providers by prefix
+  - `SkillTestController` refactored to use factory
+  - `ModelController` — `GET /api/models` with grouped provider status
+  - Settings page gains API key inputs for all providers
+  - Playground model selector fetches available models dynamically
 
 ---
 
