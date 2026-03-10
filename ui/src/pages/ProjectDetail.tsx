@@ -15,6 +15,9 @@ import {
   Wand2,
   Package,
   Upload,
+  CheckSquare,
+  Square,
+  CheckCheck,
 } from 'lucide-react'
 import { fetchProject, fetchSkills, syncProject, scanProject, createSkill } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
@@ -26,6 +29,7 @@ import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
 import { ExportModal } from '@/components/bundles/ExportModal'
 import { ImportBundleModal } from '@/components/bundles/ImportBundleModal'
 import { SyncPreviewModal } from '@/components/sync/SyncPreviewModal'
+import { BulkActionBar } from '@/components/skills/BulkActionBar'
 import { Button } from '@/components/ui/button'
 import type { Project, Skill, GeneratedSkill } from '@/types'
 
@@ -42,6 +46,8 @@ export function ProjectDetail() {
   const [showExport, setShowExport] = useState(false)
   const [showImportBundle, setShowImportBundle] = useState(false)
   const [showSyncPreview, setShowSyncPreview] = useState(false)
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedSkillIds, setSelectedSkillIds] = useState<Set<number>>(new Set())
   const navigate = useNavigate()
   const { setActiveProjectId, showToast, loadProjects } = useAppStore()
 
@@ -96,6 +102,36 @@ export function ProjectDetail() {
     } catch {
       showToast('Failed to save generated skill', 'error')
     }
+  }
+
+  const toggleSkillSelection = (id: number) => {
+    setSelectedSkillIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  const selectAll = () => {
+    setSelectedSkillIds(new Set(skills.map((s) => s.id)))
+  }
+
+  const deselectAll = () => {
+    setSelectedSkillIds(new Set())
+  }
+
+  const handleBulkActionComplete = async () => {
+    if (!project) return
+    const sk = await fetchSkills(project.id)
+    setSkills(sk)
+    setSelectedSkillIds(new Set())
+    setSelectMode(false)
+    showToast('Bulk action completed')
+    loadProjects()
   }
 
   if (loading) {
@@ -226,19 +262,44 @@ export function ProjectDetail() {
                 </span>
               )}
             </p>
-            <div className="flex items-center border border-border rounded-md">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 ${viewMode === 'grid' ? 'bg-accent' : ''}`}
+            <div className="flex items-center gap-2">
+              {selectMode && skills.length > 0 && (
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" onClick={selectAll}>
+                    <CheckCheck className="h-4 w-4 mr-1" />
+                    All
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={deselectAll}>
+                    <Square className="h-4 w-4 mr-1" />
+                    None
+                  </Button>
+                </div>
+              )}
+              <Button
+                variant={selectMode ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => {
+                  setSelectMode(!selectMode)
+                  if (selectMode) setSelectedSkillIds(new Set())
+                }}
               >
-                <LayoutGrid className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-1.5 ${viewMode === 'list' ? 'bg-accent' : ''}`}
-              >
-                <List className="h-4 w-4" />
-              </button>
+                <CheckSquare className="h-4 w-4 mr-1" />
+                {selectMode ? 'Exit Select' : 'Select'}
+              </Button>
+              <div className="flex items-center border border-border rounded-md">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-1.5 ${viewMode === 'grid' ? 'bg-accent' : ''}`}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-1.5 ${viewMode === 'list' ? 'bg-accent' : ''}`}
+                >
+                  <List className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -270,7 +331,13 @@ export function ProjectDetail() {
               }
             >
               {skills.map((skill) => (
-                <SkillCard key={skill.id} skill={skill} />
+                <SkillCard
+                  key={skill.id}
+                  skill={skill}
+                  selectable={selectMode}
+                  selected={selectedSkillIds.has(skill.id)}
+                  onToggleSelect={toggleSkillSelection}
+                />
               ))}
             </div>
           )}
@@ -339,6 +406,18 @@ export function ProjectDetail() {
             showToast(`Synced ${project.name}`)
             loadProjects()
           }}
+        />
+      )}
+
+      {selectedSkillIds.size > 0 && (
+        <BulkActionBar
+          selectedIds={selectedSkillIds}
+          projectId={project.id}
+          onClearSelection={() => {
+            setSelectedSkillIds(new Set())
+            setSelectMode(false)
+          }}
+          onActionComplete={handleBulkActionComplete}
         />
       )}
     </div>
