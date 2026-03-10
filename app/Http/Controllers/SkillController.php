@@ -10,6 +10,7 @@ use App\Services\AgentisManifestService;
 use App\Services\GitService;
 use App\Services\PromptLinter;
 use App\Services\SkillCompositionService;
+use App\Services\WebhookDispatcher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -21,6 +22,7 @@ class SkillController extends Controller
         protected AgentisManifestService $manifestService,
         protected SkillCompositionService $compositionService,
         protected GitService $gitService,
+        protected WebhookDispatcher $webhookDispatcher,
     ) {}
 
     public function index(Project $project): AnonymousResourceCollection
@@ -72,6 +74,7 @@ class SkillController extends Controller
         $this->syncTags($skill, $validated['tags'] ?? []);
         $this->createVersion($skill);
         $this->writeFile($project, $skill);
+        $this->dispatchWebhook('skill.created', $project, $skill);
 
         return new SkillResource($skill->load('tags'));
     }
@@ -108,6 +111,7 @@ class SkillController extends Controller
 
         $this->createVersion($skill);
         $this->writeFile($skill->project, $skill);
+        $this->dispatchWebhook('skill.updated', $skill->project, $skill);
 
         return new SkillResource($skill->load('tags'));
     }
@@ -121,8 +125,12 @@ class SkillController extends Controller
 
     public function destroy(Skill $skill): JsonResponse
     {
-        $this->manifestService->deleteSkillFile($skill->project->resolved_path, $skill->slug);
+        $project = $skill->project;
+        $skillData = ['id' => $skill->id, 'slug' => $skill->slug, 'name' => $skill->name];
+        $this->manifestService->deleteSkillFile($project->resolved_path, $skill->slug);
         $skill->delete();
+
+        $this->webhookDispatcher->dispatch('skill.deleted', $project, $skillData);
 
         return response()->json(['message' => 'Skill deleted']);
     }
@@ -188,6 +196,18 @@ class SkillController extends Controller
             'body' => $skill->body,
             'saved_at' => now(),
         ]);
+    }
+
+    protected function dispatchWebhook(string $event, Project $project, Skill|array $skill): void
+    {
+        $payload = is_array($skill) ? $skill : [
+            'id' => $skill->id,
+            'slug' => $skill->slug,
+            'name' => $skill->name,
+            'project_id' => $project->id,
+        ];
+
+        $this->webhookDispatcher->dispatch($event, $project, $payload);
     }
 
     protected function writeFile(Project $project, Skill $skill): void

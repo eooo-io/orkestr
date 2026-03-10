@@ -80,4 +80,9 @@ class Project extends Model
     {
         return $this->hasMany(SkillVariable::class);
     }
+
+    public function webhooks(): HasMany
+    {
+        return $this->hasMany(Webhook::class);
+    }
 }

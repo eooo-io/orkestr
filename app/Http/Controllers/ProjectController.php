@@ -9,6 +9,7 @@ use App\Models\ProjectProvider;
 use App\Rules\SafeProjectPath;
 use App\Services\GitService;
 use App\Services\ProviderSyncService;
+use App\Services\WebhookDispatcher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -95,9 +96,15 @@ class ProjectController extends Controller
         return response()->json(['message' => 'Scan queued']);
     }
 
-    public function sync(Project $project, ProviderSyncService $syncService): JsonResponse
+    public function sync(Project $project, ProviderSyncService $syncService, WebhookDispatcher $webhookDispatcher): JsonResponse
     {
         $syncService->syncProject($project);
+
+        $webhookDispatcher->dispatch('project.synced', $project, [
+            'project_id' => $project->id,
+            'project_name' => $project->name,
+            'providers' => $project->providers->pluck('provider_slug')->all(),
+        ]);
 
         return response()->json(['message' => 'Sync complete']);
     }

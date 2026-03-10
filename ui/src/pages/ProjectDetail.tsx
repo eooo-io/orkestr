@@ -18,6 +18,7 @@ import {
   CheckSquare,
   Square,
   CheckCheck,
+  Globe,
 } from 'lucide-react'
 import { fetchProject, fetchSkills, syncProject, scanProject, createSkill } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
@@ -25,6 +26,7 @@ import { SkillCard } from '@/components/skills/SkillCard'
 import { ImportLibraryModal } from '@/components/library/ImportLibraryModal'
 import { SkillsShImportModal } from '@/components/library/SkillsShImportModal'
 import { AgentsTab } from '@/components/agents/AgentsTab'
+import { WebhookSettings } from '@/components/webhooks/WebhookSettings'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
 import { ExportModal } from '@/components/bundles/ExportModal'
 import { ImportBundleModal } from '@/components/bundles/ImportBundleModal'
@@ -39,7 +41,7 @@ export function ProjectDetail() {
   const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [activeTab, setActiveTab] = useState<'skills' | 'agents'>('skills')
+  const [activeTab, setActiveTab] = useState<'skills' | 'agents' | 'webhooks'>('skills')
   const [showLibrary, setShowLibrary] = useState(false)
   const [showSkillsSh, setShowSkillsSh] = useState(false)
   const [showGenerate, setShowGenerate] = useState(false)
@@ -248,6 +250,17 @@ export function ProjectDetail() {
           <Bot className="h-4 w-4" />
           Agents
         </button>
+        <button
+          onClick={() => setActiveTab('webhooks')}
+          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
+            activeTab === 'webhooks'
+              ? 'border-primary text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Globe className="h-4 w-4" />
+          Webhooks
+        </button>
       </div>
 
       {activeTab === 'skills' && (
@@ -346,6 +359,10 @@ export function ProjectDetail() {
 
       {activeTab === 'agents' && (
         <AgentsTab projectId={project.id} skills={skills} />
+      )}
+
+      {activeTab === 'webhooks' && (
+        <WebhookSettings projectId={project.id} />
       )}
 
       {showLibrary && (
