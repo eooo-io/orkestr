@@ -11,6 +11,7 @@ import {
 } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
 import { FrontmatterForm } from '@/components/skills/FrontmatterForm'
+import { TemplateVariablesPanel } from '@/components/skills/TemplateVariablesPanel'
 import { ActionBar } from '@/components/skills/ActionBar'
 import { LiveTestPanel } from '@/components/skills/LiveTestPanel'
 import { VersionHistoryPanel } from '@/components/skills/VersionHistoryPanel'
@@ -32,6 +33,7 @@ export function SkillEditor() {
     max_tokens: null,
     tools: [],
     includes: [],
+    template_variables: null,
     body: '',
     tags: [],
     project_id: projectId ? parseInt(projectId) : undefined,
@@ -202,6 +204,17 @@ export function SkillEditor() {
         {/* Left: Editor */}
         <div className="flex-1 flex flex-col min-w-0">
           <FrontmatterForm skill={skill} onChange={handleFieldChange} projectSkills={projectSkills} />
+          {!isNew &&
+            skill.id &&
+            skill.project_id &&
+            skill.template_variables &&
+            skill.template_variables.length > 0 && (
+              <TemplateVariablesPanel
+                projectId={skill.project_id}
+                skillId={skill.id}
+                templateVariables={skill.template_variables}
+              />
+            )}
           <div className="flex-1">
             <Editor
               height="100%"

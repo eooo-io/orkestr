@@ -75,4 +75,9 @@ class Project extends Model
     {
         return $this->hasMany(ProjectAgent::class);
     }
+
+    public function skillVariables(): HasMany
+    {
+        return $this->hasMany(SkillVariable::class);
+    }
 }

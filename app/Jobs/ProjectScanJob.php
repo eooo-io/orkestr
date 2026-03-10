@@ -42,6 +42,7 @@ class ProjectScanJob implements ShouldQueue
                     'max_tokens' => $frontmatter['max_tokens'] ?? null,
                     'tools' => $frontmatter['tools'] ?? null,
                     'includes' => $frontmatter['includes'] ?? null,
+                    'template_variables' => $frontmatter['template_variables'] ?? null,
                     'body' => $body,
                 ],
             );

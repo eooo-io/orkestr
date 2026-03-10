@@ -7,9 +7,11 @@ use App\Http\Controllers\SkillsShController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\BulkSkillController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SkillGenerateController;
 use App\Http\Controllers\SkillTestController;
+use App\Http\Controllers\SkillVariableController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\VersionController;
 use Illuminate\Support\Facades\Route;
@@ -32,12 +34,22 @@ Route::get('/projects/{project}/git-diff', [ProjectController::class, 'gitDiff']
 Route::get('/projects/{project}/skills', [SkillController::class, 'index']);
 Route::post('/projects/{project}/skills', [SkillController::class, 'store']);
 
+// Bulk Skill Operations (must be before /skills/{skill} routes)
+Route::post('/skills/bulk-tag', [BulkSkillController::class, 'bulkTag']);
+Route::post('/skills/bulk-assign', [BulkSkillController::class, 'bulkAssign']);
+Route::post('/skills/bulk-delete', [BulkSkillController::class, 'bulkDelete']);
+Route::post('/skills/bulk-move', [BulkSkillController::class, 'bulkMove']);
+
 // Skills (standalone for show/update/delete/duplicate)
 Route::get('/skills/{skill}', [SkillController::class, 'show']);
 Route::put('/skills/{skill}', [SkillController::class, 'update']);
 Route::delete('/skills/{skill}', [SkillController::class, 'destroy']);
 Route::post('/skills/{skill}/duplicate', [SkillController::class, 'duplicate']);
 Route::get('/skills/{skill}/lint', [SkillController::class, 'lint']);
+
+// Skill Template Variables
+Route::get('/projects/{project}/skills/{skill}/variables', [SkillVariableController::class, 'index']);
+Route::put('/projects/{project}/skills/{skill}/variables', [SkillVariableController::class, 'update']);
 
 // Live Test Runner (SSE)
 Route::post('/skills/{skill}/test', SkillTestController::class);

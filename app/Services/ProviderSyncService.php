@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Project;
+use App\Models\SkillVariable;
 use App\Services\Providers\ClineDriver;
 use App\Services\Providers\ClaudeDriver;
 use App\Services\Providers\CopilotDriver;
@@ -26,6 +27,7 @@ class ProviderSyncService
     public function __construct(
         protected AgentComposeService $composeService,
         protected SkillCompositionService $compositionService,
+        protected TemplateResolver $templateResolver,
     ) {}
 
     public function getDriver(string $slug): ProviderDriverInterface
@@ -44,10 +46,34 @@ class ProviderSyncService
         $project->loadMissing(['providers', 'skills.tags']);
         $skills = $project->skills;
 
-        // Pre-resolve skill includes for sync
+        // Load all skill variable values for this project
+        $allVariables = SkillVariable::where('project_id', $project->id)
+            ->get()
+            ->groupBy('skill_id')
+            ->map(fn ($vars) => $vars->pluck('value', 'key')->all())
+            ->all();
+
+        // Pre-resolve skill includes for sync, then resolve template variables
         $resolvedBodies = [];
         foreach ($skills as $skill) {
-            $resolvedBodies[$skill->id] = $this->compositionService->resolve($skill);
+            $body = $this->compositionService->resolve($skill);
+
+            // Apply template variable substitution
+            $variables = $allVariables[$skill->id] ?? [];
+
+            // Merge in default values from template_variables definitions
+            foreach ($skill->template_variables ?? [] as $def) {
+                $name = $def['name'] ?? null;
+                if ($name && ! array_key_exists($name, $variables) && isset($def['default'])) {
+                    $variables[$name] = $def['default'];
+                }
+            }
+
+            if (! empty($variables)) {
+                $body = $this->templateResolver->resolve($body, $variables);
+            }
+
+            $resolvedBodies[$skill->id] = $body;
         }
 
         // Compose enabled agents
@@ -71,10 +97,33 @@ class ProviderSyncService
         $project->loadMissing(['providers', 'skills.tags']);
         $skills = $project->skills;
 
-        // Pre-resolve skill includes
+        // Load all skill variable values for this project
+        $allVariables = SkillVariable::where('project_id', $project->id)
+            ->get()
+            ->groupBy('skill_id')
+            ->map(fn ($vars) => $vars->pluck('value', 'key')->all())
+            ->all();
+
+        // Pre-resolve skill includes, then resolve template variables
         $resolvedBodies = [];
         foreach ($skills as $skill) {
-            $resolvedBodies[$skill->id] = $this->compositionService->resolve($skill);
+            $body = $this->compositionService->resolve($skill);
+
+            // Apply template variable substitution
+            $variables = $allVariables[$skill->id] ?? [];
+
+            foreach ($skill->template_variables ?? [] as $def) {
+                $name = $def['name'] ?? null;
+                if ($name && ! array_key_exists($name, $variables) && isset($def['default'])) {
+                    $variables[$name] = $def['default'];
+                }
+            }
+
+            if (! empty($variables)) {
+                $body = $this->templateResolver->resolve($body, $variables);
+            }
+
+            $resolvedBodies[$skill->id] = $body;
         }
 
         // Compose enabled agents

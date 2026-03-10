@@ -3,6 +3,7 @@ import type {
   Project,
   Skill,
   SkillVersion,
+  SkillVariableValue,
   Tag,
   LibrarySkill,
   ProjectAgent,
@@ -93,6 +94,64 @@ export const duplicateSkill = (id: number, targetProjectId?: number) =>
       target_project_id: targetProjectId,
     })
     .then((r) => r.data.data)
+
+// Skill Template Variables
+export const fetchSkillVariables = (projectId: number, skillId: number) =>
+  api
+    .get<{
+      data: {
+        definitions: Array<{ name: string; description: string; default: string | null; value: string | null }>
+        values: SkillVariableValue[]
+        body_variables: string[]
+      }
+    }>(`/projects/${projectId}/skills/${skillId}/variables`)
+    .then((r) => r.data.data)
+
+export const updateSkillVariables = (
+  projectId: number,
+  skillId: number,
+  variables: Record<string, string>,
+) =>
+  api
+    .put<{ data: SkillVariableValue[]; message: string }>(
+      `/projects/${projectId}/skills/${skillId}/variables`,
+      { variables },
+    )
+    .then((r) => r.data)
+
+// Bulk Skill Operations
+export const bulkTagSkills = (skillIds: number[], addTags: string[], removeTags: string[]) =>
+  api
+    .post<{ message: string; count: number }>('/skills/bulk-tag', {
+      skill_ids: skillIds,
+      add_tags: addTags,
+      remove_tags: removeTags,
+    })
+    .then((r) => r.data)
+
+export const bulkAssignSkills = (skillIds: number[], agentId: number, projectId: number) =>
+  api
+    .post<{ message: string; count: number }>('/skills/bulk-assign', {
+      skill_ids: skillIds,
+      agent_id: agentId,
+      project_id: projectId,
+    })
+    .then((r) => r.data)
+
+export const bulkDeleteSkills = (skillIds: number[]) =>
+  api
+    .post<{ message: string; count: number }>('/skills/bulk-delete', {
+      skill_ids: skillIds,
+    })
+    .then((r) => r.data)
+
+export const bulkMoveSkills = (skillIds: number[], targetProjectId: number) =>
+  api
+    .post<{ message: string; count: number }>('/skills/bulk-move', {
+      skill_ids: skillIds,
+      target_project_id: targetProjectId,
+    })
+    .then((r) => r.data)
 
 // Lint
 export const lintSkill = (skillId: number) =>

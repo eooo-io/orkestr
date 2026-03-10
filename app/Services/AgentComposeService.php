@@ -5,12 +5,14 @@ namespace App\Services;
 use App\Models\Agent;
 use App\Models\Project;
 use App\Models\Skill;
+use App\Models\SkillVariable;
 use Illuminate\Support\Facades\DB;
 
 class AgentComposeService
 {
     public function __construct(
         protected SkillCompositionService $compositionService,
+        protected TemplateResolver $templateResolver,
     ) {}
     /**
      * Compose the full output for a single project agent.
@@ -35,7 +37,7 @@ class AgentComposeService
             ? Skill::whereIn('id', $skillIds)->orderBy('name')->get()
             : collect();
 
-        $content = $this->render($agent, $customInstructions, $skills);
+        $content = $this->render($project, $agent, $customInstructions, $skills);
 
         return [
             'content' => $content,
@@ -76,7 +78,7 @@ class AgentComposeService
     /**
      * Render the composed markdown output.
      */
-    protected function render(Agent $agent, ?string $customInstructions, \Illuminate\Support\Collection $skills): string
+    protected function render(Project $project, Agent $agent, ?string $customInstructions, \Illuminate\Support\Collection $skills): string
     {
         $sections = [];
 
@@ -93,12 +95,37 @@ class AgentComposeService
             $sections[] = "## Project-Specific Instructions\n\n" . trim($customInstructions);
         }
 
+        // Load skill variable values for all assigned skills in this project
+        $skillIds = $skills->pluck('id')->all();
+        $allVariables = [];
+        if (! empty($skillIds)) {
+            $allVariables = SkillVariable::where('project_id', $project->id)
+                ->whereIn('skill_id', $skillIds)
+                ->get()
+                ->groupBy('skill_id')
+                ->map(fn ($vars) => $vars->pluck('value', 'key')->all())
+                ->all();
+        }
+
         // Assigned skills
         if ($skills->isNotEmpty()) {
             $skillSections = ["## Assigned Skills"];
 
             foreach ($skills as $skill) {
                 $resolvedBody = $this->compositionService->resolve($skill);
+
+                // Apply template variable substitution
+                $variables = $allVariables[$skill->id] ?? [];
+                foreach ($skill->template_variables ?? [] as $def) {
+                    $name = $def['name'] ?? null;
+                    if ($name && ! array_key_exists($name, $variables) && isset($def['default'])) {
+                        $variables[$name] = $def['default'];
+                    }
+                }
+                if (! empty($variables)) {
+                    $resolvedBody = $this->templateResolver->resolve($resolvedBody, $variables);
+                }
+
                 $skillContent = "### {$skill->name}";
                 if ($skill->description) {
                     $skillContent .= "\n\n> {$skill->description}";

@@ -21,6 +21,7 @@ class Skill extends Model
         'tools',
         'includes',
         'body',
+        'template_variables',
     ];
 
     protected function casts(): array
@@ -28,6 +29,7 @@ class Skill extends Model
         return [
             'tools' => 'array',
             'includes' => 'array',
+            'template_variables' => 'array',
             'max_tokens' => 'integer',
         ];
     }
@@ -63,5 +65,10 @@ class Skill extends Model
     {
         return $this->belongsToMany(Agent::class, 'agent_skill')
             ->withPivot('project_id');
+    }
+
+    public function skillVariables(): HasMany
+    {
+        return $this->hasMany(SkillVariable::class);
     }
 }

@@ -12,6 +12,17 @@ export interface Project {
   updated_at: string
 }
 
+export interface TemplateVariable {
+  name: string
+  description: string
+  default?: string
+}
+
+export interface SkillVariableValue {
+  key: string
+  value: string | null
+}
+
 export interface Skill {
   id: number
   uuid: string
@@ -23,6 +34,7 @@ export interface Skill {
   max_tokens: number | null
   tools: string[]
   includes: string[]
+  template_variables: TemplateVariable[] | null
   body: string
   resolved_body: string
   tags: string[]

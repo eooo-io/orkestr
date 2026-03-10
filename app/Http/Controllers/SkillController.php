@@ -43,6 +43,10 @@ class SkillController extends Controller
             'body' => 'nullable|string',
             'tags' => 'nullable|array',
             'tags.*' => 'string|max:50',
+            'template_variables' => 'nullable|array',
+            'template_variables.*.name' => 'required|string|max:100',
+            'template_variables.*.description' => 'nullable|string|max:500',
+            'template_variables.*.default' => 'nullable|string|max:10000',
         ]);
 
         $slug = Str::slug($validated['name']);
@@ -62,6 +66,7 @@ class SkillController extends Controller
             'tools' => $validated['tools'] ?? [],
             'includes' => $validated['includes'] ?? [],
             'body' => $validated['body'] ?? '',
+            'template_variables' => $validated['template_variables'] ?? null,
         ]);
 
         $this->syncTags($skill, $validated['tags'] ?? []);
@@ -89,6 +94,10 @@ class SkillController extends Controller
             'body' => 'nullable|string',
             'tags' => 'nullable|array',
             'tags.*' => 'string|max:50',
+            'template_variables' => 'nullable|array',
+            'template_variables.*.name' => 'required|string|max:100',
+            'template_variables.*.description' => 'nullable|string|max:500',
+            'template_variables.*.default' => 'nullable|string|max:10000',
         ]);
 
         $skill->update(collect($validated)->except('tags')->toArray());
@@ -141,6 +150,7 @@ class SkillController extends Controller
             'tools' => $skill->tools,
             'includes' => $skill->includes,
             'body' => $skill->body,
+            'template_variables' => $skill->template_variables,
         ]);
 
         $newSkill->tags()->sync($skill->tags->pluck('id'));
@@ -173,6 +183,7 @@ class SkillController extends Controller
                 'max_tokens' => $skill->max_tokens,
                 'tools' => $skill->tools,
                 'tags' => $skill->tags->pluck('name')->values()->all(),
+                'template_variables' => $skill->template_variables,
             ],
             'body' => $skill->body,
             'saved_at' => now(),
@@ -190,6 +201,7 @@ class SkillController extends Controller
             'max_tokens' => $skill->max_tokens,
             'tools' => $skill->tools ?? [],
             'includes' => $skill->includes ?? [],
+            'template_variables' => $skill->template_variables,
             'created_at' => $skill->created_at->toIso8601String(),
             'updated_at' => $skill->updated_at->toIso8601String(),
         ];

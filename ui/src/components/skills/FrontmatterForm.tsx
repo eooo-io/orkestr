@@ -1,6 +1,7 @@
-import { Coins, Link2 } from 'lucide-react'
+import { useState } from 'react'
+import { Coins, Link2, Variable, Plus, Trash2 } from 'lucide-react'
 import { estimateTokens } from '@/api/client'
-import type { Skill } from '@/types'
+import type { Skill, TemplateVariable } from '@/types'
 
 const MODEL_CONTEXT_LIMITS: Record<string, number> = {
   'claude-sonnet-4-20250514': 200000,
@@ -171,6 +172,12 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
         </div>
       )}
 
+      {/* Template Variables Definitions */}
+      <TemplateVariablesEditor
+        variables={(skill.template_variables as TemplateVariable[]) || []}
+        onChange={(vars) => onChange('template_variables', vars.length > 0 ? vars : null)}
+      />
+
       {/* Token Estimate */}
       {(() => {
         const tokens = estimateTokens(skill.resolved_body || skill.body || '')
@@ -199,6 +206,105 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
           </div>
         )
       })()}
+    </div>
+  )
+}
+
+function TemplateVariablesEditor({
+  variables,
+  onChange,
+}: {
+  variables: TemplateVariable[]
+  onChange: (vars: TemplateVariable[]) => void
+}) {
+  const [expanded, setExpanded] = useState(false)
+
+  const addVariable = () => {
+    onChange([...variables, { name: '', description: '', default: '' }])
+    setExpanded(true)
+  }
+
+  const removeVariable = (index: number) => {
+    onChange(variables.filter((_, i) => i !== index))
+  }
+
+  const updateVariable = (index: number, field: keyof TemplateVariable, value: string) => {
+    const updated = variables.map((v, i) =>
+      i === index ? { ...v, [field]: value } : v,
+    )
+    onChange(updated)
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors"
+        >
+          <Variable className="h-3 w-3" />
+          Template Variables
+          {variables.length > 0 && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-mono">
+              {variables.length}
+            </span>
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={addVariable}
+          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-0.5 transition-colors"
+        >
+          <Plus className="h-3 w-3" />
+          Add
+        </button>
+      </div>
+
+      {expanded && variables.length > 0 && (
+        <div className="mt-2 space-y-2">
+          {variables.map((v, i) => (
+            <div
+              key={i}
+              className="grid grid-cols-[1fr_1.5fr_1fr_auto] gap-1.5 items-start"
+            >
+              <input
+                type="text"
+                value={v.name}
+                onChange={(e) =>
+                  updateVariable(i, 'name', e.target.value.replace(/\W/g, '_'))
+                }
+                className="px-2 py-1 text-xs rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring font-mono"
+                placeholder="var_name"
+              />
+              <input
+                type="text"
+                value={v.description}
+                onChange={(e) => updateVariable(i, 'description', e.target.value)}
+                className="px-2 py-1 text-xs rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                placeholder="Description"
+              />
+              <input
+                type="text"
+                value={v.default || ''}
+                onChange={(e) => updateVariable(i, 'default', e.target.value)}
+                className="px-2 py-1 text-xs rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                placeholder="Default"
+              />
+              <button
+                type="button"
+                onClick={() => removeVariable(i)}
+                className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+          <p className="text-[10px] text-muted-foreground">
+            Use <code className="font-mono">{'{{var_name}}'}</code> in the skill body. Values are set per-project.
+          </p>
+        </div>
+      )}
     </div>
   )
 }
