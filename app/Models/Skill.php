@@ -19,6 +19,7 @@ class Skill extends Model
         'model',
         'max_tokens',
         'tools',
+        'includes',
         'body',
     ];
 
@@ -26,6 +27,7 @@ class Skill extends Model
     {
         return [
             'tools' => 'array',
+            'includes' => 'array',
             'max_tokens' => 'integer',
         ];
     }

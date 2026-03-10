@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import Editor from '@monaco-editor/react'
 import {
   fetchSkill,
+  fetchSkills,
   createSkill,
   updateSkill,
   deleteSkill,
@@ -29,10 +30,12 @@ export function SkillEditor() {
     model: null,
     max_tokens: null,
     tools: [],
+    includes: [],
     body: '',
     tags: [],
     project_id: projectId ? parseInt(projectId) : undefined,
   })
+  const [projectSkills, setProjectSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'test' | 'versions'>('test')
@@ -46,10 +49,16 @@ export function SkillEditor() {
         .then((s) => {
           setSkill(s)
           initialBody.current = s.body || ''
+          // Load sibling skills for includes picker
+          if (s.project_id) {
+            fetchSkills(s.project_id).then(setProjectSkills)
+          }
         })
         .finally(() => setLoading(false))
+    } else if (projectId) {
+      fetchSkills(parseInt(projectId)).then(setProjectSkills)
     }
-  }, [id, isNew])
+  }, [id, isNew, projectId])
 
   // Keyboard shortcut: Ctrl+S to save
   useEffect(() => {
@@ -191,7 +200,7 @@ export function SkillEditor() {
       <div className="flex flex-1 overflow-hidden">
         {/* Left: Editor */}
         <div className="flex-1 flex flex-col min-w-0">
-          <FrontmatterForm skill={skill} onChange={handleFieldChange} />
+          <FrontmatterForm skill={skill} onChange={handleFieldChange} projectSkills={projectSkills} />
           <div className="flex-1">
             <Editor
               height="100%"

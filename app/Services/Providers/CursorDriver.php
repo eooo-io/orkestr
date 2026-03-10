@@ -9,7 +9,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class CursorDriver implements ProviderDriverInterface
 {
-    public function sync(Project $project, Collection $skills, array $composedAgents = []): void
+    public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
     {
         $dir = rtrim($project->resolved_path, '/') . '/.cursor/rules';
         File::ensureDirectoryExists($dir);
@@ -20,6 +20,7 @@ class CursorDriver implements ProviderDriverInterface
         }
 
         foreach ($skills as $skill) {
+            $body = $resolvedBodies[$skill->id] ?? $skill->body;
             $frontmatter = [
                 'description' => $skill->description ?? '',
                 'alwaysApply' => false,
@@ -30,7 +31,7 @@ class CursorDriver implements ProviderDriverInterface
             }
 
             $yaml = Yaml::dump($frontmatter, 2, 2);
-            $content = "---\n{$yaml}---\n\n{$skill->body}\n";
+            $content = "---\n{$yaml}---\n\n{$body}\n";
 
             File::put($dir . '/' . $skill->slug . '.mdc', $content);
         }

@@ -21,7 +21,9 @@ export interface Skill {
   model: string | null
   max_tokens: number | null
   tools: string[]
+  includes: string[]
   body: string
+  resolved_body: string
   tags: string[]
   token_estimate: number
   project?: Project

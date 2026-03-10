@@ -7,7 +7,7 @@
 
 ## Current Status
 
-**Phase 15 is COMPLETE.** All phases 1–15 done.
+**Phase 16 is COMPLETE.** All phases 1–16 done.
 
 ---
 
@@ -200,11 +200,29 @@ Agents feature was largely pre-built (models, migrations, seeder, controller, UI
 
 ---
 
+## Phase 16: Skill Dependencies & Composition — DONE
+
+- [x] #60 — Skill include/extend system for composable prompts
+  - Migration: `includes` JSON column added to `skills` table
+  - Model: `includes` added to fillable + array cast
+  - `SkillCompositionService` — recursive include resolution with circular dependency detection (max depth 5)
+  - `SkillResource` — exposes `includes`, `resolved_body`, token estimate uses resolved body
+  - `SkillController` — accepts `includes` on store/update/duplicate, writes to .agentis files
+  - `ProviderSyncService` — pre-resolves includes, passes resolved bodies to all 6 drivers
+  - `AgentComposeService` — uses resolved bodies when composing agents
+  - `SkillTestController` — tests skills with resolved body (includes prepended)
+  - `ProjectScanJob` — parses `includes` from frontmatter on scan
+  - `ProviderDriverInterface` + all 6 drivers — updated to accept `$resolvedBodies` parameter
+  - UI: Includes picker in FrontmatterForm (toggle buttons for sibling skills)
+  - UI: Token estimate shows "(resolved)" when includes are active
+  - SkillEditor loads project skills for includes picker
+
+---
+
 ## Future Phases (Backlog)
 
 | Phase | Feature | Issues |
 |-------|---------|--------|
-| 16 | Skill Dependencies & Composition | #60 |
 | 17 | Git-Backed Skill Versioning | #61 |
 | 18 | Prompt Linting | #63 |
 | 19 | Team/Workspace Sharing | #64 |

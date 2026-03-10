@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\Skill;
 use App\Models\Tag;
 use App\Services\AgentisManifestService;
+use App\Services\SkillCompositionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -16,6 +17,7 @@ class SkillController extends Controller
 {
     public function __construct(
         protected AgentisManifestService $manifestService,
+        protected SkillCompositionService $compositionService,
     ) {}
 
     public function index(Project $project): AnonymousResourceCollection
@@ -33,6 +35,8 @@ class SkillController extends Controller
             'model' => 'nullable|string|max:100',
             'max_tokens' => 'nullable|integer|min:1',
             'tools' => 'nullable|array',
+            'includes' => 'nullable|array',
+            'includes.*' => 'string|max:100',
             'body' => 'nullable|string',
             'tags' => 'nullable|array',
             'tags.*' => 'string|max:50',
@@ -53,6 +57,7 @@ class SkillController extends Controller
             'model' => $validated['model'] ?? null,
             'max_tokens' => $validated['max_tokens'] ?? null,
             'tools' => $validated['tools'] ?? [],
+            'includes' => $validated['includes'] ?? [],
             'body' => $validated['body'] ?? '',
         ]);
 
@@ -76,6 +81,8 @@ class SkillController extends Controller
             'model' => 'nullable|string|max:100',
             'max_tokens' => 'nullable|integer|min:1',
             'tools' => 'nullable|array',
+            'includes' => 'nullable|array',
+            'includes.*' => 'string|max:100',
             'body' => 'nullable|string',
             'tags' => 'nullable|array',
             'tags.*' => 'string|max:50',
@@ -122,6 +129,7 @@ class SkillController extends Controller
             'model' => $skill->model,
             'max_tokens' => $skill->max_tokens,
             'tools' => $skill->tools,
+            'includes' => $skill->includes,
             'body' => $skill->body,
         ]);
 
@@ -171,6 +179,7 @@ class SkillController extends Controller
             'model' => $skill->model,
             'max_tokens' => $skill->max_tokens,
             'tools' => $skill->tools ?? [],
+            'includes' => $skill->includes ?? [],
             'created_at' => $skill->created_at->toIso8601String(),
             'updated_at' => $skill->updated_at->toIso8601String(),
         ];

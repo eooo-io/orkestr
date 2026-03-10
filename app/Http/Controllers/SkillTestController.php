@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
 use App\Models\Skill;
+use App\Services\SkillCompositionService;
 use Anthropic;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SkillTestController extends Controller
 {
+    public function __construct(
+        protected SkillCompositionService $compositionService,
+    ) {}
+
     /**
      * Test a single skill — legacy endpoint used by LiveTestPanel.
      */
@@ -21,7 +26,7 @@ class SkillTestController extends Controller
 
         $model = $skill->model ?: AppSetting::get('default_model', 'claude-sonnet-4-20250514');
         $maxTokens = $skill->max_tokens ?: 1024;
-        $systemPrompt = $skill->body ?: '';
+        $systemPrompt = $this->compositionService->resolve($skill);
 
         return $this->stream($model, $maxTokens, $systemPrompt, [
             ['role' => 'user', 'content' => $validated['user_message']],

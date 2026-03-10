@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\File;
 
 class WindsurfDriver implements ProviderDriverInterface
 {
-    public function sync(Project $project, Collection $skills, array $composedAgents = []): void
+    public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
     {
         $dir = rtrim($project->resolved_path, '/') . '/.windsurf/rules';
         File::ensureDirectoryExists($dir);
@@ -19,7 +19,8 @@ class WindsurfDriver implements ProviderDriverInterface
         }
 
         foreach ($skills as $skill) {
-            $content = "# {$skill->name}\n\n{$skill->body}\n";
+            $body = $resolvedBodies[$skill->id] ?? $skill->body;
+            $content = "# {$skill->name}\n\n{$body}\n";
             File::put($dir . '/' . $skill->slug . '.md', $content);
         }
 

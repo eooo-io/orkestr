@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\DB;
 
 class AgentComposeService
 {
+    public function __construct(
+        protected SkillCompositionService $compositionService,
+    ) {}
     /**
      * Compose the full output for a single project agent.
      *
@@ -95,11 +98,12 @@ class AgentComposeService
             $skillSections = ["## Assigned Skills"];
 
             foreach ($skills as $skill) {
+                $resolvedBody = $this->compositionService->resolve($skill);
                 $skillContent = "### {$skill->name}";
                 if ($skill->description) {
                     $skillContent .= "\n\n> {$skill->description}";
                 }
-                $skillContent .= "\n\n" . trim($skill->body);
+                $skillContent .= "\n\n" . trim($resolvedBody);
                 $skillSections[] = $skillContent;
             }
 

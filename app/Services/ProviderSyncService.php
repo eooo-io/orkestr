@@ -24,6 +24,7 @@ class ProviderSyncService
 
     public function __construct(
         protected AgentComposeService $composeService,
+        protected SkillCompositionService $compositionService,
     ) {}
 
     public function getDriver(string $slug): ProviderDriverInterface
@@ -42,12 +43,18 @@ class ProviderSyncService
         $project->loadMissing(['providers', 'skills.tags']);
         $skills = $project->skills;
 
+        // Pre-resolve skill includes for sync
+        $resolvedBodies = [];
+        foreach ($skills as $skill) {
+            $resolvedBodies[$skill->id] = $this->compositionService->resolve($skill);
+        }
+
         // Compose enabled agents
         $composedAgents = $this->composeService->composeAll($project);
 
         foreach ($project->providers as $provider) {
             $driver = $this->getDriver($provider->provider_slug);
-            $driver->sync($project, $skills, $composedAgents);
+            $driver->sync($project, $skills, $composedAgents, $resolvedBodies);
         }
 
         $project->update(['synced_at' => now()]);

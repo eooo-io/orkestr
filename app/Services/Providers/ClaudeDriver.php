@@ -8,12 +8,13 @@ use Illuminate\Support\Facades\File;
 
 class ClaudeDriver implements ProviderDriverInterface
 {
-    public function sync(Project $project, Collection $skills, array $composedAgents = []): void
+    public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
     {
         $output = "# CLAUDE.md\n\n";
 
         foreach ($skills as $skill) {
-            $output .= "## {$skill->name}\n\n{$skill->body}\n\n---\n\n";
+            $body = $resolvedBodies[$skill->id] ?? $skill->body;
+            $output .= "## {$skill->name}\n\n{$body}\n\n---\n\n";
         }
 
         if (! empty($composedAgents)) {

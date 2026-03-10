@@ -1,4 +1,4 @@
-import { Coins } from 'lucide-react'
+import { Coins, Link2 } from 'lucide-react'
 import { estimateTokens } from '@/api/client'
 import type { Skill } from '@/types'
 
@@ -23,6 +23,7 @@ function formatTokens(n: number): string {
 interface FrontmatterFormProps {
   skill: Partial<Skill>
   onChange: (field: string, value: unknown) => void
+  projectSkills?: Skill[]
 }
 
 const MODELS = [
@@ -31,7 +32,19 @@ const MODELS = [
   { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5' },
 ]
 
-export function FrontmatterForm({ skill, onChange }: FrontmatterFormProps) {
+export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterFormProps) {
+  const currentIncludes = (skill.includes as string[]) || []
+  const availableSkills = (projectSkills || []).filter(
+    (s) => s.slug !== skill.slug,
+  )
+
+  const toggleInclude = (slug: string) => {
+    const newIncludes = currentIncludes.includes(slug)
+      ? currentIncludes.filter((s) => s !== slug)
+      : [...currentIncludes, slug]
+    onChange('includes', newIncludes)
+  }
+
   return (
     <div className="space-y-3 p-4 border-b border-border bg-muted/30">
       <div className="grid grid-cols-2 gap-3">
@@ -119,9 +132,48 @@ export function FrontmatterForm({ skill, onChange }: FrontmatterFormProps) {
         </div>
       </div>
 
+      {/* Includes */}
+      {availableSkills.length > 0 && (
+        <div>
+          <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+            <Link2 className="h-3 w-3" />
+            Includes
+            {currentIncludes.length > 0 && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-mono">
+                {currentIncludes.length}
+              </span>
+            )}
+          </label>
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            {availableSkills.map((s) => {
+              const isIncluded = currentIncludes.includes(s.slug)
+              return (
+                <button
+                  key={s.slug}
+                  type="button"
+                  onClick={() => toggleInclude(s.slug)}
+                  className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
+                    isIncluded
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'bg-muted/50 border-border text-muted-foreground hover:border-primary/30'
+                  }`}
+                >
+                  {s.name}
+                </button>
+              )
+            })}
+          </div>
+          {currentIncludes.length > 0 && (
+            <p className="text-[10px] text-muted-foreground mt-1">
+              Included skills are prepended when syncing and composing.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Token Estimate */}
       {(() => {
-        const tokens = estimateTokens(skill.body || '')
+        const tokens = estimateTokens(skill.resolved_body || skill.body || '')
         const model = skill.model || 'claude-sonnet-4-20250514'
         const limit = MODEL_CONTEXT_LIMITS[model] || 200000
         const color = getTokenColor(tokens, limit)
@@ -132,6 +184,9 @@ export function FrontmatterForm({ skill, onChange }: FrontmatterFormProps) {
               <span className="font-mono">
                 {formatTokens(tokens)} tokens
               </span>
+              {currentIncludes.length > 0 && (
+                <span className="text-muted-foreground">(resolved)</span>
+              )}
               <span className="text-muted-foreground">
                 / {formatTokens(limit)} context
               </span>
