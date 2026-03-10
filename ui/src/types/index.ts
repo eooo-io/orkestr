@@ -133,6 +133,26 @@ export interface GitLogEntry {
   branch: string | null
 }
 
+export interface BundlePreviewItem {
+  slug: string
+  name: string
+  description: string | null
+  tags?: string[]
+  role?: string
+}
+
+export interface BundlePreview {
+  metadata: Record<string, unknown>
+  skills: BundlePreviewItem[]
+  agents: BundlePreviewItem[]
+}
+
+export interface BundleImportResult {
+  imported: number
+  skipped: number
+  errors: string[]
+}
+
 export interface ApiResponse<T> {
   data: T
 }

@@ -12,6 +12,8 @@ import type {
   GitLogEntry,
   SkillsShDiscoveredSkill,
   SkillsShSkillDetail,
+  BundlePreview,
+  BundleImportResult,
   ApiResponse,
 } from '@/types'
 
@@ -242,6 +244,49 @@ export const fetchGitDiff = (projectId: number, file: string, ref?: string) =>
       { params: { file, ref } },
     )
     .then((r) => r.data)
+
+// Bundles (Export/Import)
+export const exportBundle = (
+  projectId: number,
+  data: { skill_ids: number[]; agent_ids: number[]; format: 'zip' | 'json' },
+) => {
+  if (data.format === 'zip') {
+    return api
+      .post(`/projects/${projectId}/export`, data, {
+        responseType: 'blob',
+      })
+      .then((r) => r.data as Blob)
+  }
+  return api
+    .post(`/projects/${projectId}/export`, data)
+    .then((r) => r.data)
+}
+
+export const importBundlePreview = (projectId: number, file: File) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('preview', '1')
+  return api
+    .post<BundlePreview>(`/projects/${projectId}/import-bundle`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    .then((r) => r.data)
+}
+
+export const importBundle = (
+  projectId: number,
+  file: File,
+  conflictMode: string,
+) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('conflict_mode', conflictMode)
+  return api
+    .post<BundleImportResult>(`/projects/${projectId}/import-bundle`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    .then((r) => r.data)
+}
 
 // Settings
 export const fetchSettings = () =>

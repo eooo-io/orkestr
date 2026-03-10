@@ -12,6 +12,8 @@ import {
   Sparkles,
   Download,
   Wand2,
+  Package,
+  Upload,
 } from 'lucide-react'
 import { fetchProject, fetchSkills, syncProject, scanProject, createSkill } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
@@ -20,6 +22,8 @@ import { ImportLibraryModal } from '@/components/library/ImportLibraryModal'
 import { SkillsShImportModal } from '@/components/library/SkillsShImportModal'
 import { AgentsTab } from '@/components/agents/AgentsTab'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
+import { ExportModal } from '@/components/bundles/ExportModal'
+import { ImportBundleModal } from '@/components/bundles/ImportBundleModal'
 import { Button } from '@/components/ui/button'
 import type { Project, Skill, GeneratedSkill } from '@/types'
 
@@ -33,6 +37,8 @@ export function ProjectDetail() {
   const [showLibrary, setShowLibrary] = useState(false)
   const [showSkillsSh, setShowSkillsSh] = useState(false)
   const [showGenerate, setShowGenerate] = useState(false)
+  const [showExport, setShowExport] = useState(false)
+  const [showImportBundle, setShowImportBundle] = useState(false)
   const navigate = useNavigate()
   const { setActiveProjectId, showToast, loadProjects } = useAppStore()
 
@@ -154,6 +160,14 @@ export function ProjectDetail() {
           <Button variant="outline" size="sm" onClick={() => setShowGenerate(true)}>
             <Wand2 className="h-4 w-4 mr-1" />
             Generate
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowExport(true)}>
+            <Package className="h-4 w-4 mr-1" />
+            Export
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowImportBundle(true)}>
+            <Upload className="h-4 w-4 mr-1" />
+            Import
           </Button>
           <Link to={`/skills/new?project_id=${project.id}`}>
             <Button size="sm">
@@ -287,6 +301,26 @@ export function ProjectDetail() {
         <GenerateSkillModal
           onGenerated={handleGenerated}
           onClose={() => setShowGenerate(false)}
+        />
+      )}
+
+      {showExport && (
+        <ExportModal
+          projectId={project.id}
+          projectName={project.name}
+          onClose={() => setShowExport(false)}
+        />
+      )}
+
+      {showImportBundle && (
+        <ImportBundleModal
+          projectId={project.id}
+          onClose={() => setShowImportBundle(false)}
+          onImported={async () => {
+            const sk = await fetchSkills(project.id)
+            setSkills(sk)
+            loadProjects()
+          }}
         />
       )}
     </div>

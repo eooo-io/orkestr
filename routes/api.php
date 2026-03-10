@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\BundleController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\SkillsShController;
 use App\Http\Controllers\ProjectController;
@@ -74,6 +75,10 @@ Route::put('/projects/{project}/agents/{agent}/instructions', [AgentController::
 Route::put('/projects/{project}/agents/{agent}/skills', [AgentController::class, 'assignSkills']);
 Route::get('/projects/{project}/agents/{agent}/compose', [AgentController::class, 'compose']);
 Route::get('/projects/{project}/agents/compose', [AgentController::class, 'composeAll']);
+
+// Bundles (Export/Import)
+Route::post('/projects/{project}/export', [BundleController::class, 'export']);
+Route::post('/projects/{project}/import-bundle', [BundleController::class, 'import']);
 
 // Settings
 Route::get('/settings', SettingsController::class);

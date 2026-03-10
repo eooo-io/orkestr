@@ -7,7 +7,7 @@
 
 ## Current Status
 
-**Phase 18 is COMPLETE.** All phases 1–18 done.
+**Phase 19 is COMPLETE.** All phases 1–19 done.
 
 ---
 
@@ -242,6 +242,18 @@ Agents feature was largely pre-built (models, migrations, seeder, controller, UI
   - `LintIssue` TypeScript type, `lintSkill()` API client function
   - `LintPanel` component — "Run Lint" button, severity icons, color-coded cards (yellow warnings, blue suggestions), summary counts
   - Integrated as third tab in SkillEditor alongside "Test" and "Versions"
+
+---
+
+## Phase 19: Team/Workspace Sharing — DONE
+
+- [x] #64 — Export/import skill bundles for team sharing
+  - `BundleExportService` — exports skills + agents as ZIP (YAML frontmatter files + agents.yaml + bundle.yaml metadata) or JSON
+  - `BundleImportService` — previews and imports bundles with conflict resolution (skip/overwrite/rename)
+  - `BundleController` — `POST /api/projects/{id}/export` and `POST /api/projects/{id}/import-bundle`
+  - ExportModal — skill/agent checkboxes, select all, ZIP/JSON format toggle, file download
+  - ImportBundleModal — drag-and-drop file upload, preview step, conflict mode selector, import summary
+  - Integrated in ProjectDetail action bar with Export and Import buttons
 
 ---
 
