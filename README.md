@@ -35,6 +35,51 @@ Define, edit, and organize reusable AI skills (prompts + config) in a **provider
 | Cline | `.clinerules` | Single flat file |
 | OpenAI | `.openai/instructions.md` | All skills concatenated |
 
+## Features
+
+### Skill Management
+- **Monaco Editor** — Full-featured code editor with Markdown syntax highlighting for editing skill prompts
+- **YAML Frontmatter** — Skills stored as portable `.md` files with structured metadata (model, tags, tools, max_tokens)
+- **Version History** — Every save creates a snapshot; compare any two versions with Monaco Diff Editor and restore with one click
+- **Skill Dependencies** — `includes` system for composable prompts with recursive resolution and circular dependency detection
+- **Template Variables** — `{{variable}}` placeholders in skills with per-project values, resolved at compose/sync time
+- **Prompt Linting** — 8 rule-based checks (vague instructions, weak constraints, conflicting directives, missing output format, excessive length, role confusion, missing examples, redundancy)
+- **Duplicate & Move** — Clone skills within or across projects; bulk move multiple skills at once
+- **Token Estimation** — Live token count with model-specific context limit warnings (color-coded at 75%/90% thresholds)
+
+### AI-Powered
+- **Skill Generation** — Describe what you want in natural language and Claude generates a complete skill with frontmatter
+- **Multi-Model Test Runner** — Stream test responses from Anthropic (Claude), OpenAI (GPT-4o, o3), Google Gemini, and local Ollama models
+- **Playground** — Multi-turn chat interface with project/skill/agent system prompt picker, per-turn stats, and abort support
+
+### Agent System
+- **9 Pre-built Agents** — Orchestrator, PM, Architect, QA, Design, Code Review, Infrastructure, CI/CD, Security
+- **Agent Compose** — Merge base instructions + custom per-project instructions + assigned skill bodies into a single output
+- **Per-Project Configuration** — Enable/disable agents, set custom instructions, and assign skills per project
+- **Token Budget Preview** — See composed agent output with token estimates before syncing
+
+### Provider Sync
+- **6 Providers** — Claude, Cursor, GitHub Copilot, Windsurf, Cline, OpenAI
+- **Diff Preview** — Side-by-side Monaco diff showing exactly what will change before confirming a sync
+- **Dry-Run Mode** — Preview proposed file changes per provider without writing to disk
+- **Git Auto-Commit** — Optionally commit skill changes to the project's git repo automatically
+
+### Organization & Discovery
+- **Command Palette** — Ctrl+K / Cmd+K for instant fuzzy search across skills, projects, pages, and actions
+- **Tags** — Categorize skills with color-coded tags; filter and search by tag
+- **Cross-Project Search** — FULLTEXT search across all skills with tag, project, and model filters
+- **Bulk Operations** — Multi-select skills for batch tagging, agent assignment, moving, and deletion
+
+### Sharing & Collaboration
+- **Skill Library** — 25 pre-seeded skills across 6 categories (Laravel, PHP, TypeScript, FinTech, DevOps, Writing)
+- **Bundle Export/Import** — Export selected skills and agents as ZIP or JSON bundles; import with conflict resolution (skip/overwrite/rename)
+- **Skill Marketplace** — Self-hosted marketplace for publishing, discovering, and installing community skills with ratings and download tracking
+
+### Integrations
+- **Webhook System** — Configure outbound webhooks for skill/project events with HMAC-SHA256 signing and delivery logs
+- **GitHub Inbound Webhooks** — Receive push events to auto-scan projects for new or changed skills
+- **Filament Admin Panel** — Full admin UI for project registry, provider config, library management, tags, and settings
+
 ## Architecture
 
 The project is a **Laravel 12** app at the repository root with a separate **React SPA** in `ui/`.
