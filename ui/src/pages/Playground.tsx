@@ -18,10 +18,11 @@ import {
   fetchSkills,
   fetchProjectAgents,
   fetchAgentCompose,
+  fetchModels,
   estimateTokens,
 } from '@/api/client'
 import { Button } from '@/components/ui/button'
-import type { Project, Skill, ProjectAgent } from '@/types'
+import type { Project, Skill, ProjectAgent, ModelGroup } from '@/types'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -39,10 +40,18 @@ type PromptSource =
   | { type: 'skill'; skill: Skill }
   | { type: 'agent'; projectId: number; agent: ProjectAgent; composed?: string }
 
-const MODELS = [
-  { value: 'claude-sonnet-4-20250514', label: 'Sonnet 4' },
-  { value: 'claude-opus-4-20250514', label: 'Opus 4' },
-  { value: 'claude-haiku-4-5-20251001', label: 'Haiku 4.5' },
+// Fallback models if the API call fails
+const FALLBACK_MODELS: ModelGroup[] = [
+  {
+    provider: 'anthropic',
+    label: 'Anthropic',
+    configured: false,
+    models: [
+      { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', provider: 'anthropic', context_window: 200000 },
+      { id: 'claude-opus-4-0-20250115', name: 'Claude Opus 4', provider: 'anthropic', context_window: 200000 },
+      { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', provider: 'anthropic', context_window: 200000 },
+    ],
+  },
 ]
 
 export function Playground() {
@@ -54,6 +63,7 @@ export function Playground() {
   const [promptSource, setPromptSource] = useState<PromptSource>({ type: 'none' })
   const [model, setModel] = useState('claude-sonnet-4-20250514')
   const [maxTokens, setMaxTokens] = useState(4096)
+  const [modelGroups, setModelGroups] = useState<ModelGroup[]>(FALLBACK_MODELS)
 
   // Conversation state
   const [messages, setMessages] = useState<Message[]>([])
@@ -70,9 +80,12 @@ export function Playground() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Load projects on mount
+  // Load projects and models on mount
   useEffect(() => {
     fetchProjects().then(setProjects)
+    fetchModels()
+      .then(setModelGroups)
+      .catch(() => setModelGroups(FALLBACK_MODELS))
   }, [])
 
   // Load skills + agents when project changes
@@ -379,7 +392,7 @@ export function Playground() {
             </div>
           )}
 
-          {/* Model */}
+          {/* Model — grouped by provider */}
           <div>
             <label className="text-xs font-medium text-muted-foreground">
               Model
@@ -390,14 +403,44 @@ export function Playground() {
                 onChange={(e) => setModel(e.target.value)}
                 className="w-full px-2.5 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring appearance-none pr-8"
               >
-                {MODELS.map((m) => (
-                  <option key={m.value} value={m.value}>
-                    {m.label}
-                  </option>
+                {modelGroups.map((group) => (
+                  <optgroup
+                    key={group.provider}
+                    label={`${group.label}${group.configured ? '' : ' (not configured)'}`}
+                  >
+                    {group.models.map((m) => (
+                      <option
+                        key={m.id}
+                        value={m.id}
+                        disabled={!group.configured}
+                      >
+                        {m.name}
+                        {m.context_window > 0
+                          ? ` (${Math.round(m.context_window / 1000)}k ctx)`
+                          : ''}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
               <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
             </div>
+            {/* Show provider for selected model */}
+            {(() => {
+              const group = modelGroups.find((g) =>
+                g.models.some((m) => m.id === model),
+              )
+              return group ? (
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Provider: {group.label}
+                  {!group.configured && (
+                    <span className="text-destructive ml-1">
+                      -- API key not set
+                    </span>
+                  )}
+                </p>
+              ) : null
+            })()}
           </div>
 
           {/* Max Tokens */}
