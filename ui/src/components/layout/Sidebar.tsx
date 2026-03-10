@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import {
   FolderOpen,
   Search,
@@ -18,32 +18,25 @@ export function Sidebar() {
   const { projects, activeProjectId, setActiveProjectId, loadProjects } =
     useAppStore()
   const location = useLocation()
-  const navigate = useNavigate()
   const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     loadProjects()
   }, [loadProjects])
 
-  // Global keyboard shortcuts
+  // Global keyboard shortcuts (Ctrl+K is handled by CommandPalette)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault()
-        navigate('/search')
-      }
       if (e.key === 'Escape') {
         const tag = (e.target as HTMLElement)?.tagName
         if (tag === 'INPUT' || tag === 'TEXTAREA') {
           ;(e.target as HTMLElement).blur()
-        } else {
-          window.history.back()
         }
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [navigate])
+  }, [])
 
   const navItems = [
     { to: '/projects', label: 'Projects', icon: FolderOpen },

@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
+import { CommandPalette } from '@/components/layout/CommandPalette'
+import { useCommandPalette } from '@/hooks/useCommandPalette'
 import { Projects } from '@/pages/Projects'
 import { ProjectDetail } from '@/pages/ProjectDetail'
 import { SkillEditor } from '@/pages/SkillEditor'
@@ -9,9 +11,11 @@ import { Settings } from '@/pages/Settings'
 import { Playground } from '@/pages/Playground'
 import { ProjectForm } from '@/pages/ProjectForm'
 
-function App() {
+function AppContent() {
+  const { isOpen, close } = useCommandPalette()
+
   return (
-    <BrowserRouter>
+    <>
       <Layout>
         <Routes>
           <Route path="/" element={<Navigate to="/projects" replace />} />
@@ -27,6 +31,15 @@ function App() {
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>
+      <CommandPalette isOpen={isOpen} onClose={close} />
+    </>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   )
 }
