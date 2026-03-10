@@ -9,6 +9,7 @@ import { Library } from '@/pages/Library'
 import { Search } from '@/pages/Search'
 import { Settings } from '@/pages/Settings'
 import { Playground } from '@/pages/Playground'
+import { Marketplace } from '@/pages/Marketplace'
 import { ProjectForm } from '@/pages/ProjectForm'
 
 function AppContent() {
@@ -26,6 +27,7 @@ function AppContent() {
           <Route path="/skills/new" element={<SkillEditor />} />
           <Route path="/skills/:id" element={<SkillEditor />} />
           <Route path="/library" element={<Library />} />
+          <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/playground" element={<Playground />} />
           <Route path="/search" element={<Search />} />
           <Route path="/settings" element={<Settings />} />

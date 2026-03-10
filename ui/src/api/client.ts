@@ -6,6 +6,8 @@ import type {
   SkillVariableValue,
   Tag,
   LibrarySkill,
+  MarketplaceSkill,
+  ModelGroup,
   ProjectAgent,
   AgentComposed,
   GeneratedSkill,
@@ -16,6 +18,8 @@ import type {
   BundlePreview,
   BundleImportResult,
   SyncPreviewFile,
+  Webhook,
+  WebhookDelivery,
   ApiResponse,
 } from '@/types'
 
@@ -353,14 +357,103 @@ export const importBundle = (
     .then((r) => r.data)
 }
 
+// Marketplace
+export const fetchMarketplace = (params?: {
+  category?: string
+  tags?: string
+  q?: string
+  sort?: string
+  page?: number
+}) =>
+  api
+    .get<{
+      data: MarketplaceSkill[]
+      current_page: number
+      last_page: number
+      total: number
+    }>('/marketplace', { params })
+    .then((r) => r.data)
+
+export const fetchMarketplaceSkill = (id: number) =>
+  api
+    .get<ApiResponse<MarketplaceSkill>>(`/marketplace/${id}`)
+    .then((r) => r.data.data)
+
+export const publishToMarketplace = (data: {
+  source_type: string
+  source_id: number
+  author?: string
+}) =>
+  api
+    .post<ApiResponse<MarketplaceSkill>>('/marketplace/publish', data)
+    .then((r) => r.data.data)
+
+export const installFromMarketplace = (
+  id: number,
+  data: { target: string; project_id?: number },
+) =>
+  api
+    .post<ApiResponse<MarketplaceSkill> & { message: string }>(
+      `/marketplace/${id}/install`,
+      data,
+    )
+    .then((r) => r.data)
+
+export const voteMarketplaceSkill = (id: number, vote: 'up' | 'down') =>
+  api
+    .post<ApiResponse<MarketplaceSkill>>(`/marketplace/${id}/vote`, { vote })
+    .then((r) => r.data.data)
+
+// Webhooks
+export const fetchWebhooks = (projectId: number) =>
+  api
+    .get<ApiResponse<Webhook[]>>(`/projects/${projectId}/webhooks`)
+    .then((r) => r.data.data)
+
+export const createWebhook = (
+  projectId: number,
+  data: { event: string; url: string; secret?: string; is_active?: boolean },
+) =>
+  api
+    .post<ApiResponse<Webhook>>(`/projects/${projectId}/webhooks`, data)
+    .then((r) => r.data.data)
+
+export const updateWebhook = (
+  id: number,
+  data: Partial<{ event: string; url: string; secret: string | null; is_active: boolean }>,
+) =>
+  api
+    .put<ApiResponse<Webhook>>(`/webhooks/${id}`, data)
+    .then((r) => r.data.data)
+
+export const deleteWebhook = (id: number) => api.delete(`/webhooks/${id}`)
+
+export const fetchWebhookDeliveries = (id: number) =>
+  api
+    .get<ApiResponse<WebhookDelivery[]>>(`/webhooks/${id}/deliveries`)
+    .then((r) => r.data.data)
+
+export const testWebhook = (id: number) =>
+  api.post(`/webhooks/${id}/test`).then((r) => r.data)
+
+// Models
+export const fetchModels = () =>
+  api.get<{ data: ModelGroup[] }>('/models').then((r) => r.data.data)
+
 // Settings
 export const fetchSettings = () =>
   api
     .get<{
       anthropic_api_key_set: boolean
+      openai_api_key_set: boolean
+      gemini_api_key_set: boolean
+      ollama_url: string
       default_model: string
       allowed_project_paths: string[]
     }>('/settings')
     .then((r) => r.data)
+
+export const updateSettings = (data: Record<string, string>) =>
+  api.put<{ message: string }>('/settings', data).then((r) => r.data)
 
 export default api

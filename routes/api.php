@@ -8,12 +8,16 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\BulkSkillController;
+use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\ModelController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SkillGenerateController;
 use App\Http\Controllers\SkillTestController;
 use App\Http\Controllers\SkillVariableController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\VersionController;
+use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\InboundWebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
@@ -93,5 +97,25 @@ Route::get('/projects/{project}/agents/compose', [AgentController::class, 'compo
 Route::post('/projects/{project}/export', [BundleController::class, 'export']);
 Route::post('/projects/{project}/import-bundle', [BundleController::class, 'import']);
 
+// Marketplace
+Route::get('/marketplace', [MarketplaceController::class, 'index']);
+Route::get('/marketplace/{marketplaceSkill}', [MarketplaceController::class, 'show']);
+Route::post('/marketplace/publish', [MarketplaceController::class, 'publish']);
+Route::post('/marketplace/{marketplaceSkill}/install', [MarketplaceController::class, 'install']);
+Route::post('/marketplace/{marketplaceSkill}/vote', [MarketplaceController::class, 'vote']);
+
+// Webhooks
+Route::get('/projects/{project}/webhooks', [WebhookController::class, 'index']);
+Route::post('/projects/{project}/webhooks', [WebhookController::class, 'store']);
+Route::put('/webhooks/{webhook}', [WebhookController::class, 'update']);
+Route::delete('/webhooks/{webhook}', [WebhookController::class, 'destroy']);
+Route::get('/webhooks/{webhook}/deliveries', [WebhookController::class, 'deliveries']);
+Route::post('/webhooks/{webhook}/test', [WebhookController::class, 'test']);
+Route::post('/webhooks/github/{project}', [InboundWebhookController::class, 'github']);
+
+// Models
+Route::get('/models', [ModelController::class, 'index']);
+
 // Settings
 Route::get('/settings', SettingsController::class);
+Route::put('/settings', [SettingsController::class, 'update']);

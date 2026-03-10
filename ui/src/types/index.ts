@@ -173,6 +173,64 @@ export interface SyncPreviewFile {
   status: 'added' | 'modified' | 'unchanged' | 'deleted'
 }
 
+export interface MarketplaceSkill {
+  id: number
+  uuid: string
+  name: string
+  slug: string
+  description: string | null
+  category: string | null
+  tags: string[]
+  frontmatter: Record<string, unknown>
+  body: string
+  author: string | null
+  source: string | null
+  downloads: number
+  upvotes: number
+  downvotes: number
+  version: string
+  created_at: string
+  updated_at: string
+}
+
+export interface Webhook {
+  id: number
+  project_id: number
+  event: string
+  url: string
+  secret: string | null
+  is_active: boolean
+  last_triggered_at: string | null
+  last_status: number | null
+  created_at: string
+  updated_at: string
+}
+
+export interface WebhookDelivery {
+  id: number
+  webhook_id: number
+  event: string
+  payload: Record<string, unknown>
+  response_status: number | null
+  response_body: string | null
+  duration_ms: number | null
+  created_at: string
+}
+
+export interface ModelInfo {
+  id: string
+  name: string
+  provider: string
+  context_window: number
+}
+
+export interface ModelGroup {
+  provider: string
+  label: string
+  configured: boolean
+  models: ModelInfo[]
+}
+
 export interface ApiResponse<T> {
   data: T
 }

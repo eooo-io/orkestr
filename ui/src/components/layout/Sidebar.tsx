@@ -4,6 +4,7 @@ import {
   FolderOpen,
   Search,
   BookOpen,
+  Store,
   Settings,
   Zap,
   Sun,
@@ -42,6 +43,7 @@ export function Sidebar() {
     { to: '/projects', label: 'Projects', icon: FolderOpen },
     { to: '/search', label: 'Search', icon: Search, shortcut: 'K' },
     { to: '/library', label: 'Library', icon: BookOpen },
+    { to: '/marketplace', label: 'Marketplace', icon: Store },
     { to: '/playground', label: 'Playground', icon: MessageSquare },
     { to: '/settings', label: 'Settings', icon: Settings },
   ]
