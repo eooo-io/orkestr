@@ -57,8 +57,8 @@ agentis-studio/
 │   │   ├── api/            # Axios client (client.ts)
 │   │   └── types/          # TypeScript types (index.ts)
 │   └── vite.config.ts
-├── docker-compose.yml      # php, nginx, ui, mariadb, adminer
-├── docker/                 # Dockerfiles & nginx config
+├── docker-compose.yml      # php, mariadb
+├── docker/                 # Dockerfile & php config
 └── Makefile
 ```
 
@@ -159,8 +159,7 @@ make build       # docker compose build --no-cache
 make migrate     # php artisan migrate --seed
 make fresh       # php artisan migrate:fresh --seed
 make test        # php artisan test
-make shell-php   # bash into php container
-make shell-ui    # sh into ui container
+make shell       # bash into php container
 make logs        # docker compose logs -f
 
 # Local dev (without Docker)
@@ -183,10 +182,9 @@ composer test    # clears config + runs tests
 
 | Interface | URL |
 |---|---|
-| React SPA | http://localhost:5173 |
+| React SPA | http://localhost:5173 (run `cd ui && npm run dev` locally) |
 | Filament Admin | http://localhost:8000/admin |
 | Laravel API | http://localhost:8000/api |
-| Adminer (dev) | http://localhost:8080 |
 
 ## Implementation Phases
 

@@ -3,6 +3,8 @@ services:
     build:
       context: ./docker/php
       dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
     volumes:
       - .:/var/www/app
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
@@ -11,31 +13,7 @@ services:
       DB_HOST: mariadb
     depends_on:
       - mariadb
-    networks:
-      - agentis
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "8000:80"
-    volumes:
-      - .:/var/www/app
-      - ./docker/nginx/api.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - php
-    networks:
-      - agentis
-
-  ui:
-    build:
-      context: ./ui
-      dockerfile: ../docker/node/Dockerfile
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./ui:/app
-      - /app/node_modules
-    command: npm run dev -- --host
+    command: php artisan serve --host=0.0.0.0 --port=8000
     networks:
       - agentis
 
@@ -50,13 +28,6 @@ services:
       - mariadb_data:/var/lib/mysql
     ports:
       - "3306:3306"
-    networks:
-      - agentis
-
-  adminer:
-    image: adminer
-    ports:
-      - "8080:8080"
     networks:
       - agentis
 

@@ -16,17 +16,11 @@ fresh:
 test:
 	docker compose exec php php artisan test
 
-shell-php:
+shell:
 	docker compose exec php bash
-
-shell-ui:
-	docker compose exec ui sh
 
 logs:
 	docker compose logs -f
 
 tinker:
 	docker compose exec php php artisan tinker
-
-npm-install:
-	docker compose exec ui npm install
