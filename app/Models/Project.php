@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Project extends Model
@@ -99,5 +100,20 @@ class Project extends Model
     public function repository(string $provider = 'github'): ?ProjectRepository
     {
         return $this->repositories()->where('provider', $provider)->first();
+    }
+
+    public function openclawConfig(): HasOne
+    {
+        return $this->hasOne(OpenClawConfig::class);
+    }
+
+    public function mcpServers(): HasMany
+    {
+        return $this->hasMany(ProjectMcpServer::class);
+    }
+
+    public function a2aAgents(): HasMany
+    {
+        return $this->hasMany(ProjectA2aAgent::class);
     }
 }

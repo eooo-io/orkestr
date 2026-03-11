@@ -19,6 +19,9 @@ use App\Http\Controllers\VersionController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\InboundWebhookController;
 use App\Http\Controllers\RepositoryController;
+use App\Http\Controllers\OpenClawConfigController;
+use App\Http\Controllers\McpServerController;
+use App\Http\Controllers\A2aAgentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
@@ -126,6 +129,22 @@ Route::get('/projects/{project}/repositories/{provider}/files', [RepositoryContr
 Route::post('/projects/{project}/repositories/{provider}/pull', [RepositoryController::class, 'pullSkills']);
 Route::post('/projects/{project}/repositories/{provider}/push', [RepositoryController::class, 'pushSkills']);
 Route::get('/repositories/allowed-paths', [RepositoryController::class, 'allowedPaths']);
+
+// OpenClaw Config
+Route::get('/projects/{project}/openclaw', [OpenClawConfigController::class, 'show']);
+Route::put('/projects/{project}/openclaw', [OpenClawConfigController::class, 'update']);
+
+// MCP Servers (shared across providers)
+Route::get('/projects/{project}/mcp-servers', [McpServerController::class, 'index']);
+Route::post('/projects/{project}/mcp-servers', [McpServerController::class, 'store']);
+Route::put('/mcp-servers/{mcpServer}', [McpServerController::class, 'update']);
+Route::delete('/mcp-servers/{mcpServer}', [McpServerController::class, 'destroy']);
+
+// A2A Agents (shared across providers)
+Route::get('/projects/{project}/a2a-agents', [A2aAgentController::class, 'index']);
+Route::post('/projects/{project}/a2a-agents', [A2aAgentController::class, 'store']);
+Route::put('/a2a-agents/{a2aAgent}', [A2aAgentController::class, 'update']);
+Route::delete('/a2a-agents/{a2aAgent}', [A2aAgentController::class, 'destroy']);
 
 // Models
 Route::get('/models', [ModelController::class, 'index']);

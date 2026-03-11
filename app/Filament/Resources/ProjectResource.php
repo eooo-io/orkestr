@@ -47,6 +47,7 @@ class ProjectResource extends Resource
                         'windsurf' => 'Windsurf',
                         'cline' => 'Cline',
                         'openai' => 'OpenAI',
+                        'openclaw' => 'OpenClaw',
                     ])
                     ->columns(3)
                     ->afterStateHydrated(function (Forms\Components\CheckboxList $component, ?Project $record) {
