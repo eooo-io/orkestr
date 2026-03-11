@@ -3,19 +3,19 @@
 > Universal AI skill/agent configuration manager for multi-provider development workflows.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/PHP-8.4-777BB4?logo=php&logoColor=white" alt="PHP 8.4">
-  <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?logo=laravel&logoColor=white" alt="Laravel 12">
-  <img src="https://img.shields.io/badge/Filament-3.x-FDAE4B?logo=laravel&logoColor=white" alt="Filament 3">
-  <img src="https://img.shields.io/badge/Livewire-4.x-FB70A9?logo=livewire&logoColor=white" alt="Livewire 4">
-  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React">
-  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Vite-7.x-646CFF?logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4">
-  <img src="https://img.shields.io/badge/shadcn%2Fui-latest-000000?logo=shadcnui&logoColor=white" alt="shadcn/ui">
-  <img src="https://img.shields.io/badge/Monaco_Editor-latest-1E1E1E?logo=visualstudiocode&logoColor=white" alt="Monaco Editor">
-  <img src="https://img.shields.io/badge/MariaDB-11.x-003545?logo=mariadb&logoColor=white" alt="MariaDB 11">
-  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker">
-  <img src="https://img.shields.io/badge/Anthropic-Claude_API-D4A574?logo=anthropic&logoColor=white" alt="Anthropic">
+  <img src="https://img.shields.io/badge/PHP-8.4-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.4">
+  <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 12">
+  <img src="https://img.shields.io/badge/Filament-3.x-FDAE4B?style=for-the-badge&logo=laravel&logoColor=white" alt="Filament 3">
+  <img src="https://img.shields.io/badge/Livewire-4.x-FB70A9?style=for-the-badge&logo=livewire&logoColor=white" alt="Livewire 4">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React">
+  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Vite-7.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4">
+  <img src="https://img.shields.io/badge/shadcn%2Fui-latest-000000?style=for-the-badge&logo=shadcnui&logoColor=white" alt="shadcn/ui">
+  <img src="https://img.shields.io/badge/Monaco_Editor-latest-1E1E1E?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="Monaco Editor">
+  <img src="https://img.shields.io/badge/MariaDB-11.x-003545?style=for-the-badge&logo=mariadb&logoColor=white" alt="MariaDB 11">
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/Anthropic-Claude_API-D4A574?style=for-the-badge&logo=anthropic&logoColor=white" alt="Anthropic">
 </p>
 
 ## What It Does
