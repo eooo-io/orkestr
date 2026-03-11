@@ -138,13 +138,13 @@ export function ProjectDetail() {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-48 bg-muted rounded" />
           <div className="h-4 w-96 bg-muted rounded" />
           <div className="grid grid-cols-3 gap-4 mt-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 bg-muted rounded-lg" />
+              <div key={i} className="h-24 bg-muted" />
             ))}
           </div>
         </div>
@@ -154,70 +154,70 @@ export function ProjectDetail() {
 
   if (!project) {
     return (
-      <div className="p-6 text-center text-muted-foreground">
+      <div className="p-4 md:p-6 text-center text-muted-foreground">
         Project not found.
       </div>
     )
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">{project.name}</h1>
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+        <div className="min-w-0">
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{project.name}</h1>
           {project.description && (
             <p className="text-sm text-muted-foreground mt-1">
               {project.description}
             </p>
           )}
-          <p className="text-xs text-muted-foreground font-mono mt-1">
+          <p className="text-xs text-muted-foreground font-mono mt-1 truncate">
             {project.path}
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Link to={`/projects/${project.id}/edit`}>
             <Button variant="ghost" size="sm">
-              <Pencil className="h-4 w-4 mr-1" />
-              Edit
+              <Pencil className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Edit</span>
             </Button>
           </Link>
           <Button variant="outline" size="sm" onClick={handleScan}>
-            <RefreshCw className="h-4 w-4 mr-1" />
-            Scan
+            <RefreshCw className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Scan</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowSyncPreview(true)}>
-            <Eye className="h-4 w-4 mr-1" />
-            Preview Sync
+            <Eye className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Preview</span>
           </Button>
           <Button variant="outline" size="sm" onClick={handleSync}>
-            <ArrowUpFromLine className="h-4 w-4 mr-1" />
-            Sync
+            <ArrowUpFromLine className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Sync</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowLibrary(true)}>
-            <BookOpen className="h-4 w-4 mr-1" />
-            Library
+            <BookOpen className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Library</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowSkillsSh(true)}>
-            <Download className="h-4 w-4 mr-1" />
-            Skills.sh
+            <Download className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Skills.sh</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowGenerate(true)}>
-            <Wand2 className="h-4 w-4 mr-1" />
-            Generate
+            <Wand2 className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Generate</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowExport(true)}>
-            <Package className="h-4 w-4 mr-1" />
-            Export
+            <Package className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Export</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowImportBundle(true)}>
-            <Upload className="h-4 w-4 mr-1" />
-            Import
+            <Upload className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Import</span>
           </Button>
           <Link to={`/skills/new?project_id=${project.id}`}>
             <Button size="sm">
-              <Plus className="h-4 w-4 mr-1" />
-              Add Skill
+              <Plus className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Add Skill</span>
             </Button>
           </Link>
         </div>
@@ -227,7 +227,7 @@ export function ProjectDetail() {
       <div className="flex items-center gap-1 mb-4 border-b border-border">
         <button
           onClick={() => setActiveTab('skills')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
+          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
             activeTab === 'skills'
               ? 'border-primary text-foreground'
               : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -235,13 +235,13 @@ export function ProjectDetail() {
         >
           <Sparkles className="h-4 w-4" />
           Skills
-          <span className="ml-1 text-xs px-1.5 py-0.5 rounded-full bg-muted">
+          <span className="ml-1 text-xs px-1.5 py-0.5 bg-muted">
             {skills.length}
           </span>
         </button>
         <button
           onClick={() => setActiveTab('agents')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
+          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
             activeTab === 'agents'
               ? 'border-primary text-foreground'
               : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -252,7 +252,7 @@ export function ProjectDetail() {
         </button>
         <button
           onClick={() => setActiveTab('webhooks')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
+          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
             activeTab === 'webhooks'
               ? 'border-primary text-foreground'
               : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -299,7 +299,7 @@ export function ProjectDetail() {
                 <CheckSquare className="h-4 w-4 mr-1" />
                 {selectMode ? 'Exit Select' : 'Select'}
               </Button>
-              <div className="flex items-center border border-border rounded-md">
+              <div className="flex items-center border border-border">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-1.5 ${viewMode === 'grid' ? 'bg-accent' : ''}`}

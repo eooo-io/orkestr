@@ -24,7 +24,7 @@ class Settings extends Page
     {
         $this->form->fill([
             'anthropic_api_key' => AppSetting::get('anthropic_api_key', ''),
-            'default_model' => AppSetting::get('default_model', 'claude-sonnet-4-20250514'),
+            'default_model' => AppSetting::get('default_model', 'claude-sonnet-4-6'),
         ]);
     }
 
@@ -43,8 +43,8 @@ class Settings extends Page
                         Forms\Components\Select::make('default_model')
                             ->label('Default Model')
                             ->options([
-                                'claude-sonnet-4-20250514' => 'Claude Sonnet 4',
-                                'claude-opus-4-20250514' => 'Claude Opus 4',
+                                'claude-sonnet-4-6' => 'Claude Sonnet 4.6',
+                                'claude-opus-4-6' => 'Claude Opus 4.6',
                                 'claude-haiku-4-5-20251001' => 'Claude Haiku 4.5',
                             ]),
                     ]),
@@ -77,7 +77,7 @@ class Settings extends Page
         $data = $this->form->getState();
 
         AppSetting::set('anthropic_api_key', $data['anthropic_api_key'] ?? '');
-        AppSetting::set('default_model', $data['default_model'] ?? 'claude-sonnet-4-20250514');
+        AppSetting::set('default_model', $data['default_model'] ?? 'claude-sonnet-4-6');
 
         Notification::make()
             ->title('Settings saved')

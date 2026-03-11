@@ -26,7 +26,9 @@ return new class extends Migration
             $table->string('version')->default('1.0.0');
             $table->timestamps();
 
-            $table->fullText(['name', 'description']);
+            if (config('database.default') !== 'sqlite') {
+                $table->fullText(['name', 'description']);
+            }
         });
     }
 

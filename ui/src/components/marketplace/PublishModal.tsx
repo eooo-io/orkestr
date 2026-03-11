@@ -70,7 +70,7 @@ export function PublishModal({ onClose, onPublished }: PublishModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-card border border-border rounded-lg shadow-lg w-full max-w-lg mx-4">
+      <div className="bg-card border border-border shadow-lg w-full max-w-lg mx-4">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <h2 className="font-semibold text-sm">Publish to Marketplace</h2>
           <button
@@ -90,7 +90,7 @@ export function PublishModal({ onClose, onPublished }: PublishModalProps) {
             <div className="flex gap-2">
               <button
                 onClick={() => setSourceType('library')}
-                className={`flex-1 py-1.5 px-3 text-sm rounded-md border transition-colors ${
+                className={`flex-1 py-1.5 px-3 text-sm border transition-colors ${
                   sourceType === 'library'
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-border hover:bg-muted'
@@ -100,7 +100,7 @@ export function PublishModal({ onClose, onPublished }: PublishModalProps) {
               </button>
               <button
                 onClick={() => setSourceType('skill')}
-                className={`flex-1 py-1.5 px-3 text-sm rounded-md border transition-colors ${
+                className={`flex-1 py-1.5 px-3 text-sm border transition-colors ${
                   sourceType === 'skill'
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-border hover:bg-muted'
@@ -117,7 +117,7 @@ export function PublishModal({ onClose, onPublished }: PublishModalProps) {
               <label className="text-xs font-medium text-muted-foreground block mb-2">
                 Project
               </label>
-              <div className="space-y-1 max-h-32 overflow-y-auto border border-border rounded-md p-1">
+              <div className="space-y-1 max-h-32 overflow-y-auto border border-border p-1">
                 {projects.map((project) => (
                   <button
                     key={project.id}
@@ -145,7 +145,7 @@ export function PublishModal({ onClose, onPublished }: PublishModalProps) {
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <div className="space-y-1 max-h-48 overflow-y-auto border border-border rounded-md p-1">
+              <div className="space-y-1 max-h-48 overflow-y-auto border border-border p-1">
                 {sourceType === 'library'
                   ? librarySkills.map((skill) => (
                       <button
@@ -210,7 +210,7 @@ export function PublishModal({ onClose, onPublished }: PublishModalProps) {
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
               placeholder="Your name"
-              className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
         </div>

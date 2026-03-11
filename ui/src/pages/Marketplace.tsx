@@ -108,7 +108,7 @@ export function Marketplace() {
             <button
               key={cat.value}
               onClick={() => setCategory(cat.value)}
-              className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors ${
+              className={`w-full text-left px-3 py-1.5 text-sm transition-colors ${
                 category === cat.value
                   ? 'bg-primary text-primary-foreground font-medium'
                   : 'text-foreground hover:bg-muted'
@@ -149,13 +149,13 @@ export function Marketplace() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search marketplace..."
-              className="w-full pl-9 pr-4 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-            className="text-sm rounded-md border border-input bg-background px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring"
+            className="text-sm border border-input bg-background px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -222,7 +222,7 @@ export function Marketplace() {
       {/* Detail Panel */}
       {detailSkill && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card border border-border rounded-lg shadow-lg w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
+          <div className="bg-card border border-border shadow-lg w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
               <h2 className="font-semibold text-sm truncate">
                 {detailSkill.name}
@@ -294,7 +294,7 @@ export function Marketplace() {
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   Skill Body
                 </h3>
-                <pre className="text-xs bg-muted/50 border border-border rounded-md p-3 whitespace-pre-wrap leading-relaxed max-h-80 overflow-y-auto">
+                <pre className="text-xs bg-muted/50 border border-border p-3 whitespace-pre-wrap leading-relaxed max-h-80 overflow-y-auto">
                   {detailSkill.body}
                 </pre>
               </div>

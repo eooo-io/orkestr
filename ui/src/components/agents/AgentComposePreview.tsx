@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button'
 import type { AgentComposed } from '@/types'
 
 const MODEL_LIMITS: Record<string, number> = {
-  'claude-sonnet-4-20250514': 200000,
-  'claude-opus-4-20250514': 200000,
+  'claude-sonnet-4-6': 200000,
+  'claude-opus-4-6': 200000,
   'claude-haiku-4-5-20251001': 200000,
-  'gpt-4o': 128000,
-  'gpt-4.1': 1047576,
+  'gpt-5.4': 1048576,
+  'gpt-5-mini': 1048576,
 }
 
 const DEFAULT_LIMIT = 200000
@@ -56,13 +56,13 @@ export function AgentComposePreview({ projectId, agentId, agentName, onClose }: 
   const tokenWarning = composed && composed.token_estimate > DEFAULT_LIMIT * 0.75
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-background border border-border rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30">
+      <div className="bg-background elevation-4 w-full max-w-4xl max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-3">
             <div>
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-lg font-semibold tracking-tight">
                 {agentName} — Composed Output
               </h2>
               {composed && (
@@ -123,7 +123,7 @@ export function AgentComposePreview({ projectId, agentId, agentName, onClose }: 
             </Button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-md hover:bg-muted transition-colors"
+              className="p-1.5 hover:bg-muted transition-all duration-150"
             >
               <X className="h-4 w-4" />
             </button>

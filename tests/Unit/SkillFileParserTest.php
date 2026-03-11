@@ -13,7 +13,7 @@ id: summarize-doc
 name: Summarize Document
 description: Summarizes any document to key bullet points
 tags: [summarization, documents]
-model: claude-sonnet-4-20250514
+model: claude-sonnet-4-6
 max_tokens: 1000
 tools: []
 ---
@@ -28,7 +28,7 @@ MD;
         'name' => 'Summarize Document',
         'description' => 'Summarizes any document to key bullet points',
         'tags' => ['summarization', 'documents'],
-        'model' => 'claude-sonnet-4-20250514',
+        'model' => 'claude-sonnet-4-6',
         'max_tokens' => 1000,
         'tools' => [],
     ]);
@@ -67,7 +67,7 @@ it('round-trips render then parse to identical output', function () {
         'name' => 'Round Trip Test',
         'description' => 'Tests round-trip parsing',
         'tags' => ['test', 'parsing'],
-        'model' => 'claude-sonnet-4-20250514',
+        'model' => 'claude-sonnet-4-6',
         'max_tokens' => 2000,
     ];
     $body = "You are a helpful assistant.\n\nBe concise and clear.";

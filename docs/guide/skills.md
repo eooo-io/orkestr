@@ -16,7 +16,7 @@ Open any skill from the project detail page to launch the Skill Editor. The edit
 |---|---|---|---|
 | `name` | string | Yes | Display name of the skill |
 | `description` | string | No | Short summary of what the skill does |
-| `model` | string | No | Target model (e.g., `claude-sonnet-4-20250514`) |
+| `model` | string | No | Target model (e.g., `claude-sonnet-4-6`) |
 | `max_tokens` | number | No | Max output tokens for test/playground |
 | `tags` | string[] | No | Tags for categorization and filtering |
 | `tools` | object[] | No | Tool/function definitions (JSON) |

@@ -51,15 +51,15 @@ export function AgentConfigModal({ projectId, agent, skills, onClose, onSaved }:
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-background border border-border rounded-xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30">
+      <div className="bg-background elevation-4 w-full max-w-2xl max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div>
             <h2 className="text-lg font-semibold">{agent.name}</h2>
             <p className="text-xs text-muted-foreground mt-0.5">{agent.description}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-md hover:bg-muted transition-colors">
+          <button onClick={onClose} className="p-1.5 hover:bg-muted transition-all duration-150">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -79,7 +79,7 @@ export function AgentConfigModal({ projectId, agent, skills, onClose, onSaved }:
               onChange={(e) => setInstructions(e.target.value)}
               placeholder="Add project-specific instructions for this agent..."
               rows={5}
-              className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background resize-none focus:outline-none focus:ring-1 focus:ring-ring font-mono text-xs"
+              className="w-full px-3 py-2 text-sm border border-input bg-background resize-none focus:outline-none focus:ring-1 focus:ring-ring font-mono text-xs"
             />
           </div>
 
@@ -97,14 +97,14 @@ export function AgentConfigModal({ projectId, agent, skills, onClose, onSaved }:
                 No skills in this project yet.
               </p>
             ) : (
-              <div className="space-y-1 max-h-64 overflow-y-auto border border-border rounded-md p-1">
+              <div className="space-y-1 max-h-64 overflow-y-auto border border-border p-1">
                 {skills.map((skill) => {
                   const isSelected = selectedSkills.includes(skill.id)
                   return (
                     <button
                       key={skill.id}
                       onClick={() => toggleSkill(skill.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors ${
+                      className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-all duration-150 ${
                         isSelected
                           ? 'bg-primary/10 border border-primary/20'
                           : 'hover:bg-muted border border-transparent'
@@ -134,7 +134,7 @@ export function AgentConfigModal({ projectId, agent, skills, onClose, onSaved }:
                           {skill.tags.slice(0, 2).map((tag) => (
                             <span
                               key={tag}
-                              className="px-1.5 py-0.5 text-[10px] rounded bg-muted text-muted-foreground"
+                              className="px-1.5 py-0.5 text-[10px] bg-muted text-muted-foreground"
                             >
                               {tag}
                             </span>
@@ -156,7 +156,7 @@ export function AgentConfigModal({ projectId, agent, skills, onClose, onSaved }:
             <summary className="text-sm font-medium cursor-pointer select-none hover:text-foreground/80">
               View Base Instructions
             </summary>
-            <pre className="mt-2 p-3 text-xs font-mono bg-muted rounded-md overflow-x-auto whitespace-pre-wrap">
+            <pre className="mt-2 p-3 text-xs font-mono bg-muted overflow-x-auto whitespace-pre-wrap">
               {agent.base_instructions}
             </pre>
           </details>

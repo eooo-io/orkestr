@@ -103,8 +103,8 @@ export function ImportBundleModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-background rounded-lg border border-border shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col">
+    <div className="fixed inset-0 bg-foreground/30 flex items-center justify-center z-50 p-4">
+      <div className="bg-background elevation-4 w-full max-w-lg max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
             <Upload className="h-4 w-4 text-primary" />
@@ -127,11 +127,11 @@ export function ImportBundleModal({
                 <span>Import complete</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-muted/50 rounded-md px-3 py-2 text-center">
+                <div className="bg-muted/50 px-3 py-2 text-center">
                   <p className="text-lg font-semibold">{result.imported}</p>
                   <p className="text-xs text-muted-foreground">Imported</p>
                 </div>
-                <div className="bg-muted/50 rounded-md px-3 py-2 text-center">
+                <div className="bg-muted/50 px-3 py-2 text-center">
                   <p className="text-lg font-semibold">{result.skipped}</p>
                   <p className="text-xs text-muted-foreground">Skipped</p>
                 </div>
@@ -142,7 +142,7 @@ export function ImportBundleModal({
                     <AlertTriangle className="h-3 w-3" />
                     Errors ({result.errors.length})
                   </p>
-                  <div className="bg-destructive/10 rounded-md p-2 max-h-32 overflow-y-auto">
+                  <div className="bg-destructive/10 p-2 max-h-32 overflow-y-auto">
                     {result.errors.map((err, i) => (
                       <p key={i} className="text-xs text-destructive">
                         {err}
@@ -159,7 +159,7 @@ export function ImportBundleModal({
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                className={`border-2 border-dashed p-8 text-center transition-all duration-150 ${
                   dragOver
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-muted-foreground'
@@ -195,7 +195,7 @@ export function ImportBundleModal({
           ) : (
             <>
               {/* Preview */}
-              <div className="bg-muted/50 rounded-md px-3 py-2 flex items-center justify-between">
+              <div className="bg-muted/50 px-3 py-2 flex items-center justify-between">
                 <span className="text-sm truncate">{file?.name}</span>
                 <button
                   onClick={() => {
@@ -213,7 +213,7 @@ export function ImportBundleModal({
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Skills ({preview.skills.length})
                   </label>
-                  <div className="mt-1 space-y-1 max-h-36 overflow-y-auto border border-border rounded-md p-2">
+                  <div className="mt-1 space-y-1 max-h-36 overflow-y-auto border border-border p-2">
                     {preview.skills.map((skill, i) => (
                       <div
                         key={i}
@@ -236,7 +236,7 @@ export function ImportBundleModal({
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Agents ({preview.agents.length})
                   </label>
-                  <div className="mt-1 space-y-1 max-h-28 overflow-y-auto border border-border rounded-md p-2">
+                  <div className="mt-1 space-y-1 max-h-28 overflow-y-auto border border-border p-2">
                     {preview.agents.map((agent, i) => (
                       <div
                         key={i}
@@ -264,7 +264,7 @@ export function ImportBundleModal({
                     <button
                       key={mode}
                       onClick={() => setConflictMode(mode)}
-                      className={`flex-1 px-3 py-2 text-sm rounded-md border transition-colors capitalize ${
+                      className={`flex-1 px-3 py-2 text-sm border transition-all duration-150 capitalize ${
                         conflictMode === mode
                           ? 'border-primary bg-primary/10 text-foreground'
                           : 'border-input text-muted-foreground hover:text-foreground'
@@ -284,7 +284,7 @@ export function ImportBundleModal({
           )}
 
           {error && (
-            <div className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
+            <div className="text-sm text-destructive bg-destructive/10 px-3 py-2">
               {error}
             </div>
           )}

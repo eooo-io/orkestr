@@ -76,18 +76,18 @@ export function Library() {
   }
 
   return (
-    <div className="flex h-full">
-      {/* Category sidebar */}
-      <div className="w-48 shrink-0 border-r border-border p-4">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+    <div className="flex flex-col md:flex-row h-full">
+      {/* Category sidebar — horizontal scroll on mobile, vertical on desktop */}
+      <div className="shrink-0 border-b md:border-b-0 md:border-r border-border md:w-48 md:p-4">
+        <h3 className="hidden md:block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
           Categories
         </h3>
-        <nav className="space-y-0.5">
+        <nav className="flex md:flex-col gap-0.5 overflow-x-auto md:overflow-x-visible px-4 py-2 md:p-0">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.value}
               onClick={() => setCategory(cat.value)}
-              className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition-colors ${
+              className={`whitespace-nowrap px-3 py-1.5 text-sm transition-all duration-150 ${
                 category === cat.value
                   ? 'bg-primary text-primary-foreground font-medium'
                   : 'text-foreground hover:bg-muted'
@@ -100,21 +100,21 @@ export function Library() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 overflow-auto p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="flex-1 overflow-auto p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div>
-            <h1 className="text-2xl font-bold">Library</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Library</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Browse and import pre-built skills into your projects
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground mr-2">
+            <span className="text-sm text-muted-foreground mr-2 hidden sm:inline">
               {skills.length} skill{skills.length !== 1 ? 's' : ''}
             </span>
             <Button variant="outline" size="sm" onClick={() => setShowSkillsSh(true)}>
               <Github className="h-4 w-4 mr-1" />
-              Import from Skills.sh
+              <span className="hidden sm:inline">Import from</span> Skills.sh
             </Button>
           </div>
         </div>
@@ -127,7 +127,7 @@ export function Library() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search library skills..."
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
 
@@ -145,7 +145,7 @@ export function Library() {
             {skills.map((skill) => (
               <div
                 key={skill.id}
-                className="p-4 rounded-lg border border-border bg-card hover:border-primary/40 hover:shadow-sm transition-all"
+                className="p-4 bg-card elevation-1 hover:elevation-2 transition-all duration-150"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
@@ -174,7 +174,7 @@ export function Library() {
 
                 <div className="flex items-center gap-2 mt-3 flex-wrap">
                   {skill.category && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground font-medium">
+                    <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary font-medium">
                       {skill.category}
                     </span>
                   )}
@@ -203,8 +203,8 @@ export function Library() {
 
       {/* Import modal */}
       {importModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card border border-border rounded-lg shadow-lg w-full max-w-md mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30">
+          <div className="bg-card elevation-3 w-full max-w-md mx-4">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <h2 className="font-semibold text-sm">Import Skill</h2>
               <button
@@ -230,7 +230,7 @@ export function Library() {
                     <button
                       key={project.id}
                       onClick={() => setSelectedProject(project.id)}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                      className={`w-full text-left px-3 py-2 text-sm transition-all duration-150 ${
                         selectedProject === project.id
                           ? 'bg-primary text-primary-foreground'
                           : 'hover:bg-muted'

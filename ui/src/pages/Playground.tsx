@@ -12,6 +12,7 @@ import {
   Sparkles,
   Coins,
   ChevronDown,
+  Settings2,
 } from 'lucide-react'
 import {
   fetchProjects,
@@ -47,8 +48,8 @@ const FALLBACK_MODELS: ModelGroup[] = [
     label: 'Anthropic',
     configured: false,
     models: [
-      { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4', provider: 'anthropic', context_window: 200000 },
-      { id: 'claude-opus-4-0-20250115', name: 'Claude Opus 4', provider: 'anthropic', context_window: 200000 },
+      { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', provider: 'anthropic', context_window: 200000 },
+      { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', provider: 'anthropic', context_window: 200000 },
       { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', provider: 'anthropic', context_window: 200000 },
     ],
   },
@@ -61,7 +62,7 @@ export function Playground() {
   const [skills, setSkills] = useState<Skill[]>([])
   const [agents, setAgents] = useState<ProjectAgent[]>([])
   const [promptSource, setPromptSource] = useState<PromptSource>({ type: 'none' })
-  const [model, setModel] = useState('claude-sonnet-4-20250514')
+  const [model, setModel] = useState('claude-sonnet-4-6')
   const [maxTokens, setMaxTokens] = useState(4096)
   const [modelGroups, setModelGroups] = useState<ModelGroup[]>(FALLBACK_MODELS)
 
@@ -302,11 +303,25 @@ export function Playground() {
         ? estimateTokens(promptSource.composed)
         : 0
 
+  const [configOpen, setConfigOpen] = useState(false)
+
   return (
-    <div className="flex h-screen">
+    <div className="flex flex-col md:flex-row h-screen">
+      {/* Mobile config toggle */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/20 md:hidden">
+        <h1 className="text-base font-semibold flex items-center gap-2">
+          <Bot className="h-4 w-4 text-primary" />
+          Playground
+        </h1>
+        <Button variant="outline" size="sm" onClick={() => setConfigOpen(!configOpen)}>
+          <Settings2 className="h-4 w-4 mr-1" />
+          Config
+        </Button>
+      </div>
+
       {/* Left: Config sidebar */}
-      <div className="w-72 border-r border-border bg-muted/20 flex flex-col shrink-0">
-        <div className="p-4 border-b border-border">
+      <div className={`${configOpen ? 'block' : 'hidden'} md:block w-full md:w-72 border-b md:border-b-0 md:border-r border-border bg-muted/20 flex flex-col shrink-0`}>
+        <div className="hidden md:block p-4 border-b border-border">
           <h1 className="text-lg font-semibold flex items-center gap-2">
             <Bot className="h-5 w-5 text-primary" />
             Playground
@@ -327,7 +342,7 @@ export function Playground() {
                   setSelectedProjectId(v)
                   setPromptSource({ type: 'none' })
                 }}
-                className="w-full px-2.5 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring appearance-none pr-8"
+                className="w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring appearance-none pr-8"
               >
                 <option value="">Select a project...</option>
                 {projects.map((p) => (
@@ -350,7 +365,7 @@ export function Playground() {
                 <select
                   value={sourceValue}
                   onChange={(e) => handleSourceChange(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring appearance-none pr-8"
+                  className="w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring appearance-none pr-8"
                 >
                   <option value="none">None (freeform)</option>
                   {skills.length > 0 && (
@@ -377,7 +392,7 @@ export function Playground() {
 
               {/* System prompt preview */}
               {systemPromptPreview && (
-                <div className="mt-2 p-2 rounded bg-muted/50 border border-border">
+                <div className="mt-2 p-2 bg-muted/50 border border-border">
                   <p className="text-[10px] text-muted-foreground line-clamp-3 font-mono">
                     {systemPromptPreview}...
                   </p>
@@ -401,7 +416,7 @@ export function Playground() {
               <select
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
-                className="w-full px-2.5 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring appearance-none pr-8"
+                className="w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring appearance-none pr-8"
               >
                 {modelGroups.map((group) => (
                   <optgroup
@@ -454,7 +469,7 @@ export function Playground() {
               onChange={(e) => setMaxTokens(parseInt(e.target.value) || 4096)}
               min={1}
               max={128000}
-              className="mt-1 w-full px-2.5 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              className="mt-1 w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
         </div>
@@ -496,7 +511,7 @@ export function Playground() {
                 className={`flex gap-3 ${msg.role === 'user' ? '' : ''}`}
               >
                 <div
-                  className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5 ${
+                  className={`shrink-0 w-7 h-7 flex items-center justify-center mt-0.5 ${
                     msg.role === 'user'
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted text-muted-foreground'
@@ -516,7 +531,7 @@ export function Playground() {
                     {msg.role === 'assistant' && (
                       <button
                         onClick={() => handleCopy(idx, msg.content)}
-                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        className="text-muted-foreground hover:text-foreground transition-all duration-150"
                       >
                         {copied === idx ? (
                           <Check className="h-3 w-3 text-green-500" />
@@ -536,7 +551,7 @@ export function Playground() {
             {/* Streaming message */}
             {isStreaming && (
               <div className="flex gap-3">
-                <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5 bg-muted text-muted-foreground">
+                <div className="shrink-0 w-7 h-7 flex items-center justify-center mt-0.5 bg-muted text-muted-foreground">
                   <Bot className="h-3.5 w-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -602,7 +617,7 @@ export function Playground() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Send a message..."
               rows={2}
-              className="flex-1 px-3 py-2 text-sm rounded-lg border border-input bg-background resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+              className="flex-1 px-3 py-2 text-sm border border-input bg-background resize-none focus:outline-none focus:ring-1 focus:ring-ring"
               onKeyDown={(e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                   e.preventDefault()

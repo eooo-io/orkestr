@@ -74,7 +74,7 @@ function DiffViewer({ file }: { file: SyncPreviewFile }) {
   }, [file])
 
   return (
-    <div ref={containerRef} className="h-[400px] border border-border rounded-md overflow-hidden" />
+    <div ref={containerRef} className="h-[400px] border border-border overflow-hidden" />
   )
 }
 
@@ -141,8 +141,8 @@ export function SyncPreviewModal({ projectId, onClose, onSynced }: SyncPreviewMo
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-background rounded-lg border border-border shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col">
+    <div className="fixed inset-0 bg-foreground/30 flex items-center justify-center z-50 p-4">
+      <div className="bg-background elevation-4 w-full max-w-4xl max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
@@ -167,7 +167,7 @@ export function SyncPreviewModal({ projectId, onClose, onSynced }: SyncPreviewMo
               </span>
             </div>
           ) : error && files.length === 0 ? (
-            <div className="p-4 text-sm text-destructive bg-destructive/10 rounded-md m-4">
+            <div className="p-4 text-sm text-destructive bg-destructive/10 m-4">
               {error}
             </div>
           ) : files.length === 0 ? (
@@ -221,7 +221,7 @@ export function SyncPreviewModal({ projectId, onClose, onSynced }: SyncPreviewMo
                         setActiveProvider(provider)
                         setExpandedFile(null)
                       }}
-                      className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors -mb-px capitalize ${
+                      className={`px-3 py-2 text-xs font-medium border-b-2 transition-all duration-150 -mb-px capitalize ${
                         activeProvider === provider
                           ? 'border-primary text-foreground'
                           : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -241,7 +241,7 @@ export function SyncPreviewModal({ projectId, onClose, onSynced }: SyncPreviewMo
                 {activeFiles.map((file) => (
                   <div
                     key={file.path}
-                    className="border border-border rounded-md overflow-hidden"
+                    className="border border-border overflow-hidden"
                   >
                     <button
                       onClick={() =>
@@ -249,7 +249,7 @@ export function SyncPreviewModal({ projectId, onClose, onSynced }: SyncPreviewMo
                           expandedFile === file.path ? null : file.path,
                         )
                       }
-                      className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-accent/50 transition-colors"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-accent/50 transition-all duration-150"
                     >
                       <StatusIcon status={file.status} />
                       <span className="text-xs font-mono flex-1 truncate">
@@ -308,7 +308,7 @@ export function SyncPreviewModal({ projectId, onClose, onSynced }: SyncPreviewMo
 
         {error && files.length > 0 && (
           <div className="px-4 pb-3">
-            <div className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
+            <div className="text-sm text-destructive bg-destructive/10 px-3 py-2">
               {error}
             </div>
           </div>

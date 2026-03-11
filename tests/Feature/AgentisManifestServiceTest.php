@@ -66,7 +66,7 @@ it('scans a project directory with multiple skills', function () {
     ));
 
     file_put_contents($skillsDir . '/review.md', $parser->renderFile(
-        ['id' => 'review', 'name' => 'Code Review', 'model' => 'claude-sonnet-4-20250514'],
+        ['id' => 'review', 'name' => 'Code Review', 'model' => 'claude-sonnet-4-6'],
         'You review code carefully.',
     ));
 

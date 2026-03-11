@@ -106,9 +106,8 @@ class OpenAIProvider implements LLMProviderInterface
     public function models(): array
     {
         return [
-            'gpt-4o',
-            'gpt-4.1',
-            'gpt-4.1-mini',
+            'gpt-5.4',
+            'gpt-5-mini',
             'o3',
             'o4-mini',
         ];

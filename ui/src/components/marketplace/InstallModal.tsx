@@ -45,7 +45,7 @@ export function InstallModal({ skill, onClose, onInstalled }: InstallModalProps)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-card border border-border rounded-lg shadow-lg w-full max-w-md mx-4">
+      <div className="bg-card border border-border shadow-lg w-full max-w-md mx-4">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <h2 className="font-semibold text-sm">Install Skill</h2>
           <button
@@ -65,7 +65,7 @@ export function InstallModal({ skill, onClose, onInstalled }: InstallModalProps)
           <div className="flex gap-2">
             <button
               onClick={() => setTarget('library')}
-              className={`flex-1 py-1.5 px-3 text-sm rounded-md border transition-colors ${
+              className={`flex-1 py-1.5 px-3 text-sm border transition-colors ${
                 target === 'library'
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-border hover:bg-muted'
@@ -75,7 +75,7 @@ export function InstallModal({ skill, onClose, onInstalled }: InstallModalProps)
             </button>
             <button
               onClick={() => setTarget('project')}
-              className={`flex-1 py-1.5 px-3 text-sm rounded-md border transition-colors ${
+              className={`flex-1 py-1.5 px-3 text-sm border transition-colors ${
                 target === 'project'
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-border hover:bg-muted'
@@ -93,7 +93,7 @@ export function InstallModal({ skill, onClose, onInstalled }: InstallModalProps)
                   No projects found. Create a project first.
                 </p>
               ) : (
-                <div className="space-y-1 max-h-60 overflow-y-auto border border-border rounded-md p-1">
+                <div className="space-y-1 max-h-60 overflow-y-auto border border-border p-1">
                   {projects.map((project) => (
                     <button
                       key={project.id}

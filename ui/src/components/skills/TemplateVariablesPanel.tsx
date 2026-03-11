@@ -97,21 +97,21 @@ export function TemplateVariablesPanel({
         <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
           <Variable className="h-3.5 w-3.5" />
           Template Variables
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-mono">
+          <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary font-mono">
             {entries.length}
           </span>
         </label>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1 text-xs px-2.5 py-1 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all duration-150"
         >
           <Save className="h-3 w-3" />
           {saving ? 'Saving...' : 'Save Values'}
         </button>
       </div>
 
-      <div className="flex items-start gap-1.5 text-[11px] text-muted-foreground bg-muted/50 rounded-md px-2.5 py-2">
+      <div className="flex items-start gap-1.5 text-[11px] text-muted-foreground bg-muted/50 px-2.5 py-2">
         <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
         <span>
           Template variables use <code className="font-mono text-primary/80">{'{{variable_name}}'}</code> syntax in the skill body.
@@ -137,7 +137,7 @@ export function TemplateVariablesPanel({
               value={entry.value ?? ''}
               onChange={(e) => handleValueChange(entry.name, e.target.value)}
               placeholder={entry.default ? `Default: ${entry.default}` : `Value for {{${entry.name}}}`}
-              className="w-full px-2.5 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring font-mono"
+              className="w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring font-mono"
             />
           </div>
         ))}

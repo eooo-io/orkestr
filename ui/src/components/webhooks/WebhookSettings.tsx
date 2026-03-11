@@ -200,7 +200,7 @@ export function WebhookSettings({ projectId }: Props) {
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="border border-border rounded-lg p-4 space-y-3 bg-muted/30"
+          className="border border-border p-4 space-y-3 bg-muted/30"
         >
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -210,7 +210,7 @@ export function WebhookSettings({ projectId }: Props) {
               <select
                 value={formEvent}
                 onChange={(e) => setFormEvent(e.target.value)}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                className="w-full border border-border bg-background px-3 py-2 text-sm"
               >
                 {WEBHOOK_EVENTS.map((ev) => (
                   <option key={ev.value} value={ev.value}>
@@ -229,7 +229,7 @@ export function WebhookSettings({ projectId }: Props) {
                 onChange={(e) => setFormUrl(e.target.value)}
                 placeholder="https://example.com/webhook"
                 required
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                className="w-full border border-border bg-background px-3 py-2 text-sm"
               />
             </div>
           </div>
@@ -243,7 +243,7 @@ export function WebhookSettings({ projectId }: Props) {
                 value={formSecret}
                 onChange={(e) => setFormSecret(e.target.value)}
                 placeholder="webhook-secret"
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-mono"
+                className="w-full border border-border bg-background px-3 py-2 text-sm font-mono"
               />
             </div>
             <div className="flex items-end pb-1">
@@ -290,7 +290,7 @@ export function WebhookSettings({ projectId }: Props) {
           {webhooks.map((wh) => (
             <div
               key={wh.id}
-              className="border border-border rounded-lg overflow-hidden"
+              className="border border-border overflow-hidden"
             >
               <div className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-3 min-w-0">

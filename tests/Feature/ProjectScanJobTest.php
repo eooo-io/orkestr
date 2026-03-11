@@ -22,7 +22,7 @@ beforeEach(function () {
     ));
 
     file_put_contents($skillsDir . '/review.md', $parser->renderFile(
-        ['id' => 'review', 'name' => 'Code Review', 'model' => 'claude-sonnet-4-20250514', 'tags' => ['code']],
+        ['id' => 'review', 'name' => 'Code Review', 'model' => 'claude-sonnet-4-6', 'tags' => ['code']],
         'You review code.',
     ));
 
@@ -52,7 +52,7 @@ it('scans a project directory and creates skills in DB', function () {
     expect($summarize->body)->toBe('You summarize documents.');
 
     $review = Skill::where('slug', 'review')->first();
-    expect($review->model)->toBe('claude-sonnet-4-20250514');
+    expect($review->model)->toBe('claude-sonnet-4-6');
 
     $translate = Skill::where('slug', 'translate')->first();
     expect($translate->max_tokens)->toBe(2000);

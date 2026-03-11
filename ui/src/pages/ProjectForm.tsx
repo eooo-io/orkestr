@@ -140,16 +140,16 @@ export function ProjectForm() {
   }
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="p-4 md:p-6 max-w-2xl">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => navigate(-1)}
-          className="p-1.5 rounded-md hover:bg-muted transition-colors"
+          className="p-1.5 hover:bg-muted transition-all duration-150"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-2xl font-semibold tracking-tight">
           {isEdit ? 'Edit Project' : 'New Project'}
         </h1>
       </div>
@@ -165,7 +165,7 @@ export function ProjectForm() {
             value={form.name}
             onChange={(e) => handleChange('name', e.target.value)}
             placeholder="My Project"
-            className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
             autoFocus
           />
         </div>
@@ -180,7 +180,7 @@ export function ProjectForm() {
             onChange={(e) => handleChange('description', e.target.value)}
             placeholder="Optional project description"
             rows={2}
-            className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+            className="w-full px-3 py-2 text-sm border border-input bg-background resize-none focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
 
@@ -194,7 +194,7 @@ export function ProjectForm() {
             value={form.path}
             onChange={(e) => handleChange('path', e.target.value)}
             placeholder="/Users/you/projects/my-project"
-            className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background font-mono text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+            className="w-full px-3 py-2 text-sm border border-input bg-background font-mono text-xs focus:outline-none focus:ring-1 focus:ring-ring"
           />
           <p className="text-xs text-muted-foreground mt-1">
             {allowedPaths.length > 0
@@ -215,7 +215,7 @@ export function ProjectForm() {
             {PROVIDERS.map((p) => (
               <label
                 key={p.slug}
-                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                className={`flex items-start gap-3 p-3 border cursor-pointer transition-all duration-150 ${
                   form.providers.includes(p.slug)
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-primary/30'

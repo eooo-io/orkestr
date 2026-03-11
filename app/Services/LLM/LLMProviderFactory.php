@@ -15,7 +15,8 @@ class LLMProviderFactory
             str_starts_with($model, 'claude-') => new AnthropicProvider(),
             str_starts_with($model, 'gpt-'),
             str_starts_with($model, 'o3'),
-            str_starts_with($model, 'o4') => new OpenAIProvider(),
+            str_starts_with($model, 'o4'),
+            str_starts_with($model, 'o5') => new OpenAIProvider(),
             str_starts_with($model, 'gemini-') => new GeminiProvider(),
             default => new OllamaProvider(),
         };
@@ -30,7 +31,8 @@ class LLMProviderFactory
             str_starts_with($model, 'claude-') => 'anthropic',
             str_starts_with($model, 'gpt-'),
             str_starts_with($model, 'o3'),
-            str_starts_with($model, 'o4') => 'openai',
+            str_starts_with($model, 'o4'),
+            str_starts_with($model, 'o5') => 'openai',
             str_starts_with($model, 'gemini-') => 'gemini',
             default => 'ollama',
         };
@@ -91,29 +93,27 @@ class LLMProviderFactory
     protected function formatModels(array $modelIds, string $provider): array
     {
         $contextWindows = [
-            'claude-sonnet-4-20250514' => 200000,
-            'claude-opus-4-0-20250115' => 200000,
+            'claude-opus-4-6' => 200000,
+            'claude-sonnet-4-6' => 200000,
             'claude-haiku-4-5-20251001' => 200000,
-            'gpt-4o' => 128000,
-            'gpt-4.1' => 1047576,
-            'gpt-4.1-mini' => 1047576,
+            'gpt-5.4' => 1048576,
+            'gpt-5-mini' => 1048576,
             'o3' => 200000,
             'o4-mini' => 200000,
-            'gemini-2.5-pro' => 1048576,
-            'gemini-2.5-flash' => 1048576,
+            'gemini-3.1-pro-preview' => 1048576,
+            'gemini-3-flash-preview' => 1048576,
         ];
 
         $labels = [
-            'claude-sonnet-4-20250514' => 'Claude Sonnet 4',
-            'claude-opus-4-0-20250115' => 'Claude Opus 4',
+            'claude-opus-4-6' => 'Claude Opus 4.6',
+            'claude-sonnet-4-6' => 'Claude Sonnet 4.6',
             'claude-haiku-4-5-20251001' => 'Claude Haiku 4.5',
-            'gpt-4o' => 'GPT-4o',
-            'gpt-4.1' => 'GPT-4.1',
-            'gpt-4.1-mini' => 'GPT-4.1 Mini',
+            'gpt-5.4' => 'GPT-5.4',
+            'gpt-5-mini' => 'GPT-5 Mini',
             'o3' => 'o3',
             'o4-mini' => 'o4-mini',
-            'gemini-2.5-pro' => 'Gemini 2.5 Pro',
-            'gemini-2.5-flash' => 'Gemini 2.5 Flash',
+            'gemini-3.1-pro-preview' => 'Gemini 3.1 Pro',
+            'gemini-3-flash-preview' => 'Gemini 3 Flash',
         ];
 
         return array_map(fn (string $id) => [
