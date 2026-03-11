@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    'github' => [
+        'client_id' => env('GITHUB_CLIENT_ID'),
+        'client_secret' => env('GITHUB_CLIENT_SECRET'),
+        'redirect_uri' => env('GITHUB_REDIRECT_URI', 'http://localhost:8000/auth/github/callback'),
+    ],
+
+    'apple' => [
+        'client_id' => env('APPLE_CLIENT_ID'),
+        'team_id' => env('APPLE_TEAM_ID'),
+        'key_id' => env('APPLE_KEY_ID'),
+        'private_key' => env('APPLE_PRIVATE_KEY'),
+        'redirect_uri' => env('APPLE_REDIRECT_URI', 'http://localhost:8000/auth/apple/callback'),
+    ],
+
 ];

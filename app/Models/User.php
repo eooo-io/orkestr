@@ -21,6 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'avatar',
+        'github_id',
+        'apple_id',
+        'auth_provider',
+        'social_metadata',
         'current_organization_id',
     ];
 
@@ -32,6 +37,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'github_id',
+        'apple_id',
+        'social_metadata',
     ];
 
     /**
@@ -44,6 +52,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'social_metadata' => 'array',
         ];
     }
 
@@ -79,5 +88,19 @@ class User extends Authenticatable
             ->first();
 
         return $membership?->pivot->role;
+    }
+
+    public function hasSocialProvider(string $provider): bool
+    {
+        return match ($provider) {
+            'github' => ! empty($this->github_id),
+            'apple' => ! empty($this->apple_id),
+            default => false,
+        };
+    }
+
+    public function hasPassword(): bool
+    {
+        return ! empty($this->password);
     }
 }
