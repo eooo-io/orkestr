@@ -122,6 +122,10 @@ Route::delete('/projects/{project}/repositories/{provider}', [RepositoryControll
 Route::get('/projects/{project}/repositories/{provider}/status', [RepositoryController::class, 'status']);
 Route::get('/projects/{project}/repositories/{provider}/branches', [RepositoryController::class, 'branches']);
 Route::get('/projects/{project}/repositories/{provider}/latest-commit', [RepositoryController::class, 'latestCommit']);
+Route::get('/projects/{project}/repositories/{provider}/files', [RepositoryController::class, 'files']);
+Route::post('/projects/{project}/repositories/{provider}/pull', [RepositoryController::class, 'pullSkills']);
+Route::post('/projects/{project}/repositories/{provider}/push', [RepositoryController::class, 'pushSkills']);
+Route::get('/repositories/allowed-paths', [RepositoryController::class, 'allowedPaths']);
 
 // Models
 Route::get('/models', [ModelController::class, 'index']);

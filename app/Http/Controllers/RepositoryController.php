@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\ProjectRepository;
 use App\Services\RepositoryConnectionService;
+use App\Services\RepositoryFileService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,6 +13,7 @@ class RepositoryController extends Controller
 {
     public function __construct(
         private RepositoryConnectionService $repositoryService,
+        private RepositoryFileService $fileService,
     ) {}
 
     public function show(Project $project): JsonResponse
@@ -114,6 +116,88 @@ class RepositoryController extends Controller
         return response()->json([
             'data' => $this->formatRepository($repository->fresh()),
             'message' => 'Repository settings updated.',
+        ]);
+    }
+
+    public function files(Project $project, string $provider): JsonResponse
+    {
+        $repository = $project->repositories()
+            ->where('provider', $provider)
+            ->firstOrFail();
+
+        try {
+            $files = $this->fileService->listAllowedFiles($repository);
+
+            return response()->json(['data' => $files]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function pullSkills(Project $project, string $provider): JsonResponse
+    {
+        $repository = $project->repositories()
+            ->where('provider', $provider)
+            ->firstOrFail();
+
+        try {
+            $files = $this->fileService->pullSkillFiles($repository);
+
+            $repository->update([
+                'last_synced_at' => now(),
+            ]);
+
+            return response()->json([
+                'data' => $files,
+                'count' => count($files),
+                'message' => count($files) . ' skill file(s) pulled from repository.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function pushSkills(Request $request, Project $project, string $provider): JsonResponse
+    {
+        $repository = $project->repositories()
+            ->where('provider', $provider)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'files' => 'required|array|min:1',
+            'files.*.path' => 'required|string',
+            'files.*.content' => 'required|string',
+            'commit_message' => 'nullable|string|max:500',
+        ]);
+
+        $commitMessage = $validated['commit_message'] ?? 'Update AI skills via Agentis Studio';
+
+        try {
+            $results = $this->fileService->pushSkillFiles(
+                $repository,
+                $validated['files'],
+                $commitMessage,
+            );
+
+            $repository->update([
+                'last_synced_at' => now(),
+            ]);
+
+            return response()->json([
+                'data' => $results,
+                'message' => 'Skills pushed to repository.',
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], 403);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function allowedPaths(): JsonResponse
+    {
+        return response()->json([
+            'data' => RepositoryFileService::ALLOWED_PATHS,
         ]);
     }
 

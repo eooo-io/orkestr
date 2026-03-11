@@ -19,6 +19,7 @@ import {
   Square,
   CheckCheck,
   Globe,
+  GitBranch,
 } from 'lucide-react'
 import { fetchProject, fetchSkills, syncProject, scanProject, createSkill } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
@@ -27,6 +28,7 @@ import { ImportLibraryModal } from '@/components/library/ImportLibraryModal'
 import { SkillsShImportModal } from '@/components/library/SkillsShImportModal'
 import { AgentsTab } from '@/components/agents/AgentsTab'
 import { WebhookSettings } from '@/components/webhooks/WebhookSettings'
+import { RepositorySettings } from '@/components/repository/RepositorySettings'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
 import { ExportModal } from '@/components/bundles/ExportModal'
 import { ImportBundleModal } from '@/components/bundles/ImportBundleModal'
@@ -41,7 +43,7 @@ export function ProjectDetail() {
   const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [activeTab, setActiveTab] = useState<'skills' | 'agents' | 'webhooks'>('skills')
+  const [activeTab, setActiveTab] = useState<'skills' | 'agents' | 'webhooks' | 'repository'>('skills')
   const [showLibrary, setShowLibrary] = useState(false)
   const [showSkillsSh, setShowSkillsSh] = useState(false)
   const [showGenerate, setShowGenerate] = useState(false)
@@ -261,6 +263,17 @@ export function ProjectDetail() {
           <Globe className="h-4 w-4" />
           Webhooks
         </button>
+        <button
+          onClick={() => setActiveTab('repository')}
+          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
+            activeTab === 'repository'
+              ? 'border-primary text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <GitBranch className="h-4 w-4" />
+          Repository
+        </button>
       </div>
 
       {activeTab === 'skills' && (
@@ -363,6 +376,10 @@ export function ProjectDetail() {
 
       {activeTab === 'webhooks' && (
         <WebhookSettings projectId={project.id} />
+      )}
+
+      {activeTab === 'repository' && (
+        <RepositorySettings projectId={project.id} />
       )}
 
       {showLibrary && (

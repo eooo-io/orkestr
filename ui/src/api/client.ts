@@ -20,6 +20,9 @@ import type {
   SyncPreviewFile,
   Webhook,
   WebhookDelivery,
+  ProjectRepository,
+  RepositoryStatus,
+  RepositoryFile,
   ApiResponse,
 } from '@/types'
 
@@ -429,6 +432,95 @@ export const fetchWebhookDeliveries = (id: number) =>
 
 export const testWebhook = (id: number) =>
   api.post(`/webhooks/${id}/test`).then((r) => r.data)
+
+// Repositories
+export const fetchRepositories = (projectId: number) =>
+  api
+    .get<ApiResponse<ProjectRepository[]>>(`/projects/${projectId}/repositories`)
+    .then((r) => r.data.data)
+
+export const connectRepository = (
+  projectId: number,
+  data: {
+    provider: 'github' | 'gitlab'
+    full_name: string
+    access_token?: string
+    auto_scan_on_push?: boolean
+    auto_sync_on_push?: boolean
+  },
+) =>
+  api
+    .post<ApiResponse<ProjectRepository> & { message: string }>(
+      `/projects/${projectId}/repositories`,
+      data,
+    )
+    .then((r) => r.data)
+
+export const updateRepository = (
+  projectId: number,
+  provider: string,
+  data: {
+    access_token?: string
+    auto_scan_on_push?: boolean
+    auto_sync_on_push?: boolean
+    default_branch?: string
+  },
+) =>
+  api
+    .put<ApiResponse<ProjectRepository> & { message: string }>(
+      `/projects/${projectId}/repositories/${provider}`,
+      data,
+    )
+    .then((r) => r.data)
+
+export const disconnectRepository = (projectId: number, provider: string) =>
+  api.delete(`/projects/${projectId}/repositories/${provider}`)
+
+export const fetchRepositoryStatus = (projectId: number, provider: string) =>
+  api
+    .get<ApiResponse<RepositoryStatus>>(
+      `/projects/${projectId}/repositories/${provider}/status`,
+    )
+    .then((r) => r.data.data)
+
+export const fetchRepositoryBranches = (projectId: number, provider: string) =>
+  api
+    .get<ApiResponse<string[]>>(
+      `/projects/${projectId}/repositories/${provider}/branches`,
+    )
+    .then((r) => r.data.data)
+
+export const fetchRepositoryFiles = (projectId: number, provider: string) =>
+  api
+    .get<ApiResponse<RepositoryFile[]>>(
+      `/projects/${projectId}/repositories/${provider}/files`,
+    )
+    .then((r) => r.data.data)
+
+export const pullRepositorySkills = (projectId: number, provider: string) =>
+  api
+    .post<{ data: Array<{ path: string; content: string; sha: string }>; count: number; message: string }>(
+      `/projects/${projectId}/repositories/${provider}/pull`,
+    )
+    .then((r) => r.data)
+
+export const pushRepositorySkills = (
+  projectId: number,
+  provider: string,
+  files: Array<{ path: string; content: string }>,
+  commitMessage?: string,
+) =>
+  api
+    .post<{ data: Array<{ path: string; status: string; message?: string }>; message: string }>(
+      `/projects/${projectId}/repositories/${provider}/push`,
+      { files, commit_message: commitMessage },
+    )
+    .then((r) => r.data)
+
+export const fetchAllowedPaths = () =>
+  api
+    .get<ApiResponse<string[]>>('/repositories/allowed-paths')
+    .then((r) => r.data.data)
 
 // Models
 export const fetchModels = () =>

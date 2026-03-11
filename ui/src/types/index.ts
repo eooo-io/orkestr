@@ -231,6 +231,38 @@ export interface ModelGroup {
   models: ModelInfo[]
 }
 
+export interface ProjectRepository {
+  id: number
+  provider: 'github' | 'gitlab'
+  owner: string
+  name: string
+  full_name: string
+  default_branch: string
+  url: string
+  has_access_token: boolean
+  auto_scan_on_push: boolean
+  auto_sync_on_push: boolean
+  last_synced_at: string | null
+  last_commit_sha: string | null
+  created_at: string
+}
+
+export interface RepositoryStatus {
+  connected: boolean
+  accessible: boolean
+  reason?: string
+  default_branch?: string
+  visibility?: string
+  last_push?: string
+  open_issues?: number
+}
+
+export interface RepositoryFile {
+  path: string
+  size: number | null
+  sha: string | null
+}
+
 export interface ApiResponse<T> {
   data: T
 }
