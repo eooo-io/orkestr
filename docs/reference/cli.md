@@ -35,15 +35,8 @@ make test        # Run the Pest PHP test suite inside the container
 ### Shell Access
 
 ```bash
-make shell-php   # Open a bash shell in the PHP container
-make shell-ui    # Open a sh shell in the UI (Node) container
-```
-
-### Other
-
-```bash
+make shell       # Open a bash shell in the PHP container
 make tinker      # Open Laravel Tinker (interactive REPL) in the PHP container
-make npm-install # Run npm install in the UI container
 ```
 
 ## Composer Scripts (Local Development)
@@ -87,11 +80,14 @@ The `docker-compose.yml` defines these services:
 
 | Service | Port | Description |
 |---|---|---|
-| `php` | -- | PHP-FPM 8.4 (no direct port, accessed via nginx) |
-| `nginx` | 8000 | Web server proxying to PHP-FPM |
-| `ui` | 5173 | Vite dev server for the React SPA |
+| `php` | 8000 | PHP 8.4 CLI running `php artisan serve` |
 | `mariadb` | 3306 | MariaDB 11 database |
-| `adminer` | 8080 | Database browser UI |
+
+The React SPA runs locally outside Docker for faster HMR:
+
+```bash
+cd ui && npm install && npm run dev
+```
 
 ## Environment Variables
 

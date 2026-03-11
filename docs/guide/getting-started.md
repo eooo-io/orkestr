@@ -23,7 +23,13 @@ make up
 make migrate
 ```
 
-That's it. The four services (PHP, Nginx, React UI, MariaDB) are running.
+Then start the React SPA locally (runs outside Docker for faster HMR):
+
+```bash
+cd ui && npm install && npm run dev
+```
+
+That's it. Docker runs PHP and MariaDB, Vite runs locally.
 
 ## Installation without Docker
 
@@ -64,10 +70,9 @@ composer dev
 
 | Interface | URL | Purpose |
 |---|---|---|
-| React SPA | http://localhost:5173 | Skill editing, testing, search |
+| React SPA | http://localhost:5173 | Skill editing, testing, search (local Vite) |
 | Filament Admin | http://localhost:8000/admin | Project registry, provider config, settings |
 | Laravel API | http://localhost:8000/api | REST API consumed by the SPA |
-| Adminer | http://localhost:8080 | Database browser (Docker only) |
 
 ## Your First Project
 
@@ -76,7 +81,7 @@ composer dev
 Open the Filament Admin at http://localhost:8000/admin and create a new project. Give it a name and set the **path** to the root directory of an existing codebase on your machine (e.g., `/home/you/code/my-app`).
 
 ::: tip
-The path must be accessible from within the PHP container. When using Docker, this means the path as it appears inside the container, relative to the `PROJECTS_HOST_PATH` mount.
+The path must be accessible from within the PHP container. When using Docker, it is relative to the `PROJECTS_HOST_PATH` mount defined in `.env`.
 :::
 
 ### 2. Scaffold the `.agentis/` directory
