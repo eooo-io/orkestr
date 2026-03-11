@@ -17,10 +17,10 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            ['name' => 'Test User', 'password' => bcrypt('password')],
+        );
 
         $this->call(LibrarySkillSeeder::class);
         $this->call(AgentSeeder::class);
