@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Project extends Model
 {
+    use BelongsToOrganization;
+
     protected $fillable = [
         'uuid',
         'name',
@@ -17,6 +21,7 @@ class Project extends Model
         'path',
         'synced_at',
         'git_auto_commit',
+        'organization_id',
     ];
 
     protected function casts(): array

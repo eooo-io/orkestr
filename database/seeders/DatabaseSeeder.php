@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->call(LibrarySkillSeeder::class);
+        $this->call(ComplianceSkillSeeder::class);
         $this->call(AgentSeeder::class);
+        $this->call(PlanSeeder::class);
     }
 }
