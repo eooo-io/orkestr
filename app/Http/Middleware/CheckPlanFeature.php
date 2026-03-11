@@ -28,7 +28,7 @@ class CheckPlanFeature
         }
 
         // Check boolean feature flags
-        if (in_array($feature, ['marketplace_publish', 'ai_generation', 'webhook_access', 'bundle_export', 'priority_support'])) {
+        if (in_array($feature, ['marketplace_publish', 'ai_generation', 'webhook_access', 'bundle_export', 'repository_access', 'priority_support'])) {
             if (! $plan->{$feature}) {
                 return response()->json([
                     'error' => 'Feature not available on your current plan.',

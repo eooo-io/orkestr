@@ -18,6 +18,7 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\VersionController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\InboundWebhookController;
+use App\Http\Controllers\RepositoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
@@ -112,6 +113,15 @@ Route::delete('/webhooks/{webhook}', [WebhookController::class, 'destroy']);
 Route::get('/webhooks/{webhook}/deliveries', [WebhookController::class, 'deliveries']);
 Route::post('/webhooks/{webhook}/test', [WebhookController::class, 'test']);
 Route::post('/webhooks/github/{project}', [InboundWebhookController::class, 'github']);
+
+// Repositories
+Route::get('/projects/{project}/repositories', [RepositoryController::class, 'show']);
+Route::post('/projects/{project}/repositories', [RepositoryController::class, 'connect']);
+Route::put('/projects/{project}/repositories/{provider}', [RepositoryController::class, 'update']);
+Route::delete('/projects/{project}/repositories/{provider}', [RepositoryController::class, 'disconnect']);
+Route::get('/projects/{project}/repositories/{provider}/status', [RepositoryController::class, 'status']);
+Route::get('/projects/{project}/repositories/{provider}/branches', [RepositoryController::class, 'branches']);
+Route::get('/projects/{project}/repositories/{provider}/latest-commit', [RepositoryController::class, 'latestCommit']);
 
 // Models
 Route::get('/models', [ModelController::class, 'index']);

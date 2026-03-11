@@ -90,4 +90,14 @@ class Project extends Model
     {
         return $this->hasMany(Webhook::class);
     }
+
+    public function repositories(): HasMany
+    {
+        return $this->hasMany(ProjectRepository::class);
+    }
+
+    public function repository(string $provider = 'github'): ?ProjectRepository
+    {
+        return $this->repositories()->where('provider', $provider)->first();
+    }
 }
