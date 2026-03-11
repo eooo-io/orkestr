@@ -25,6 +25,7 @@ class SkillResource extends JsonResource
             'max_tokens' => $this->max_tokens,
             'tools' => $this->tools ?? [],
             'includes' => $this->includes ?? [],
+            'conditions' => $this->conditions,
             'template_variables' => $this->template_variables,
             'body' => $this->body,
             'resolved_body' => $resolvedBody,

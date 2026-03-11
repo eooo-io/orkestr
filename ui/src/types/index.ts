@@ -34,6 +34,7 @@ export interface Skill {
   max_tokens: number | null
   tools: string[]
   includes: string[]
+  conditions: SkillConditions | null
   template_variables: TemplateVariable[] | null
   body: string
   resolved_body: string
@@ -261,6 +262,24 @@ export interface RepositoryFile {
   path: string
   size: number | null
   sha: string | null
+}
+
+export interface SkillConditions {
+  file_patterns?: string[]
+  path_prefixes?: string[]
+}
+
+export interface ImportDetectedSkill {
+  name: string
+  slug: string
+  description: string | null
+  body_length: number
+  tags: string[]
+}
+
+export interface ImportResult {
+  created: number
+  skipped: number
 }
 
 export interface ApiResponse<T> {

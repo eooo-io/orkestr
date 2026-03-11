@@ -18,7 +18,15 @@ class WindsurfDriver implements ProviderDriverInterface
 
         foreach ($skills as $skill) {
             $body = $resolvedBodies[$skill->id] ?? $skill->body;
-            $content = "# {$skill->name}\n\n{$body}\n";
+            $content = "# {$skill->name}\n\n";
+
+            // Windsurf supports trigger patterns via frontmatter-style comments
+            if (! empty($skill->conditions['file_patterns'])) {
+                $patterns = implode(', ', $skill->conditions['file_patterns']);
+                $content .= "> Trigger: {$patterns}\n\n";
+            }
+
+            $content .= "{$body}\n";
             $files[$dir . '/' . $skill->slug . '.md'] = $content;
         }
 

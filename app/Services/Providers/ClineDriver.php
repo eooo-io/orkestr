@@ -16,7 +16,14 @@ class ClineDriver implements ProviderDriverInterface
 
         foreach ($skills as $skill) {
             $body = $resolvedBodies[$skill->id] ?? $skill->body;
-            $output .= "# {$skill->name}\n\n{$body}\n\n---\n\n";
+            $output .= "# {$skill->name}\n\n";
+
+            if (! empty($skill->conditions['file_patterns'])) {
+                $patterns = implode(', ', $skill->conditions['file_patterns']);
+                $output .= "> **Applies to:** `{$patterns}`\n\n";
+            }
+
+            $output .= "{$body}\n\n---\n\n";
         }
 
         if (! empty($composedAgents)) {

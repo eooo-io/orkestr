@@ -22,6 +22,7 @@ use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\OpenClawConfigController;
 use App\Http\Controllers\McpServerController;
 use App\Http\Controllers\A2aAgentController;
+use App\Http\Controllers\ImportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
@@ -145,6 +146,10 @@ Route::get('/projects/{project}/a2a-agents', [A2aAgentController::class, 'index'
 Route::post('/projects/{project}/a2a-agents', [A2aAgentController::class, 'store']);
 Route::put('/a2a-agents/{a2aAgent}', [A2aAgentController::class, 'update']);
 Route::delete('/a2a-agents/{a2aAgent}', [A2aAgentController::class, 'destroy']);
+
+// Import (Reverse-Sync)
+Route::post('/import/detect', [ImportController::class, 'detect']);
+Route::post('/projects/{project}/import', [ImportController::class, 'import']);
 
 // Models
 Route::get('/models', [ModelController::class, 'index']);

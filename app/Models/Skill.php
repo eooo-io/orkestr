@@ -21,6 +21,7 @@ class Skill extends Model
         'tools',
         'includes',
         'body',
+        'conditions',
         'template_variables',
     ];
 
@@ -29,6 +30,7 @@ class Skill extends Model
         return [
             'tools' => 'array',
             'includes' => 'array',
+            'conditions' => 'array',
             'template_variables' => 'array',
             'max_tokens' => 'integer',
         ];

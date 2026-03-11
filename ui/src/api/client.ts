@@ -23,6 +23,8 @@ import type {
   ProjectRepository,
   RepositoryStatus,
   RepositoryFile,
+  ImportDetectedSkill,
+  ImportResult,
   ApiResponse,
 } from '@/types'
 
@@ -520,6 +522,23 @@ export const pushRepositorySkills = (
 export const fetchAllowedPaths = () =>
   api
     .get<ApiResponse<string[]>>('/repositories/allowed-paths')
+    .then((r) => r.data.data)
+
+// Import (Reverse-Sync)
+export const detectImportableSkills = (path: string, provider?: string) =>
+  api
+    .post<ApiResponse<Record<string, ImportDetectedSkill[]>>>('/import/detect', {
+      path,
+      provider,
+    })
+    .then((r) => r.data.data)
+
+export const importFromProvider = (projectId: number, path: string, provider?: string) =>
+  api
+    .post<ApiResponse<ImportResult>>(`/projects/${projectId}/import`, {
+      path,
+      provider,
+    })
     .then((r) => r.data.data)
 
 // Models
