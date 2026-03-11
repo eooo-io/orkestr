@@ -5,6 +5,7 @@ import {
   Search,
   BookOpen,
   Settings,
+  CreditCard,
   Sun,
   Moon,
   Monitor,
@@ -45,6 +46,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     // { to: '/marketplace', label: 'Marketplace', icon: Store },
     { to: '/playground', label: 'Playground', icon: MessageSquare },
     { to: '/settings', label: 'Settings', icon: Settings },
+    { to: '/billing', label: 'Billing', icon: CreditCard },
   ]
 
   const themeOptions = [

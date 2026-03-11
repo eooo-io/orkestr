@@ -12,6 +12,7 @@ import { Settings } from '@/pages/Settings'
 import { Playground } from '@/pages/Playground'
 // import { Marketplace } from '@/pages/Marketplace'
 import { ProjectForm } from '@/pages/ProjectForm'
+import { Billing } from '@/pages/Billing'
 import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 
@@ -44,6 +45,7 @@ function AppContent() {
                   <Route path="/playground" element={<Playground />} />
                   <Route path="/search" element={<Search />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/billing" element={<Billing />} />
                 </Routes>
               </Layout>
             </AuthGuard>

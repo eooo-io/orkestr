@@ -25,6 +25,9 @@ import type {
   RepositoryFile,
   ImportDetectedSkill,
   ImportResult,
+  BillingPlan,
+  BillingStatus,
+  UsageSummary,
   ApiResponse,
 } from '@/types'
 
@@ -560,5 +563,57 @@ export const fetchSettings = () =>
 
 export const updateSettings = (data: Record<string, string>) =>
   api.put<{ message: string }>('/settings', data).then((r) => r.data)
+
+// Billing
+export const fetchBillingPlans = () =>
+  api.get<ApiResponse<BillingPlan[]>>('/billing/plans').then((r) => r.data.data)
+
+export const fetchBillingStatus = () =>
+  api.get<ApiResponse<BillingStatus>>('/billing/status').then((r) => r.data.data)
+
+export const subscribeToPlan = (plan: string, interval: 'monthly' | 'yearly', paymentMethod?: string) =>
+  api
+    .post<ApiResponse<Record<string, unknown>>>('/billing/subscribe', {
+      plan,
+      interval,
+      payment_method: paymentMethod,
+    })
+    .then((r) => r.data.data)
+
+export const changePlan = (plan: string, interval: 'monthly' | 'yearly') =>
+  api
+    .post<ApiResponse<Record<string, unknown>>>('/billing/change-plan', { plan, interval })
+    .then((r) => r.data.data)
+
+export const cancelSubscription = () =>
+  api.post<ApiResponse<Record<string, unknown>>>('/billing/cancel').then((r) => r.data.data)
+
+export const resumeSubscription = () =>
+  api.post<ApiResponse<Record<string, unknown>>>('/billing/resume').then((r) => r.data.data)
+
+export const createSetupIntent = () =>
+  api.post<ApiResponse<{ client_secret: string }>>('/billing/setup-intent').then((r) => r.data.data)
+
+export const updatePaymentMethod = (paymentMethod: string) =>
+  api.put('/billing/payment-method', { payment_method: paymentMethod })
+
+export const fetchInvoices = () =>
+  api
+    .get<ApiResponse<Array<{ id: string; date: string; total: string; status: string; pdf_url: string }>>>('/billing/invoices')
+    .then((r) => r.data.data)
+
+export const fetchUsage = () =>
+  api.get<ApiResponse<UsageSummary>>('/billing/usage').then((r) => r.data.data)
+
+export const setupStripeConnect = () =>
+  api.post<ApiResponse<{ onboarding_url?: string; dashboard_url?: string; status: string }>>('/billing/connect').then((r) => r.data.data)
+
+export const fetchConnectStatus = () =>
+  api.get<ApiResponse<{ status: string; onboarded: boolean }>>('/billing/connect/status').then((r) => r.data.data)
+
+export const fetchEarnings = () =>
+  api
+    .get<ApiResponse<{ total_earned: number; pending: number; payout_count: number }>>('/billing/earnings')
+    .then((r) => r.data.data)
 
 export default api

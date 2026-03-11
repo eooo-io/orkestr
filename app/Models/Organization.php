@@ -6,9 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Laravel\Cashier\Billable;
 
 class Organization extends Model
 {
+    use Billable;
+
     protected $fillable = [
         'uuid',
         'name',
@@ -18,6 +21,9 @@ class Organization extends Model
         'trial_ends_at',
         'subscription_ends_at',
         'plan_limits',
+        'stripe_id',
+        'pm_type',
+        'pm_last_four',
     ];
 
     protected function casts(): array
@@ -89,5 +95,39 @@ class Organization extends Model
     public function planLimit(string $key, int $default = 0): int
     {
         return $this->plan_limits[$key] ?? $default;
+    }
+
+    public function usageRecords(): HasMany
+    {
+        return $this->hasMany(UsageRecord::class);
+    }
+
+    public function currentMonthTokenUsage(): int
+    {
+        return (int) $this->usageRecords()
+            ->where('type', 'llm_tokens')
+            ->where('recorded_at', '>=', now()->startOfMonth())
+            ->sum('quantity');
+    }
+
+    public function recordUsage(string $type, int $quantity, ?string $model = null, ?int $userId = null, array $metadata = []): UsageRecord
+    {
+        return $this->usageRecords()->create([
+            'user_id' => $userId,
+            'type' => $type,
+            'quantity' => $quantity,
+            'model' => $model,
+            'metadata' => $metadata ?: null,
+            'recorded_at' => now(),
+        ]);
+    }
+
+    public function tokenBudgetRemaining(): int
+    {
+        $plan = Plan::findBySlug($this->plan);
+        $included = $plan?->included_tokens_monthly ?? 0;
+        $used = $this->currentMonthTokenUsage();
+
+        return max(0, $included - $used);
     }
 }

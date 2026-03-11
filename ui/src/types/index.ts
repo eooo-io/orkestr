@@ -282,6 +282,73 @@ export interface ImportResult {
   skipped: number
 }
 
+export interface BillingPlan {
+  slug: string
+  name: string
+  description: string | null
+  price_monthly: string
+  price_yearly: string
+  price_monthly_cents: number
+  price_yearly_cents: number
+  limits: {
+    max_projects: number
+    max_skills_per_project: number
+    max_providers: number
+    max_members: number
+    included_tokens_monthly: number
+  }
+  features: {
+    marketplace_publish: boolean
+    ai_generation: boolean
+    webhook_access: boolean
+    bundle_export: boolean
+    repository_access: boolean
+    priority_support: boolean
+  }
+}
+
+export interface BillingStatus {
+  plan: {
+    slug: string
+    name: string
+    price_monthly: string
+    price_yearly: string
+  }
+  subscription: {
+    status: string
+    trial_ends_at: string | null
+    ends_at: string | null
+    on_grace_period: boolean
+    cancelled: boolean
+  } | null
+  usage: {
+    tokens_used: number
+    tokens_included: number
+    tokens_remaining: number
+    overage_rate: number
+  }
+  payment_method: {
+    type: string
+    last_four: string
+  } | null
+  has_stripe_id: boolean
+}
+
+export interface UsageSummary {
+  summary: {
+    period_start: string
+    period_end: string
+    llm_tokens: {
+      used: number
+      included: number
+      requests: number
+    }
+    sync_operations: { count: number }
+    api_calls: { count: number }
+  }
+  daily_tokens: Array<{ date: string; tokens: number }>
+}
+
 export interface ApiResponse<T> {
   data: T
 }

@@ -22,7 +22,9 @@ use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\OpenClawConfigController;
 use App\Http\Controllers\McpServerController;
 use App\Http\Controllers\A2aAgentController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
@@ -153,6 +155,26 @@ Route::post('/projects/{project}/import', [ImportController::class, 'import']);
 
 // Models
 Route::get('/models', [ModelController::class, 'index']);
+
+// Billing & Subscriptions
+Route::get('/billing/plans', [BillingController::class, 'plans']);
+Route::get('/billing/status', [BillingController::class, 'status']);
+Route::post('/billing/subscribe', [BillingController::class, 'subscribe']);
+Route::post('/billing/change-plan', [BillingController::class, 'changePlan']);
+Route::post('/billing/cancel', [BillingController::class, 'cancel']);
+Route::post('/billing/resume', [BillingController::class, 'resume']);
+Route::post('/billing/setup-intent', [BillingController::class, 'setupIntent']);
+Route::put('/billing/payment-method', [BillingController::class, 'updatePaymentMethod']);
+Route::get('/billing/invoices', [BillingController::class, 'invoices']);
+Route::get('/billing/usage', [BillingController::class, 'usage']);
+
+// Stripe Connect (Marketplace Sellers)
+Route::post('/billing/connect', [BillingController::class, 'connectSetup']);
+Route::get('/billing/connect/status', [BillingController::class, 'connectStatus']);
+Route::get('/billing/earnings', [BillingController::class, 'earnings']);
+
+// Stripe Webhooks
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
 // Settings
 Route::get('/settings', SettingsController::class);
