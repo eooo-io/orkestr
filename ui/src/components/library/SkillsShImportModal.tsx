@@ -117,8 +117,8 @@ export function SkillsShImportModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-background border border-border rounded-xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30">
+      <div className="bg-background elevation-4 w-full max-w-3xl max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div className="flex items-center gap-2">
@@ -133,7 +133,7 @@ export function SkillsShImportModal({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-muted transition-colors"
+            className="p-1.5 hover:bg-muted transition-all duration-150"
           >
             <X className="h-4 w-4" />
           </button>
@@ -150,7 +150,7 @@ export function SkillsShImportModal({
                 onChange={(e) => setRepo(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleDiscover()}
                 placeholder="owner/repo (e.g. vercel-labs/skills)"
-                className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-input bg-background font-mono focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-input bg-background font-mono focus:outline-none focus:ring-1 focus:ring-ring"
                 autoFocus
               />
             </div>
@@ -178,7 +178,7 @@ export function SkillsShImportModal({
                   <button
                     key={r.repo}
                     onClick={() => handleDiscover(r.repo)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md border border-border hover:border-primary/30 hover:bg-primary/5 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-border hover:border-primary/30 hover:bg-primary/5 transition-all duration-150"
                   >
                     <Github className="h-3 w-3" />
                     <span className="font-medium">{r.label}</span>
@@ -202,7 +202,7 @@ export function SkillsShImportModal({
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 placeholder={`Filter ${skills.length} skills...`}
-                className="w-full pl-9 pr-3 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full pl-9 pr-3 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
           </div>
@@ -233,7 +233,7 @@ export function SkillsShImportModal({
                 return (
                   <div
                     key={skill.path}
-                    className="flex items-center gap-3 px-5 py-2.5 hover:bg-muted/50 transition-colors"
+                    className="flex items-center gap-3 px-5 py-2.5 hover:bg-muted/50 transition-all duration-150"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -241,7 +241,7 @@ export function SkillsShImportModal({
                           {skill.name}
                         </span>
                         {displayPath !== skill.name && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono truncate max-w-48">
+                          <span className="text-[10px] px-1.5 py-0.5 bg-muted text-muted-foreground font-mono truncate max-w-48">
                             {displayPath}
                           </span>
                         )}
@@ -310,7 +310,7 @@ export function SkillsShImportModal({
               href="https://skills.sh"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 hover:text-foreground transition-colors"
+              className="flex items-center gap-1 hover:text-foreground transition-all duration-150"
             >
               Browse skills.sh
               <ExternalLink className="h-3 w-3" />

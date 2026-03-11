@@ -150,7 +150,7 @@ export function LiveTestPanel({ skillId }: LiveTestPanelProps) {
           onChange={(e) => setUserMessage(e.target.value)}
           placeholder="Enter a test message..."
           rows={3}
-          className="w-full px-2.5 py-2 text-sm rounded-md border border-input bg-background resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+          className="w-full px-2.5 py-2 text-sm border border-input bg-background resize-none focus:outline-none focus:ring-1 focus:ring-ring"
           onKeyDown={(e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
               e.preventDefault()
@@ -203,7 +203,7 @@ export function LiveTestPanel({ skillId }: LiveTestPanelProps) {
       {/* Output */}
       <div className="flex-1 overflow-auto relative" ref={outputRef}>
         {error && (
-          <div className="m-3 p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+          <div className="m-3 p-3 bg-destructive/10 text-destructive text-sm">
             {error}
           </div>
         )}

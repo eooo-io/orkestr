@@ -95,7 +95,7 @@ id: summarize-doc
 name: Summarize Document
 description: Summarizes any document to key bullet points
 tags: [summarization, documents]
-model: claude-sonnet-4-20250514
+model: claude-sonnet-4-6
 max_tokens: 1000
 tools: []
 created_at: 2026-01-15T09:00:00Z

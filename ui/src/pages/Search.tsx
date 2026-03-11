@@ -67,12 +67,12 @@ export function Search() {
   }, {})
 
   // Get unique models from results for the filter
-  const modelOptions = ['claude-sonnet-4-20250514', 'claude-haiku-4-5-20251001', 'claude-opus-4-20250514']
+  const modelOptions = ['claude-opus-4-6', 'claude-sonnet-4-6', 'claude-haiku-4-5-20251001']
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Search</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Search</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Search skills across all projects
         </p>
@@ -86,13 +86,13 @@ export function Search() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search skills..."
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
             autoFocus
           />
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`p-2 rounded-md border transition-colors ${
+          className={`p-2 border transition-all duration-150 ${
             showFilters || hasFilters
               ? 'border-primary text-primary bg-primary/5'
               : 'border-input text-muted-foreground hover:text-foreground'
@@ -105,7 +105,7 @@ export function Search() {
 
       {/* Filters panel */}
       {showFilters && (
-        <div className="max-w-xl mb-4 p-4 rounded-md border border-border bg-card space-y-3">
+        <div className="max-w-xl mb-4 p-4 bg-card elevation-1 space-y-3">
           {/* Project filter */}
           <div>
             <label className="text-xs font-medium text-muted-foreground block mb-1.5">
@@ -116,7 +116,7 @@ export function Search() {
               onChange={(e) =>
                 setSelectedProject(e.target.value ? parseInt(e.target.value) : undefined)
               }
-              className="w-full px-3 py-1.5 text-sm rounded-md border border-input bg-background"
+              className="w-full px-3 py-1.5 text-sm border border-input bg-background"
             >
               <option value="">All projects</option>
               {projects.map((p) => (
@@ -135,7 +135,7 @@ export function Search() {
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm rounded-md border border-input bg-background"
+              className="w-full px-3 py-1.5 text-sm border border-input bg-background"
             >
               <option value="">All models</option>
               {modelOptions.map((m) => (
@@ -157,7 +157,7 @@ export function Search() {
                   <button
                     key={tag.id}
                     onClick={() => toggleTag(tag.name)}
-                    className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                    className={`text-xs px-2 py-0.5 border transition-all duration-150 ${
                       selectedTags.includes(tag.name)
                         ? 'border-primary bg-primary text-primary-foreground'
                         : 'border-border hover:border-primary/40'
@@ -186,19 +186,19 @@ export function Search() {
       {hasFilters && !showFilters && (
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           {selectedProject && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
+            <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary font-medium">
               {projects.find((p) => p.id === selectedProject)?.name}
             </span>
           )}
           {selectedModel && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground font-mono">
+            <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary font-medium font-mono">
               {selectedModel}
             </span>
           )}
           {selectedTags.map((tag) => (
             <span
               key={tag}
-              className="text-xs px-2 py-0.5 rounded-full bg-accent text-accent-foreground"
+              className="text-xs px-2 py-0.5 bg-accent text-accent-foreground"
             >
               {tag}
             </span>

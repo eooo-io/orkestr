@@ -141,10 +141,10 @@ export function BulkActionBar({
   }
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50" ref={barRef}>
+    <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] sm:w-auto max-w-lg" ref={barRef}>
       {/* Popover panels */}
       {activePopover === 'tag' && (
-        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-80 bg-popover border border-border rounded-lg shadow-xl p-4">
+        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] sm:w-80 max-w-sm bg-popover border border-border elevation-4 p-4">
           <h4 className="text-sm font-medium mb-3">Manage Tags</h4>
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {tags.map((tag) => (
@@ -196,7 +196,7 @@ export function BulkActionBar({
       )}
 
       {activePopover === 'assign' && (
-        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-72 bg-popover border border-border rounded-lg shadow-xl p-4">
+        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] sm:w-72 max-w-sm bg-popover border border-border elevation-4 p-4">
           <h4 className="text-sm font-medium mb-3">Assign to Agent</h4>
           <div className="space-y-1 max-h-48 overflow-y-auto">
             {agents.length === 0 && (
@@ -229,7 +229,7 @@ export function BulkActionBar({
       )}
 
       {activePopover === 'move' && (
-        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-72 bg-popover border border-border rounded-lg shadow-xl p-4">
+        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] sm:w-72 max-w-sm bg-popover border border-border elevation-4 p-4">
           <h4 className="text-sm font-medium mb-3">Move to Project</h4>
           <div className="space-y-1 max-h-48 overflow-y-auto">
             {projects.length === 0 && (
@@ -262,7 +262,7 @@ export function BulkActionBar({
       )}
 
       {activePopover === 'delete' && (
-        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-72 bg-popover border border-border rounded-lg shadow-xl p-4">
+        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] sm:w-72 max-w-sm bg-popover border border-border elevation-4 p-4">
           <h4 className="text-sm font-medium mb-2">Confirm Delete</h4>
           <p className="text-sm text-muted-foreground mb-4">
             Are you sure you want to delete {count} skill{count !== 1 ? 's' : ''}? This will also
@@ -280,8 +280,8 @@ export function BulkActionBar({
       )}
 
       {/* Main bar */}
-      <div className="flex items-center gap-3 px-4 py-2.5 bg-zinc-900 dark:bg-zinc-800 text-white rounded-xl shadow-2xl border border-zinc-700">
-        <span className="text-sm font-medium whitespace-nowrap">
+      <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 bg-zinc-900 dark:bg-zinc-800 text-white elevation-5 border border-zinc-700">
+        <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
           {count} selected
         </span>
 
@@ -293,8 +293,8 @@ export function BulkActionBar({
           className="text-white hover:bg-zinc-700 hover:text-white"
           onClick={() => setActivePopover(activePopover === 'tag' ? null : 'tag')}
         >
-          <Tag className="h-4 w-4 mr-1" />
-          Tag
+          <Tag className="h-4 w-4 sm:mr-1" />
+          <span className="hidden sm:inline">Tag</span>
         </Button>
 
         <Button
@@ -303,8 +303,8 @@ export function BulkActionBar({
           className="text-white hover:bg-zinc-700 hover:text-white"
           onClick={() => setActivePopover(activePopover === 'assign' ? null : 'assign')}
         >
-          <Users className="h-4 w-4 mr-1" />
-          Assign
+          <Users className="h-4 w-4 sm:mr-1" />
+          <span className="hidden sm:inline">Assign</span>
         </Button>
 
         <Button
@@ -313,8 +313,8 @@ export function BulkActionBar({
           className="text-white hover:bg-zinc-700 hover:text-white"
           onClick={() => setActivePopover(activePopover === 'move' ? null : 'move')}
         >
-          <FolderInput className="h-4 w-4 mr-1" />
-          Move
+          <FolderInput className="h-4 w-4 sm:mr-1" />
+          <span className="hidden sm:inline">Move</span>
         </Button>
 
         <Button
@@ -323,15 +323,15 @@ export function BulkActionBar({
           className="text-white hover:bg-zinc-700 hover:text-white"
           onClick={() => setActivePopover(activePopover === 'delete' ? null : 'delete')}
         >
-          <Trash2 className="h-4 w-4 mr-1" />
-          Delete
+          <Trash2 className="h-4 w-4 sm:mr-1" />
+          <span className="hidden sm:inline">Delete</span>
         </Button>
 
         <div className="h-4 w-px bg-zinc-600" />
 
         <button
           onClick={onClearSelection}
-          className="text-zinc-400 hover:text-white transition-colors p-1"
+          className="text-zinc-400 hover:text-white transition-all duration-150 p-1"
           title="Deselect all"
         >
           <X className="h-4 w-4" />

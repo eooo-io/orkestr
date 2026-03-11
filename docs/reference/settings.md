@@ -55,7 +55,7 @@ No API key needed -- just a running Ollama instance.
 ### Default Model
 
 - **Setting key:** `default_model`
-- **Default:** `claude-sonnet-4-20250514`
+- **Default:** `claude-sonnet-4-6`
 
 Used when a skill does not specify a model in its frontmatter. Also used as the initial selection in the Playground model dropdown.
 
@@ -88,7 +88,7 @@ PUT /api/settings
 ```json
 {
   "anthropic_api_key": "sk-ant-...",
-  "default_model": "claude-sonnet-4-20250514",
+  "default_model": "claude-sonnet-4-6",
   "ollama_url": "http://localhost:11434"
 }
 ```
@@ -102,7 +102,7 @@ Settings use the `AppSetting` model with static helpers:
 $key = AppSetting::get('anthropic_api_key');
 
 // Write a setting
-AppSetting::set('default_model', 'claude-sonnet-4-20250514');
+AppSetting::set('default_model', 'claude-sonnet-4-6');
 ```
 
 The `key` column has a unique constraint. `get()` returns `null` for missing keys. `set()` performs an upsert.

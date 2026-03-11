@@ -200,9 +200,9 @@ export function SkillEditor() {
         projectId={skill.project_id}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
         {/* Left: Editor */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
           <FrontmatterForm skill={skill} onChange={handleFieldChange} projectSkills={projectSkills} />
           {!isNew &&
             skill.id &&
@@ -215,7 +215,7 @@ export function SkillEditor() {
                 templateVariables={skill.template_variables}
               />
             )}
-          <div className="flex-1">
+          <div className="flex-1 min-h-[300px]">
             <Editor
               height="100%"
               defaultLanguage="markdown"
@@ -236,11 +236,11 @@ export function SkillEditor() {
         </div>
 
         {/* Right: Tabs */}
-        <div className="w-[400px] border-l border-border flex flex-col bg-muted/20">
+        <div className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l border-border flex flex-col bg-muted/20 min-h-[300px] lg:min-h-0">
           <div className="flex border-b border-border">
             <button
               onClick={() => setActiveTab('test')}
-              className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+              className={`flex-1 px-4 py-2 text-sm font-medium transition-all duration-150 ${
                 activeTab === 'test'
                   ? 'border-b-2 border-primary text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
@@ -250,7 +250,7 @@ export function SkillEditor() {
             </button>
             <button
               onClick={() => setActiveTab('versions')}
-              className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+              className={`flex-1 px-4 py-2 text-sm font-medium transition-all duration-150 ${
                 activeTab === 'versions'
                   ? 'border-b-2 border-primary text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
@@ -260,7 +260,7 @@ export function SkillEditor() {
             </button>
             <button
               onClick={() => setActiveTab('lint')}
-              className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+              className={`flex-1 px-4 py-2 text-sm font-medium transition-all duration-150 ${
                 activeTab === 'lint'
                   ? 'border-b-2 border-primary text-foreground'
                   : 'text-muted-foreground hover:text-foreground'

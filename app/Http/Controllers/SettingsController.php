@@ -16,7 +16,7 @@ class SettingsController extends Controller
             'openai_api_key_set' => ! empty(AppSetting::get('openai_api_key')),
             'gemini_api_key_set' => ! empty(AppSetting::get('gemini_api_key')),
             'ollama_url' => AppSetting::get('ollama_url', 'http://localhost:11434'),
-            'default_model' => AppSetting::get('default_model', 'claude-sonnet-4-20250514'),
+            'default_model' => AppSetting::get('default_model', 'claude-sonnet-4-6'),
             'allowed_project_paths' => SafeProjectPath::getAllowedBases(),
         ]);
     }

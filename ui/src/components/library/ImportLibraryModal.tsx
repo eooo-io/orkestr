@@ -81,8 +81,8 @@ export function ImportLibraryModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-card border border-border rounded-lg shadow-lg w-full max-w-3xl mx-4 max-h-[80vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30">
+      <div className="bg-card elevation-3 w-full max-w-3xl mx-4 max-h-[80vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
@@ -106,7 +106,7 @@ export function ImportLibraryModal({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search library skills..."
-              className="w-full pl-9 pr-4 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
               autoFocus
             />
           </div>
@@ -115,7 +115,7 @@ export function ImportLibraryModal({
               <button
                 key={cat.value}
                 onClick={() => setCategory(cat.value)}
-                className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                className={`text-xs px-2.5 py-1 border transition-all duration-150 ${
                   category === cat.value
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-border hover:border-primary/40'
@@ -146,7 +146,7 @@ export function ImportLibraryModal({
                 return (
                   <div
                     key={skill.id}
-                    className="flex items-start gap-4 px-5 py-3 hover:bg-muted/30 transition-colors"
+                    className="flex items-start gap-4 px-5 py-3 hover:bg-muted/30 transition-all duration-150"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export function ImportLibraryModal({
                           {skill.name}
                         </h3>
                         {skill.category && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground shrink-0">
+                          <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary font-medium shrink-0">
                             {skill.category}
                           </span>
                         )}

@@ -57,18 +57,15 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const navigate = useNavigate()
   const projects = useAppStore((s) => s.projects)
 
-  // Load skills from all projects when palette opens
   useEffect(() => {
     if (!isOpen) return
     setQuery('')
     setSelectedIndex(0)
 
-    // Focus input after render
     requestAnimationFrame(() => {
       inputRef.current?.focus()
     })
 
-    // Fetch skills for all projects
     const loadSkills = async () => {
       try {
         const skillArrays = await Promise.all(
@@ -91,11 +88,9 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     [onClose]
   )
 
-  // Build all command items
   const allItems = useMemo<CommandItem[]>(() => {
     const items: CommandItem[] = []
 
-    // Skills
     for (const skill of allSkills) {
       const project = projects.find((p) => p.id === skill.project_id)
       items.push({
@@ -108,7 +103,6 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       })
     }
 
-    // Projects
     for (const project of projects) {
       items.push({
         id: `project-${project.id}`,
@@ -120,7 +114,6 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       })
     }
 
-    // Pages
     const pages: { label: string; path: string; icon: typeof Layout }[] = [
       { label: 'Library', path: '/library', icon: BookOpen },
       { label: 'Search', path: '/search', icon: Search },
@@ -137,7 +130,6 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       })
     }
 
-    // Actions
     items.push({
       id: 'action-new-project',
       label: 'New Project',
@@ -150,12 +142,10 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     return items
   }, [allSkills, projects, navigate])
 
-  // Filter and rank results
   const filteredItems = useMemo(() => {
     const q = query.trim().toLowerCase()
 
     if (!q) {
-      // Show recent items when query is empty
       const recentIds = getRecentIds()
       const recentItems = recentIds
         .map((id) => allItems.find((item) => item.id === id))
@@ -163,7 +153,6 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       return recentItems
     }
 
-    // Score items: exact match > starts-with > contains
     const scored = allItems
       .map((item) => {
         const label = item.label.toLowerCase()
@@ -184,7 +173,6 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     return scored.map((s) => s.item)
   }, [query, allItems])
 
-  // Group results by category
   const groupedResults = useMemo(() => {
     const q = query.trim()
     if (!q && filteredItems.length > 0) {
@@ -208,25 +196,21 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     return groups
   }, [filteredItems, query])
 
-  // Flatten for keyboard navigation
   const flatItems = useMemo(
     () => groupedResults.flatMap((g) => g.items),
     [groupedResults]
   )
 
-  // Reset selection when results change
   useEffect(() => {
     setSelectedIndex(0)
   }, [query])
 
-  // Scroll selected item into view
   useEffect(() => {
     if (!listRef.current) return
     const selected = listRef.current.querySelector('[data-selected="true"]')
     selected?.scrollIntoView({ block: 'nearest' })
   }, [selectedIndex])
 
-  // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return
 
@@ -264,32 +248,34 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] sm:pt-[20vh] px-4 sm:px-0"
       onClick={onClose}
     >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+      {/* Scrim */}
+      <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
 
       {/* Dialog */}
       <div
-        className="relative w-full max-w-lg bg-popover border border-border rounded-xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-lg bg-popover elevation-5 overflow-hidden animate-in fade-in zoom-in-95"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 border-b border-border">
-          <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+        <div className="flex items-center gap-3 px-4">
+          <Search className="h-5 w-5 text-primary shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search skills, projects, pages..."
-            className="flex-1 bg-transparent py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
+            className="flex-1 bg-transparent py-4 text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
-          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border font-mono shrink-0">
+          <kbd className="text-[10px] px-2 py-1 bg-muted text-muted-foreground font-mono shrink-0">
             Esc
           </kbd>
         </div>
+
+        <div className="h-px bg-border mx-4" />
 
         {/* Results */}
         <div
@@ -297,15 +283,15 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           className="max-h-80 overflow-y-auto p-2"
         >
           {groupedResults.length === 0 ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
+            <div className="py-10 text-center text-sm text-muted-foreground">
               {query.trim() ? 'No results found' : 'No recent items'}
             </div>
           ) : (
             groupedResults.map((group) => {
               const CatIcon = categoryIcon[group.category] ?? Layout
               return (
-                <div key={group.category} className="mb-2 last:mb-0">
-                  <div className="flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <div key={group.category} className="mb-1 last:mb-0">
+                  <div className="flex items-center gap-1.5 px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
                     <CatIcon className="h-3 w-3" />
                     {group.category}
                   </div>
@@ -319,13 +305,13 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                         data-selected={isSelected}
                         onClick={() => executeItem(item)}
                         onMouseEnter={() => setSelectedIndex(globalIndex)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-150 ${
                           isSelected
-                            ? 'bg-accent text-accent-foreground'
-                            : 'text-foreground hover:bg-accent/50'
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-foreground hover:bg-muted'
                         }`}
                       >
-                        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <Icon className={`h-4 w-4 shrink-0 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
                         <span className="flex-1 text-left truncate">
                           {item.label}
                         </span>
@@ -334,15 +320,6 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                             {item.subtitle}
                           </span>
                         )}
-                        <span
-                          className={`text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0 ${
-                            isSelected
-                              ? 'bg-background/20 text-accent-foreground'
-                              : 'bg-muted text-muted-foreground'
-                          }`}
-                        >
-                          {item.category}
-                        </span>
                       </button>
                     )
                   })}
@@ -352,24 +329,24 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           )}
         </div>
 
-        {/* Footer hints */}
-        <div className="px-4 py-2 border-t border-border flex items-center gap-3 text-[11px] text-muted-foreground">
-          <span>
-            <kbd className="px-1 py-0.5 rounded bg-muted border border-border font-mono">
+        {/* Footer */}
+        <div className="px-4 py-2.5 border-t border-border flex items-center gap-4 text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 bg-muted font-mono text-[10px]">
               ↑↓
-            </kbd>{' '}
+            </kbd>
             Navigate
           </span>
-          <span>
-            <kbd className="px-1 py-0.5 rounded bg-muted border border-border font-mono">
+          <span className="flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 bg-muted font-mono text-[10px]">
               Enter
-            </kbd>{' '}
+            </kbd>
             Select
           </span>
-          <span>
-            <kbd className="px-1 py-0.5 rounded bg-muted border border-border font-mono">
+          <span className="flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 bg-muted font-mono text-[10px]">
               Esc
-            </kbd>{' '}
+            </kbd>
             Close
           </span>
         </div>

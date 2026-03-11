@@ -14,7 +14,7 @@ Set the `ANTHROPIC_API_KEY` in your `.env` file or enter it in the Settings page
 
 ### OpenAI
 
-Required for GPT-4o, o3, and other OpenAI models.
+Required for GPT-5.4, GPT-5 Mini, o3, and other OpenAI models.
 
 Set `OPENAI_API_KEY` in `.env` or enter it in Settings. Models prefixed with `gpt-` or `o` are routed to the OpenAI provider.
 
@@ -44,9 +44,9 @@ The `LLMProviderFactory` routes requests to the correct provider based on the mo
 
 | Prefix | Provider | Examples |
 |---|---|---|
-| `claude-` | Anthropic | `claude-sonnet-4-20250514`, `claude-haiku-3.5` |
-| `gpt-` or `o` | OpenAI | `gpt-4o`, `o3` |
-| `gemini-` | Google Gemini | `gemini-2.5-pro`, `gemini-2.0-flash` |
+| `claude-` | Anthropic | `claude-sonnet-4-6`, `claude-opus-4-6` |
+| `gpt-` or `o` | OpenAI | `gpt-5.4`, `gpt-5-mini`, `o3` |
+| `gemini-` | Google Gemini | `gemini-3.1-pro-preview`, `gemini-3-flash-preview` |
 | `ollama/` | Ollama | `ollama/llama3`, `ollama/codellama` |
 
 ## Checking Available Models
@@ -68,11 +68,11 @@ Returns a grouped list:
 {
   "anthropic": {
     "configured": true,
-    "models": ["claude-sonnet-4-20250514", "claude-haiku-3.5"]
+    "models": ["claude-opus-4-6", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"]
   },
   "openai": {
     "configured": true,
-    "models": ["gpt-4o", "o3"]
+    "models": ["gpt-5.4", "gpt-5-mini", "o3", "o4-mini"]
   },
   "gemini": {
     "configured": false,
@@ -94,7 +94,7 @@ Set the `model` field in a skill's frontmatter to any supported model. The [Test
 ```yaml
 ---
 name: Code Review
-model: gpt-4o
+model: gpt-5.4
 ---
 ```
 

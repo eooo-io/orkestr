@@ -9,11 +9,10 @@ services:
       - .:/var/www/app
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
       - projects:/projects
-    environment:
-      DB_HOST: mariadb
     depends_on:
       - mariadb
-    command: php artisan serve --host=0.0.0.0 --port=8000
+    command: >
+      sh -c "php artisan serve --host=0.0.0.0 --port=8000 --env=docker"
     networks:
       - agentis
 

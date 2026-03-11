@@ -27,7 +27,7 @@ export function SkillCard({ skill, selectable, selected, onToggleSelect }: Skill
       {(selectable || selected) && (
         <button
           onClick={handleCheckboxClick}
-          className={`absolute top-2 left-2 z-10 h-5 w-5 rounded border-2 flex items-center justify-center transition-all ${
+          className={`absolute top-2 left-2 z-10 h-5 w-5 rounded border-2 flex items-center justify-center transition-all duration-150 ${
             selected
               ? 'bg-primary border-primary text-primary-foreground'
               : 'border-muted-foreground/40 bg-background hover:border-primary/60'
@@ -38,19 +38,19 @@ export function SkillCard({ skill, selectable, selected, onToggleSelect }: Skill
       )}
 
       <div
-        className={`block p-4 rounded-lg border bg-card hover:border-primary/40 hover:shadow-sm transition-all group ${
-          selected ? 'border-primary/60 bg-primary/5' : 'border-border'
+        className={`block p-4 bg-card elevation-1 hover:elevation-2 transition-all duration-150 group ${
+          selected ? 'border border-primary/60 bg-primary/5' : ''
         } ${selectable ? 'pl-9' : ''}`}
       >
         <div className="flex items-start gap-3">
           <FileText className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="font-medium text-sm group-hover:text-primary transition-colors truncate">
+              <h3 className="font-medium text-sm group-hover:text-primary transition-all duration-150 truncate">
                 {skill.name}
               </h3>
               {skill.token_estimate > 0 && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono flex items-center gap-0.5 shrink-0">
+                <span className="text-[10px] px-1.5 py-0.5 bg-muted text-muted-foreground font-mono flex items-center gap-0.5 shrink-0">
                   <Coins className="h-2.5 w-2.5" />
                   {formatTokens(skill.token_estimate)}
                 </span>
@@ -63,7 +63,7 @@ export function SkillCard({ skill, selectable, selected, onToggleSelect }: Skill
             )}
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               {skill.model && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground font-mono">
+                <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary font-medium font-mono">
                   {skill.model}
                 </span>
               )}

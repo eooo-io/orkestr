@@ -25,7 +25,7 @@ class SkillTestController extends Controller
             'user_message' => 'required|string|max:10000',
         ]);
 
-        $model = $skill->model ?: AppSetting::get('default_model', 'claude-sonnet-4-20250514');
+        $model = $skill->model ?: AppSetting::get('default_model', 'claude-sonnet-4-6');
         $maxTokens = $skill->max_tokens ?: 1024;
         $systemPrompt = $this->compositionService->resolve($skill);
 
@@ -48,7 +48,7 @@ class SkillTestController extends Controller
             'max_tokens' => 'nullable|integer|min:1|max:128000',
         ]);
 
-        $model = $validated['model'] ?: AppSetting::get('default_model', 'claude-sonnet-4-20250514');
+        $model = $validated['model'] ?: AppSetting::get('default_model', 'claude-sonnet-4-6');
         $maxTokens = $validated['max_tokens'] ?: 4096;
         $systemPrompt = $validated['system_prompt'] ?? '';
 

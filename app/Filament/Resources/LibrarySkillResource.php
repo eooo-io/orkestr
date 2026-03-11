@@ -55,8 +55,8 @@ class LibrarySkillResource extends Resource
                 Forms\Components\Select::make('model')
                     ->label('Model')
                     ->options([
-                        'claude-sonnet-4-20250514' => 'Claude Sonnet 4',
-                        'claude-opus-4-20250514' => 'Claude Opus 4',
+                        'claude-sonnet-4-6' => 'Claude Sonnet 4.6',
+                        'claude-opus-4-6' => 'Claude Opus 4.6',
                         'claude-haiku-4-5-20251001' => 'Claude Haiku 4.5',
                     ])
                     ->afterStateUpdated(function (Forms\Set $set, ?string $state) {

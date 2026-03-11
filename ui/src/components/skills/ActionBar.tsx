@@ -43,20 +43,20 @@ export function ActionBar({
       <div className="flex items-center gap-2">
         {onGenerate && (
           <Button variant="outline" size="sm" onClick={onGenerate}>
-            <Wand2 className="h-4 w-4 mr-1" />
-            Generate
+            <Wand2 className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Generate</span>
           </Button>
         )}
         {!isNew && onDuplicate && (
           <Button variant="ghost" size="sm" onClick={onDuplicate}>
-            <Copy className="h-4 w-4 mr-1" />
-            Duplicate
+            <Copy className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Duplicate</span>
           </Button>
         )}
         {!isNew && onDelete && (
           <Button variant="ghost" size="sm" onClick={onDelete} className="text-destructive hover:text-destructive">
-            <Trash2 className="h-4 w-4 mr-1" />
-            Delete
+            <Trash2 className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Delete</span>
           </Button>
         )}
         <Button size="sm" onClick={onSave} disabled={isSaving || !isDirty}>

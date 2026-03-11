@@ -17,7 +17,7 @@ class BundleController extends Controller
     ) {}
 
     /**
-     * Export skills and/or agents as a bundle.
+     * Export skills and/or agents as a ZIP bundle.
      */
     public function export(Request $request, Project $project): JsonResponse|BinaryFileResponse
     {
@@ -26,25 +26,18 @@ class BundleController extends Controller
             'skill_ids.*' => 'integer|exists:skills,id',
             'agent_ids' => 'nullable|array',
             'agent_ids.*' => 'integer|exists:agents,id',
-            'format' => 'required|in:zip,json',
+            'content_format' => 'required|in:json,yaml,markdown,toon',
         ]);
 
         $skillIds = $validated['skill_ids'] ?? [];
         $agentIds = $validated['agent_ids'] ?? [];
-        $format = $validated['format'];
+        $contentFormat = $validated['content_format'];
 
         if (empty($skillIds) && empty($agentIds)) {
             return response()->json(['message' => 'No skills or agents selected for export.'], 422);
         }
 
-        if ($format === 'json') {
-            $data = $this->exportService->exportJson($project, $skillIds, $agentIds);
-
-            return response()->json($data);
-        }
-
-        // ZIP format
-        $zipPath = $this->exportService->exportZip($project, $skillIds, $agentIds);
+        $zipPath = $this->exportService->exportZip($project, $skillIds, $agentIds, $contentFormat);
         $filename = \Illuminate\Support\Str::slug($project->name) . '-bundle.zip';
 
         return response()

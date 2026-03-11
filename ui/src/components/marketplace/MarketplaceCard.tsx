@@ -23,7 +23,7 @@ export function MarketplaceCard({
 }: MarketplaceCardProps) {
   return (
     <div
-      className="p-4 rounded-lg border border-border bg-card hover:border-primary/40 hover:shadow-sm transition-all cursor-pointer"
+      className="p-4 border border-border bg-card hover:border-primary/40 hover:shadow-sm transition-all cursor-pointer"
       onClick={() => onSelect(skill)}
     >
       <div className="flex items-start justify-between gap-2">

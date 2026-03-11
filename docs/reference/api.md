@@ -124,7 +124,7 @@ POST /api/projects/{id}/skills
   "name": "Code Review",
   "description": "Reviews code for quality",
   "body": "You are a code reviewer...",
-  "model": "claude-sonnet-4-20250514",
+  "model": "claude-sonnet-4-6",
   "max_tokens": 4096,
   "tags": ["review", "quality"],
   "tools": [],
@@ -329,7 +329,7 @@ DELETE /api/tags/{id}
 ### Full-Text Search
 
 ```
-GET /api/search?q=review&tags=security&project_id=uuid&model=claude-sonnet-4-20250514
+GET /api/search?q=review&tags=security&project_id=uuid&model=claude-sonnet-4-6
 ```
 
 All parameters are optional. Returns skills matching the query, grouped by project.
@@ -610,7 +610,7 @@ POST /api/playground
     { "role": "assistant", "content": "Hi there!" },
     { "role": "user", "content": "What can you do?" }
   ],
-  "model": "claude-sonnet-4-20250514",
+  "model": "claude-sonnet-4-6",
   "max_tokens": 4096
 }
 ```
@@ -639,6 +639,6 @@ PUT /api/settings
   "openai_api_key": "sk-...",
   "gemini_api_key": "AIza...",
   "ollama_url": "http://localhost:11434",
-  "default_model": "claude-sonnet-4-20250514"
+  "default_model": "claude-sonnet-4-6"
 }
 ```

@@ -38,8 +38,8 @@ export function GenerateSkillModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-background rounded-lg border border-border shadow-xl w-full max-w-lg">
+    <div className="fixed inset-0 bg-foreground/30 flex items-center justify-center z-50 p-4">
+      <div className="bg-background elevation-4 w-full max-w-lg">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
             <Wand2 className="h-4 w-4 text-primary" />
@@ -62,7 +62,7 @@ export function GenerateSkillModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="e.g. A code reviewer that focuses on security vulnerabilities, follows OWASP top 10, and suggests fixes with code examples"
-              className="mt-1 w-full px-3 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+              className="mt-1 w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring resize-none"
               rows={4}
               maxLength={2000}
               autoFocus
@@ -80,14 +80,14 @@ export function GenerateSkillModal({
               value={constraints}
               onChange={(e) => setConstraints(e.target.value)}
               placeholder="e.g. Keep it under 500 words, use bullet points, focus on PHP/Laravel"
-              className="mt-1 w-full px-3 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+              className="mt-1 w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring resize-none"
               rows={2}
               maxLength={1000}
             />
           </div>
 
           {error && (
-            <div className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
+            <div className="text-sm text-destructive bg-destructive/10 px-3 py-2">
               {error}
             </div>
           )}

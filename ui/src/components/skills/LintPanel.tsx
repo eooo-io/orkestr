@@ -76,7 +76,7 @@ export function LintPanel({ skillId }: LintPanelProps) {
             {issues.map((issue, idx) => (
               <div
                 key={idx}
-                className={`rounded-md border px-3 py-2 text-xs ${
+                className={`border px-3 py-2 text-xs ${
                   issue.severity === 'warning'
                     ? 'border-yellow-500/30 bg-yellow-500/5'
                     : 'border-blue-500/30 bg-blue-500/5'

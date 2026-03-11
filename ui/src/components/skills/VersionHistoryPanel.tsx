@@ -104,7 +104,7 @@ export function VersionHistoryPanel({
             options={{
               readOnly: true,
               minimap: { enabled: false },
-              renderSideBySide: true,
+              renderSideBySide: window.innerWidth >= 1024,
               scrollBeyondLastLine: false,
               fontSize: 12,
               automaticLayout: true,
@@ -136,7 +136,7 @@ export function VersionHistoryPanel({
         {versions.map((version) => (
           <div
             key={version.id}
-            className="flex items-center gap-2 px-3 py-2.5 border-b border-border hover:bg-muted/30 transition-colors"
+            className="flex items-center gap-2 px-3 py-2.5 border-b border-border hover:bg-muted/30 transition-all duration-150"
           >
             <input
               type="checkbox"

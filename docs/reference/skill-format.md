@@ -23,7 +23,7 @@ id: summarize-doc
 name: Summarize Document
 description: Summarizes any document to key bullet points
 tags: [summarization, documents]
-model: claude-sonnet-4-20250514
+model: claude-sonnet-4-6
 max_tokens: 1000
 tools: []
 includes: []
@@ -58,7 +58,7 @@ the key points and present them as a concise bulleted list.
 |---|---|---|---|
 | `description` | `string` | `null` | Short summary of the skill's purpose |
 | `tags` | `string[]` | `[]` | Tags for categorization and filtering |
-| `model` | `string` | `null` | Target model (e.g., `claude-sonnet-4-20250514`). Falls back to default model in settings. |
+| `model` | `string` | `null` | Target model (e.g., `claude-sonnet-4-6`). Falls back to default model in settings. |
 | `max_tokens` | `integer` | `null` | Maximum output tokens for test/playground. Falls back to system default. |
 | `tools` | `object[]` | `[]` | Tool/function definitions in JSON Schema format |
 | `includes` | `string[]` | `[]` | Slugs of other skills in the same project to prepend. See [Includes](../guide/includes). |
@@ -120,7 +120,7 @@ id: api-endpoint-review
 name: API Endpoint Review
 description: Reviews REST API endpoints for correctness, security, and consistency
 tags: [api, review, security]
-model: claude-sonnet-4-20250514
+model: claude-sonnet-4-6
 max_tokens: 4096
 tools: []
 includes: [project-context, coding-standards]

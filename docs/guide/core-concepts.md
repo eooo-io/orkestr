@@ -30,7 +30,7 @@ id: code-review
 name: Code Review Standards
 description: Enforces team code review conventions
 tags: [quality, review]
-model: claude-sonnet-4-20250514
+model: claude-sonnet-4-6
 max_tokens: 4096
 ---
 

@@ -15,7 +15,7 @@ export function ExportModal({ projectId, projectName, onClose }: ExportModalProp
   const [agents, setAgents] = useState<ProjectAgent[]>([])
   const [selectedSkillIds, setSelectedSkillIds] = useState<Set<number>>(new Set())
   const [selectedAgentIds, setSelectedAgentIds] = useState<Set<number>>(new Set())
-  const [format, setFormat] = useState<'zip' | 'json'>('zip')
+  const [contentFormat, setContentFormat] = useState<'json' | 'yaml' | 'markdown' | 'toon'>('markdown')
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -63,34 +63,20 @@ export function ExportModal({ projectId, projectName, onClose }: ExportModalProp
     setError(null)
 
     try {
-      const result = await exportBundle(projectId, {
+      const blob = await exportBundle(projectId, {
         skill_ids: skillIds,
         agent_ids: agentIds,
-        format,
+        content_format: contentFormat,
       })
 
-      if (format === 'zip') {
-        const blob = result as Blob
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `${projectName.toLowerCase().replace(/\s+/g, '-')}-bundle.zip`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
-      } else {
-        const json = JSON.stringify(result, null, 2)
-        const blob = new Blob([json], { type: 'application/json' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `${projectName.toLowerCase().replace(/\s+/g, '-')}-bundle.json`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
-      }
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${projectName.toLowerCase().replace(/\s+/g, '-')}-bundle.zip`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
 
       onClose()
     } catch (err: unknown) {
@@ -106,8 +92,8 @@ export function ExportModal({ projectId, projectName, onClose }: ExportModalProp
   const totalSelected = selectedSkillIds.size + selectedAgentIds.size
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-background rounded-lg border border-border shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col">
+    <div className="fixed inset-0 bg-foreground/30 flex items-end sm:items-center justify-center z-50 sm:p-4">
+      <div className="bg-background elevation-4 w-full sm:max-w-lg max-h-[85vh] sm:max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
             <Package className="h-4 w-4 text-primary" />
@@ -149,7 +135,7 @@ export function ExportModal({ projectId, projectName, onClose }: ExportModalProp
                     </button>
                   </div>
                 </div>
-                <div className="space-y-1 max-h-48 overflow-y-auto border border-border rounded-md p-2">
+                <div className="space-y-1 max-h-48 overflow-y-auto border border-border p-2">
                   {skills.length === 0 ? (
                     <p className="text-xs text-muted-foreground py-2 text-center">
                       No skills in this project
@@ -161,7 +147,7 @@ export function ExportModal({ projectId, projectName, onClose }: ExportModalProp
                         className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
                       >
                         <div
-                          className={`h-4 w-4 rounded border flex items-center justify-center transition-colors ${
+                          className={`h-4 w-4 rounded border flex items-center justify-center transition-all duration-150 ${
                             selectedSkillIds.has(skill.id)
                               ? 'bg-primary border-primary'
                               : 'border-input'
@@ -205,14 +191,14 @@ export function ExportModal({ projectId, projectName, onClose }: ExportModalProp
                       </button>
                     </div>
                   </div>
-                  <div className="space-y-1 max-h-36 overflow-y-auto border border-border rounded-md p-2">
+                  <div className="space-y-1 max-h-36 overflow-y-auto border border-border p-2">
                     {agents.map((agent) => (
                       <label
                         key={agent.id}
                         className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
                       >
                         <div
-                          className={`h-4 w-4 rounded border flex items-center justify-center transition-colors ${
+                          className={`h-4 w-4 rounded border flex items-center justify-center transition-all duration-150 ${
                             selectedAgentIds.has(agent.id)
                               ? 'bg-primary border-primary'
                               : 'border-input'
@@ -230,37 +216,33 @@ export function ExportModal({ projectId, projectName, onClose }: ExportModalProp
                 </div>
               )}
 
-              {/* Format toggle */}
+              {/* Content format */}
               <div>
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Format
+                  Skill Format
                 </label>
-                <div className="flex gap-2 mt-1">
-                  <button
-                    onClick={() => setFormat('zip')}
-                    className={`flex-1 px-3 py-2 text-sm rounded-md border transition-colors ${
-                      format === 'zip'
-                        ? 'border-primary bg-primary/10 text-foreground'
-                        : 'border-input text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    ZIP Archive
-                  </button>
-                  <button
-                    onClick={() => setFormat('json')}
-                    className={`flex-1 px-3 py-2 text-sm rounded-md border transition-colors ${
-                      format === 'json'
-                        ? 'border-primary bg-primary/10 text-foreground'
-                        : 'border-input text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    JSON File
-                  </button>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+                  {(['markdown', 'yaml', 'json', 'toon'] as const).map((fmt) => (
+                    <button
+                      key={fmt}
+                      onClick={() => setContentFormat(fmt)}
+                      className={`px-3 py-2 text-sm border transition-all duration-150 ${
+                        contentFormat === fmt
+                          ? 'border-primary bg-primary/10 text-foreground'
+                          : 'border-input text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {fmt === 'markdown' ? 'MD' : fmt === 'toon' ? 'TOON' : fmt.toUpperCase()}
+                    </button>
+                  ))}
                 </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  Skills are exported as a ZIP archive with each skill in the chosen format.
+                </p>
               </div>
 
               {error && (
-                <div className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
+                <div className="text-sm text-destructive bg-destructive/10 px-3 py-2">
                   {error}
                 </div>
               )}

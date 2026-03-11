@@ -88,15 +88,15 @@ export function AgentsTab({ projectId, skills }: Props) {
           return (
             <div
               key={agent.id}
-              className={`flex items-center gap-4 p-4 rounded-lg border transition-colors ${
+              className={`flex items-center gap-4 p-4 elevation-1 transition-all duration-150 ${
                 agent.is_enabled
-                  ? 'border-primary/20 bg-primary/5'
-                  : 'border-border bg-background opacity-60'
+                  ? 'bg-primary/5'
+                  : 'bg-background opacity-60'
               }`}
             >
               {/* Icon */}
               <div
-                className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                className={`h-10 w-10 flex items-center justify-center flex-shrink-0 ${
                   agent.is_enabled
                     ? 'bg-primary/10 text-primary'
                     : 'bg-muted text-muted-foreground'
@@ -109,7 +109,7 @@ export function AgentsTab({ projectId, skills }: Props) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">{agent.name}</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                  <span className="text-[10px] px-1.5 py-0.5 bg-muted text-muted-foreground">
                     {agent.role}
                   </span>
                 </div>
@@ -128,7 +128,7 @@ export function AgentsTab({ projectId, skills }: Props) {
                 {agent.is_enabled && (
                   <button
                     onClick={() => setPreviewAgent(agent)}
-                    className="p-2 rounded-md hover:bg-muted transition-colors"
+                    className="p-2 hover:bg-muted transition-all duration-150"
                     title="Preview composed output"
                   >
                     <Eye className="h-4 w-4 text-muted-foreground" />
@@ -136,7 +136,7 @@ export function AgentsTab({ projectId, skills }: Props) {
                 )}
                 <button
                   onClick={() => setConfigAgent(agent)}
-                  className="p-2 rounded-md hover:bg-muted transition-colors"
+                  className="p-2 hover:bg-muted transition-all duration-150"
                   title="Configure agent"
                 >
                   <Settings2 className="h-4 w-4 text-muted-foreground" />
@@ -145,7 +145,7 @@ export function AgentsTab({ projectId, skills }: Props) {
                 {/* Toggle switch */}
                 <button
                   onClick={() => handleToggle(agent)}
-                  className={`relative w-10 h-5 rounded-full transition-colors ${
+                  className={`relative w-10 h-5 rounded-full transition-all duration-150 ${
                     agent.is_enabled ? 'bg-primary' : 'bg-muted-foreground/30'
                   }`}
                   title={agent.is_enabled ? 'Disable agent' : 'Enable agent'}

@@ -4,8 +4,8 @@ import { estimateTokens } from '@/api/client'
 import type { Skill, TemplateVariable } from '@/types'
 
 const MODEL_CONTEXT_LIMITS: Record<string, number> = {
-  'claude-sonnet-4-20250514': 200000,
-  'claude-opus-4-20250514': 200000,
+  'claude-opus-4-6': 200000,
+  'claude-sonnet-4-6': 200000,
   'claude-haiku-4-5-20251001': 200000,
 }
 
@@ -28,8 +28,8 @@ interface FrontmatterFormProps {
 }
 
 const MODELS = [
-  { value: 'claude-sonnet-4-20250514', label: 'Claude Sonnet 4' },
-  { value: 'claude-opus-4-20250514', label: 'Claude Opus 4' },
+  { value: 'claude-opus-4-6', label: 'Claude Opus 4.6' },
+  { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6' },
   { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5' },
 ]
 
@@ -48,7 +48,7 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
 
   return (
     <div className="space-y-3 p-4 border-b border-border bg-muted/30">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="text-xs font-medium text-muted-foreground">
             Name
@@ -57,7 +57,7 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
             type="text"
             value={skill.name || ''}
             onChange={(e) => onChange('name', e.target.value)}
-            className="mt-1 w-full px-2.5 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            className="mt-1 w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
             placeholder="Skill name"
           />
         </div>
@@ -68,7 +68,7 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
           <select
             value={skill.model || ''}
             onChange={(e) => onChange('model', e.target.value || null)}
-            className="mt-1 w-full px-2.5 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            className="mt-1 w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
           >
             <option value="">Default</option>
             {MODELS.map((m) => (
@@ -88,12 +88,12 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
           type="text"
           value={skill.description || ''}
           onChange={(e) => onChange('description', e.target.value || null)}
-          className="mt-1 w-full px-2.5 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+          className="mt-1 w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
           placeholder="Brief description"
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="text-xs font-medium text-muted-foreground">
             Max Tokens
@@ -107,7 +107,7 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
                 e.target.value ? parseInt(e.target.value) : null,
               )
             }
-            className="mt-1 w-full px-2.5 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            className="mt-1 w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
             placeholder="e.g. 1000"
           />
         </div>
@@ -127,7 +127,7 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
                   .filter(Boolean),
               )
             }
-            className="mt-1 w-full px-2.5 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            className="mt-1 w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
             placeholder="e.g. code, review"
           />
         </div>
@@ -140,7 +140,7 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
             <Link2 className="h-3 w-3" />
             Includes
             {currentIncludes.length > 0 && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-mono">
+              <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary font-mono">
                 {currentIncludes.length}
               </span>
             )}
@@ -153,7 +153,7 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
                   key={s.slug}
                   type="button"
                   onClick={() => toggleInclude(s.slug)}
-                  className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
+                  className={`text-[11px] px-2 py-0.5 border transition-all duration-150 ${
                     isIncluded
                       ? 'bg-primary/10 border-primary/30 text-primary'
                       : 'bg-muted/50 border-border text-muted-foreground hover:border-primary/30'
@@ -181,7 +181,7 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
       {/* Token Estimate */}
       {(() => {
         const tokens = estimateTokens(skill.resolved_body || skill.body || '')
-        const model = skill.model || 'claude-sonnet-4-20250514'
+        const model = skill.model || 'claude-sonnet-4-6'
         const limit = MODEL_CONTEXT_LIMITS[model] || 200000
         const color = getTokenColor(tokens, limit)
         return (
@@ -241,12 +241,12 @@ function TemplateVariablesEditor({
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors"
+          className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-all duration-150"
         >
           <Variable className="h-3 w-3" />
           Template Variables
           {variables.length > 0 && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-mono">
+            <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary font-mono">
               {variables.length}
             </span>
           )}
@@ -254,7 +254,7 @@ function TemplateVariablesEditor({
         <button
           type="button"
           onClick={addVariable}
-          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-0.5 transition-colors"
+          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-0.5 transition-all duration-150"
         >
           <Plus className="h-3 w-3" />
           Add
@@ -266,7 +266,7 @@ function TemplateVariablesEditor({
           {variables.map((v, i) => (
             <div
               key={i}
-              className="grid grid-cols-[1fr_1.5fr_1fr_auto] gap-1.5 items-start"
+              className="grid grid-cols-1 sm:grid-cols-[1fr_1.5fr_1fr_auto] gap-1.5 items-start"
             >
               <input
                 type="text"
@@ -274,27 +274,27 @@ function TemplateVariablesEditor({
                 onChange={(e) =>
                   updateVariable(i, 'name', e.target.value.replace(/\W/g, '_'))
                 }
-                className="px-2 py-1 text-xs rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring font-mono"
+                className="px-2 py-1 text-xs border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring font-mono"
                 placeholder="var_name"
               />
               <input
                 type="text"
                 value={v.description}
                 onChange={(e) => updateVariable(i, 'description', e.target.value)}
-                className="px-2 py-1 text-xs rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                className="px-2 py-1 text-xs border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                 placeholder="Description"
               />
               <input
                 type="text"
                 value={v.default || ''}
                 onChange={(e) => updateVariable(i, 'default', e.target.value)}
-                className="px-2 py-1 text-xs rounded-md border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                className="px-2 py-1 text-xs border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                 placeholder="Default"
               />
               <button
                 type="button"
                 onClick={() => removeVariable(i)}
-                className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                className="p-1 text-muted-foreground hover:text-destructive transition-all duration-150"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>

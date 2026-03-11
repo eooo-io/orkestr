@@ -317,19 +317,13 @@ export const fetchGitDiff = (projectId: number, file: string, ref?: string) =>
 // Bundles (Export/Import)
 export const exportBundle = (
   projectId: number,
-  data: { skill_ids: number[]; agent_ids: number[]; format: 'zip' | 'json' },
-) => {
-  if (data.format === 'zip') {
-    return api
-      .post(`/projects/${projectId}/export`, data, {
-        responseType: 'blob',
-      })
-      .then((r) => r.data as Blob)
-  }
-  return api
-    .post(`/projects/${projectId}/export`, data)
-    .then((r) => r.data)
-}
+  data: { skill_ids: number[]; agent_ids: number[]; content_format: string },
+) =>
+  api
+    .post(`/projects/${projectId}/export`, data, {
+      responseType: 'blob',
+    })
+    .then((r) => r.data as Blob)
 
 export const importBundlePreview = (projectId: number, file: File) => {
   const formData = new FormData()
