@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\File;
 
 class ClaudeDriver implements ProviderDriverInterface
 {
+    use GeneratesMcpConfig;
+
     public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
         $output = "# CLAUDE.md\n\n";
@@ -24,9 +26,14 @@ class ClaudeDriver implements ProviderDriverInterface
             }
         }
 
-        $path = rtrim($project->resolved_path, '/') . '/.claude/CLAUDE.md';
+        $base = rtrim($project->resolved_path, '/');
+        $files = [$base . '/.claude/CLAUDE.md' => rtrim($output) . "\n"];
 
-        return [$path => rtrim($output) . "\n"];
+        // MCP servers → .mcp.json (project-scoped, team-shareable)
+        $mcpFiles = $this->generateMcpFiles($project, $base . '/.mcp.json');
+        $files = array_merge($files, $mcpFiles);
+
+        return $files;
     }
 
     public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
@@ -41,15 +48,25 @@ class ClaudeDriver implements ProviderDriverInterface
 
     public function getOutputPaths(Project $project): array
     {
-        return [rtrim($project->resolved_path, '/') . '/.claude/CLAUDE.md'];
+        $base = rtrim($project->resolved_path, '/');
+        $paths = [$base . '/.claude/CLAUDE.md'];
+
+        $mcpPath = $base . '/.mcp.json';
+        if (File::exists($mcpPath)) {
+            $paths[] = $mcpPath;
+        }
+
+        return $paths;
     }
 
     public function clean(Project $project): void
     {
-        $path = rtrim($project->resolved_path, '/') . '/.claude/CLAUDE.md';
+        $base = rtrim($project->resolved_path, '/');
 
-        if (File::exists($path)) {
-            File::delete($path);
+        foreach ([$base . '/.claude/CLAUDE.md', $base . '/.mcp.json'] as $path) {
+            if (File::exists($path)) {
+                File::delete($path);
+            }
         }
     }
 }

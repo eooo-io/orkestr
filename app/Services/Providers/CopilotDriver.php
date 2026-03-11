@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\File;
 
 class CopilotDriver implements ProviderDriverInterface
 {
+    use GeneratesMcpConfig;
+
     public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
         $output = "# GitHub Copilot Instructions\n\n";
@@ -24,9 +26,14 @@ class CopilotDriver implements ProviderDriverInterface
             }
         }
 
-        $path = rtrim($project->resolved_path, '/') . '/.github/copilot-instructions.md';
+        $base = rtrim($project->resolved_path, '/');
+        $files = [$base . '/.github/copilot-instructions.md' => rtrim($output) . "\n"];
 
-        return [$path => rtrim($output) . "\n"];
+        // MCP servers → .vscode/mcp.json (VS Code workspace-scoped)
+        $mcpFiles = $this->generateMcpFiles($project, $base . '/.vscode/mcp.json');
+        $files = array_merge($files, $mcpFiles);
+
+        return $files;
     }
 
     public function sync(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): void
@@ -41,15 +48,25 @@ class CopilotDriver implements ProviderDriverInterface
 
     public function getOutputPaths(Project $project): array
     {
-        return [rtrim($project->resolved_path, '/') . '/.github/copilot-instructions.md'];
+        $base = rtrim($project->resolved_path, '/');
+        $paths = [$base . '/.github/copilot-instructions.md'];
+
+        $mcpPath = $base . '/.vscode/mcp.json';
+        if (File::exists($mcpPath)) {
+            $paths[] = $mcpPath;
+        }
+
+        return $paths;
     }
 
     public function clean(Project $project): void
     {
-        $path = rtrim($project->resolved_path, '/') . '/.github/copilot-instructions.md';
+        $base = rtrim($project->resolved_path, '/');
 
-        if (File::exists($path)) {
-            File::delete($path);
+        foreach ([$base . '/.github/copilot-instructions.md', $base . '/.vscode/mcp.json'] as $path) {
+            if (File::exists($path)) {
+                File::delete($path);
+            }
         }
     }
 }
