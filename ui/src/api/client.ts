@@ -28,6 +28,7 @@ import type {
   BillingPlan,
   BillingStatus,
   UsageSummary,
+  ProjectGraphData,
   ApiResponse,
 } from '@/types'
 
@@ -79,6 +80,11 @@ export const syncProject = (id: number) => api.post(`/projects/${id}/sync`)
 export const fetchSyncPreview = (projectId: number) =>
   api
     .post<ApiResponse<SyncPreviewFile[]>>(`/projects/${projectId}/sync/preview`)
+    .then((r) => r.data.data)
+
+export const fetchProjectGraph = (projectId: number) =>
+  api
+    .get<ApiResponse<ProjectGraphData>>(`/projects/${projectId}/graph`)
     .then((r) => r.data.data)
 
 // Skills

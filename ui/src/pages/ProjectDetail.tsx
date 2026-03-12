@@ -36,6 +36,7 @@ import { McpServersTab } from '@/components/integrations/McpServersTab'
 import { A2aAgentsTab } from '@/components/integrations/A2aAgentsTab'
 import { OpenClawConfigTab } from '@/components/integrations/OpenClawConfigTab'
 import ImportTab from '@/components/integrations/ImportTab'
+import VisualizationTab from '@/components/visualization/VisualizationTab'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
 import { ExportModal } from '@/components/bundles/ExportModal'
 import { ImportBundleModal } from '@/components/bundles/ImportBundleModal'
@@ -50,7 +51,7 @@ export function ProjectDetail() {
   const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [activeTab, setActiveTab] = useState<'skills' | 'agents' | 'webhooks' | 'repository' | 'mcp' | 'a2a' | 'openclaw' | 'import'>('skills')
+  const [activeTab, setActiveTab] = useState<'skills' | 'agents' | 'webhooks' | 'repository' | 'mcp' | 'a2a' | 'openclaw' | 'import' | 'visualize'>('skills')
   const [showLibrary, setShowLibrary] = useState(false)
   const [showSkillsSh, setShowSkillsSh] = useState(false)
   const [showGenerate, setShowGenerate] = useState(false)
@@ -325,6 +326,17 @@ export function ProjectDetail() {
           <Download className="h-4 w-4" />
           Import
         </button>
+        <button
+          onClick={() => setActiveTab('visualize')}
+          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
+            activeTab === 'visualize'
+              ? 'border-primary text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <GitBranch className="h-4 w-4" />
+          Visualize
+        </button>
       </div>
 
       {activeTab === 'skills' && (
@@ -454,6 +466,10 @@ export function ProjectDetail() {
             setSkills(sk)
           }}
         />
+      )}
+
+      {activeTab === 'visualize' && (
+        <VisualizationTab projectId={project.id} />
       )}
 
       {showLibrary && (

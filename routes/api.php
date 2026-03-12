@@ -25,6 +25,7 @@ use App\Http\Controllers\A2aAgentController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\StripeWebhookController;
+use App\Http\Controllers\VisualizationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
@@ -148,6 +149,9 @@ Route::get('/projects/{project}/a2a-agents', [A2aAgentController::class, 'index'
 Route::post('/projects/{project}/a2a-agents', [A2aAgentController::class, 'store']);
 Route::put('/a2a-agents/{a2aAgent}', [A2aAgentController::class, 'update']);
 Route::delete('/a2a-agents/{a2aAgent}', [A2aAgentController::class, 'destroy']);
+
+// Visualization
+Route::get('/projects/{project}/graph', [VisualizationController::class, 'graph']);
 
 // Import (Reverse-Sync)
 Route::post('/import/detect', [ImportController::class, 'detect']);

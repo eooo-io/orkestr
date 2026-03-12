@@ -349,6 +349,59 @@ export interface UsageSummary {
   daily_tokens: Array<{ date: string; tokens: number }>
 }
 
+export interface ProjectGraphData {
+  project: {
+    id: number
+    name: string
+    synced_at: string | null
+  }
+  skills: Array<{
+    id: number
+    slug: string
+    name: string
+    description: string | null
+    model: string | null
+    includes: string[]
+    conditions: SkillConditions | null
+    template_variables: TemplateVariable[] | null
+    tags: string[]
+    token_estimate: number
+  }>
+  skill_edges: Array<{
+    source: number
+    target: number
+    type: string
+  }>
+  circular_deps: string[]
+  agents: Array<{
+    id: number
+    name: string
+    slug: string
+    role: string
+    icon: string | null
+    is_enabled: boolean
+    has_custom_instructions: boolean
+    skill_ids: number[]
+  }>
+  agent_edges: Array<{
+    source_type: string
+    source: number
+    target_type: string
+    target: number
+    type: string
+  }>
+  providers: Array<{
+    slug: string
+    name: string
+  }>
+  mcp_servers: Array<{
+    id: number
+    name: string
+    transport: string
+  }>
+  sync_outputs: Record<string, string[]>
+}
+
 export interface ApiResponse<T> {
   data: T
 }
