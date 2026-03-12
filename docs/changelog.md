@@ -120,3 +120,10 @@
 - Per-project git_auto_commit setting
 - Auto-commit skill files after save
 - Git log and diff API endpoints
+
+### Skills.sh Import
+
+- Discover skills in any GitHub repository via the GitHub API
+- Preview skill content before importing (batch up to 30)
+- Import to library or directly to a project
+- Category auto-derivation from repository path structure

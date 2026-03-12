@@ -360,6 +360,56 @@ POST /api/library/{librarySkillId}/import
 
 ---
 
+## Skills.sh (GitHub Import)
+
+### Discover Skills in a Repository
+
+```
+POST /api/skills-sh/discover
+```
+
+```json
+{
+  "repo": "owner/repo-name"
+}
+```
+
+Returns a list of skill file paths found in the repository.
+
+### Preview Skills
+
+Fetch content for a batch of discovered skill files (up to 30).
+
+```
+POST /api/skills-sh/preview
+```
+
+```json
+{
+  "repo": "owner/repo-name",
+  "paths": [".curated/code-review.md", ".curated/testing.md"]
+}
+```
+
+### Import a Skill
+
+```
+POST /api/skills-sh/import
+```
+
+```json
+{
+  "repo": "owner/repo-name",
+  "path": ".curated/code-review.md",
+  "target": "project",
+  "project_id": "target-project-uuid"
+}
+```
+
+`target` is `"library"` or `"project"`. When targeting a project, `project_id` is required.
+
+---
+
 ## Marketplace
 
 ### Browse Marketplace

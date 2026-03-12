@@ -101,4 +101,5 @@ Key variables in `.env`:
 | `ANTHROPIC_API_KEY` | API key for Claude models |
 | `OPENAI_API_KEY` | API key for OpenAI models |
 | `GEMINI_API_KEY` | API key for Gemini models |
-| `OLLAMA_URL` | URL for local Ollama instance |
+| `OLLAMA_URL` | URL for local Ollama instance (default: `http://localhost:11434`) |
+| `PROJECTS_BASE_PATH` | Internal mount path for project directories |

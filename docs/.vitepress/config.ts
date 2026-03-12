@@ -75,6 +75,7 @@ export default defineConfig({
           items: [
             { text: 'Library', link: '/guide/library' },
             { text: 'Marketplace', link: '/guide/marketplace' },
+            { text: 'Skills.sh Import', link: '/guide/skills-sh' },
             { text: 'Bundle Export/Import', link: '/guide/bundles' },
           ],
         },
