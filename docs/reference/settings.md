@@ -93,6 +93,19 @@ PUT /api/settings
 }
 ```
 
+## Environment Variables Summary
+
+All API keys can be set via `.env` or through the Settings UI. Database values take precedence.
+
+```env
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=AIza...
+OLLAMA_URL=http://localhost:11434
+PROJECTS_HOST_PATH=/path/to/your/dev/directory
+PROJECTS_BASE_PATH=/projects
+```
+
 ## Internal Storage
 
 Settings use the `AppSetting` model with static helpers:
