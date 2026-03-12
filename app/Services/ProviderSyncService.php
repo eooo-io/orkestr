@@ -9,6 +9,7 @@ use App\Services\Providers\ClaudeDriver;
 use App\Services\Providers\CopilotDriver;
 use App\Services\Providers\CursorDriver;
 use App\Services\Providers\OpenAIDriver;
+use App\Services\Providers\OpenClawDriver;
 use App\Services\Providers\ProviderDriverInterface;
 use App\Services\Providers\WindsurfDriver;
 use Illuminate\Support\Facades\File;
@@ -22,6 +23,7 @@ class ProviderSyncService
         'windsurf' => WindsurfDriver::class,
         'cline' => ClineDriver::class,
         'openai' => OpenAIDriver::class,
+        'openclaw' => OpenClawDriver::class,
     ];
 
     public function __construct(

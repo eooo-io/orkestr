@@ -18,6 +18,13 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\VersionController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\InboundWebhookController;
+use App\Http\Controllers\RepositoryController;
+use App\Http\Controllers\OpenClawConfigController;
+use App\Http\Controllers\McpServerController;
+use App\Http\Controllers\A2aAgentController;
+use App\Http\Controllers\BillingController;
+use App\Http\Controllers\ImportController;
+use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
@@ -113,8 +120,61 @@ Route::get('/webhooks/{webhook}/deliveries', [WebhookController::class, 'deliver
 Route::post('/webhooks/{webhook}/test', [WebhookController::class, 'test']);
 Route::post('/webhooks/github/{project}', [InboundWebhookController::class, 'github']);
 
+// Repositories
+Route::get('/projects/{project}/repositories', [RepositoryController::class, 'show']);
+Route::post('/projects/{project}/repositories', [RepositoryController::class, 'connect']);
+Route::put('/projects/{project}/repositories/{provider}', [RepositoryController::class, 'update']);
+Route::delete('/projects/{project}/repositories/{provider}', [RepositoryController::class, 'disconnect']);
+Route::get('/projects/{project}/repositories/{provider}/status', [RepositoryController::class, 'status']);
+Route::get('/projects/{project}/repositories/{provider}/branches', [RepositoryController::class, 'branches']);
+Route::get('/projects/{project}/repositories/{provider}/latest-commit', [RepositoryController::class, 'latestCommit']);
+Route::get('/projects/{project}/repositories/{provider}/files', [RepositoryController::class, 'files']);
+Route::post('/projects/{project}/repositories/{provider}/pull', [RepositoryController::class, 'pullSkills']);
+Route::post('/projects/{project}/repositories/{provider}/push', [RepositoryController::class, 'pushSkills']);
+Route::get('/repositories/allowed-paths', [RepositoryController::class, 'allowedPaths']);
+
+// OpenClaw Config
+Route::get('/projects/{project}/openclaw', [OpenClawConfigController::class, 'show']);
+Route::put('/projects/{project}/openclaw', [OpenClawConfigController::class, 'update']);
+
+// MCP Servers (shared across providers)
+Route::get('/projects/{project}/mcp-servers', [McpServerController::class, 'index']);
+Route::post('/projects/{project}/mcp-servers', [McpServerController::class, 'store']);
+Route::put('/mcp-servers/{mcpServer}', [McpServerController::class, 'update']);
+Route::delete('/mcp-servers/{mcpServer}', [McpServerController::class, 'destroy']);
+
+// A2A Agents (shared across providers)
+Route::get('/projects/{project}/a2a-agents', [A2aAgentController::class, 'index']);
+Route::post('/projects/{project}/a2a-agents', [A2aAgentController::class, 'store']);
+Route::put('/a2a-agents/{a2aAgent}', [A2aAgentController::class, 'update']);
+Route::delete('/a2a-agents/{a2aAgent}', [A2aAgentController::class, 'destroy']);
+
+// Import (Reverse-Sync)
+Route::post('/import/detect', [ImportController::class, 'detect']);
+Route::post('/projects/{project}/import', [ImportController::class, 'import']);
+
 // Models
 Route::get('/models', [ModelController::class, 'index']);
+
+// Billing & Subscriptions
+Route::get('/billing/plans', [BillingController::class, 'plans']);
+Route::get('/billing/status', [BillingController::class, 'status']);
+Route::post('/billing/subscribe', [BillingController::class, 'subscribe']);
+Route::post('/billing/change-plan', [BillingController::class, 'changePlan']);
+Route::post('/billing/cancel', [BillingController::class, 'cancel']);
+Route::post('/billing/resume', [BillingController::class, 'resume']);
+Route::post('/billing/setup-intent', [BillingController::class, 'setupIntent']);
+Route::put('/billing/payment-method', [BillingController::class, 'updatePaymentMethod']);
+Route::get('/billing/invoices', [BillingController::class, 'invoices']);
+Route::get('/billing/usage', [BillingController::class, 'usage']);
+
+// Stripe Connect (Marketplace Sellers)
+Route::post('/billing/connect', [BillingController::class, 'connectSetup']);
+Route::get('/billing/connect/status', [BillingController::class, 'connectStatus']);
+Route::get('/billing/earnings', [BillingController::class, 'earnings']);
+
+// Stripe Webhooks
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
 // Settings
 Route::get('/settings', SettingsController::class);

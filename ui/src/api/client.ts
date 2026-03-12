@@ -20,6 +20,14 @@ import type {
   SyncPreviewFile,
   Webhook,
   WebhookDelivery,
+  ProjectRepository,
+  RepositoryStatus,
+  RepositoryFile,
+  ImportDetectedSkill,
+  ImportResult,
+  BillingPlan,
+  BillingStatus,
+  UsageSummary,
   ApiResponse,
 } from '@/types'
 
@@ -430,6 +438,112 @@ export const fetchWebhookDeliveries = (id: number) =>
 export const testWebhook = (id: number) =>
   api.post(`/webhooks/${id}/test`).then((r) => r.data)
 
+// Repositories
+export const fetchRepositories = (projectId: number) =>
+  api
+    .get<ApiResponse<ProjectRepository[]>>(`/projects/${projectId}/repositories`)
+    .then((r) => r.data.data)
+
+export const connectRepository = (
+  projectId: number,
+  data: {
+    provider: 'github' | 'gitlab'
+    full_name: string
+    access_token?: string
+    auto_scan_on_push?: boolean
+    auto_sync_on_push?: boolean
+  },
+) =>
+  api
+    .post<ApiResponse<ProjectRepository> & { message: string }>(
+      `/projects/${projectId}/repositories`,
+      data,
+    )
+    .then((r) => r.data)
+
+export const updateRepository = (
+  projectId: number,
+  provider: string,
+  data: {
+    access_token?: string
+    auto_scan_on_push?: boolean
+    auto_sync_on_push?: boolean
+    default_branch?: string
+  },
+) =>
+  api
+    .put<ApiResponse<ProjectRepository> & { message: string }>(
+      `/projects/${projectId}/repositories/${provider}`,
+      data,
+    )
+    .then((r) => r.data)
+
+export const disconnectRepository = (projectId: number, provider: string) =>
+  api.delete(`/projects/${projectId}/repositories/${provider}`)
+
+export const fetchRepositoryStatus = (projectId: number, provider: string) =>
+  api
+    .get<ApiResponse<RepositoryStatus>>(
+      `/projects/${projectId}/repositories/${provider}/status`,
+    )
+    .then((r) => r.data.data)
+
+export const fetchRepositoryBranches = (projectId: number, provider: string) =>
+  api
+    .get<ApiResponse<string[]>>(
+      `/projects/${projectId}/repositories/${provider}/branches`,
+    )
+    .then((r) => r.data.data)
+
+export const fetchRepositoryFiles = (projectId: number, provider: string) =>
+  api
+    .get<ApiResponse<RepositoryFile[]>>(
+      `/projects/${projectId}/repositories/${provider}/files`,
+    )
+    .then((r) => r.data.data)
+
+export const pullRepositorySkills = (projectId: number, provider: string) =>
+  api
+    .post<{ data: Array<{ path: string; content: string; sha: string }>; count: number; message: string }>(
+      `/projects/${projectId}/repositories/${provider}/pull`,
+    )
+    .then((r) => r.data)
+
+export const pushRepositorySkills = (
+  projectId: number,
+  provider: string,
+  files: Array<{ path: string; content: string }>,
+  commitMessage?: string,
+) =>
+  api
+    .post<{ data: Array<{ path: string; status: string; message?: string }>; message: string }>(
+      `/projects/${projectId}/repositories/${provider}/push`,
+      { files, commit_message: commitMessage },
+    )
+    .then((r) => r.data)
+
+export const fetchAllowedPaths = () =>
+  api
+    .get<ApiResponse<string[]>>('/repositories/allowed-paths')
+    .then((r) => r.data.data)
+
+// Import (Reverse-Sync)
+export const detectImportableSkills = (path: string, provider?: string) =>
+  api
+    .post<ApiResponse<Record<string, ImportDetectedSkill[]>>>('/import/detect', {
+      path,
+      provider,
+    })
+    .then((r) => r.data.data)
+
+export const importFromProvider = (projectId: number, path: string, provider?: string) =>
+  api
+    .post<ApiResponse<ImportResult>>(`/projects/${projectId}/import`, {
+      path,
+      provider,
+    })
+    .then((r) => r.data.data)
+
 // Models
 export const fetchModels = () =>
   api.get<{ data: ModelGroup[] }>('/models').then((r) => r.data.data)
@@ -449,5 +563,57 @@ export const fetchSettings = () =>
 
 export const updateSettings = (data: Record<string, string>) =>
   api.put<{ message: string }>('/settings', data).then((r) => r.data)
+
+// Billing
+export const fetchBillingPlans = () =>
+  api.get<ApiResponse<BillingPlan[]>>('/billing/plans').then((r) => r.data.data)
+
+export const fetchBillingStatus = () =>
+  api.get<ApiResponse<BillingStatus>>('/billing/status').then((r) => r.data.data)
+
+export const subscribeToPlan = (plan: string, interval: 'monthly' | 'yearly', paymentMethod?: string) =>
+  api
+    .post<ApiResponse<Record<string, unknown>>>('/billing/subscribe', {
+      plan,
+      interval,
+      payment_method: paymentMethod,
+    })
+    .then((r) => r.data.data)
+
+export const changePlan = (plan: string, interval: 'monthly' | 'yearly') =>
+  api
+    .post<ApiResponse<Record<string, unknown>>>('/billing/change-plan', { plan, interval })
+    .then((r) => r.data.data)
+
+export const cancelSubscription = () =>
+  api.post<ApiResponse<Record<string, unknown>>>('/billing/cancel').then((r) => r.data.data)
+
+export const resumeSubscription = () =>
+  api.post<ApiResponse<Record<string, unknown>>>('/billing/resume').then((r) => r.data.data)
+
+export const createSetupIntent = () =>
+  api.post<ApiResponse<{ client_secret: string }>>('/billing/setup-intent').then((r) => r.data.data)
+
+export const updatePaymentMethod = (paymentMethod: string) =>
+  api.put('/billing/payment-method', { payment_method: paymentMethod })
+
+export const fetchInvoices = () =>
+  api
+    .get<ApiResponse<Array<{ id: string; date: string; total: string; status: string; pdf_url: string }>>>('/billing/invoices')
+    .then((r) => r.data.data)
+
+export const fetchUsage = () =>
+  api.get<ApiResponse<UsageSummary>>('/billing/usage').then((r) => r.data.data)
+
+export const setupStripeConnect = () =>
+  api.post<ApiResponse<{ onboarding_url?: string; dashboard_url?: string; status: string }>>('/billing/connect').then((r) => r.data.data)
+
+export const fetchConnectStatus = () =>
+  api.get<ApiResponse<{ status: string; onboarded: boolean }>>('/billing/connect/status').then((r) => r.data.data)
+
+export const fetchEarnings = () =>
+  api
+    .get<ApiResponse<{ total_earned: number; pending: number; payout_count: number }>>('/billing/earnings')
+    .then((r) => r.data.data)
 
 export default api

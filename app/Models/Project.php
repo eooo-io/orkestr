@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Project extends Model
 {
+    use BelongsToOrganization;
+
     protected $fillable = [
         'uuid',
         'name',
@@ -17,6 +22,7 @@ class Project extends Model
         'path',
         'synced_at',
         'git_auto_commit',
+        'organization_id',
     ];
 
     protected function casts(): array
@@ -84,5 +90,30 @@ class Project extends Model
     public function webhooks(): HasMany
     {
         return $this->hasMany(Webhook::class);
+    }
+
+    public function repositories(): HasMany
+    {
+        return $this->hasMany(ProjectRepository::class);
+    }
+
+    public function repository(string $provider = 'github'): ?ProjectRepository
+    {
+        return $this->repositories()->where('provider', $provider)->first();
+    }
+
+    public function openclawConfig(): HasOne
+    {
+        return $this->hasOne(OpenClawConfig::class);
+    }
+
+    public function mcpServers(): HasMany
+    {
+        return $this->hasMany(ProjectMcpServer::class);
+    }
+
+    public function a2aAgents(): HasMany
+    {
+        return $this->hasMany(ProjectA2aAgent::class);
     }
 }

@@ -19,7 +19,7 @@ class ProjectController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $projects = Project::withCount('skills')
-            ->with('providers')
+            ->with(['providers', 'repositories'])
             ->orderBy('name')
             ->get();
 
@@ -50,12 +50,12 @@ class ProjectController extends Controller
             }
         }
 
-        return new ProjectResource($project->load('providers')->loadCount('skills'));
+        return new ProjectResource($project->load(['providers', 'repositories'])->loadCount('skills'));
     }
 
     public function show(Project $project): ProjectResource
     {
-        return new ProjectResource($project->load('providers')->loadCount('skills'));
+        return new ProjectResource($project->load(['providers', 'repositories'])->loadCount('skills'));
     }
 
     public function update(Request $request, Project $project): ProjectResource
@@ -79,7 +79,7 @@ class ProjectController extends Controller
             }
         }
 
-        return new ProjectResource($project->load('providers')->loadCount('skills'));
+        return new ProjectResource($project->load(['providers', 'repositories'])->loadCount('skills'));
     }
 
     public function destroy(Project $project): JsonResponse

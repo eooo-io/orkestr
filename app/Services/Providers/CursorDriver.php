@@ -9,17 +9,26 @@ use Symfony\Component\Yaml\Yaml;
 
 class CursorDriver implements ProviderDriverInterface
 {
+    use GeneratesMcpConfig;
+
     public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
-        $dir = rtrim($project->resolved_path, '/') . '/.cursor/rules';
+        $base = rtrim($project->resolved_path, '/');
+        $dir = $base . '/.cursor/rules';
         $files = [];
 
         foreach ($skills as $skill) {
             $body = $resolvedBodies[$skill->id] ?? $skill->body;
+            $hasConditions = ! empty($skill->conditions);
             $frontmatter = [
                 'description' => $skill->description ?? '',
-                'alwaysApply' => false,
+                'alwaysApply' => ! $hasConditions,
             ];
+
+            // Cursor uses "globs" for conditional activation
+            if ($hasConditions && ! empty($skill->conditions['file_patterns'])) {
+                $frontmatter['globs'] = $skill->conditions['file_patterns'];
+            }
 
             if ($skill->tags->isNotEmpty()) {
                 $frontmatter['tags'] = $skill->tags->pluck('name')->values()->all();
@@ -44,6 +53,10 @@ class CursorDriver implements ProviderDriverInterface
             $files[$dir . '/agent-' . $slug . '.mdc'] = $content;
         }
 
+        // MCP servers → .cursor/mcp.json
+        $mcpFiles = $this->generateMcpFiles($project, $base . '/.cursor/mcp.json');
+        $files = array_merge($files, $mcpFiles);
+
         return $files;
     }
 
@@ -67,21 +80,34 @@ class CursorDriver implements ProviderDriverInterface
 
     public function getOutputPaths(Project $project): array
     {
-        $dir = rtrim($project->resolved_path, '/') . '/.cursor/rules';
+        $base = rtrim($project->resolved_path, '/');
+        $dir = $base . '/.cursor/rules';
+        $paths = [];
 
-        if (! File::isDirectory($dir)) {
-            return [];
+        if (File::isDirectory($dir)) {
+            $paths = File::glob($dir . '/*.mdc');
         }
 
-        return File::glob($dir . '/*.mdc');
+        $mcpPath = $base . '/.cursor/mcp.json';
+        if (File::exists($mcpPath)) {
+            $paths[] = $mcpPath;
+        }
+
+        return $paths;
     }
 
     public function clean(Project $project): void
     {
-        $dir = rtrim($project->resolved_path, '/') . '/.cursor/rules';
+        $base = rtrim($project->resolved_path, '/');
 
+        $dir = $base . '/.cursor/rules';
         if (File::isDirectory($dir)) {
             File::deleteDirectory($dir);
+        }
+
+        $mcpPath = $base . '/.cursor/mcp.json';
+        if (File::exists($mcpPath)) {
+            File::delete($mcpPath);
         }
     }
 }

@@ -8,14 +8,25 @@ use Illuminate\Support\Facades\File;
 
 class WindsurfDriver implements ProviderDriverInterface
 {
+    use GeneratesMcpConfig;
+
     public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
-        $dir = rtrim($project->resolved_path, '/') . '/.windsurf/rules';
+        $base = rtrim($project->resolved_path, '/');
+        $dir = $base . '/.windsurf/rules';
         $files = [];
 
         foreach ($skills as $skill) {
             $body = $resolvedBodies[$skill->id] ?? $skill->body;
-            $content = "# {$skill->name}\n\n{$body}\n";
+            $content = "# {$skill->name}\n\n";
+
+            // Windsurf supports trigger patterns via frontmatter-style comments
+            if (! empty($skill->conditions['file_patterns'])) {
+                $patterns = implode(', ', $skill->conditions['file_patterns']);
+                $content .= "> Trigger: {$patterns}\n\n";
+            }
+
+            $content .= "{$body}\n";
             $files[$dir . '/' . $skill->slug . '.md'] = $content;
         }
 
@@ -23,6 +34,10 @@ class WindsurfDriver implements ProviderDriverInterface
             $slug = $composed['agent']['slug'];
             $files[$dir . '/agent-' . $slug . '.md'] = $composed['content'];
         }
+
+        // MCP servers → .windsurf/mcp_config.json
+        $mcpFiles = $this->generateMcpFiles($project, $base . '/.windsurf/mcp_config.json');
+        $files = array_merge($files, $mcpFiles);
 
         return $files;
     }
@@ -47,21 +62,34 @@ class WindsurfDriver implements ProviderDriverInterface
 
     public function getOutputPaths(Project $project): array
     {
-        $dir = rtrim($project->resolved_path, '/') . '/.windsurf/rules';
+        $base = rtrim($project->resolved_path, '/');
+        $dir = $base . '/.windsurf/rules';
+        $paths = [];
 
-        if (! File::isDirectory($dir)) {
-            return [];
+        if (File::isDirectory($dir)) {
+            $paths = File::glob($dir . '/*.md');
         }
 
-        return File::glob($dir . '/*.md');
+        $mcpPath = $base . '/.windsurf/mcp_config.json';
+        if (File::exists($mcpPath)) {
+            $paths[] = $mcpPath;
+        }
+
+        return $paths;
     }
 
     public function clean(Project $project): void
     {
-        $dir = rtrim($project->resolved_path, '/') . '/.windsurf/rules';
+        $base = rtrim($project->resolved_path, '/');
 
+        $dir = $base . '/.windsurf/rules';
         if (File::isDirectory($dir)) {
             File::deleteDirectory($dir);
+        }
+
+        $mcpPath = $base . '/.windsurf/mcp_config.json';
+        if (File::exists($mcpPath)) {
+            File::delete($mcpPath);
         }
     }
 }

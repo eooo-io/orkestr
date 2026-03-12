@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Coins, Link2, Variable, Plus, Trash2 } from 'lucide-react'
+import { Coins, Link2, Variable, Plus, Trash2, Filter } from 'lucide-react'
 import { estimateTokens } from '@/api/client'
-import type { Skill, TemplateVariable } from '@/types'
+import ConditionsEditor from '@/components/skills/ConditionsEditor'
+import type { Skill, TemplateVariable, SkillConditions } from '@/types'
 
 const MODEL_CONTEXT_LIMITS: Record<string, number> = {
   'claude-opus-4-6': 200000,
@@ -172,6 +173,12 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
         </div>
       )}
 
+      {/* Conditional Activation */}
+      <ConditionsSection
+        conditions={(skill.conditions as SkillConditions | null) ?? null}
+        onChange={(conditions) => onChange('conditions', conditions)}
+      />
+
       {/* Template Variables Definitions */}
       <TemplateVariablesEditor
         variables={(skill.template_variables as TemplateVariable[]) || []}
@@ -206,6 +213,41 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
           </div>
         )
       })()}
+    </div>
+  )
+}
+
+function ConditionsSection({
+  conditions,
+  onChange,
+}: {
+  conditions: SkillConditions | null
+  onChange: (conditions: SkillConditions | null) => void
+}) {
+  const [expanded, setExpanded] = useState(!!conditions)
+  const hasConditions = conditions &&
+    ((conditions.file_patterns?.length ?? 0) > 0 || (conditions.path_prefixes?.length ?? 0) > 0)
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="text-xs font-medium text-muted-foreground flex items-center gap-1 hover:text-foreground transition-all duration-150"
+      >
+        <Filter className="h-3 w-3" />
+        Conditional Activation
+        {hasConditions && (
+          <span className="text-[10px] px-1.5 py-0.5 bg-blue-500/10 text-blue-400 font-mono">
+            active
+          </span>
+        )}
+      </button>
+      {expanded && (
+        <div className="mt-2">
+          <ConditionsEditor conditions={conditions} onChange={onChange} />
+        </div>
+      )}
     </div>
   )
 }

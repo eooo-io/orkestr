@@ -34,6 +34,7 @@ export interface Skill {
   max_tokens: number | null
   tools: string[]
   includes: string[]
+  conditions: SkillConditions | null
   template_variables: TemplateVariable[] | null
   body: string
   resolved_body: string
@@ -229,6 +230,123 @@ export interface ModelGroup {
   label: string
   configured: boolean
   models: ModelInfo[]
+}
+
+export interface ProjectRepository {
+  id: number
+  provider: 'github' | 'gitlab'
+  owner: string
+  name: string
+  full_name: string
+  default_branch: string
+  url: string
+  has_access_token: boolean
+  auto_scan_on_push: boolean
+  auto_sync_on_push: boolean
+  last_synced_at: string | null
+  last_commit_sha: string | null
+  created_at: string
+}
+
+export interface RepositoryStatus {
+  connected: boolean
+  accessible: boolean
+  reason?: string
+  default_branch?: string
+  visibility?: string
+  last_push?: string
+  open_issues?: number
+}
+
+export interface RepositoryFile {
+  path: string
+  size: number | null
+  sha: string | null
+}
+
+export interface SkillConditions {
+  file_patterns?: string[]
+  path_prefixes?: string[]
+}
+
+export interface ImportDetectedSkill {
+  name: string
+  slug: string
+  description: string | null
+  body_length: number
+  tags: string[]
+}
+
+export interface ImportResult {
+  created: number
+  skipped: number
+}
+
+export interface BillingPlan {
+  slug: string
+  name: string
+  description: string | null
+  price_monthly: string
+  price_yearly: string
+  price_monthly_cents: number
+  price_yearly_cents: number
+  limits: {
+    max_projects: number
+    max_skills_per_project: number
+    max_providers: number
+    max_members: number
+    included_tokens_monthly: number
+  }
+  features: {
+    marketplace_publish: boolean
+    ai_generation: boolean
+    webhook_access: boolean
+    bundle_export: boolean
+    repository_access: boolean
+    priority_support: boolean
+  }
+}
+
+export interface BillingStatus {
+  plan: {
+    slug: string
+    name: string
+    price_monthly: string
+    price_yearly: string
+  }
+  subscription: {
+    status: string
+    trial_ends_at: string | null
+    ends_at: string | null
+    on_grace_period: boolean
+    cancelled: boolean
+  } | null
+  usage: {
+    tokens_used: number
+    tokens_included: number
+    tokens_remaining: number
+    overage_rate: number
+  }
+  payment_method: {
+    type: string
+    last_four: string
+  } | null
+  has_stripe_id: boolean
+}
+
+export interface UsageSummary {
+  summary: {
+    period_start: string
+    period_end: string
+    llm_tokens: {
+      used: number
+      included: number
+      requests: number
+    }
+    sync_operations: { count: number }
+    api_calls: { count: number }
+  }
+  daily_tokens: Array<{ date: string; tokens: number }>
 }
 
 export interface ApiResponse<T> {
