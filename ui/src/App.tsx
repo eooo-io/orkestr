@@ -13,6 +13,7 @@ import { Playground } from '@/pages/Playground'
 // import { Marketplace } from '@/pages/Marketplace'
 import { ProjectForm } from '@/pages/ProjectForm'
 import { Billing } from '@/pages/Billing'
+import { ProjectVisualize } from '@/pages/ProjectVisualize'
 import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 
@@ -25,6 +26,16 @@ function AppContent() {
         {/* Public auth routes (no layout, no guard) */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Full-screen routes (no sidebar layout) */}
+        <Route
+          path="/projects/:id/visualize"
+          element={
+            <AuthGuard>
+              <ProjectVisualize />
+            </AuthGuard>
+          }
+        />
 
         {/* Protected app routes */}
         <Route
