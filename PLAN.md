@@ -72,6 +72,7 @@ Observe (result fed back into context)
 **Phases 1–26 COMPLETE.** Component Layer fully built.
 **Phase A COMPLETE** — Agent Designer (25 issues, all closed).
 **Phase B COMPLETE** — Orchestration (27 issues, all closed).
+**Phase C COMPLETE** — Design + Runtime (35 issues, all closed).
 
 ---
 
@@ -273,18 +274,93 @@ B.1 (data model) ──► B.2 + B.4 in parallel (API + context engine) ──�
 
 ---
 
-## Phase C: Design + Runtime (planned)
+## Phase C: Design + Runtime
 
-Lightweight agent runtime inside Agentis Studio.
+Lightweight agent runtime inside Agentis Studio — transforming from a design-time configuration tool into a full execution platform.
 
-- **Execution engine:** run agent loops with real LLM calls and tool execution
-- **Playground evolution:** from chat tester to full agent execution environment
-- **Real tool calls:** MCP server invocation, A2A agent delegation
-- **Memory persistence:** agent state across loop iterations and sessions
-- **Observation UI:** live view of perceive → reason → act → observe cycle
-- **Execution logs:** traces, token costs, timing, error handling
-- **Sandboxing:** tool execution in isolated environments
-- **Cost controls:** budget limits, approval gates for expensive operations
+### C.1 — MCP Client
+
+| Issue | Title | Status |
+|---|---|---|
+| #135 | MCP protocol message types and transport abstraction | DONE |
+| #136 | MCP stdio transport driver | DONE |
+| #137 | MCP SSE transport driver | DONE |
+| #138 | McpClientService — connect, list tools, invoke | DONE |
+| #139 | MCP server lifecycle manager | DONE |
+| #140 | MCP tool discovery API endpoint | DONE |
+| #141 | Pest tests for MCP client services | DONE |
+
+### C.2 — Agent Execution Engine
+
+| Issue | Title | Status |
+|---|---|---|
+| #142 | Execution runs data model — runs and steps tables | DONE |
+| #143 | AgentExecutionService — the agent loop runner | DONE |
+| #144 | Tool call parser and dispatcher | DONE |
+| #145 | Agent execution API endpoints | DONE |
+| #146 | Execution playground UI — run agents live | DONE |
+| #147 | Pest tests for agent execution engine | DONE |
+
+### C.3 — Workflow Execution Engine
+
+| Issue | Title | Status |
+|---|---|---|
+| #148 | Workflow execution runner — DAG traversal engine | DONE |
+| #149 | Workflow run data model and status tracking | DONE |
+| #150 | Checkpoint approval API and UI | DONE |
+| #151 | Workflow execution API endpoints | DONE |
+| #152 | Workflow execution visualization — live DAG status | DONE |
+| #153 | Pest tests for workflow execution engine | DONE |
+
+### C.4 — Memory & State Persistence
+
+| Issue | Title | Status |
+|---|---|---|
+| #154 | Agent memory data model — conversation and working memory | DONE |
+| #155 | AgentMemoryService — store, retrieve, summarize | DONE |
+| #156 | Memory integration with agent execution loop | DONE |
+| #157 | Pest tests for memory services | DONE |
+
+### C.5 — Execution Observability
+
+| Issue | Title | Status |
+|---|---|---|
+| #158 | Execution trace logging and token cost tracking | DONE |
+| #159 | Execution detail UI — trace viewer | DONE |
+| #160 | Execution dashboard — runs overview and cost analytics | DONE |
+| #161 | Pest tests for observability features | DONE |
+
+### C.6 — Runtime Guardrails
+
+| Issue | Title | Status |
+|---|---|---|
+| #162 | Budget limits and approval gates | DONE |
+| #163 | Tool execution sandboxing and allowlists | DONE |
+| #164 | Output content filtering and safety checks | DONE |
+| #165 | Pest tests for runtime guardrails | DONE |
+
+### C.7 — A2A Protocol Client
+
+| Issue | Title | Status |
+|---|---|---|
+| #166 | A2A protocol client — agent card discovery | DONE |
+| #167 | A2A task delegation — send task and receive result | DONE |
+| #168 | A2A integration with tool dispatcher | DONE |
+| #169 | Pest tests for A2A protocol client | DONE |
+
+### Implementation Sequence
+
+```
+C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow execution)
+                                                      │
+                     C.4 (memory) ◄────────────────────┘
+                         │
+                         ▼
+                     C.5 (observability) + C.6 (guardrails) in parallel
+                         │
+                         ▼
+                     C.7 (A2A client)
+```
 
 ---
 

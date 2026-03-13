@@ -60,6 +60,60 @@ class AnthropicProvider implements LLMProviderInterface
         yield ['type' => 'done'];
     }
 
+    public function chat(string $systemPrompt, array $messages, string $model, int $maxTokens, array $tools = []): array
+    {
+        $apiKey = AppSetting::get('anthropic_api_key')
+            ?: config('services.anthropic.api_key')
+            ?: env('ANTHROPIC_API_KEY');
+
+        if (empty($apiKey)) {
+            throw new \RuntimeException('Anthropic API key not configured. Set it in Settings.');
+        }
+
+        $client = Anthropic::factory()
+            ->withApiKey($apiKey)
+            ->make();
+
+        $params = [
+            'model' => $model,
+            'max_tokens' => $maxTokens,
+            'messages' => $messages,
+        ];
+
+        if (! empty($systemPrompt)) {
+            $params['system'] = $systemPrompt;
+        }
+
+        if (! empty($tools)) {
+            $params['tools'] = $tools;
+        }
+
+        $response = $client->messages()->create($params);
+
+        $content = [];
+        foreach ($response->content as $block) {
+            if ($block->type === 'text') {
+                $content[] = ['type' => 'text', 'text' => $block->text];
+            } elseif ($block->type === 'tool_use') {
+                $content[] = [
+                    'type' => 'tool_use',
+                    'id' => $block->id,
+                    'name' => $block->name,
+                    'input' => (array) $block->input,
+                ];
+            }
+        }
+
+        return [
+            'content' => $content,
+            'stop_reason' => $response->stopReason ?? 'end_turn',
+            'usage' => [
+                'input_tokens' => $response->usage->inputTokens ?? 0,
+                'output_tokens' => $response->usage->outputTokens ?? 0,
+            ],
+        ];
+    }
+
     public function models(): array
     {
         return [

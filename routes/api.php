@@ -27,6 +27,9 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\VisualizationController;
 use App\Http\Controllers\WorkflowController;
+use App\Http\Controllers\ExecutionController;
+use App\Http\Controllers\WorkflowRunController;
+use App\Http\Controllers\AgentMemoryController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -160,6 +163,8 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/projects/{project}/mcp-servers', [McpServerController::class, 'store']);
     Route::put('/mcp-servers/{mcpServer}', [McpServerController::class, 'update']);
     Route::delete('/mcp-servers/{mcpServer}', [McpServerController::class, 'destroy']);
+    Route::get('/projects/{project}/mcp-servers/{mcpServer}/tools', [McpServerController::class, 'tools']);
+    Route::post('/projects/{project}/mcp-servers/{mcpServer}/ping', [McpServerController::class, 'ping']);
 
     // A2A Agents (shared across providers)
     Route::get('/projects/{project}/a2a-agents', [A2aAgentController::class, 'index']);
@@ -181,6 +186,28 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/projects/{project}/workflows/{workflow}/versions', [WorkflowController::class, 'versions']);
     Route::post('/projects/{project}/workflows/{workflow}/versions', [WorkflowController::class, 'createVersion']);
     Route::post('/projects/{project}/workflows/{workflow}/versions/{versionNumber}/restore', [WorkflowController::class, 'restoreVersion']);
+
+    // Agent Memory
+    Route::get('/projects/{project}/agents/{agent}/memories', [AgentMemoryController::class, 'index']);
+    Route::post('/projects/{project}/agents/{agent}/memories', [AgentMemoryController::class, 'store']);
+    Route::delete('/projects/{project}/agents/{agent}/memories', [AgentMemoryController::class, 'clear']);
+    Route::delete('/memories/{agentMemory}', [AgentMemoryController::class, 'destroy']);
+    Route::get('/projects/{project}/agents/{agent}/conversations', [AgentMemoryController::class, 'conversations']);
+
+    // Agent Execution
+    Route::post('/projects/{project}/agents/{agent}/execute', [ExecutionController::class, 'execute']);
+    Route::get('/projects/{project}/runs/stats', [ExecutionController::class, 'stats']);
+    Route::get('/projects/{project}/runs', [ExecutionController::class, 'index']);
+    Route::get('/runs/{run}', [ExecutionController::class, 'show']);
+    Route::post('/runs/{run}/cancel', [ExecutionController::class, 'cancel']);
+
+    // Workflow Execution
+    Route::post('/projects/{project}/workflows/{workflow}/execute', [WorkflowRunController::class, 'execute']);
+    Route::get('/projects/{project}/workflow-runs', [WorkflowRunController::class, 'index']);
+    Route::get('/workflow-runs/{workflowRun}', [WorkflowRunController::class, 'show']);
+    Route::post('/workflow-runs/{workflowRun}/cancel', [WorkflowRunController::class, 'cancel']);
+    Route::post('/workflow-runs/{workflowRun}/steps/{workflowRunStep}/approve', [WorkflowRunController::class, 'approveCheckpoint']);
+    Route::post('/workflow-runs/{workflowRun}/steps/{workflowRunStep}/reject', [WorkflowRunController::class, 'rejectCheckpoint']);
 
     // Visualization
     Route::get('/projects/{project}/graph', [VisualizationController::class, 'graph']);

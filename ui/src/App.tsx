@@ -19,6 +19,8 @@ import { Agents } from '@/pages/Agents'
 import { AgentBuilder } from '@/pages/AgentBuilder'
 import { Workflows } from '@/pages/Workflows'
 import { WorkflowBuilder } from '@/pages/WorkflowBuilder'
+import { ExecutionPlayground } from '@/pages/ExecutionPlayground'
+import { ExecutionDashboard } from '@/pages/ExecutionDashboard'
 import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 
@@ -71,6 +73,8 @@ function AppContent() {
                   <Route path="/library" element={<Library />} />
                   {/* <Route path="/marketplace" element={<Marketplace />} /> */}
                   <Route path="/playground" element={<Playground />} />
+                  <Route path="/projects/:id/execute" element={<ExecutionPlayground />} />
+                  <Route path="/projects/:id/runs" element={<ExecutionDashboard />} />
                   <Route path="/search" element={<Search />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/billing" element={<Billing />} />

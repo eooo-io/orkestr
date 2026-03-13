@@ -121,4 +121,9 @@ class Project extends Model
     {
         return $this->hasMany(Workflow::class);
     }
+
+    public function executionRuns(): HasMany
+    {
+        return $this->hasMany(ExecutionRun::class);
+    }
 }

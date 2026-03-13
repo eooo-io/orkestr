@@ -36,6 +36,8 @@ import type {
   WorkflowEdge,
   WorkflowVersion,
   WorkflowValidation,
+  ExecutionRun,
+  ExecutionStats,
   ApiResponse,
 } from '@/types'
 
@@ -766,6 +768,43 @@ export const restoreWorkflowVersion = (
 export const exportWorkflow = (projectId: number, workflowId: number, format: 'json' | 'langgraph' | 'crewai' = 'json') =>
   api
     .get(`/projects/${projectId}/workflows/${workflowId}/export`, { params: { format } })
+    .then((r) => r.data)
+
+// MCP Server Tools
+export const fetchMcpServerTools = (projectId: number, serverId: number) =>
+  api
+    .get(`/projects/${projectId}/mcp-servers/${serverId}/tools`)
+    .then((r) => r.data)
+
+export const pingMcpServer = (projectId: number, serverId: number) =>
+  api
+    .post(`/projects/${projectId}/mcp-servers/${serverId}/ping`)
+    .then((r) => r.data)
+
+// Agent Execution
+export const executeAgent = (projectId: number, agentId: number, input: Record<string, unknown> = {}, config: Record<string, unknown> = {}) =>
+  api
+    .post<ApiResponse<ExecutionRun>>(`/projects/${projectId}/agents/${agentId}/execute`, { input, config })
+    .then((r) => r.data.data)
+
+export const fetchExecutionRuns = (projectId: number, params: { status?: string; agent_id?: number } = {}) =>
+  api
+    .get<ApiResponse<ExecutionRun[]>>(`/projects/${projectId}/runs`, { params })
+    .then((r) => r.data.data)
+
+export const fetchExecutionRun = (runId: number) =>
+  api
+    .get<ApiResponse<ExecutionRun>>(`/runs/${runId}`)
+    .then((r) => r.data.data)
+
+export const cancelExecutionRun = (runId: number) =>
+  api
+    .post(`/runs/${runId}/cancel`)
+    .then((r) => r.data)
+
+export const fetchExecutionStats = (projectId: number) =>
+  api
+    .get<ExecutionStats>(`/projects/${projectId}/runs/stats`)
     .then((r) => r.data)
 
 export default api

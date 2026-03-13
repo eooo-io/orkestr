@@ -103,6 +103,12 @@ class OpenAIProvider implements LLMProviderInterface
         yield ['type' => 'done'];
     }
 
+    public function chat(string $systemPrompt, array $messages, string $model, int $maxTokens, array $tools = []): array
+    {
+        // TODO: Implement full tool-use chat for OpenAI
+        throw new \RuntimeException('OpenAI chat with tools not yet implemented. Use Anthropic models for agent execution.');
+    }
+
     public function models(): array
     {
         return [

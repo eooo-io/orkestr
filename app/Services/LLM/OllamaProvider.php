@@ -104,6 +104,11 @@ class OllamaProvider implements LLMProviderInterface
         yield ['type' => 'done'];
     }
 
+    public function chat(string $systemPrompt, array $messages, string $model, int $maxTokens, array $tools = []): array
+    {
+        throw new \RuntimeException('Ollama chat with tools not yet implemented. Use Anthropic models for agent execution.');
+    }
+
     public function models(): array
     {
         try {

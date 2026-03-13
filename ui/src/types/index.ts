@@ -600,6 +600,75 @@ export interface WorkflowValidation {
   warnings: string[]
 }
 
+// --- Execution ---
+
+export interface ExecutionRun {
+  id: number
+  uuid: string
+  project_id: number
+  agent_id: number
+  agent?: {
+    id: number
+    name: string
+    slug: string
+    icon: string | null
+  }
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
+  input: Record<string, unknown> | null
+  output: Record<string, unknown> | null
+  config: Record<string, unknown> | null
+  error: string | null
+  started_at: string | null
+  completed_at: string | null
+  total_tokens: number
+  total_cost_microcents: number
+  total_duration_ms: number
+  steps?: ExecutionStep[]
+  steps_count?: number
+  created_at: string
+}
+
+export interface ExecutionStep {
+  id: number
+  uuid: string
+  step_number: number
+  phase: 'perceive' | 'reason' | 'act' | 'observe'
+  input: Record<string, unknown> | null
+  output: Record<string, unknown> | null
+  tool_calls: ToolCallData[] | null
+  token_usage: TokenUsage | null
+  duration_ms: number
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  error: string | null
+  created_at: string
+}
+
+export interface ToolCallData {
+  tool_name: string
+  content: Array<{ type: string; text?: string }>
+  is_error: boolean
+  duration_ms: number
+}
+
+export interface TokenUsage {
+  input_tokens: number
+  output_tokens: number
+  cache_read?: number
+  cache_write?: number
+}
+
+export interface ExecutionStats {
+  total_runs: number
+  total_tokens: number
+  total_cost_microcents: number
+  total_cost_formatted: string
+  total_duration_ms: number
+  by_model: Record<string, { tokens: number; cost: number; runs: number }>
+  success_rate: number
+  completed_count: number
+  failed_count: number
+}
+
 export interface ApiResponse<T> {
   data: T
 }
