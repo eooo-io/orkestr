@@ -3,6 +3,11 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
+// ─── CSRF Cookie ─────────────────────────────────────────────
+Route::get('/csrf-cookie', function () {
+    return response()->noContent();
+});
+
 // ─── API Auth Endpoints (session-based) ───────────────────────
 
 Route::prefix('api/auth')->group(function () {

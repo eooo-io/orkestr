@@ -176,9 +176,43 @@ Required frontmatter fields: `id`, `name`. All others are optional.
 | Cline | `.clinerules` | Single flat file |
 | OpenAI | `.openai/instructions.md` | All skills concatenated |
 
+## Authentication & Authorization
+
+- **Session-based auth** using Laravel's `auth:web` guard — cookies, not tokens
+- **Multi-auth:** email/password, GitHub OAuth, Apple Sign In
+- **Multi-tenant:** Organizations with role-based access (owner, admin, editor, viewer, member)
+- **Plan-based gates:** free, pro, teams — enforced via `CheckPlanFeature`, `CheckPlanLimit`, `CheckUsageBudget` middleware
+- **Filament admin** protected with Filament's `Authenticate` middleware
+- **API routes** protected with `auth:web` middleware (session cookies shared with SPA)
+- **Organization resolution:** `ResolveOrganization` middleware resolves via `X-Organization-Id` header or user's `current_organization_id`
+- **Default seeded user:** `admin@admin.com` / `password`
+
+### Auth Routes (defined in `routes/auth.php`, uses `web` middleware)
+
+```
+POST /api/auth/register    # Email registration
+POST /api/auth/login       # Email login
+POST /api/auth/logout      # Logout (session invalidation)
+GET  /api/auth/me          # Current user
+
+GET  /auth/github/redirect # GitHub OAuth redirect
+GET  /auth/github/callback # GitHub OAuth callback
+GET  /auth/apple/redirect  # Apple Sign In redirect
+POST /auth/apple/callback  # Apple Sign In callback (form_post)
+```
+
+### Public API Routes (no auth)
+
+```
+GET  /api/health                        # Health check
+POST /api/stripe/webhook                # Stripe webhooks
+POST /api/webhooks/github/{projectId}   # Inbound GitHub push
+GET  /api/billing/plans                 # Plan listing
+```
+
 ## API Endpoints
 
-All consumed by the React SPA. No auth middleware — single-user application.
+All consumed by the React SPA. Protected by `auth:web` middleware (session-based).
 
 ```
 # Projects
@@ -257,11 +291,56 @@ POST           /api/projects/{id}/webhooks
 PUT|DELETE     /api/webhooks/{id}
 GET            /api/webhooks/{id}/deliveries
 POST           /api/webhooks/{id}/test
-POST           /api/webhooks/github/{projectId}    # Inbound GitHub push
+
+# Repositories
+GET            /api/projects/{id}/repositories
+POST           /api/projects/{id}/repositories
+PUT|DELETE     /api/projects/{id}/repositories/{provider}
+GET            /api/projects/{id}/repositories/{provider}/status
+GET            /api/projects/{id}/repositories/{provider}/branches
+GET            /api/projects/{id}/repositories/{provider}/latest-commit
+GET            /api/projects/{id}/repositories/{provider}/files
+POST           /api/projects/{id}/repositories/{provider}/pull
+POST           /api/projects/{id}/repositories/{provider}/push
+GET            /api/repositories/allowed-paths
+
+# OpenClaw Config
+GET|PUT        /api/projects/{id}/openclaw
+
+# MCP Servers
+GET|POST       /api/projects/{id}/mcp-servers
+PUT|DELETE     /api/mcp-servers/{id}
+
+# A2A Agents
+GET|POST       /api/projects/{id}/a2a-agents
+PUT|DELETE     /api/a2a-agents/{id}
+
+# Visualization
+GET            /api/projects/{id}/graph
+
+# Import (Reverse-Sync)
+POST           /api/import/detect
+POST           /api/projects/{id}/import
 
 # Models & Settings
 GET            /api/models
 GET|PUT        /api/settings
+
+# Billing & Subscriptions
+GET            /api/billing/status
+POST           /api/billing/subscribe
+POST           /api/billing/change-plan
+POST           /api/billing/cancel
+POST           /api/billing/resume
+POST           /api/billing/setup-intent
+PUT            /api/billing/payment-method
+GET            /api/billing/invoices
+GET            /api/billing/usage
+
+# Stripe Connect (Marketplace Sellers)
+POST           /api/billing/connect
+GET            /api/billing/connect/status
+GET            /api/billing/earnings
 ```
 
 ## Development Commands
@@ -292,7 +371,7 @@ cd docs && npm run build  # Build static site
 
 ## Key Conventions
 
-- **No auth** — single-user app, no Sanctum or session auth on the API
+- **Session auth** — `auth:web` guard on all API routes, session cookies shared with React SPA via CORS
 - **Pest PHP** for testing
 - **YAML parsing** uses `symfony/yaml`
 - **Streaming** uses SSE (Server-Sent Events) for test runner and playground

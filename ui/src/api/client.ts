@@ -38,6 +38,19 @@ const api = axios.create({
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
+  withCredentials: true,
+  withXSRFToken: true,
+})
+
+// Fetch CSRF cookie before the first mutating request
+let csrfReady = false
+api.interceptors.request.use(async (config) => {
+  if (!csrfReady && config.method && config.method !== 'get') {
+    const baseUrl = import.meta.env.VITE_API_URL?.replace(/\/api$/, '') || ''
+    await axios.get(`${baseUrl}/csrf-cookie`, { withCredentials: true })
+    csrfReady = true
+  }
+  return config
 })
 
 api.interceptors.response.use(
