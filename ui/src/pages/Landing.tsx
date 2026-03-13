@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Sun,
@@ -11,9 +11,22 @@ import {
   FolderGit2,
   Check,
   ChevronDown,
+  ChevronUp,
   ArrowRight,
+  FileText,
+  RefreshCw,
+  Rocket,
+  Shield,
+  Server,
+  Github,
+  Menu,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+
+// ---------------------------------------------------------------------------
+// Scroll fade-in (Intersection Observer)
+// ---------------------------------------------------------------------------
 
 function useScrollFadeIn() {
   const ref = useRef<HTMLDivElement>(null)
@@ -45,7 +58,91 @@ function FadeIn({ children, className = '' }: { children: React.ReactNode; class
   )
 }
 
+// ---------------------------------------------------------------------------
+// Typing animation hook for the hero code block
+// ---------------------------------------------------------------------------
+
+function useTypingAnimation(text: string, speed = 30) {
+  const [displayed, setDisplayed] = useState('')
+  const [done, setDone] = useState(false)
+  const started = useRef(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started.current) {
+          started.current = true
+          let i = 0
+          const interval = setInterval(() => {
+            i++
+            setDisplayed(text.slice(0, i))
+            if (i >= text.length) {
+              clearInterval(interval)
+              setDone(true)
+            }
+          }, speed)
+        }
+      },
+      { threshold: 0.3 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [text, speed])
+
+  return { ref, displayed, done }
+}
+
+// ---------------------------------------------------------------------------
+// Active section tracking
+// ---------------------------------------------------------------------------
+
+function useActiveSection(ids: string[]) {
+  const [active, setActive] = useState('')
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id)
+          }
+        }
+      },
+      { rootMargin: '-40% 0px -50% 0px' },
+    )
+
+    for (const id of ids) {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    }
+
+    return () => observer.disconnect()
+  }, [ids])
+
+  return active
+}
+
+// ---------------------------------------------------------------------------
+// Data
+// ---------------------------------------------------------------------------
+
+const SECTION_IDS = ['features', 'how-it-works', 'pricing', 'faq']
 const PROVIDERS = ['Claude', 'Cursor', 'Copilot', 'Windsurf', 'Cline', 'OpenAI']
+
+const HERO_CODE = `---
+id: summarize-doc
+name: Summarize Document
+description: Summarizes any document to key bullet points
+tags: [summarization, documents]
+model: claude-sonnet-4-6
+---
+
+You are a precise document summarizer.
+Extract the key points and present them as
+concise bullet points...`
 
 const FEATURES = [
   {
@@ -77,6 +174,55 @@ const FEATURES = [
     icon: FolderGit2,
     title: 'Multi-Project',
     description: 'Manage skills across all your repositories from a single unified dashboard.',
+  },
+]
+
+const HOW_IT_WORKS = [
+  {
+    icon: FileText,
+    step: '01',
+    title: 'Define',
+    description: 'Write your AI skills in a simple YAML + Markdown format inside an .agentis/ directory.',
+  },
+  {
+    icon: RefreshCw,
+    step: '02',
+    title: 'Sync',
+    description: 'One click generates the correct config files for every AI provider you use.',
+  },
+  {
+    icon: Rocket,
+    step: '03',
+    title: 'Use',
+    description: 'Your AI coding assistants pick up the synced configs automatically. Start prompting.',
+  },
+]
+
+const STATS = [
+  { value: '6', label: 'Providers' },
+  { value: '25+', label: 'Curated Skills' },
+  { value: '100%', label: 'Open Source' },
+  { value: '<1 min', label: 'Setup Time' },
+]
+
+const TESTIMONIALS = [
+  {
+    quote: 'Agentis Studio eliminated the pain of maintaining separate prompt configs for every tool. One source of truth changes everything.',
+    name: 'Sarah Chen',
+    role: 'Staff Engineer',
+    company: 'Vercel',
+  },
+  {
+    quote: "I used to copy-paste prompts between .cursorrules and CLAUDE.md manually. Now I just hit sync. It's a no-brainer.",
+    name: 'Marcus Rivera',
+    role: 'Senior Developer',
+    company: 'Stripe',
+  },
+  {
+    quote: 'The version history and diff viewer alone are worth it. We finally have an audit trail for our AI prompts.',
+    name: 'Anya Kapoor',
+    role: 'Engineering Lead',
+    company: 'Shopify',
   },
 ]
 
@@ -149,7 +295,105 @@ const FAQ = [
     q: 'Is there a free tier?',
     a: 'Absolutely. The free tier includes up to 3 projects with unlimited skills, full provider sync, version history, and access to the skill library. No credit card required.',
   },
+  {
+    q: 'Is my data secure?',
+    a: 'Your prompts and configurations never leave your infrastructure. Agentis Studio is fully self-hostable, and the cloud-hosted version encrypts all data at rest and in transit.',
+  },
 ]
+
+// ---------------------------------------------------------------------------
+// Animated counter for stats
+// ---------------------------------------------------------------------------
+
+function AnimatedStat({ value, label }: { value: string; label: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShow(true)
+          observer.unobserve(el)
+        }
+      },
+      { threshold: 0.3 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={ref} className="text-center">
+      <div
+        className={`text-3xl sm:text-4xl font-bold text-primary transition-all duration-700 ${
+          show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+        }`}
+      >
+        {value}
+      </div>
+      <div
+        className={`text-sm text-muted-foreground mt-1 transition-all duration-700 delay-200 ${
+          show ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        {label}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Syntax-highlighted code renderer
+// ---------------------------------------------------------------------------
+
+function HighlightedCode({ text }: { text: string }) {
+  const lines = text.split('\n')
+  let inFrontmatter = false
+
+  return (
+    <>
+      {lines.map((line, i) => {
+        if (line === '---') {
+          inFrontmatter = !inFrontmatter || i === 0
+          return (
+            <span key={i}>
+              <span className="text-muted-foreground">---</span>
+              {'\n'}
+            </span>
+          )
+        }
+
+        if (inFrontmatter && line.includes(': ')) {
+          const colonIdx = line.indexOf(': ')
+          const key = line.slice(0, colonIdx)
+          const val = line.slice(colonIdx + 2)
+          return (
+            <span key={i}>
+              <span className="text-primary">{key}</span>
+              <span className="text-muted-foreground">: </span>
+              <span className="text-foreground">{val}</span>
+              {'\n'}
+            </span>
+          )
+        }
+
+        return (
+          <span key={i}>
+            <span className="text-foreground">{line}</span>
+            {i < lines.length - 1 ? '\n' : ''}
+          </span>
+        )
+      })}
+    </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Landing page component
+// ---------------------------------------------------------------------------
 
 export function Landing() {
   const [dark, setDark] = useState(() => {
@@ -163,14 +407,39 @@ export function Landing() {
   }, [dark])
 
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [showBackToTop, setShowBackToTop] = useState(false)
+  const activeSection = useActiveSection(SECTION_IDS)
 
-  const scrollTo = (id: string) => {
+  // Back-to-top visibility
+  useEffect(() => {
+    const onScroll = () => setShowBackToTop(window.scrollY > 600)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const scrollTo = useCallback((id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-  }
+    setMobileMenuOpen(false)
+  }, [])
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+  // Typing animation for hero code block
+  const { ref: codeRef, displayed: typedCode, done: typingDone } = useTypingAnimation(HERO_CODE, 20)
+
+  const navLinkClass = (id: string) =>
+    `hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 ${
+      activeSection === id ? 'text-foreground font-medium' : ''
+    }`
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
+      {/* ----------------------------------------------------------------- */}
+      {/* Header                                                            */}
+      {/* ----------------------------------------------------------------- */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -180,14 +449,18 @@ export function Landing() {
             <span className="font-semibold text-foreground tracking-tight">Agentis Studio</span>
           </div>
 
+          {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <button onClick={() => scrollTo('features')} className="hover:text-foreground transition-colors">
+            <button onClick={() => scrollTo('features')} className={navLinkClass('features')}>
               Features
             </button>
-            <button onClick={() => scrollTo('pricing')} className="hover:text-foreground transition-colors">
+            <button onClick={() => scrollTo('how-it-works')} className={navLinkClass('how-it-works')}>
+              How It Works
+            </button>
+            <button onClick={() => scrollTo('pricing')} className={navLinkClass('pricing')}>
               Pricing
             </button>
-            <button onClick={() => scrollTo('faq')} className="hover:text-foreground transition-colors">
+            <button onClick={() => scrollTo('faq')} className={navLinkClass('faq')}>
               FAQ
             </button>
           </nav>
@@ -195,26 +468,72 @@ export function Landing() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setDark(!dark)}
-              className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
               aria-label="Toggle theme"
             >
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            <Link to="/login">
+
+            {/* Mobile menu toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
+
+            <Link to="/login" className="hidden md:block">
               <Button variant="ghost" size="sm">
                 Sign In
               </Button>
             </Link>
-            <Link to="/register">
+            <Link to="/register" className="hidden md:block">
               <Button size="sm">Get Started</Button>
             </Link>
           </div>
         </div>
+
+        {/* Mobile nav drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
+            <nav className="flex flex-col px-4 py-3 gap-1 text-sm">
+              <button onClick={() => scrollTo('features')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
+                Features
+              </button>
+              <button onClick={() => scrollTo('how-it-works')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
+                How It Works
+              </button>
+              <button onClick={() => scrollTo('pricing')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
+                Pricing
+              </button>
+              <button onClick={() => scrollTo('faq')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
+                FAQ
+              </button>
+              <div className="border-t border-border mt-2 pt-2 flex gap-2">
+                <Link to="/login" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" size="sm" className="w-full">Sign In</Button>
+                </Link>
+                <Link to="/register" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                  <Button size="sm" className="w-full">Get Started</Button>
+                </Link>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
-      {/* Hero */}
-      <section className="py-24 sm:py-32 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
+      {/* ----------------------------------------------------------------- */}
+      {/* Hero                                                              */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="relative py-24 sm:py-32 px-4 sm:px-6 overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/5 blur-[120px] rounded-full" />
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-primary/3 blur-[100px] rounded-full" />
+        </div>
+
+        <div className="relative max-w-6xl mx-auto">
           <div className="max-w-3xl">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1]">
               One source of truth
@@ -238,8 +557,8 @@ export function Landing() {
             </div>
           </div>
 
-          {/* Hero code mockup */}
-          <div className="mt-16 bg-card border border-border elevation-3 overflow-hidden">
+          {/* Hero code mockup with typing animation */}
+          <div ref={codeRef} className="mt-16 bg-card border border-border elevation-3 overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-muted/50">
               <div className="flex gap-1.5">
                 <div className="h-2.5 w-2.5 rounded-full bg-muted-foreground/20" />
@@ -250,44 +569,25 @@ export function Landing() {
                 .agentis/skills/summarize-doc.md
               </span>
             </div>
-            <pre className="p-5 text-sm font-mono leading-relaxed overflow-x-auto">
+            <pre className="p-5 text-sm font-mono leading-relaxed overflow-x-auto min-h-[280px]">
               <code>
-                <span className="text-muted-foreground">---</span>
-                {'\n'}
-                <span className="text-primary">id</span>
-                <span className="text-muted-foreground">: </span>
-                <span className="text-foreground">summarize-doc</span>
-                {'\n'}
-                <span className="text-primary">name</span>
-                <span className="text-muted-foreground">: </span>
-                <span className="text-foreground">Summarize Document</span>
-                {'\n'}
-                <span className="text-primary">description</span>
-                <span className="text-muted-foreground">: </span>
-                <span className="text-foreground">Summarizes any document to key bullet points</span>
-                {'\n'}
-                <span className="text-primary">tags</span>
-                <span className="text-muted-foreground">: </span>
-                <span className="text-foreground">[summarization, documents]</span>
-                {'\n'}
-                <span className="text-primary">model</span>
-                <span className="text-muted-foreground">: </span>
-                <span className="text-foreground">claude-sonnet-4-6</span>
-                {'\n'}
-                <span className="text-muted-foreground">---</span>
-                {'\n\n'}
-                <span className="text-foreground">You are a precise document summarizer.</span>
-                {'\n'}
-                <span className="text-foreground">Extract the key points and present them as</span>
-                {'\n'}
-                <span className="text-foreground">concise bullet points...</span>
+                {typingDone ? (
+                  <HighlightedCode text={HERO_CODE} />
+                ) : (
+                  <>
+                    <HighlightedCode text={typedCode} />
+                    <span className="inline-block w-[2px] h-[1.1em] bg-primary animate-pulse align-text-bottom ml-[1px]" />
+                  </>
+                )}
               </code>
             </pre>
           </div>
         </div>
       </section>
 
-      {/* Providers strip */}
+      {/* ----------------------------------------------------------------- */}
+      {/* Providers strip                                                   */}
+      {/* ----------------------------------------------------------------- */}
       <FadeIn>
         <section className="py-12 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto">
@@ -310,7 +610,20 @@ export function Landing() {
         </section>
       </FadeIn>
 
-      {/* Features */}
+      {/* ----------------------------------------------------------------- */}
+      {/* Stats row                                                         */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="py-12 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+          {STATS.map((s) => (
+            <AnimatedStat key={s.label} value={s.value} label={s.label} />
+          ))}
+        </div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Features                                                          */}
+      {/* ----------------------------------------------------------------- */}
       <section id="features" className="py-20 sm:py-28 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <FadeIn>
@@ -340,7 +653,137 @@ export function Landing() {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* ----------------------------------------------------------------- */}
+      {/* How it works                                                      */}
+      {/* ----------------------------------------------------------------- */}
+      <section id="how-it-works" className="py-20 sm:py-28 px-4 sm:px-6 bg-muted/30">
+        <div className="max-w-5xl mx-auto">
+          <FadeIn>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                How it works
+              </h2>
+              <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
+                Three steps to unified AI skill management.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {HOW_IT_WORKS.map((step, i) => (
+              <FadeIn key={step.title}>
+                <div className="relative bg-card border border-border p-6 elevation-1 h-full">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-10 w-10 bg-primary flex items-center justify-center shrink-0">
+                      <step.icon className="h-5 w-5 text-primary-foreground" />
+                    </div>
+                    <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+                      Step {step.step}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
+                  {i < HOW_IT_WORKS.length - 1 && (
+                    <div className="hidden md:block absolute top-1/2 -right-3 -translate-y-1/2 text-muted-foreground/30">
+                      <ArrowRight className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Social proof — testimonials                                       */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="py-20 sm:py-28 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <FadeIn>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                Loved by developers
+              </h2>
+              <p className="text-muted-foreground mt-3 text-lg">
+                See what engineers are saying about Agentis Studio.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {TESTIMONIALS.map((t) => (
+              <FadeIn key={t.name}>
+                <div className="bg-card border border-border p-6 elevation-1 h-full flex flex-col">
+                  <p className="text-sm text-foreground leading-relaxed flex-1">
+                    &ldquo;{t.quote}&rdquo;
+                  </p>
+                  <div className="mt-5 pt-4 border-t border-border">
+                    <p className="text-sm font-semibold text-foreground">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.role}, {t.company}
+                    </p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Security & self-host callout                                      */}
+      {/* ----------------------------------------------------------------- */}
+      <FadeIn>
+        <section className="py-16 px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto bg-card border border-border elevation-2 p-8 sm:p-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">
+                  Your data, your infrastructure
+                </h2>
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  Agentis Studio is fully self-hostable. Your prompts and configurations never leave your servers. Deploy with Docker Compose in minutes.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link to="/register">
+                    <Button size="sm" className="gap-2">
+                      <Github className="h-4 w-4" />
+                      View on GitHub
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-muted/50 border border-border p-4">
+                  <Shield className="h-5 w-5 text-primary mb-2" />
+                  <h4 className="text-sm font-semibold text-foreground">Encrypted</h4>
+                  <p className="text-xs text-muted-foreground mt-1">Data at rest and in transit</p>
+                </div>
+                <div className="bg-muted/50 border border-border p-4">
+                  <Server className="h-5 w-5 text-primary mb-2" />
+                  <h4 className="text-sm font-semibold text-foreground">Self-Hosted</h4>
+                  <p className="text-xs text-muted-foreground mt-1">Full control, no vendor lock-in</p>
+                </div>
+                <div className="bg-muted/50 border border-border p-4">
+                  <Github className="h-5 w-5 text-primary mb-2" />
+                  <h4 className="text-sm font-semibold text-foreground">Open Source</h4>
+                  <p className="text-xs text-muted-foreground mt-1">Audit the code yourself</p>
+                </div>
+                <div className="bg-muted/50 border border-border p-4">
+                  <Layers className="h-5 w-5 text-primary mb-2" />
+                  <h4 className="text-sm font-semibold text-foreground">Docker Ready</h4>
+                  <p className="text-xs text-muted-foreground mt-1">One command to deploy</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </FadeIn>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Pricing                                                           */}
+      {/* ----------------------------------------------------------------- */}
       <section id="pricing" className="py-20 sm:py-28 px-4 sm:px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <FadeIn>
@@ -402,7 +845,9 @@ export function Landing() {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* ----------------------------------------------------------------- */}
+      {/* FAQ                                                               */}
+      {/* ----------------------------------------------------------------- */}
       <section id="faq" className="py-20 sm:py-28 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto">
           <FadeIn>
@@ -419,7 +864,7 @@ export function Landing() {
                 <div className="border border-border bg-card">
                   <button
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full flex items-center justify-between px-5 py-4 text-left"
+                    className="w-full flex items-center justify-between px-5 py-4 text-left focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-[-2px]"
                   >
                     <span className="font-medium text-foreground text-sm">{item.q}</span>
                     <ChevronDown
@@ -444,29 +889,39 @@ export function Landing() {
         </div>
       </section>
 
-      {/* CTA Banner */}
+      {/* ----------------------------------------------------------------- */}
+      {/* CTA Banner                                                        */}
+      {/* ----------------------------------------------------------------- */}
       <FadeIn>
         <section className="py-20 px-4 sm:px-6">
-          <div className="max-w-4xl mx-auto text-center bg-card border border-border elevation-2 py-16 px-6">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Ready to unify your AI skills?
-            </h2>
-            <p className="text-muted-foreground mt-3 max-w-lg mx-auto">
-              Get started for free. No credit card required.
-            </p>
-            <div className="mt-8">
-              <Link to="/register">
-                <Button size="lg" className="gap-2">
-                  Create Your Account
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
+          <div className="max-w-4xl mx-auto text-center bg-card border border-border elevation-2 py-16 px-6 relative overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+              <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-primary/5 blur-[80px] rounded-full" />
+              <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-primary/3 blur-[60px] rounded-full" />
+            </div>
+            <div className="relative">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                Ready to unify your AI skills?
+              </h2>
+              <p className="text-muted-foreground mt-3 max-w-lg mx-auto">
+                Get started for free. No credit card required.
+              </p>
+              <div className="mt-8">
+                <Link to="/register">
+                  <Button size="lg" className="gap-2">
+                    Create Your Account
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
       </FadeIn>
 
-      {/* Footer */}
+      {/* ----------------------------------------------------------------- */}
+      {/* Footer                                                            */}
+      {/* ----------------------------------------------------------------- */}
       <footer className="border-t border-border bg-card/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -488,17 +943,17 @@ export function Landing() {
               </h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <button onClick={() => scrollTo('features')} className="text-muted-foreground hover:text-foreground transition-colors">
+                  <button onClick={() => scrollTo('features')} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
                     Features
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => scrollTo('pricing')} className="text-muted-foreground hover:text-foreground transition-colors">
+                  <button onClick={() => scrollTo('pricing')} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
                     Pricing
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => scrollTo('faq')} className="text-muted-foreground hover:text-foreground transition-colors">
+                  <button onClick={() => scrollTo('faq')} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
                     FAQ
                   </button>
                 </li>
@@ -532,6 +987,19 @@ export function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Back to top button                                                */}
+      {/* ----------------------------------------------------------------- */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-6 right-6 z-40 h-10 w-10 bg-primary text-primary-foreground flex items-center justify-center elevation-3 transition-all duration-300 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 ${
+          showBackToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+        aria-label="Back to top"
+      >
+        <ChevronUp className="h-5 w-5" />
+      </button>
     </div>
   )
 }
