@@ -15,13 +15,39 @@ class ProjectAgent extends Model
         'agent_id',
         'custom_instructions',
         'is_enabled',
+
+        // Override columns
+        'objective_override',
+        'success_criteria_override',
+        'max_iterations_override',
+        'timeout_override',
+        'model_override',
+        'temperature_override',
+        'context_strategy_override',
+        'planning_mode_override',
+        'custom_tools_override',
     ];
 
     protected function casts(): array
     {
         return [
             'is_enabled' => 'boolean',
+            'max_iterations_override' => 'integer',
+            'timeout_override' => 'integer',
+            'temperature_override' => 'decimal:2',
+            'success_criteria_override' => 'array',
+            'custom_tools_override' => 'array',
         ];
+    }
+
+    /**
+     * Resolve an agent field with project-level override taking precedence.
+     */
+    public function resolve(string $field): mixed
+    {
+        $override = $this->getAttribute("{$field}_override");
+
+        return $override ?? $this->agent->getAttribute($field);
     }
 
     public function project(): BelongsTo

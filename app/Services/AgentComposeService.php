@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Agent;
 use App\Models\Project;
+use App\Models\ProjectAgent;
 use App\Models\Skill;
 use App\Models\SkillVariable;
 use Illuminate\Support\Facades\DB;
@@ -14,8 +15,9 @@ class AgentComposeService
         protected SkillCompositionService $compositionService,
         protected TemplateResolver $templateResolver,
     ) {}
+
     /**
-     * Compose the full output for a single project agent.
+     * Compose the full markdown output for a single project agent.
      *
      * @return array{content: string, token_estimate: int, agent: array, skill_count: int}
      */
@@ -27,16 +29,7 @@ class AgentComposeService
 
         $customInstructions = $projectAgent?->custom_instructions;
 
-        // Get assigned skill IDs for this agent in this project
-        $skillIds = DB::table('agent_skill')
-            ->where('project_id', $project->id)
-            ->where('agent_id', $agent->id)
-            ->pluck('skill_id');
-
-        $skills = $skillIds->isNotEmpty()
-            ? Skill::whereIn('id', $skillIds)->orderBy('name')->get()
-            : collect();
-
+        $skills = $this->getAssignedSkills($project, $agent);
         $content = $this->render($project, $agent, $customInstructions, $skills);
 
         return [
@@ -50,6 +43,145 @@ class AgentComposeService
                 'icon' => $agent->icon,
             ],
             'skill_count' => $skills->count(),
+        ];
+    }
+
+    /**
+     * Compose a structured agent definition for a single project agent.
+     *
+     * Returns the full loop definition with resolved fields, tools, and skills —
+     * ready for export to Claude Agent SDK, LangGraph, CrewAI, or generic JSON.
+     */
+    public function composeStructured(Project $project, Agent $agent): array
+    {
+        $projectAgent = $project->projectAgents()
+            ->where('agent_id', $agent->id)
+            ->first();
+
+        $skills = $this->getAssignedSkills($project, $agent);
+        $resolvedSkills = $this->resolveSkillBodies($project, $skills);
+
+        // Resolve MCP servers bound to this agent in this project
+        $mcpServers = DB::table('agent_mcp_server')
+            ->join('project_mcp_servers', 'agent_mcp_server.project_mcp_server_id', '=', 'project_mcp_servers.id')
+            ->where('agent_mcp_server.project_id', $project->id)
+            ->where('agent_mcp_server.agent_id', $agent->id)
+            ->select('project_mcp_servers.*', 'agent_mcp_server.config_overrides')
+            ->get()
+            ->map(fn ($s) => [
+                'name' => $s->name,
+                'transport' => $s->transport,
+                'command' => $s->command,
+                'args' => json_decode($s->args, true),
+                'url' => $s->url,
+                'env' => json_decode($s->env, true),
+                'config_overrides' => json_decode($s->config_overrides, true),
+            ]);
+
+        // Resolve A2A agents bound to this agent
+        $a2aAgents = DB::table('agent_a2a_agent')
+            ->join('project_a2a_agents', 'agent_a2a_agent.project_a2a_agent_id', '=', 'project_a2a_agents.id')
+            ->where('agent_a2a_agent.project_id', $project->id)
+            ->where('agent_a2a_agent.agent_id', $agent->id)
+            ->select('project_a2a_agents.*', 'agent_a2a_agent.config_overrides')
+            ->get()
+            ->map(fn ($a) => [
+                'name' => $a->name,
+                'url' => $a->url,
+                'description' => $a->description,
+                'skills' => json_decode($a->skills, true),
+                'config_overrides' => json_decode($a->config_overrides, true),
+            ]);
+
+        // Build the system prompt from composed markdown
+        $systemPrompt = $this->render(
+            $project,
+            $agent,
+            $projectAgent?->custom_instructions,
+            $skills,
+        );
+
+        // Resolve overrides from project_agent pivot
+        $model = $projectAgent?->model_override ?? $agent->model;
+        $temperature = $projectAgent?->temperature_override ?? $agent->temperature;
+        $maxIterations = $projectAgent?->max_iterations_override ?? $agent->max_iterations;
+        $timeoutSeconds = $projectAgent?->timeout_override ?? $agent->timeout_seconds;
+        $contextStrategy = $projectAgent?->context_strategy_override ?? $agent->context_strategy;
+        $planningMode = $projectAgent?->planning_mode_override ?? $agent->planning_mode;
+        $objective = $projectAgent?->objective_override ?? $agent->objective_template;
+        $successCriteria = $projectAgent?->success_criteria_override ?? $agent->success_criteria;
+        $customTools = $projectAgent?->custom_tools_override ?? $agent->custom_tools;
+
+        return [
+            // Identity
+            'agent' => [
+                'id' => $agent->id,
+                'uuid' => $agent->uuid,
+                'name' => $agent->name,
+                'slug' => $agent->slug,
+                'role' => $agent->role,
+                'icon' => $agent->icon,
+                'description' => $agent->description,
+            ],
+
+            // Composed system prompt (markdown)
+            'system_prompt' => $systemPrompt,
+            'token_estimate' => $this->estimateTokens($systemPrompt),
+
+            // Model config
+            'model' => $model,
+            'temperature' => $temperature ? (float) $temperature : null,
+
+            // Goal
+            'goal' => [
+                'objective' => $objective,
+                'success_criteria' => $successCriteria,
+                'max_iterations' => $maxIterations,
+                'timeout_seconds' => $timeoutSeconds,
+                'loop_condition' => $agent->loop_condition,
+            ],
+
+            // Perception
+            'perception' => [
+                'input_schema' => $agent->input_schema,
+                'memory_sources' => $agent->memory_sources,
+                'context_strategy' => $contextStrategy,
+            ],
+
+            // Reasoning
+            'reasoning' => [
+                'planning_mode' => $planningMode,
+                'persona_prompt' => $agent->persona_prompt,
+            ],
+
+            // Actions / Tools
+            'tools' => [
+                'mcp_servers' => $mcpServers->values(),
+                'a2a_agents' => $a2aAgents->values(),
+                'custom_tools' => $customTools,
+            ],
+
+            // Skills (resolved)
+            'skills' => $resolvedSkills,
+            'skill_count' => $skills->count(),
+
+            // Observation
+            'observation' => [
+                'eval_criteria' => $agent->eval_criteria,
+                'output_schema' => $agent->output_schema,
+            ],
+
+            // Orchestration
+            'orchestration' => [
+                'can_delegate' => $agent->can_delegate,
+                'delegation_rules' => $agent->delegation_rules,
+                'parent_agent_id' => $agent->parent_agent_id,
+                'parent_agent' => $agent->parentAgent ? [
+                    'id' => $agent->parentAgent->id,
+                    'name' => $agent->parentAgent->name,
+                    'slug' => $agent->parentAgent->slug,
+                ] : null,
+            ],
         ];
     }
 
@@ -76,6 +208,86 @@ class AgentComposeService
     }
 
     /**
+     * Compose all enabled agents as structured definitions.
+     */
+    public function composeAllStructured(Project $project): array
+    {
+        $enabledAgentIds = $project->projectAgents()
+            ->where('is_enabled', true)
+            ->pluck('agent_id');
+
+        if ($enabledAgentIds->isEmpty()) {
+            return [];
+        }
+
+        $agents = Agent::whereIn('id', $enabledAgentIds)
+            ->with('parentAgent')
+            ->orderBy('sort_order')
+            ->get();
+
+        return $agents->map(fn (Agent $agent) => $this->composeStructured($project, $agent))->values()->all();
+    }
+
+    /**
+     * Get assigned skills for an agent in a project.
+     */
+    protected function getAssignedSkills(Project $project, Agent $agent): \Illuminate\Support\Collection
+    {
+        $skillIds = DB::table('agent_skill')
+            ->where('project_id', $project->id)
+            ->where('agent_id', $agent->id)
+            ->pluck('skill_id');
+
+        return $skillIds->isNotEmpty()
+            ? Skill::whereIn('id', $skillIds)->orderBy('name')->get()
+            : collect();
+    }
+
+    /**
+     * Resolve skill bodies with includes and template variables.
+     */
+    protected function resolveSkillBodies(Project $project, \Illuminate\Support\Collection $skills): array
+    {
+        $skillIds = $skills->pluck('id')->all();
+        $allVariables = [];
+
+        if (! empty($skillIds)) {
+            $allVariables = SkillVariable::where('project_id', $project->id)
+                ->whereIn('skill_id', $skillIds)
+                ->get()
+                ->groupBy('skill_id')
+                ->map(fn ($vars) => $vars->pluck('value', 'key')->all())
+                ->all();
+        }
+
+        return $skills->map(function (Skill $skill) use ($allVariables) {
+            $resolvedBody = $this->compositionService->resolve($skill);
+
+            $variables = $allVariables[$skill->id] ?? [];
+            foreach ($skill->template_variables ?? [] as $def) {
+                $name = $def['name'] ?? null;
+                if ($name && ! array_key_exists($name, $variables) && isset($def['default'])) {
+                    $variables[$name] = $def['default'];
+                }
+            }
+            if (! empty($variables)) {
+                $resolvedBody = $this->templateResolver->resolve($resolvedBody, $variables);
+            }
+
+            return [
+                'id' => $skill->id,
+                'slug' => $skill->slug,
+                'name' => $skill->name,
+                'description' => $skill->description,
+                'model' => $skill->model,
+                'tools' => $skill->tools,
+                'body' => $resolvedBody,
+                'token_estimate' => $this->estimateTokens($resolvedBody),
+            ];
+        })->values()->all();
+    }
+
+    /**
      * Render the composed markdown output.
      */
     protected function render(Project $project, Agent $agent, ?string $customInstructions, \Illuminate\Support\Collection $skills): string
@@ -95,42 +307,18 @@ class AgentComposeService
             $sections[] = "## Project-Specific Instructions\n\n" . trim($customInstructions);
         }
 
-        // Load skill variable values for all assigned skills in this project
-        $skillIds = $skills->pluck('id')->all();
-        $allVariables = [];
-        if (! empty($skillIds)) {
-            $allVariables = SkillVariable::where('project_id', $project->id)
-                ->whereIn('skill_id', $skillIds)
-                ->get()
-                ->groupBy('skill_id')
-                ->map(fn ($vars) => $vars->pluck('value', 'key')->all())
-                ->all();
-        }
+        // Resolved skill sections
+        $resolvedSkills = $this->resolveSkillBodies($project, $skills);
 
-        // Assigned skills
-        if ($skills->isNotEmpty()) {
+        if (! empty($resolvedSkills)) {
             $skillSections = ["## Assigned Skills"];
 
-            foreach ($skills as $skill) {
-                $resolvedBody = $this->compositionService->resolve($skill);
-
-                // Apply template variable substitution
-                $variables = $allVariables[$skill->id] ?? [];
-                foreach ($skill->template_variables ?? [] as $def) {
-                    $name = $def['name'] ?? null;
-                    if ($name && ! array_key_exists($name, $variables) && isset($def['default'])) {
-                        $variables[$name] = $def['default'];
-                    }
+            foreach ($resolvedSkills as $skill) {
+                $skillContent = "### {$skill['name']}";
+                if ($skill['description']) {
+                    $skillContent .= "\n\n> {$skill['description']}";
                 }
-                if (! empty($variables)) {
-                    $resolvedBody = $this->templateResolver->resolve($resolvedBody, $variables);
-                }
-
-                $skillContent = "### {$skill->name}";
-                if ($skill->description) {
-                    $skillContent .= "\n\n> {$skill->description}";
-                }
-                $skillContent .= "\n\n" . trim($resolvedBody);
+                $skillContent .= "\n\n" . trim($skill['body']);
                 $skillSections[] = $skillContent;
             }
 

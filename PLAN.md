@@ -70,7 +70,7 @@ Observe (result fed back into context)
 ## Current Status
 
 **Phases 1–26 COMPLETE.** Component Layer fully built.
-**Phase A in progress** — Agent Designer.
+**Phase A COMPLETE** — Agent Designer (25 issues, all closed).
 
 ---
 
@@ -80,11 +80,11 @@ Observe (result fed back into context)
 
 | Issue | Title | Status |
 |---|---|---|
-| #83 | Add agent loop columns to agents table migration | |
-| #84 | Add agent_mcp_server and agent_a2a_agent pivot tables | |
-| #85 | Update Agent model with casts, relationships, fillable | |
-| #86 | Update AgentSeeder with loop field defaults | |
-| #87 | Expand project_agent pivot with override columns | |
+| #83 | Add agent loop columns to agents table migration | DONE |
+| #84 | Add agent_mcp_server and agent_a2a_agent pivot tables | DONE |
+| #85 | Update Agent model with casts, relationships, fillable | DONE |
+| #86 | Update AgentSeeder with loop field defaults | DONE |
+| #87 | Expand project_agent pivot with override columns | DONE |
 
 **Agent Definition Structure:**
 ```
@@ -102,10 +102,10 @@ AgentDefinition
 
 | Issue | Title | Status |
 |---|---|---|
-| #88 | Create AgentResource API resource | |
-| #89 | Expand AgentController with full CRUD | |
-| #90 | Agent tool binding endpoints (MCP + A2A) | |
-| #91 | Agent export as JSON/YAML | |
+| #88 | Create AgentResource API resource | DONE |
+| #89 | Expand AgentController with full CRUD | DONE |
+| #90 | Agent tool binding endpoints (MCP + A2A) | DONE |
+| #91 | Agent export as JSON/YAML | DONE |
 
 **New endpoints:**
 ```
@@ -123,10 +123,10 @@ PUT    /api/projects/{p}/agents/{a}/a2a-agents         # bind A2A
 
 | Issue | Title | Status |
 |---|---|---|
-| #92 | Agent list view with create/edit/delete | |
-| #93 | Agent Builder form with loop sections | |
-| #94 | Update API client with agent endpoints | |
-| #95 | Agent Builder page routing | |
+| #92 | Agent list view with create/edit/delete | DONE |
+| #93 | Agent Builder form with loop sections | DONE |
+| #94 | Update API client with agent endpoints | DONE |
+| #95 | Agent Builder page routing | DONE |
 
 **Builder sections:** Identity, Goal, Perception, Reasoning, Actions, Observation, Orchestration — each collapsible, with Monaco editors for JSON/prompt fields.
 
@@ -134,10 +134,10 @@ PUT    /api/projects/{p}/agents/{a}/a2a-agents         # bind A2A
 
 | Issue | Title | Status |
 |---|---|---|
-| #96 | Structured compose output format | |
-| #97 | Structured compose API endpoint | |
-| #98 | Update provider drivers for structured agents | |
-| #99 | Generic JSON agent definition export format | |
+| #96 | Structured compose output format | DONE |
+| #97 | Structured compose API endpoint | DONE |
+| #98 | Update provider drivers for structured agents | DONE |
+| #99 | Generic JSON agent definition export format | DONE |
 
 **Key change:** `composeStructured()` returns system_prompt, model, tools (MCP/A2A/custom), skills, loop config, delegation config — not just concatenated text.
 
@@ -145,19 +145,19 @@ PUT    /api/projects/{p}/agents/{a}/a2a-agents         # bind A2A
 
 | Issue | Title | Status |
 |---|---|---|
-| #100 | Expand graph endpoint with agent loop data | |
-| #101 | React Flow agent loop visualization | |
-| #102 | Agent loop detail panel in visualization | |
+| #100 | Expand graph endpoint with agent loop data | DONE |
+| #101 | React Flow agent loop visualization | DONE |
+| #102 | Agent loop detail panel in visualization | DONE |
 
 ### A.6 — Testing & Migration
 
 | Issue | Title | Status |
 |---|---|---|
-| #103 | Pest tests for expanded Agent model | |
-| #104 | Pest tests for AgentComposeService v2 | |
-| #105 | API endpoint tests for agent CRUD | |
-| #106 | Data migration for existing agents | |
-| #107 | Update bundle export/import for expanded agents | |
+| #103 | Pest tests for expanded Agent model | DONE |
+| #104 | Pest tests for AgentComposeService v2 | DONE |
+| #105 | API endpoint tests for agent CRUD | DONE |
+| #106 | Data migration for existing agents | DONE |
+| #107 | Update bundle export/import for expanded agents | DONE |
 
 ### Implementation Sequence
 

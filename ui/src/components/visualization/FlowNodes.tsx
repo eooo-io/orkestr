@@ -18,18 +18,28 @@ type AgentNodeData = {
   isEnabled: boolean
   hasCustomInstructions: boolean
   skillCount: number
+  model: string | null
+  planningMode: string
+  contextStrategy: string
+  loopCondition: string
+  maxIterations: number | null
+  canDelegate: boolean
+  hasLoopConfig: boolean
+  mcpCount: number
+  a2aCount: number
 }
 
 export const AgentNode = memo(({ data }: NodeProps & { data: AgentNodeData }) => {
   const d = data as AgentNodeData
   return (
     <div
-      className={`px-4 py-3 rounded-lg border-2 min-w-[200px] shadow-lg transition-all ${
+      className={`px-4 py-3 rounded-lg border-2 min-w-[220px] shadow-lg transition-all ${
         d.isEnabled
           ? 'bg-violet-950/80 border-violet-500/60 hover:border-violet-400'
           : 'bg-zinc-900/80 border-zinc-600/40 opacity-60'
       }`}
     >
+      <Handle type="target" position={Position.Left} className="!bg-violet-500 !w-2 !h-2" />
       <Handle type="source" position={Position.Right} className="!bg-violet-500 !w-2 !h-2" />
       <div className="flex items-center gap-2 mb-1">
         <Bot className="h-4 w-4 text-violet-400 shrink-0" />
@@ -37,11 +47,26 @@ export const AgentNode = memo(({ data }: NodeProps & { data: AgentNodeData }) =>
         {!d.isEnabled && (
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-700 text-zinc-400 shrink-0">off</span>
         )}
+        {d.canDelegate && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-800 text-violet-300 shrink-0">delegate</span>
+        )}
       </div>
       <div className="flex items-center gap-2 text-[11px] text-zinc-400">
         <span className="capitalize">{d.role}</span>
         <span>·</span>
         <span>{d.skillCount} skill{d.skillCount !== 1 ? 's' : ''}</span>
+        {d.mcpCount > 0 && (
+          <>
+            <span>·</span>
+            <span>{d.mcpCount} MCP</span>
+          </>
+        )}
+        {d.a2aCount > 0 && (
+          <>
+            <span>·</span>
+            <span>{d.a2aCount} A2A</span>
+          </>
+        )}
         {d.hasCustomInstructions && (
           <>
             <span>·</span>
@@ -49,6 +74,18 @@ export const AgentNode = memo(({ data }: NodeProps & { data: AgentNodeData }) =>
           </>
         )}
       </div>
+      {d.hasLoopConfig && (
+        <div className="flex items-center gap-1.5 mt-1.5 text-[10px] text-zinc-500 flex-wrap">
+          {d.model && <span className="px-1 py-0.5 rounded bg-zinc-800 text-zinc-400">{d.model}</span>}
+          {d.planningMode !== 'none' && (
+            <span className="px-1 py-0.5 rounded bg-violet-900/50 text-violet-300">{d.planningMode}</span>
+          )}
+          {d.maxIterations && (
+            <span className="text-zinc-500">max:{d.maxIterations}</span>
+          )}
+          <span className="text-zinc-600">{d.loopCondition}</span>
+        </div>
+      )}
     </div>
   )
 })

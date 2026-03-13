@@ -1,0 +1,626 @@
+import { useEffect, useState } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import {
+  ArrowLeft,
+  Save,
+  Loader2,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  Trash2,
+  Download,
+  Brain,
+} from 'lucide-react'
+import { fetchAgent, createAgent, updateAgent, deleteAgent, exportAgent } from '@/api/client'
+import { useAppStore } from '@/store/useAppStore'
+import type { Agent } from '@/types'
+
+const EMPTY_AGENT: Partial<Agent> = {
+  name: '',
+  role: '',
+  description: '',
+  base_instructions: '',
+  persona_prompt: null,
+  model: 'claude-sonnet-4-6',
+  icon: 'brain',
+  objective_template: null,
+  success_criteria: null,
+  max_iterations: null,
+  timeout_seconds: null,
+  input_schema: null,
+  memory_sources: null,
+  context_strategy: 'full',
+  planning_mode: 'none',
+  temperature: null,
+  system_prompt: null,
+  eval_criteria: null,
+  output_schema: null,
+  loop_condition: 'goal_met',
+  parent_agent_id: null,
+  delegation_rules: null,
+  can_delegate: false,
+  custom_tools: null,
+  is_template: false,
+}
+
+const CONTEXT_STRATEGIES = [
+  { value: 'full', label: 'Full Context', desc: 'Include all available context' },
+  { value: 'summary', label: 'Summary', desc: 'Summarize prior context' },
+  { value: 'sliding_window', label: 'Sliding Window', desc: 'Recent context only' },
+  { value: 'rag', label: 'RAG', desc: 'Retrieval-augmented generation' },
+]
+
+const PLANNING_MODES = [
+  { value: 'none', label: 'None', desc: 'No planning, direct execution' },
+  { value: 'act', label: 'Act', desc: 'Execute actions directly' },
+  { value: 'plan_then_act', label: 'Plan then Act', desc: 'Plan first, then execute' },
+  { value: 'react', label: 'ReAct', desc: 'Reason + Act loop' },
+]
+
+const LOOP_CONDITIONS = [
+  { value: 'goal_met', label: 'Goal Met', desc: 'Stop when success criteria are satisfied' },
+  { value: 'max_iterations', label: 'Max Iterations', desc: 'Stop after N iterations' },
+  { value: 'timeout', label: 'Timeout', desc: 'Stop after timeout' },
+  { value: 'manual', label: 'Manual', desc: 'Human decides when to stop' },
+]
+
+const ICONS = [
+  'brain', 'clipboard-list', 'boxes', 'shield-check', 'palette',
+  'git-pull-request', 'container', 'rocket', 'lock', 'code',
+  'search', 'zap', 'globe', 'database', 'terminal',
+]
+
+export function AgentBuilder() {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { showToast } = useAppStore()
+  const isNew = !id
+
+  const [agent, setAgent] = useState<Partial<Agent>>(EMPTY_AGENT)
+  const [loading, setLoading] = useState(!isNew)
+  const [saving, setSaving] = useState(false)
+  const [openSections, setOpenSections] = useState<Set<string>>(
+    new Set(['identity', 'goal', 'reasoning']),
+  )
+
+  useEffect(() => {
+    if (id) {
+      setLoading(true)
+      fetchAgent(parseInt(id))
+        .then((data) => setAgent(data))
+        .catch(() => showToast('Failed to load agent', 'error'))
+        .finally(() => setLoading(false))
+    }
+  }, [id])
+
+  const toggleSection = (section: string) => {
+    setOpenSections((prev) => {
+      const next = new Set(prev)
+      if (next.has(section)) next.delete(section)
+      else next.add(section)
+      return next
+    })
+  }
+
+  const update = (field: string, value: unknown) => {
+    setAgent((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleSave = async () => {
+    if (!agent.name?.trim()) {
+      showToast('Name is required', 'error')
+      return
+    }
+    if (!agent.role?.trim()) {
+      showToast('Role is required', 'error')
+      return
+    }
+
+    setSaving(true)
+    try {
+      if (isNew) {
+        const created = await createAgent(agent)
+        showToast('Agent created', 'success')
+        navigate(`/agents/${created.id}`, { replace: true })
+      } else {
+        await updateAgent(parseInt(id!), agent)
+        showToast('Agent saved', 'success')
+      }
+    } catch {
+      showToast('Failed to save agent', 'error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!id) return
+    if (!confirm('Delete this agent? This cannot be undone.')) return
+    try {
+      await deleteAgent(parseInt(id))
+      showToast('Agent deleted', 'success')
+      navigate('/agents')
+    } catch {
+      showToast('Failed to delete agent', 'error')
+    }
+  }
+
+  const handleExport = async (format: 'json' | 'yaml') => {
+    if (!id) return
+    try {
+      const result = await exportAgent(parseInt(id), format)
+      const content = format === 'yaml' ? result.content : JSON.stringify(result.content, null, 2)
+      navigator.clipboard.writeText(content)
+      showToast(`${format.toUpperCase()} copied to clipboard`, 'success')
+    } catch {
+      showToast('Failed to export agent', 'error')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link
+            to="/agents"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Agents
+          </Link>
+          <span className="text-muted-foreground">/</span>
+          <span className="text-sm font-medium">{isNew ? 'New Agent' : agent.name}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {!isNew && (
+            <>
+              <button
+                onClick={() => handleExport('json')}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground border border-border hover:bg-muted transition-colors"
+                title="Export as JSON"
+              >
+                <Download className="h-3 w-3" />
+                JSON
+              </button>
+              <button
+                onClick={() => handleExport('yaml')}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground border border-border hover:bg-muted transition-colors"
+                title="Export as YAML"
+              >
+                <Download className="h-3 w-3" />
+                YAML
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 hover:text-red-300 border border-red-500/30 hover:bg-red-500/10 transition-colors"
+              >
+                <Trash2 className="h-3 w-3" />
+                Delete
+              </button>
+            </>
+          )}
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-1.5 px-4 py-1.5 text-xs bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          >
+            {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+            {isNew ? 'Create' : 'Save'}
+          </button>
+        </div>
+      </div>
+
+      {/* Sections */}
+      <div className="space-y-3">
+        {/* Identity */}
+        <Section title="Identity" id="identity" open={openSections.has('identity')} onToggle={toggleSection}>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Name" required>
+              <input
+                type="text"
+                value={agent.name || ''}
+                onChange={(e) => update('name', e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="e.g. Code Review Agent"
+              />
+            </Field>
+            <Field label="Role" required>
+              <input
+                type="text"
+                value={agent.role || ''}
+                onChange={(e) => update('role', e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="e.g. code-reviewer"
+              />
+            </Field>
+          </div>
+          <Field label="Description">
+            <textarea
+              value={agent.description || ''}
+              onChange={(e) => update('description', e.target.value)}
+              rows={2}
+              className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+              placeholder="Brief description of what this agent does"
+            />
+          </Field>
+          <div className="grid grid-cols-3 gap-4">
+            <Field label="Model">
+              <input
+                type="text"
+                value={agent.model || ''}
+                onChange={(e) => update('model', e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="claude-sonnet-4-6"
+              />
+            </Field>
+            <Field label="Icon">
+              <select
+                value={agent.icon || 'brain'}
+                onChange={(e) => update('icon', e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                {ICONS.map((icon) => (
+                  <option key={icon} value={icon}>{icon}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Sort Order">
+              <input
+                type="number"
+                value={agent.sort_order ?? 0}
+                onChange={(e) => update('sort_order', parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </Field>
+          </div>
+          <Field label="Base Instructions">
+            <textarea
+              value={agent.base_instructions || ''}
+              onChange={(e) => update('base_instructions', e.target.value)}
+              rows={8}
+              className="w-full px-3 py-2 bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              placeholder="Core instructions for this agent (Markdown supported)"
+            />
+          </Field>
+          <Field label="Persona Prompt">
+            <textarea
+              value={agent.persona_prompt || ''}
+              onChange={(e) => update('persona_prompt', e.target.value || null)}
+              rows={3}
+              className="w-full px-3 py-2 bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              placeholder="Optional persona layer on top of base instructions"
+            />
+          </Field>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={agent.is_template ?? false}
+                onChange={(e) => update('is_template', e.target.checked)}
+                className="rounded"
+              />
+              Template agent
+            </label>
+          </div>
+        </Section>
+
+        {/* Goal */}
+        <Section title="Goal" id="goal" open={openSections.has('goal')} onToggle={toggleSection}>
+          <Field label="Objective Template">
+            <textarea
+              value={agent.objective_template || ''}
+              onChange={(e) => update('objective_template', e.target.value || null)}
+              rows={3}
+              className="w-full px-3 py-2 bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              placeholder="What this agent is trying to achieve"
+            />
+          </Field>
+          <Field label="Success Criteria" hint="One per line">
+            <textarea
+              value={(agent.success_criteria || []).join('\n')}
+              onChange={(e) =>
+                update('success_criteria', e.target.value ? e.target.value.split('\n').filter(Boolean) : null)
+              }
+              rows={3}
+              className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              placeholder="e.g. all_tests_passing&#10;code_reviewed&#10;no_security_issues"
+            />
+          </Field>
+          <div className="grid grid-cols-3 gap-4">
+            <Field label="Max Iterations">
+              <input
+                type="number"
+                value={agent.max_iterations ?? ''}
+                onChange={(e) => update('max_iterations', e.target.value ? parseInt(e.target.value) : null)}
+                className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="e.g. 10"
+                min={1}
+                max={1000}
+              />
+            </Field>
+            <Field label="Timeout (seconds)">
+              <input
+                type="number"
+                value={agent.timeout_seconds ?? ''}
+                onChange={(e) => update('timeout_seconds', e.target.value ? parseInt(e.target.value) : null)}
+                className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="e.g. 300"
+                min={1}
+                max={3600}
+              />
+            </Field>
+            <Field label="Loop Condition">
+              <select
+                value={agent.loop_condition || 'goal_met'}
+                onChange={(e) => update('loop_condition', e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                {LOOP_CONDITIONS.map((lc) => (
+                  <option key={lc.value} value={lc.value}>{lc.label}</option>
+                ))}
+              </select>
+            </Field>
+          </div>
+        </Section>
+
+        {/* Perception */}
+        <Section title="Perception" id="perception" open={openSections.has('perception')} onToggle={toggleSection}>
+          <Field label="Context Strategy">
+            <div className="grid grid-cols-2 gap-2">
+              {CONTEXT_STRATEGIES.map((cs) => (
+                <label
+                  key={cs.value}
+                  className={`flex items-start gap-2 p-3 border cursor-pointer transition-colors ${
+                    agent.context_strategy === cs.value
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-muted-foreground/30'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="context_strategy"
+                    value={cs.value}
+                    checked={agent.context_strategy === cs.value}
+                    onChange={() => update('context_strategy', cs.value)}
+                    className="mt-0.5"
+                  />
+                  <div>
+                    <span className="text-sm font-medium">{cs.label}</span>
+                    <p className="text-xs text-muted-foreground">{cs.desc}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </Field>
+          <Field label="Memory Sources" hint="One per line">
+            <textarea
+              value={(agent.memory_sources || []).join('\n')}
+              onChange={(e) =>
+                update('memory_sources', e.target.value ? e.target.value.split('\n').filter(Boolean) : null)
+              }
+              rows={3}
+              className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              placeholder="e.g. conversation_history&#10;project_files&#10;external_docs"
+            />
+          </Field>
+          <Field label="Input Schema (JSON)">
+            <textarea
+              value={agent.input_schema ? JSON.stringify(agent.input_schema, null, 2) : ''}
+              onChange={(e) => {
+                try {
+                  update('input_schema', e.target.value ? JSON.parse(e.target.value) : null)
+                } catch {
+                  // Allow typing invalid JSON while editing
+                }
+              }}
+              rows={4}
+              className="w-full px-3 py-2 bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              placeholder='{"type": "object", "properties": {...}}'
+            />
+          </Field>
+        </Section>
+
+        {/* Reasoning */}
+        <Section title="Reasoning" id="reasoning" open={openSections.has('reasoning')} onToggle={toggleSection}>
+          <Field label="Planning Mode">
+            <div className="grid grid-cols-2 gap-2">
+              {PLANNING_MODES.map((pm) => (
+                <label
+                  key={pm.value}
+                  className={`flex items-start gap-2 p-3 border cursor-pointer transition-colors ${
+                    agent.planning_mode === pm.value
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-muted-foreground/30'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="planning_mode"
+                    value={pm.value}
+                    checked={agent.planning_mode === pm.value}
+                    onChange={() => update('planning_mode', pm.value)}
+                    className="mt-0.5"
+                  />
+                  <div>
+                    <span className="text-sm font-medium">{pm.label}</span>
+                    <p className="text-xs text-muted-foreground">{pm.desc}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Temperature">
+              <input
+                type="number"
+                value={agent.temperature ?? ''}
+                onChange={(e) => update('temperature', e.target.value ? parseFloat(e.target.value) : null)}
+                className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="0.0 - 2.0"
+                min={0}
+                max={2}
+                step={0.1}
+              />
+            </Field>
+          </div>
+          <Field label="System Prompt">
+            <textarea
+              value={agent.system_prompt || ''}
+              onChange={(e) => update('system_prompt', e.target.value || null)}
+              rows={4}
+              className="w-full px-3 py-2 bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              placeholder="Optional explicit system prompt (overrides base_instructions + persona_prompt)"
+            />
+          </Field>
+        </Section>
+
+        {/* Observation */}
+        <Section title="Observation" id="observation" open={openSections.has('observation')} onToggle={toggleSection}>
+          <Field label="Evaluation Criteria" hint="One per line">
+            <textarea
+              value={(agent.eval_criteria || []).join('\n')}
+              onChange={(e) =>
+                update('eval_criteria', e.target.value ? e.target.value.split('\n').filter(Boolean) : null)
+              }
+              rows={3}
+              className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              placeholder="e.g. output_matches_schema&#10;no_hallucinations&#10;follows_conventions"
+            />
+          </Field>
+          <Field label="Output Schema (JSON)">
+            <textarea
+              value={agent.output_schema ? JSON.stringify(agent.output_schema, null, 2) : ''}
+              onChange={(e) => {
+                try {
+                  update('output_schema', e.target.value ? JSON.parse(e.target.value) : null)
+                } catch {
+                  // Allow typing invalid JSON while editing
+                }
+              }}
+              rows={4}
+              className="w-full px-3 py-2 bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              placeholder='{"type": "object", "properties": {...}}'
+            />
+          </Field>
+        </Section>
+
+        {/* Orchestration */}
+        <Section title="Orchestration" id="orchestration" open={openSections.has('orchestration')} onToggle={toggleSection}>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={agent.can_delegate ?? false}
+                onChange={(e) => update('can_delegate', e.target.checked)}
+                className="rounded"
+              />
+              Can delegate to other agents
+            </label>
+          </div>
+          <Field label="Delegation Rules (JSON)">
+            <textarea
+              value={agent.delegation_rules ? JSON.stringify(agent.delegation_rules, null, 2) : ''}
+              onChange={(e) => {
+                try {
+                  update('delegation_rules', e.target.value ? JSON.parse(e.target.value) : null)
+                } catch {
+                  // Allow typing invalid JSON while editing
+                }
+              }}
+              rows={4}
+              className="w-full px-3 py-2 bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              placeholder='{"parallel_when_independent": true, "max_delegation_depth": 3}'
+            />
+          </Field>
+        </Section>
+
+        {/* Actions */}
+        <Section title="Actions / Custom Tools" id="actions" open={openSections.has('actions')} onToggle={toggleSection}>
+          <Field label="Custom Tools (JSON array)">
+            <textarea
+              value={agent.custom_tools ? JSON.stringify(agent.custom_tools, null, 2) : ''}
+              onChange={(e) => {
+                try {
+                  update('custom_tools', e.target.value ? JSON.parse(e.target.value) : null)
+                } catch {
+                  // Allow typing invalid JSON while editing
+                }
+              }}
+              rows={6}
+              className="w-full px-3 py-2 bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+              placeholder='[{"name": "search_docs", "description": "Search documentation", "input_schema": {...}}]'
+            />
+          </Field>
+          <p className="text-xs text-muted-foreground">
+            MCP servers and A2A agents are bound per-project in the project agent configuration.
+          </p>
+        </Section>
+      </div>
+    </div>
+  )
+}
+
+// --- Helper Components ---
+
+function Section({
+  title,
+  id,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string
+  id: string
+  open: boolean
+  onToggle: (id: string) => void
+  children: React.ReactNode
+}) {
+  return (
+    <div className="border border-border">
+      <button
+        onClick={() => onToggle(id)}
+        className="w-full flex items-center gap-2 px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors text-left"
+      >
+        {open ? (
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        ) : (
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        )}
+        <span className="text-sm font-medium">{title}</span>
+      </button>
+      {open && <div className="p-4 space-y-4">{children}</div>}
+    </div>
+  )
+}
+
+function Field({
+  label,
+  required,
+  hint,
+  children,
+}: {
+  label: string
+  required?: boolean
+  hint?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        {label}
+        {required && <span className="text-red-400 ml-0.5">*</span>}
+        {hint && <span className="font-normal normal-case tracking-normal ml-2 text-muted-foreground/60">({hint})</span>}
+      </label>
+      {children}
+    </div>
+  )
+}

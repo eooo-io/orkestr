@@ -93,14 +93,66 @@ export interface Agent {
   role: string
   description: string | null
   base_instructions: string
+  persona_prompt: string | null
+  model: string | null
   icon: string | null
   sort_order: number
+
+  // Goal
+  objective_template: string | null
+  success_criteria: string[] | null
+  max_iterations: number | null
+  timeout_seconds: number | null
+
+  // Perception
+  input_schema: Record<string, unknown> | null
+  memory_sources: string[] | null
+  context_strategy: string
+
+  // Reasoning
+  planning_mode: string
+  temperature: number | null
+  system_prompt: string | null
+
+  // Observation
+  eval_criteria: string[] | null
+  output_schema: Record<string, unknown> | null
+  loop_condition: string
+
+  // Orchestration
+  parent_agent_id: number | null
+  delegation_rules: Record<string, unknown> | null
+  can_delegate: boolean
+
+  // Actions
+  custom_tools: Record<string, unknown>[] | null
+
+  // Meta
+  is_template: boolean
+  created_by: number | null
+  has_loop_config: boolean
+
+  created_at: string
+  updated_at: string
 }
 
 export interface ProjectAgent extends Agent {
   is_enabled: boolean
   custom_instructions: string | null
   skill_ids: number[]
+  mcp_server_ids: number[]
+  a2a_agent_ids: number[]
+
+  // Override fields
+  objective_override?: string | null
+  success_criteria_override?: string[] | null
+  max_iterations_override?: number | null
+  timeout_override?: number | null
+  model_override?: string | null
+  temperature_override?: number | null
+  context_strategy_override?: string | null
+  planning_mode_override?: string | null
+  custom_tools_override?: Record<string, unknown>[] | null
 }
 
 export interface SkillsShDiscoveredSkill {
@@ -127,6 +179,63 @@ export interface AgentComposed {
     icon: string | null
   }
   skill_count: number
+}
+
+export interface AgentStructured {
+  agent: {
+    id: number
+    uuid: string
+    name: string
+    slug: string
+    role: string
+    icon: string | null
+    description: string | null
+  }
+  system_prompt: string
+  token_estimate: number
+  model: string | null
+  temperature: number | null
+  goal: {
+    objective: string | null
+    success_criteria: string[] | null
+    max_iterations: number | null
+    timeout_seconds: number | null
+    loop_condition: string
+  }
+  perception: {
+    input_schema: Record<string, unknown> | null
+    memory_sources: string[] | null
+    context_strategy: string
+  }
+  reasoning: {
+    planning_mode: string
+    persona_prompt: string | null
+  }
+  tools: {
+    mcp_servers: Array<{ name: string; transport: string; command: string | null; url: string | null }>
+    a2a_agents: Array<{ name: string; url: string; description: string | null }>
+    custom_tools: Record<string, unknown>[] | null
+  }
+  skills: Array<{
+    id: number
+    slug: string
+    name: string
+    description: string | null
+    model: string | null
+    body: string
+    token_estimate: number
+  }>
+  skill_count: number
+  observation: {
+    eval_criteria: string[] | null
+    output_schema: Record<string, unknown> | null
+  }
+  orchestration: {
+    can_delegate: boolean
+    delegation_rules: Record<string, unknown> | null
+    parent_agent_id: number | null
+    parent_agent: { id: number; name: string; slug: string } | null
+  }
 }
 
 export interface LintIssue {
@@ -382,6 +491,17 @@ export interface ProjectGraphData {
     is_enabled: boolean
     has_custom_instructions: boolean
     skill_ids: number[]
+    mcp_server_ids: number[]
+    a2a_agent_ids: number[]
+    model: string | null
+    planning_mode: string
+    context_strategy: string
+    loop_condition: string
+    max_iterations: number | null
+    objective_template: string | null
+    can_delegate: boolean
+    has_loop_config: boolean
+    parent_agent_id: number | null
   }>
   agent_edges: Array<{
     source_type: string
@@ -398,6 +518,11 @@ export interface ProjectGraphData {
     id: number
     name: string
     transport: string
+  }>
+  a2a_agents: Array<{
+    id: number
+    name: string
+    url: string
   }>
   sync_outputs: Record<string, string[]>
 }

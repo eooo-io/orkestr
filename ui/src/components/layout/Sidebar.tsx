@@ -12,6 +12,7 @@ import {
   MessageSquare,
   ExternalLink,
   X,
+  Brain,
 } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { useTheme } from '@/hooks/useTheme'
@@ -41,6 +42,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
 
   const navItems = [
     { to: '/projects', label: 'Projects', icon: FolderOpen },
+    { to: '/agents', label: 'Agents', icon: Brain },
     { to: '/search', label: 'Search', icon: Search, shortcut: 'K' },
     { to: '/library', label: 'Library', icon: BookOpen },
     // { to: '/marketplace', label: 'Marketplace', icon: Store },

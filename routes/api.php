@@ -98,13 +98,24 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/skills-sh/preview', [SkillsShController::class, 'preview']);
     Route::post('/skills-sh/import', [SkillsShController::class, 'import']);
 
-    // Agents
+    // Agents — global CRUD
     Route::get('/agents', [AgentController::class, 'index']);
+    Route::post('/agents', [AgentController::class, 'store']);
+    Route::get('/agents/{agent}', [AgentController::class, 'show']);
+    Route::put('/agents/{agent}', [AgentController::class, 'update']);
+    Route::delete('/agents/{agent}', [AgentController::class, 'destroy']);
+    Route::post('/agents/{agent}/duplicate', [AgentController::class, 'duplicate']);
+    Route::get('/agents/{agent}/export', [AgentController::class, 'export']);
+
+    // Agents — project-scoped
     Route::get('/projects/{project}/agents', [AgentController::class, 'projectAgents']);
     Route::put('/projects/{project}/agents/{agent}/toggle', [AgentController::class, 'toggle']);
     Route::put('/projects/{project}/agents/{agent}/instructions', [AgentController::class, 'updateInstructions']);
     Route::put('/projects/{project}/agents/{agent}/skills', [AgentController::class, 'assignSkills']);
+    Route::put('/projects/{project}/agents/{agent}/mcp-servers', [AgentController::class, 'bindMcpServers']);
+    Route::put('/projects/{project}/agents/{agent}/a2a-agents', [AgentController::class, 'bindA2aAgents']);
     Route::get('/projects/{project}/agents/{agent}/compose', [AgentController::class, 'compose']);
+    Route::get('/projects/{project}/agents/{agent}/compose-structured', [AgentController::class, 'composeStructured']);
     Route::get('/projects/{project}/agents/compose', [AgentController::class, 'composeAll']);
 
     // Bundles (Export/Import)

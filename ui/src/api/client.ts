@@ -8,8 +8,10 @@ import type {
   LibrarySkill,
   MarketplaceSkill,
   ModelGroup,
+  Agent,
   ProjectAgent,
   AgentComposed,
+  AgentStructured,
   GeneratedSkill,
   LintIssue,
   GitLogEntry,
@@ -271,7 +273,29 @@ export const importSkillSh = (
     project_id: projectId,
   })
 
-// Agents
+// Agents — global CRUD
+export const fetchAgents = () =>
+  api.get<ApiResponse<Agent[]>>('/agents').then((r) => r.data.data)
+
+export const fetchAgent = (agentId: number) =>
+  api.get<ApiResponse<Agent>>(`/agents/${agentId}`).then((r) => r.data.data)
+
+export const createAgent = (data: Partial<Agent>) =>
+  api.post<ApiResponse<Agent>>('/agents', data).then((r) => r.data.data)
+
+export const updateAgent = (agentId: number, data: Partial<Agent>) =>
+  api.put<ApiResponse<Agent>>(`/agents/${agentId}`, data).then((r) => r.data.data)
+
+export const deleteAgent = (agentId: number) =>
+  api.delete(`/agents/${agentId}`)
+
+export const duplicateAgent = (agentId: number) =>
+  api.post<ApiResponse<Agent>>(`/agents/${agentId}/duplicate`).then((r) => r.data.data)
+
+export const exportAgent = (agentId: number, format: 'json' | 'yaml' = 'json') =>
+  api.get(`/agents/${agentId}/export`, { params: { format } }).then((r) => r.data)
+
+// Agents — project-scoped
 export const fetchProjectAgents = (projectId: number) =>
   api
     .get<ApiResponse<ProjectAgent[]>>(`/projects/${projectId}/agents`)
@@ -298,11 +322,36 @@ export const assignAgentSkills = (
     skill_ids: skillIds,
   })
 
+export const bindAgentMcpServers = (
+  projectId: number,
+  agentId: number,
+  mcpServerIds: number[],
+) =>
+  api.put(`/projects/${projectId}/agents/${agentId}/mcp-servers`, {
+    mcp_server_ids: mcpServerIds,
+  })
+
+export const bindAgentA2aAgents = (
+  projectId: number,
+  agentId: number,
+  a2aAgentIds: number[],
+) =>
+  api.put(`/projects/${projectId}/agents/${agentId}/a2a-agents`, {
+    a2a_agent_ids: a2aAgentIds,
+  })
+
 // Agent Compose
 export const fetchAgentCompose = (projectId: number, agentId: number) =>
   api
     .get<ApiResponse<AgentComposed>>(
       `/projects/${projectId}/agents/${agentId}/compose`,
+    )
+    .then((r) => r.data.data)
+
+export const fetchAgentComposeStructured = (projectId: number, agentId: number) =>
+  api
+    .get<ApiResponse<AgentStructured>>(
+      `/projects/${projectId}/agents/${agentId}/compose-structured`,
     )
     .then((r) => r.data.data)
 

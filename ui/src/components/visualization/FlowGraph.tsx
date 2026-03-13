@@ -78,7 +78,7 @@ function buildGraph(data: ProjectGraphData) {
     position: { x: LANE.providers, y: 0 },
     data: {
       label: 'Integrations',
-      count: data.providers.length + data.mcp_servers.length,
+      count: data.providers.length + data.mcp_servers.length + (data.a2a_agents?.length ?? 0),
     },
     draggable: false,
     selectable: false,
@@ -103,8 +103,18 @@ function buildGraph(data: ProjectGraphData) {
         isEnabled: agent.is_enabled,
         hasCustomInstructions: agent.has_custom_instructions,
         skillCount: agent.skill_ids.length,
+        model: agent.model,
+        planningMode: agent.planning_mode,
+        contextStrategy: agent.context_strategy,
+        loopCondition: agent.loop_condition,
+        maxIterations: agent.max_iterations,
+        canDelegate: agent.can_delegate,
+        hasLoopConfig: agent.has_loop_config,
+        mcpCount: agent.mcp_server_ids?.length ?? 0,
+        a2aCount: agent.a2a_agent_ids?.length ?? 0,
       },
       sourcePosition: Position.Right,
+      targetPosition: Position.Left,
     })
 
     // Place this agent's skills in the skills lane
@@ -242,6 +252,71 @@ function buildGraph(data: ProjectGraphData) {
 
     providerY += NODE_GAP_Y
   })
+
+  // A2A agents
+  ;(data.a2a_agents ?? []).forEach((a2a) => {
+    nodes.push({
+      id: `a2a-${a2a.id}`,
+      type: 'mcpNode', // reuse MCP node style for now
+      position: { x: LANE.mcp, y: providerY },
+      data: {
+        label: a2a.name,
+        transport: 'A2A',
+      },
+      targetPosition: Position.Left,
+    })
+
+    providerY += NODE_GAP_Y
+  })
+
+  // Agent → MCP server edges
+  data.agent_edges
+    .filter((e) => e.type === 'uses_tool' && e.target_type === 'mcp_server')
+    .forEach((edge) => {
+      edges.push({
+        id: `e-agent-mcp-${edge.source}-${edge.target}`,
+        source: `agent-${edge.source}`,
+        target: `mcp-${edge.target}`,
+        type: 'smoothstep',
+        animated: false,
+        style: { stroke: '#ec4899', strokeWidth: 1.5, strokeDasharray: '4 3' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#ec4899', width: 12, height: 12 },
+      })
+    })
+
+  // Agent → A2A agent edges
+  data.agent_edges
+    .filter((e) => e.type === 'delegates_to' && e.target_type === 'a2a_agent')
+    .forEach((edge) => {
+      edges.push({
+        id: `e-agent-a2a-${edge.source}-${edge.target}`,
+        source: `agent-${edge.source}`,
+        target: `a2a-${edge.target}`,
+        type: 'smoothstep',
+        animated: true,
+        style: { stroke: '#06b6d4', strokeWidth: 1.5 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#06b6d4', width: 12, height: 12 },
+      })
+    })
+
+  // Parent → child agent edges
+  data.agent_edges
+    .filter((e) => e.type === 'parent_of' && e.target_type === 'agent')
+    .forEach((edge) => {
+      edges.push({
+        id: `e-parent-${edge.source}-${edge.target}`,
+        source: `agent-${edge.source}`,
+        target: `agent-${edge.target}`,
+        type: 'smoothstep',
+        animated: false,
+        style: { stroke: '#a78bfa', strokeWidth: 2, strokeDasharray: '8 4' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#a78bfa', width: 14, height: 14 },
+        label: 'delegates',
+        labelStyle: { fill: '#9ca3af', fontSize: 10 },
+        labelBgStyle: { fill: '#18181b', fillOpacity: 0.9 },
+        labelBgPadding: [4, 2] as [number, number],
+      })
+    })
 
   // Edges from skills to providers (all assigned skills fan out to each provider)
   // This would be too noisy — instead connect at the project level concept

@@ -15,6 +15,8 @@ import { ProjectForm } from '@/pages/ProjectForm'
 import { ProjectSettings } from '@/pages/ProjectSettings'
 import { Billing } from '@/pages/Billing'
 import { ProjectVisualize } from '@/pages/ProjectVisualize'
+import { Agents } from '@/pages/Agents'
+import { AgentBuilder } from '@/pages/AgentBuilder'
 import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 
@@ -52,6 +54,9 @@ function AppContent() {
                   <Route path="/projects/:id/settings" element={<ProjectSettings />} />
                   <Route path="/skills/new" element={<SkillEditor />} />
                   <Route path="/skills/:id" element={<SkillEditor />} />
+                  <Route path="/agents" element={<Agents />} />
+                  <Route path="/agents/new" element={<AgentBuilder />} />
+                  <Route path="/agents/:id" element={<AgentBuilder />} />
                   <Route path="/library" element={<Library />} />
                   {/* <Route path="/marketplace" element={<Marketplace />} /> */}
                   <Route path="/playground" element={<Playground />} />
