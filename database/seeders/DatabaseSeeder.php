@@ -18,8 +18,8 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            ['name' => 'Test User', 'password' => bcrypt('password')],
+            ['email' => 'admin@admin.com'],
+            ['name' => 'Admin', 'password' => bcrypt('password')],
         );
 
         $this->call(LibrarySkillSeeder::class);

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OpenClawConfig extends Model
 {
+    protected $table = 'openclaw_configs';
+
     protected $fillable = [
         'project_id',
         'soul_content',
