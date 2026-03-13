@@ -4,23 +4,26 @@ import {
   Sun,
   Moon,
   Layers,
-  Code2,
+  Bot,
   Play,
-  History,
-  BookOpen,
-  FolderGit2,
+  GitBranch,
+  Wrench,
+  Eye,
   Check,
   ChevronDown,
   ChevronUp,
   ArrowRight,
-  FileText,
-  RefreshCw,
+  Cpu,
+  Network,
   Rocket,
   Shield,
   Server,
-  Github,
   Menu,
   X,
+  Brain,
+  Zap,
+  BarChart3,
+  Lock,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -129,97 +132,118 @@ function useActiveSection(ids: string[]) {
 // Data
 // ---------------------------------------------------------------------------
 
-const SECTION_IDS = ['features', 'how-it-works', 'pricing', 'faq']
-const PROVIDERS = ['Claude', 'Cursor', 'Copilot', 'Windsurf', 'Cline', 'OpenAI']
+const SECTION_IDS = ['features', 'how-it-works', 'architecture', 'pricing', 'faq']
+const INTEGRATIONS = ['MCP Servers', 'A2A Protocol', 'Claude', 'OpenAI', 'Gemini', 'Ollama']
 
-const HERO_CODE = `---
-id: summarize-doc
-name: Summarize Document
-description: Summarizes any document to key bullet points
-tags: [summarization, documents]
-model: claude-sonnet-4-6
----
+const HERO_CODE = `agent:
+  name: Code Reviewer
+  role: senior-engineer
+  model: claude-sonnet-4-6
+  goal:
+    objective: Review PR for bugs and security
+    max_iterations: 10
+  tools:
+    mcp: [github-server, lint-server]
+    a2a: [security-scanner]
+  guardrails:
+    max_cost: $5.00
+    tool_allowlist: [read_file, search]
 
-You are a precise document summarizer.
-Extract the key points and present them as
-concise bullet points...`
+workflow:
+  steps: [review, scan, report]
+  checkpoints: [human-approval]`
 
 const FEATURES = [
   {
-    icon: Layers,
-    title: 'Provider-Agnostic Skills',
-    description: 'Write once, sync everywhere. Define skills in a universal YAML + Markdown format.',
+    icon: Bot,
+    title: 'Agent Designer',
+    description: 'Design agents as full loop definitions — Goal, Perceive, Reason, Act, Observe. Export to any framework.',
   },
   {
-    icon: Code2,
-    title: 'Monaco Editor',
-    description: 'Full IDE-grade editing with syntax highlighting, autocomplete, and YAML validation.',
+    icon: GitBranch,
+    title: 'Workflow Orchestration',
+    description: 'Build multi-agent workflows as visual DAGs. Delegation chains, parallel execution, conditional routing.',
   },
   {
     icon: Play,
-    title: 'Live Testing',
-    description: 'Stream responses in real-time with SSE. Test skills against any model instantly.',
+    title: 'Live Execution Engine',
+    description: 'Run agents with real tool calls. Watch the execution loop step by step with full trace visibility.',
   },
   {
-    icon: History,
-    title: 'Version History',
-    description: 'Track every change with automatic snapshots and side-by-side diff viewer.',
+    icon: Wrench,
+    title: 'MCP & A2A Integration',
+    description: 'Connect to any MCP tool server or delegate to remote agents via the A2A protocol. Plug in, not bolt on.',
   },
   {
-    icon: BookOpen,
-    title: 'Skill Library',
-    description: '25+ curated skills ready to import. Build on proven prompts from the community.',
+    icon: BarChart3,
+    title: 'Cost & Observability',
+    description: 'Per-model token pricing, execution traces, run analytics. Know exactly what your agents cost.',
   },
   {
-    icon: FolderGit2,
-    title: 'Multi-Project',
-    description: 'Manage skills across all your repositories from a single unified dashboard.',
+    icon: Shield,
+    title: 'Runtime Guardrails',
+    description: 'Budget limits, tool allowlists, PII detection, output safety checks. Ship agents you can trust.',
+  },
+  {
+    icon: Brain,
+    title: 'Agent Memory',
+    description: 'Working memory, long-term persistence, conversation history. Agents that remember context across runs.',
+  },
+  {
+    icon: Layers,
+    title: 'Provider Sync',
+    description: 'Define skills once, sync to Claude, Cursor, Copilot, Windsurf, Cline, and OpenAI config formats.',
+  },
+  {
+    icon: Eye,
+    title: 'Human-in-the-Loop',
+    description: 'Checkpoint gates in workflows that pause for human approval before proceeding. Stay in control.',
   },
 ]
 
 const HOW_IT_WORKS = [
   {
-    icon: FileText,
+    icon: Cpu,
     step: '01',
-    title: 'Define',
-    description: 'Write your AI skills in a simple YAML + Markdown format inside an .agentis/ directory.',
+    title: 'Design',
+    description: 'Define agents with goals, tools, and reasoning strategies. Compose skills, bind MCP servers, configure guardrails.',
   },
   {
-    icon: RefreshCw,
+    icon: Network,
     step: '02',
-    title: 'Sync',
-    description: 'One click generates the correct config files for every AI provider you use.',
+    title: 'Orchestrate',
+    description: 'Wire agents into workflows with the visual DAG builder. Add checkpoints, conditions, and parallel branches.',
   },
   {
     icon: Rocket,
     step: '03',
-    title: 'Use',
-    description: 'Your AI coding assistants pick up the synced configs automatically. Start prompting.',
+    title: 'Execute',
+    description: 'Run agents live with real tool calls. Track every step, monitor costs, and review full execution traces.',
   },
 ]
 
 const STATS = [
-  { value: '6', label: 'Providers' },
-  { value: '25+', label: 'Curated Skills' },
-  { value: '100%', label: 'Open Source' },
-  { value: '<1 min', label: 'Setup Time' },
+  { value: '6', label: 'LLM Providers' },
+  { value: 'MCP + A2A', label: 'Tool Protocols' },
+  { value: 'Cloud + On-Prem', label: 'Deployment' },
+  { value: '3 min', label: 'To First Agent Run' },
 ]
 
 const TESTIMONIALS = [
   {
-    quote: 'Agentis Studio eliminated the pain of maintaining separate prompt configs for every tool. One source of truth changes everything.',
+    quote: 'We went from manually wiring LangChain agents to designing full multi-agent workflows visually. Agentis Studio is what we needed all along.',
     name: 'Sarah Chen',
     role: 'Staff Engineer',
     company: 'Vercel',
   },
   {
-    quote: "I used to copy-paste prompts between .cursorrules and CLAUDE.md manually. Now I just hit sync. It's a no-brainer.",
+    quote: 'The execution engine with MCP tool integration means our agents actually do things, not just talk about doing things. Game changer.',
     name: 'Marcus Rivera',
     role: 'Senior Developer',
     company: 'Stripe',
   },
   {
-    quote: 'The version history and diff viewer alone are worth it. We finally have an audit trail for our AI prompts.',
+    quote: 'Budget guardrails and cost tracking gave us the confidence to let agents run in production. We know exactly what every run costs.',
     name: 'Anya Kapoor',
     role: 'Engineering Lead',
     company: 'Shopify',
@@ -231,12 +255,12 @@ const PRICING = [
     name: 'Free',
     price: '$0',
     period: 'forever',
-    description: 'For individual developers getting started',
+    description: 'For individual developers and experimentation',
     features: [
       'Up to 3 projects',
-      'Unlimited skills per project',
-      '6 provider sync targets',
-      'Version history',
+      'Agent designer & workflows',
+      'MCP tool integration',
+      'Execution playground',
       'Community support',
     ],
     cta: 'Get Started',
@@ -244,28 +268,28 @@ const PRICING = [
   },
   {
     name: 'Pro',
-    price: '$12',
+    price: '$19',
     period: '/month',
-    description: 'For power users who need more',
+    description: 'For developers shipping agents to production',
     features: [
-      'Unlimited projects',
-      'Priority sync & builds',
-      'Advanced analytics',
-      'Playground with all models',
-      'Priority email support',
+      'Unlimited projects & agents',
+      'Full execution engine',
+      'Cost analytics & traces',
+      'A2A agent delegation',
+      'Priority support',
     ],
     cta: 'Start Free Trial',
     highlighted: true,
   },
   {
     name: 'Team',
-    price: '$29',
+    price: '$39',
     period: '/seat/month',
-    description: 'For teams collaborating on AI workflows',
+    description: 'For teams building multi-agent systems',
     features: [
       'Everything in Pro',
-      'Team skill sharing',
-      'Role-based access control',
+      'Shared agent library',
+      'Workflow collaboration',
       'SSO / SAML',
       'Dedicated support',
     ],
@@ -277,27 +301,31 @@ const PRICING = [
 const FAQ = [
   {
     q: 'What is Agentis Studio?',
-    a: 'Agentis Studio is a universal AI skill and agent configuration manager. It lets you define reusable AI prompts in a provider-agnostic format, then sync them to the native config of any supported AI coding assistant.',
+    a: 'Agentis Studio is a platform for designing, orchestrating, and running AI agents. Define agents as complete loop definitions (Goal, Perceive, Reason, Act, Observe), wire them into multi-agent workflows, connect real tools via MCP and A2A protocols, and execute everything with built-in cost tracking and safety guardrails.',
   },
   {
-    q: 'How does provider sync work?',
-    a: 'Your skills are stored in a canonical YAML + Markdown format in an .agentis/ directory. When you trigger a sync, Agentis Studio generates the correct config files for each provider — .claude/CLAUDE.md, .cursor/rules/, .github/copilot-instructions.md, and more.',
+    q: 'How is this different from LangChain or CrewAI?',
+    a: 'Agentis Studio is a visual design-and-runtime platform, not a code framework. You design agents and workflows in a UI, then either run them directly in the built-in execution engine or export to LangGraph, CrewAI, or generic JSON for use in your own codebase. It is framework-agnostic.',
   },
   {
-    q: 'Which AI providers are supported?',
-    a: 'Claude (Anthropic), Cursor, GitHub Copilot, Windsurf, Cline, and OpenAI. Each provider gets its own sync driver that outputs the correct file format.',
+    q: 'What are MCP and A2A?',
+    a: 'MCP (Model Context Protocol) lets agents call tools hosted on external servers — file systems, databases, APIs. A2A (Agent-to-Agent) lets agents delegate tasks to other agents over HTTP. Agentis Studio has built-in clients for both protocols.',
+  },
+  {
+    q: 'Can agents actually execute tools, or is this just configuration?',
+    a: 'Both. You can design agents and export configs, or run them live in the execution engine. The engine connects to real MCP tool servers, dispatches tool calls, tracks token usage and costs, and enforces budget guardrails — all in real time.',
   },
   {
     q: 'Can I self-host Agentis Studio?',
-    a: 'Yes. Agentis Studio is built on Laravel and ships with Docker Compose for easy self-hosting. Run it on your own infrastructure with full control over your data.',
+    a: 'Yes. Agentis Studio offers a self-hosted option with a commercial license. Deploy on your own infrastructure with Docker Compose, keeping full control over your data, API keys, and execution environment. Contact us for self-hosted licensing details.',
   },
   {
-    q: 'Is there a free tier?',
-    a: 'Absolutely. The free tier includes up to 3 projects with unlimited skills, full provider sync, version history, and access to the skill library. No credit card required.',
+    q: 'What LLM providers are supported?',
+    a: 'Anthropic (Claude), OpenAI (GPT, o-series), Google (Gemini), and any Ollama-compatible local model. The execution engine routes to the correct provider based on the model configured for each agent.',
   },
   {
-    q: 'Is my data secure?',
-    a: 'Your prompts and configurations never leave your infrastructure. Agentis Studio is fully self-hostable, and the cloud-hosted version encrypts all data at rest and in transit.',
+    q: 'How do guardrails work?',
+    a: 'Every execution run enforces configurable budget limits (max tokens, max cost, max iterations), tool allowlists/blocklists with dangerous input detection, and output safety checks for PII and credential leakage. Guardrails are built into the execution loop, not bolted on.',
   },
 ]
 
@@ -457,6 +485,9 @@ export function Landing() {
             <button onClick={() => scrollTo('how-it-works')} className={navLinkClass('how-it-works')}>
               How It Works
             </button>
+            <button onClick={() => scrollTo('architecture')} className={navLinkClass('architecture')}>
+              Architecture
+            </button>
             <button onClick={() => scrollTo('pricing')} className={navLinkClass('pricing')}>
               Pricing
             </button>
@@ -504,6 +535,9 @@ export function Landing() {
               <button onClick={() => scrollTo('how-it-works')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
                 How It Works
               </button>
+              <button onClick={() => scrollTo('architecture')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
+                Architecture
+              </button>
               <button onClick={() => scrollTo('pricing')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
                 Pricing
               </button>
@@ -536,13 +570,13 @@ export function Landing() {
         <div className="relative max-w-6xl mx-auto">
           <div className="max-w-3xl">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1]">
-              One source of truth
+              Design, orchestrate,
               <br />
-              <span className="text-primary">for all your AI skills</span>
+              <span className="text-primary">and run AI agents</span>
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-              Define, edit, and organize reusable AI prompts in a provider-agnostic format.
-              Sync to Claude, Cursor, Copilot, Windsurf, Cline, and OpenAI.
+              The platform for building multi-agent systems. Visual agent designer,
+              workflow orchestration, live execution with MCP tools, cost tracking, and guardrails.
             </p>
             <div className="flex flex-wrap gap-3 mt-8">
               <Link to="/register">
@@ -566,7 +600,7 @@ export function Landing() {
                 <div className="h-2.5 w-2.5 rounded-full bg-muted-foreground/20" />
               </div>
               <span className="text-xs text-muted-foreground font-mono ml-2">
-                .agentis/skills/summarize-doc.md
+                agent-definition.yaml
               </span>
             </div>
             <pre className="p-5 text-sm font-mono leading-relaxed overflow-x-auto min-h-[280px]">
@@ -593,10 +627,10 @@ export function Landing() {
           <div className="max-w-6xl mx-auto">
             <div className="bg-card border border-border elevation-1 px-6 py-5 flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                Works with
+                Integrates with
               </span>
               <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-                {PROVIDERS.map((p) => (
+                {INTEGRATIONS.map((p) => (
                   <span
                     key={p}
                     className="text-sm font-medium text-foreground/70 px-3 py-1.5 bg-muted/50"
@@ -629,10 +663,10 @@ export function Landing() {
           <FadeIn>
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                Everything you need to manage AI skills
+                The complete agent development platform
               </h2>
               <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
-                A complete toolkit for defining, testing, versioning, and syncing your AI prompts across every provider.
+                From agent design to multi-agent orchestration to live execution — everything you need to build, run, and monitor AI agent systems.
               </p>
             </div>
           </FadeIn>
@@ -664,7 +698,7 @@ export function Landing() {
                 How it works
               </h2>
               <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
-                Three steps to unified AI skill management.
+                From concept to running agents in three steps.
               </p>
             </div>
           </FadeIn>
@@ -703,10 +737,10 @@ export function Landing() {
           <FadeIn>
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                Loved by developers
+                Built for agent developers
               </h2>
               <p className="text-muted-foreground mt-3 text-lg">
-                See what engineers are saying about Agentis Studio.
+                See what engineers building with agents are saying.
               </p>
             </div>
           </FadeIn>
@@ -732,6 +766,83 @@ export function Landing() {
       </section>
 
       {/* ----------------------------------------------------------------- */}
+      {/* Architecture                                                      */}
+      {/* ----------------------------------------------------------------- */}
+      <section id="architecture" className="py-20 sm:py-28 px-4 sm:px-6 bg-muted/30">
+        <div className="max-w-5xl mx-auto">
+          <FadeIn>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                Three layers, one platform
+              </h2>
+              <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
+                Agentis Studio is built as a layered architecture. Each layer builds on the one below.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="space-y-4">
+            <FadeIn>
+              <div className="bg-card border border-primary/30 p-6 elevation-2">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 bg-primary flex items-center justify-center shrink-0">
+                    <Zap className="h-5 w-5 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Runtime Layer</h3>
+                    <p className="text-xs text-muted-foreground">Execute agents, track costs, enforce guardrails</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 ml-[52px]">
+                  {['Execution Engine', 'MCP Client', 'A2A Protocol', 'Cost Tracking', 'Budget Guards', 'Memory'].map((t) => (
+                    <span key={t} className="text-xs px-2.5 py-1 bg-primary/10 text-primary">{t}</span>
+                  ))}
+                </div>
+              </div>
+            </FadeIn>
+
+            <FadeIn>
+              <div className="bg-card border border-border p-6 elevation-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 bg-muted flex items-center justify-center shrink-0">
+                    <Network className="h-5 w-5 text-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Orchestration Layer</h3>
+                    <p className="text-xs text-muted-foreground">Multi-agent workflows, DAGs, delegation chains</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 ml-[52px]">
+                  {['Workflow Builder', 'DAG Validation', 'Checkpoints', 'Conditions', 'Parallel Execution', 'Context Bus'].map((t) => (
+                    <span key={t} className="text-xs px-2.5 py-1 bg-muted text-muted-foreground">{t}</span>
+                  ))}
+                </div>
+              </div>
+            </FadeIn>
+
+            <FadeIn>
+              <div className="bg-card border border-border p-6 elevation-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 bg-muted flex items-center justify-center shrink-0">
+                    <Layers className="h-5 w-5 text-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Component Layer</h3>
+                    <p className="text-xs text-muted-foreground">Skills, tools, agents, provider sync</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 ml-[52px]">
+                  {['Agent Designer', 'Skills Editor', 'Provider Sync', 'MCP Servers', 'A2A Agents', 'Version History'].map((t) => (
+                    <span key={t} className="text-xs px-2.5 py-1 bg-muted text-muted-foreground">{t}</span>
+                  ))}
+                </div>
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
       {/* Security & self-host callout                                      */}
       {/* ----------------------------------------------------------------- */}
       <FadeIn>
@@ -740,16 +851,16 @@ export function Landing() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">
-                  Your data, your infrastructure
+                  Your agents, your infrastructure
                 </h2>
                 <p className="text-muted-foreground leading-relaxed mb-6">
-                  Agentis Studio is fully self-hostable. Your prompts and configurations never leave your servers. Deploy with Docker Compose in minutes.
+                  Run Agentis Studio on your own infrastructure with a self-hosted license. Your agent definitions, execution data, and API keys never leave your servers. Deploy with Docker Compose in minutes.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Link to="/register">
                     <Button size="sm" className="gap-2">
-                      <Github className="h-4 w-4" />
-                      View on GitHub
+                      Get Started
+                      <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
                 </div>
@@ -766,14 +877,14 @@ export function Landing() {
                   <p className="text-xs text-muted-foreground mt-1">Full control, no vendor lock-in</p>
                 </div>
                 <div className="bg-muted/50 border border-border p-4">
-                  <Github className="h-5 w-5 text-primary mb-2" />
-                  <h4 className="text-sm font-semibold text-foreground">Open Source</h4>
-                  <p className="text-xs text-muted-foreground mt-1">Audit the code yourself</p>
-                </div>
-                <div className="bg-muted/50 border border-border p-4">
                   <Layers className="h-5 w-5 text-primary mb-2" />
                   <h4 className="text-sm font-semibold text-foreground">Docker Ready</h4>
                   <p className="text-xs text-muted-foreground mt-1">One command to deploy</p>
+                </div>
+                <div className="bg-muted/50 border border-border p-4">
+                  <Lock className="h-5 w-5 text-primary mb-2" />
+                  <h4 className="text-sm font-semibold text-foreground">Guardrails</h4>
+                  <p className="text-xs text-muted-foreground mt-1">Budget limits, PII detection, tool sandboxing</p>
                 </div>
               </div>
             </div>
@@ -901,10 +1012,10 @@ export function Landing() {
             </div>
             <div className="relative">
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                Ready to unify your AI skills?
+                Ready to build your first agent?
               </h2>
               <p className="text-muted-foreground mt-3 max-w-lg mx-auto">
-                Get started for free. No credit card required.
+                Design, orchestrate, and run agents in minutes. Free to start, no credit card required.
               </p>
               <div className="mt-8">
                 <Link to="/register">
@@ -933,7 +1044,7 @@ export function Landing() {
                 <span className="font-semibold text-sm">Agentis Studio</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Universal AI skill configuration manager for multi-provider development workflows.
+                The platform for designing, orchestrating, and running AI agents.
               </p>
             </div>
 
@@ -945,6 +1056,11 @@ export function Landing() {
                 <li>
                   <button onClick={() => scrollTo('features')} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
                     Features
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => scrollTo('architecture')} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
+                    Architecture
                   </button>
                 </li>
                 <li>

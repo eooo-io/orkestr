@@ -14,9 +14,7 @@ class LLMProviderFactory
         return match (true) {
             str_starts_with($model, 'claude-') => new AnthropicProvider(),
             str_starts_with($model, 'gpt-'),
-            str_starts_with($model, 'o3'),
-            str_starts_with($model, 'o4'),
-            str_starts_with($model, 'o5') => new OpenAIProvider(),
+            str_starts_with($model, 'o3') => new OpenAIProvider(),
             str_starts_with($model, 'gemini-') => new GeminiProvider(),
             default => new OllamaProvider(),
         };
@@ -30,9 +28,7 @@ class LLMProviderFactory
         return match (true) {
             str_starts_with($model, 'claude-') => 'anthropic',
             str_starts_with($model, 'gpt-'),
-            str_starts_with($model, 'o3'),
-            str_starts_with($model, 'o4'),
-            str_starts_with($model, 'o5') => 'openai',
+            str_starts_with($model, 'o3') => 'openai',
             str_starts_with($model, 'gemini-') => 'gemini',
             default => 'ollama',
         };
@@ -97,11 +93,13 @@ class LLMProviderFactory
             'claude-sonnet-4-6' => 200000,
             'claude-haiku-4-5-20251001' => 200000,
             'gpt-5.4' => 1048576,
+            'gpt-5.4-thinking' => 1048576,
             'gpt-5-mini' => 1048576,
+            'gpt-5.3-instant' => 1048576,
             'o3' => 200000,
-            'o4-mini' => 200000,
-            'gemini-3.1-pro-preview' => 1048576,
-            'gemini-3-flash-preview' => 1048576,
+            'gemini-3.1-pro' => 1048576,
+            'gemini-3-flash' => 1048576,
+            'gemini-3.1-flash-lite' => 1048576,
         ];
 
         $labels = [
@@ -109,11 +107,13 @@ class LLMProviderFactory
             'claude-sonnet-4-6' => 'Claude Sonnet 4.6',
             'claude-haiku-4-5-20251001' => 'Claude Haiku 4.5',
             'gpt-5.4' => 'GPT-5.4',
+            'gpt-5.4-thinking' => 'GPT-5.4 Thinking',
             'gpt-5-mini' => 'GPT-5 Mini',
+            'gpt-5.3-instant' => 'GPT-5.3 Instant',
             'o3' => 'o3',
-            'o4-mini' => 'o4-mini',
-            'gemini-3.1-pro-preview' => 'Gemini 3.1 Pro',
-            'gemini-3-flash-preview' => 'Gemini 3 Flash',
+            'gemini-3.1-pro' => 'Gemini 3.1 Pro',
+            'gemini-3-flash' => 'Gemini 3 Flash',
+            'gemini-3.1-flash-lite' => 'Gemini 3.1 Flash Lite',
         ];
 
         return array_map(fn (string $id) => [

@@ -113,9 +113,10 @@ class OpenAIProvider implements LLMProviderInterface
     {
         return [
             'gpt-5.4',
+            'gpt-5.4-thinking',
             'gpt-5-mini',
+            'gpt-5.3-instant',
             'o3',
-            'o4-mini',
         ];
     }
 }

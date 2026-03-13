@@ -125,8 +125,9 @@ class GeminiProvider implements LLMProviderInterface
     public function models(): array
     {
         return [
-            'gemini-3.1-pro-preview',
-            'gemini-3-flash-preview',
+            'gemini-3.1-pro',
+            'gemini-3-flash',
+            'gemini-3.1-flash-lite',
         ];
     }
 }
