@@ -17,10 +17,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <Menu className="h-5 w-5" />
         </button>
         <div className="flex items-center gap-2">
-          <div className="h-6 w-6 bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-[11px]">A</span>
-          </div>
-          <span className="font-semibold text-sm tracking-tight">Agentis Studio</span>
+          <img src="/logo.png" alt="eooo.ai" className="h-6 w-6 object-contain" />
+          <span className="font-semibold text-sm tracking-tight">eooo.ai</span>
         </div>
       </div>
 

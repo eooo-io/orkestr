@@ -7,20 +7,25 @@
 
 ## Roadmap Overview
 
-Agentis Studio is evolving from a skill/config sync tool into a full agent configuration, orchestration, and runtime platform. The roadmap has three phases:
+Agentis Studio is evolving from a skill/config sync tool into a full agent configuration, orchestration, and runtime platform. The roadmap has four phases:
 
 ```
-Phase A — Agent Designer
+Phase A — Agent Designer  (COMPLETE)
   Design agents as full loop definitions (Goal → Perceive → Reason → Act → Observe).
   Export to Claude Agent SDK, LangGraph, CrewAI, and generic JSON.
 
-Phase B — Orchestration
+Phase B — Orchestration  (COMPLETE)
   Multi-agent workflows as DAGs. Visual workflow builder. Human-in-the-loop checkpoints.
   Delegation chains, handoff conditions, shared context.
 
-Phase C — Design + Runtime
+Phase C — Design + Runtime  (COMPLETE)
   Lightweight agent runtime inside Agentis. Execute agent loops with real tool calls.
   Playground evolves into execution environment. Memory persistence. Traces & cost tracking.
+
+Phase D — Production-Ready Agent Teams  (IN PROGRESS)
+  Multi-model routing & fallback chains. Agent schedules & event triggers.
+  Organization & team management. Agent autonomy levels & permissions.
+  Performance dashboards. Competitive positioning.
 ```
 
 The existing Component Layer (skills, provider sync, MCP, A2A) remains the foundation. Each phase builds on the previous.
@@ -73,6 +78,7 @@ Observe (result fed back into context)
 **Phase A COMPLETE** — Agent Designer (25 issues, all closed).
 **Phase B COMPLETE** — Orchestration (27 issues, all closed).
 **Phase C COMPLETE** — Design + Runtime (35 issues, all closed).
+**Phase D IN PROGRESS** — Production-Ready Agent Teams (29 issues across 5 milestones).
 
 ---
 
@@ -448,6 +454,66 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 - [x] #72 — OpenAI, Gemini, Ollama support
 
 </details>
+
+---
+
+## Phase D: Production-Ready Agent Teams
+
+> **Motivation:** Address five strategic concerns identified during competitive analysis — ensure Agentis Studio has a defensible moat against provider-native tooling, code frameworks, and funded competitors.
+
+### D.1 — Multi-Model Routing & Fallbacks
+
+| Issue | Title | Status |
+|---|---|---|
+| #171 | Per-step model override in workflow nodes | TODO |
+| #172 | Model fallback chain configuration | TODO |
+| #173 | Cost-optimized model routing | TODO |
+| #174 | Provider health monitoring & status | TODO |
+| #175 | Multi-model execution trace attribution | TODO |
+
+### D.2 — Agent Schedules & Event Triggers
+
+| Issue | Title | Status |
+|---|---|---|
+| #176 | Agent schedule data model & migration | TODO |
+| #177 | Cron schedule builder UI | TODO |
+| #178 | Schedule management API endpoints | TODO |
+| #179 | Webhook-triggered agent execution | TODO |
+| #180 | Trigger configuration UI | TODO |
+| #181 | Scheduled execution queue & worker | TODO |
+
+### D.3 — Organization & Team Completion
+
+| Issue | Title | Status |
+|---|---|---|
+| #182 | Organization switcher component | TODO |
+| #183 | Team invitation flow (API + UI) | TODO |
+| #184 | Role enforcement in API controllers | TODO |
+| #185 | Workspace settings page | TODO |
+| #186 | Organization-scoped data isolation | TODO |
+| #187 | Organization API endpoints | TODO |
+
+### D.4 — Agent Autonomy & Permissions
+
+| Issue | Title | Status |
+|---|---|---|
+| #188 | Agent autonomy levels | TODO |
+| #189 | Per-agent budget envelopes | TODO |
+| #190 | Agent tool scope configuration | TODO |
+| #191 | Human approval gate for tool calls | TODO |
+| #192 | Agent data access boundaries | TODO |
+| #193 | Agent audit log | TODO |
+
+### D.5 — Agent Performance & Competitive Positioning
+
+| Issue | Title | Status |
+|---|---|---|
+| #194 | Agent performance dashboard | TODO |
+| #195 | Agents-first navigation reframe | TODO |
+| #196 | Competitive comparison content | TODO |
+| #197 | Agent team overview page | TODO |
+| #198 | Landing page: sharpen provider-agnostic positioning | TODO |
+| #199 | Onboarding flow: first agent in 3 minutes | TODO |
 
 ---
 

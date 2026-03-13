@@ -53,11 +53,9 @@ export function Login() {
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
           <div className="flex justify-center mb-3">
-            <div className="h-10 w-10 bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-base">A</span>
-            </div>
+            <img src="/logo.png" alt="eooo.ai" className="h-10 w-10 object-contain" />
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">Agentis Studio</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">eooo.ai</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Sign in to your account
           </p>
