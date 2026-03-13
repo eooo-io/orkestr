@@ -7,7 +7,6 @@ import {
   Eye,
   LayoutGrid,
   List,
-  Pencil,
   BookOpen,
   Bot,
   Sparkles,
@@ -18,11 +17,11 @@ import {
   CheckSquare,
   Square,
   CheckCheck,
-  Globe,
   GitBranch,
   Server,
   Network,
   Terminal,
+  Settings2,
 } from 'lucide-react'
 import { fetchProject, fetchSkills, syncProject, scanProject, createSkill } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
@@ -30,12 +29,9 @@ import { SkillCard } from '@/components/skills/SkillCard'
 import { ImportLibraryModal } from '@/components/library/ImportLibraryModal'
 import { SkillsShImportModal } from '@/components/library/SkillsShImportModal'
 import { AgentsTab } from '@/components/agents/AgentsTab'
-import { WebhookSettings } from '@/components/webhooks/WebhookSettings'
-import { RepositorySettings } from '@/components/repository/RepositorySettings'
 import { McpServersTab } from '@/components/integrations/McpServersTab'
 import { A2aAgentsTab } from '@/components/integrations/A2aAgentsTab'
 import { OpenClawConfigTab } from '@/components/integrations/OpenClawConfigTab'
-import ImportTab from '@/components/integrations/ImportTab'
 import VisualizationTab from '@/components/visualization/VisualizationTab'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
 import { ExportModal } from '@/components/bundles/ExportModal'
@@ -51,7 +47,7 @@ export function ProjectDetail() {
   const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [activeTab, setActiveTab] = useState<'skills' | 'agents' | 'webhooks' | 'repository' | 'mcp' | 'a2a' | 'openclaw' | 'import' | 'visualize'>('skills')
+  const [activeTab, setActiveTab] = useState<'agents' | 'skills' | 'mcp' | 'a2a' | 'openclaw' | 'visualize'>('agents')
   const [showLibrary, setShowLibrary] = useState(false)
   const [showSkillsSh, setShowSkillsSh] = useState(false)
   const [showGenerate, setShowGenerate] = useState(false)
@@ -186,10 +182,10 @@ export function ProjectDetail() {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <Link to={`/projects/${project.id}/edit`}>
+          <Link to={`/projects/${project.id}/settings`}>
             <Button variant="ghost" size="sm">
-              <Pencil className="h-4 w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Edit</span>
+              <Settings2 className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Settings</span>
             </Button>
           </Link>
           <Button variant="outline" size="sm" onClick={handleScan}>
@@ -236,6 +232,17 @@ export function ProjectDetail() {
       {/* Tab Switcher */}
       <div className="flex items-center gap-1 mb-4 border-b border-border">
         <button
+          onClick={() => setActiveTab('agents')}
+          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
+            activeTab === 'agents'
+              ? 'border-primary text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Bot className="h-4 w-4" />
+          Agents
+        </button>
+        <button
           onClick={() => setActiveTab('skills')}
           className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
             activeTab === 'skills'
@@ -248,39 +255,6 @@ export function ProjectDetail() {
           <span className="ml-1 text-xs px-1.5 py-0.5 bg-muted">
             {skills.length}
           </span>
-        </button>
-        <button
-          onClick={() => setActiveTab('agents')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
-            activeTab === 'agents'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Bot className="h-4 w-4" />
-          Agents
-        </button>
-        <button
-          onClick={() => setActiveTab('webhooks')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
-            activeTab === 'webhooks'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Globe className="h-4 w-4" />
-          Webhooks
-        </button>
-        <button
-          onClick={() => setActiveTab('repository')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
-            activeTab === 'repository'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <GitBranch className="h-4 w-4" />
-          Repository
         </button>
         <button
           onClick={() => setActiveTab('mcp')}
@@ -314,17 +288,6 @@ export function ProjectDetail() {
         >
           <Terminal className="h-4 w-4" />
           OpenClaw
-        </button>
-        <button
-          onClick={() => setActiveTab('import')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
-            activeTab === 'import'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Download className="h-4 w-4" />
-          Import
         </button>
         <button
           onClick={() => setActiveTab('visualize')}
@@ -437,14 +400,6 @@ export function ProjectDetail() {
         <AgentsTab projectId={project.id} skills={skills} />
       )}
 
-      {activeTab === 'webhooks' && (
-        <WebhookSettings projectId={project.id} />
-      )}
-
-      {activeTab === 'repository' && (
-        <RepositorySettings projectId={project.id} />
-      )}
-
       {activeTab === 'mcp' && (
         <McpServersTab projectId={project.id} />
       )}
@@ -455,17 +410,6 @@ export function ProjectDetail() {
 
       {activeTab === 'openclaw' && (
         <OpenClawConfigTab projectId={project.id} />
-      )}
-
-      {activeTab === 'import' && (
-        <ImportTab
-          projectId={project.id}
-          projectPath={project.path}
-          onImported={async () => {
-            const sk = await fetchSkills(project.id)
-            setSkills(sk)
-          }}
-        />
       )}
 
       {activeTab === 'visualize' && (

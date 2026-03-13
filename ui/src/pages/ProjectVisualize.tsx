@@ -3,19 +3,13 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { fetchProjectGraph } from '@/api/client'
 import type { ProjectGraphData } from '@/types'
-import SkillDependencyGraph from '@/components/visualization/SkillDependencyGraph'
-import AgentCompositionTree from '@/components/visualization/AgentCompositionTree'
-import SyncFlowDiagram from '@/components/visualization/SyncFlowDiagram'
-import FullProjectOverview from '@/components/visualization/FullProjectOverview'
-
-type View = 'overview' | 'skills' | 'agents' | 'sync'
+import FlowGraph from '@/components/visualization/FlowGraph'
 
 export function ProjectVisualize() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [data, setData] = useState<ProjectGraphData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState<View>('overview')
 
   useEffect(() => {
     if (!id) return
@@ -47,15 +41,7 @@ export function ProjectVisualize() {
     )
   }
 
-  const views: { key: View; label: string }[] = [
-    { key: 'overview', label: 'Full Overview' },
-    { key: 'skills', label: 'Skill Dependencies' },
-    { key: 'agents', label: 'Agent Composition' },
-    { key: 'sync', label: 'Sync Flow' },
-  ]
-
-  // Full screen height minus header
-  const graphHeight = typeof window !== 'undefined' ? window.innerHeight - 64 : 600
+  const graphHeight = typeof window !== 'undefined' ? window.innerHeight - 52 : 600
 
   return (
     <div className="flex flex-col h-screen">
@@ -73,31 +59,31 @@ export function ProjectVisualize() {
           <span className="text-xs text-muted-foreground">Configuration Graph</span>
         </div>
 
-        <div className="flex gap-1">
-          {views.map((v) => (
-            <button
-              key={v.key}
-              onClick={() => setView(v.key)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                view === v.key
-                  ? 'bg-primary/20 text-primary'
-                  : 'text-muted-foreground hover:text-foreground bg-muted/30'
-              }`}
-            >
-              {v.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-3 text-xs text-zinc-400">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-sm bg-violet-500" />
+            Agents ({data.agents.length})
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-sm bg-emerald-500" />
+            Skills ({data.skills.length})
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-sm bg-amber-500" />
+            Providers ({data.providers.length})
+          </span>
+          {data.mcp_servers.length > 0 && (
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-sm bg-pink-500" />
+              MCP ({data.mcp_servers.length})
+            </span>
+          )}
         </div>
       </div>
 
       {/* Graph */}
       <div className="flex-1">
-        {view === 'overview' && (
-          <FullProjectOverview data={data} height={graphHeight} onNodeClick={handleNodeClick} />
-        )}
-        {view === 'skills' && <SkillDependencyGraph data={data} height={graphHeight} />}
-        {view === 'agents' && <AgentCompositionTree data={data} height={graphHeight} />}
-        {view === 'sync' && <SyncFlowDiagram data={data} height={graphHeight} />}
+        <FlowGraph data={data} height={graphHeight} onNodeClick={handleNodeClick} />
       </div>
     </div>
   )

@@ -12,6 +12,7 @@ import { Settings } from '@/pages/Settings'
 import { Playground } from '@/pages/Playground'
 // import { Marketplace } from '@/pages/Marketplace'
 import { ProjectForm } from '@/pages/ProjectForm'
+import { ProjectSettings } from '@/pages/ProjectSettings'
 import { Billing } from '@/pages/Billing'
 import { ProjectVisualize } from '@/pages/ProjectVisualize'
 import { Login } from '@/pages/Login'
@@ -48,7 +49,7 @@ function AppContent() {
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/projects/new" element={<ProjectForm />} />
                   <Route path="/projects/:id" element={<ProjectDetail />} />
-                  <Route path="/projects/:id/edit" element={<ProjectForm />} />
+                  <Route path="/projects/:id/settings" element={<ProjectSettings />} />
                   <Route path="/skills/new" element={<SkillEditor />} />
                   <Route path="/skills/:id" element={<SkillEditor />} />
                   <Route path="/library" element={<Library />} />
