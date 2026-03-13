@@ -1,360 +1,299 @@
 # Agentis Studio — Implementation Plan
 
 > This file tracks implementation progress across sessions.
-> Refer to `CLAUDE.md` for architecture details and `AGENTIS_STUDIO_PROJECT_PLAN.md` for the full spec.
+> Refer to `CLAUDE.md` for architecture details.
+
+---
+
+## Roadmap Overview
+
+Agentis Studio is evolving from a skill/config sync tool into a full agent configuration, orchestration, and runtime platform. The roadmap has three phases:
+
+```
+Phase A — Agent Designer
+  Design agents as full loop definitions (Goal → Perceive → Reason → Act → Observe).
+  Export to Claude Agent SDK, LangGraph, CrewAI, and generic JSON.
+
+Phase B — Orchestration
+  Multi-agent workflows as DAGs. Visual workflow builder. Human-in-the-loop checkpoints.
+  Delegation chains, handoff conditions, shared context.
+
+Phase C — Design + Runtime
+  Lightweight agent runtime inside Agentis. Execute agent loops with real tool calls.
+  Playground evolves into execution environment. Memory persistence. Traces & cost tracking.
+```
+
+The existing Component Layer (skills, provider sync, MCP, A2A) remains the foundation. Each phase builds on the previous.
+
+---
+
+## Architecture: The Agent Loop
+
+```
+Goal
+  │
+  ▼
+Perceive (input + memory retrieval)
+  │
+  ▼
+Reason (model + planning loop)
+  │
+  ▼
+Act (tool call or output)
+  │
+  ▼
+Observe (result fed back into context)
+  │
+  └──► Repeat until goal met or termination condition hit
+```
+
+### Three Layers
+
+```
+┌─────────────────────────────────────────┐
+│  Orchestration Layer  (Phase B)          │
+│  Workflows, DAGs, delegation chains,     │
+│  human-in-the-loop checkpoints           │
+├─────────────────────────────────────────┤
+│  Agent Layer  (Phase A)                  │
+│  Goal, Perceive, Reason, Act, Observe    │
+│  Each agent is a complete loop           │
+├─────────────────────────────────────────┤
+│  Component Layer  (Phases 1–26, done)    │
+│  Skills, Tools (MCP/A2A), Provider Sync, │
+│  Memory (context sources), Schemas       │
+└─────────────────────────────────────────┘
+```
 
 ---
 
 ## Current Status
 
-**Phase 26 is COMPLETE.** All phases 1–26 done. Full roadmap implemented.
+**Phases 1–26 COMPLETE.** Component Layer fully built.
+**Phase A in progress** — Agent Designer.
 
 ---
 
-## Phase 1: Docker Environment & Project Scaffold — DONE
+## Phase A: Agent Designer
 
-All items complete:
-- [x] #1 docker-compose.yml (php, nginx, ui, mariadb, adminer)
-- [x] #2 Dockerfiles (docker/php, docker/nginx, docker/node)
-- [x] #3 .env.example + Makefile
-- [x] #4 Filament 3.x installed, AdminPanelProvider at /admin
-- [x] #5 symfony/yaml + mozex/anthropic-laravel installed
-- [x] #6 `projects` filesystem disk, CORS config, api routes registered
-- [x] #7 React + Vite + TS SPA in ui/ (Tailwind v4, shadcn/ui, Monaco, Zustand, Router, Lucide)
-- [x] #8 SPA base structure (types, api/client.ts, store, routing stubs)
+### A.1 — Agent Data Model Expansion
 
-**Initial commit pushed to GitHub.**
+| Issue | Title | Status |
+|---|---|---|
+| #83 | Add agent loop columns to agents table migration | |
+| #84 | Add agent_mcp_server and agent_a2a_agent pivot tables | |
+| #85 | Update Agent model with casts, relationships, fillable | |
+| #86 | Update AgentSeeder with loop field defaults | |
+| #87 | Expand project_agent pivot with override columns | |
 
----
+**Agent Definition Structure:**
+```
+AgentDefinition
+├── identity        (name, slug, role, icon, model, persona_prompt)
+├── goal            (objective_template, success_criteria, max_iterations, timeout)
+├── perception      (input_schema, memory_sources, context_strategy)
+├── reasoning       (planning_mode, skills, temperature, system_prompt)
+├── actions         (tools: MCP servers + A2A agents + custom tools)
+├── observation     (eval_criteria, output_schema, loop_condition)
+└── orchestration   (parent_agent_id, delegation_rules, can_delegate)
+```
 
-## Phase 2: Database Migrations & Models — DONE
+### A.2 — Agent Designer API
 
-All items complete:
-- [x] #9 — `create_projects_table` + `create_project_providers_table` migrations
-- [x] #10 — `create_skills_table` (with FULLTEXT index) + `create_skill_versions_table` migrations
-- [x] #11 — `create_tags_table` + `create_skill_tag_table` (pivot) + `create_library_skills_table` + `create_app_settings_table` migrations
-- [x] #12 — All Eloquent models: Project, ProjectProvider, Skill, SkillVersion, Tag, LibrarySkill, AppSetting
+| Issue | Title | Status |
+|---|---|---|
+| #88 | Create AgentResource API resource | |
+| #89 | Expand AgentController with full CRUD | |
+| #90 | Agent tool binding endpoints (MCP + A2A) | |
+| #91 | Agent export as JSON/YAML | |
 
-All verified: migrations run clean, relationships work, AppSetting helpers work, JSON casts work, UUIDs auto-generate, slugs auto-generate.
+**New endpoints:**
+```
+POST   /api/agents                                    # create
+GET    /api/agents/{agent}                             # show
+PUT    /api/agents/{agent}                             # update
+DELETE /api/agents/{agent}                             # delete
+POST   /api/agents/{agent}/duplicate                   # duplicate
+GET    /api/agents/{agent}/export?format=json|yaml     # export
+PUT    /api/projects/{p}/agents/{a}/mcp-servers        # bind MCP
+PUT    /api/projects/{p}/agents/{a}/a2a-agents         # bind A2A
+```
 
-Also fixed: docker-compose.yml now sets `DB_HOST=mariadb` via environment override so `.env` can keep `127.0.0.1` for local dev.
+### A.3 — Agent Builder UI
 
----
+| Issue | Title | Status |
+|---|---|---|
+| #92 | Agent list view with create/edit/delete | |
+| #93 | Agent Builder form with loop sections | |
+| #94 | Update API client with agent endpoints | |
+| #95 | Agent Builder page routing | |
 
-## Phase 3: File I/O & Manifest Engine — DONE
+**Builder sections:** Identity, Goal, Perception, Reasoning, Actions, Observation, Orchestration — each collapsible, with Monaco editors for JSON/prompt fields.
 
-All items complete:
-- [x] #13 — `SkillFileParser` (parseFile, parseContent, renderFile, validateFrontmatter)
-- [x] #14 — `AgentisManifestService` (scanProject, writeManifest, scaffoldProject, writeSkillFile, deleteSkillFile, skillExists)
-- [x] #15 — `ProjectScanJob` (upserts by slug+project_id, creates v1 snapshots, syncs tags)
-- [x] #16 — 19 Pest tests (7 unit + 12 feature), all passing
+### A.4 — Agent Compose v2
 
-Also fixed: FULLTEXT index migration now conditionally skips on SQLite for test compatibility.
+| Issue | Title | Status |
+|---|---|---|
+| #96 | Structured compose output format | |
+| #97 | Structured compose API endpoint | |
+| #98 | Update provider drivers for structured agents | |
+| #99 | Generic JSON agent definition export format | |
 
----
+**Key change:** `composeStructured()` returns system_prompt, model, tools (MCP/A2A/custom), skills, loop config, delegation config — not just concatenated text.
 
-## Phase 4: Provider Sync Engine — DONE
+### A.5 — Agent Visualization Update
 
-All items complete:
-- [x] #17 — `ProviderDriverInterface` + `ProviderSyncService`
-- [x] #27 — ClaudeDriver + CursorDriver
-- [x] #28 — CopilotDriver + WindsurfDriver
-- [x] #29 — ClineDriver + OpenAIDriver
-- [x] #30 — Provider sync tests (10 tests, all passing)
+| Issue | Title | Status |
+|---|---|---|
+| #100 | Expand graph endpoint with agent loop data | |
+| #101 | React Flow agent loop visualization | |
+| #102 | Agent loop detail panel in visualization | |
 
-28 total tests, 116 assertions, all green.
+### A.6 — Testing & Migration
 
----
+| Issue | Title | Status |
+|---|---|---|
+| #103 | Pest tests for expanded Agent model | |
+| #104 | Pest tests for AgentComposeService v2 | |
+| #105 | API endpoint tests for agent CRUD | |
+| #106 | Data migration for existing agents | |
+| #107 | Update bundle export/import for expanded agents | |
 
-## Phase 5: Filament Admin Panel — DONE
+### Implementation Sequence
 
-All items complete:
-- [x] #31 — ProjectResource (CRUD + provider checkboxes + Scan/Sync/Open Editor actions)
-- [x] #32 — LibrarySkillResource (CRUD + category filter + tags)
-- [x] #33 — TagResource (CRUD + ColorPicker + skill count)
-- [x] #34 — Settings page (API key, default model, provider reference, rescan all)
-- [x] #35 — Dashboard (StatsOverview widget + SPA link)
-
----
-
-## Phase 6: Skills CRUD API — DONE
-
-All items complete:
-- [x] #19 — API Resources (ProjectResource, SkillResource, VersionResource)
-- [x] #36 — SkillController (index, store, show, update, destroy, duplicate)
-- [x] #37 — VersionController (index, show, restore)
-- [x] #18 — TagController, SearchController, LibraryController, SettingsController
-- [x] #20 — 24 API routes registered in routes/api.php
-
-All endpoints verified via smoke test. FULLTEXT search with LIKE fallback for SQLite.
-
----
-
-## Phase 7: React SPA Core UI — DONE
-
-All items complete:
-- [x] #25 — Zustand store (projects, toast, dirty state) + typed Axios client (all endpoints)
-- [x] #21 — Layout shell (Sidebar with project list, nav, admin link) + Toast
-- [x] #22 — Projects page (card grid, sync button, empty state)
-- [x] #23 — ProjectDetail page (skill grid, scan/sync/add, grid/list toggle, loading skeleton)
-- [x] #24 — SkillEditor page (FrontmatterForm + Monaco + ActionBar + Ctrl+S + beforeunload guard + tab stubs)
-
-Also built: Search page with debounced FULLTEXT search and grouped results. Library page stub.
-TypeScript clean (`tsc --noEmit`), Vite production build passes.
-
----
-
-## Phase 8: Live Test Runner — DONE
-
-All items complete:
-- [x] #26 — SkillTestController (SSE streaming via Anthropic PHP SDK, reads API key from AppSetting/env)
-- [x] #38 — LiveTestPanel (ReadableStream, token counter, elapsed timer, copy, stop, Ctrl+Enter)
+```
+A.1 (data model) ──► A.2 + A.4 in parallel (API + compose) ──► A.3 (UI) ──► A.5 (viz) ──► A.6 (tests throughout)
+```
 
 ---
 
-## Phase 9: Version History & Diff Viewer — DONE
+## Phase B: Orchestration (planned)
 
-All items complete:
-- [x] #39 — VersionHistoryPanel (version list, checkboxes, timestamps, notes)
-- [x] #40 — Monaco Diff Editor (side-by-side, readOnly, compare any 2 versions)
-- [x] #41 — Restore flow (confirm dialog, POST restore, reload skill + versions)
+Multi-agent workflow designer with visual DAG builder.
 
----
-
-## Phase 10: Global Library & Search — DONE
-
-All items complete:
-- [x] #42 — LibrarySkillSeeder (25 skills, 6 categories: Laravel, PHP, TypeScript, FinTech, DevOps, Writing)
-- [x] #45 — Library import endpoint (slug collision handling, tag sync, v1 version, file write)
-- [x] #43 — Library page (category sidebar, search, import modal with project picker)
-- [x] #44 — Search page (FULLTEXT, tag/project/model filters, grouped results)
+- **Workflow entity:** name, trigger, entry_agent, steps (DAG), checkpoints, termination
+- **Visual builder:** React Flow as actual flow designer (not just visualization)
+- **Delegation chains:** agents hand off to sub-agents based on conditions
+- **Human-in-the-loop:** checkpoint gates requiring approval before proceeding
+- **Shared context:** agents in a workflow share a context bus
+- **Export:** workflow definitions as LangGraph YAML, CrewAI configs, generic JSON
 
 ---
 
-## Phase 11: Settings, Polish & QA — DONE
+## Phase C: Design + Runtime (planned)
 
-All items complete:
-- [x] #46 — Settings page in SPA (API key status, default model, provider sync reference table)
-- [x] #47 — Global toast notifications (Axios 500 error interceptor with lazy store import)
-- [x] #48 — Keyboard shortcuts (Ctrl+S save, Ctrl+K search, Escape blur/back)
-- [x] #49 — Empty states + loading skeletons (Projects, ProjectDetail, Library, Search, SkillEditor)
-- [x] #50 — Unsaved changes navigation guard (beforeunload + unstable_usePrompt)
-- [x] #51 — End-to-end QA (28 tests pass, tsc clean, Vite build passes, all API endpoints verified)
+Lightweight agent runtime inside Agentis Studio.
 
----
-
-## Phase 12: Agent Compose & Export — DONE
-
-Agents feature was largely pre-built (models, migrations, seeder, controller, UI). Remaining work completed:
-- [x] #52 — Agents + project_agent + agent_skill migrations & models
-- [x] #53 — Seed 9 default agents (Orchestrator, PM, Architect, QA, Design, Code Review, Infrastructure, CI/CD, Security)
-- [x] #54 — Agent API endpoints (index, projectAgents, toggle, updateInstructions, assignSkills, compose, composeAll)
-- [x] #55 — Agent configuration UI (AgentsTab, AgentConfigModal, tab integration in ProjectDetail)
-- [x] #56 — AgentComposeService (merge base + custom + skills, token estimation, markdown rendering)
-- [x] #58 — Compose preview UI (AgentComposePreview modal, token budget progress bar, copy-to-clipboard)
-- [x] #57 — Provider sync integration — all 6 drivers handle composedAgents, ProviderSyncService calls composeAll()
+- **Execution engine:** run agent loops with real LLM calls and tool execution
+- **Playground evolution:** from chat tester to full agent execution environment
+- **Real tool calls:** MCP server invocation, A2A agent delegation
+- **Memory persistence:** agent state across loop iterations and sessions
+- **Observation UI:** live view of perceive → reason → act → observe cycle
+- **Execution logs:** traces, token costs, timing, error handling
+- **Sandboxing:** tool execution in isolated environments
+- **Cost controls:** budget limits, approval gates for expensive operations
 
 ---
 
-## Phase 13: Token Estimation & Budget Warnings — DONE
+## Completed Phases (1–26)
 
-- [x] #62 — Token counting and budget warnings for skills and agents
-  - `token_estimate` added to SkillResource API response (via AgentComposeService::estimateTokens)
-  - Per-skill token count displayed in SkillCard (with Coins icon, formatted as 1.2k)
-  - Live token counter in FrontmatterForm (client-side estimateTokens)
-  - Model-specific context limits (200k for all Claude models)
-  - Color-coded warnings: green (normal), yellow (>75%), red (>90%)
-  - Token budget already present in AgentComposePreview (from Phase 12)
+<details>
+<summary>Click to expand completed phases</summary>
 
----
+### Phase 1: Docker Environment & Project Scaffold — DONE
+- [x] #1–#8 — Docker, Filament, React SPA scaffold
 
-## Phase 14: AI-Assisted Skill Generation — DONE
+### Phase 2: Database Migrations & Models — DONE
+- [x] #9–#12 — All core tables and Eloquent models
 
-- [x] #70 — Natural language skill generation via Anthropic API
-  - `POST /api/skills/generate` endpoint (SkillGenerateController)
-  - Calls Claude Sonnet 4 with expert prompt engineer system prompt
-  - Returns structured JSON: name, description, model, max_tokens, tags, body
-  - GenerateSkillModal component (description textarea + constraints + loading state)
-  - Integrated in SkillEditor ActionBar ("Generate" button) — fills editor with result for review
-  - Integrated in ProjectDetail ("Generate" button) — creates skill directly and navigates to editor
-  - Fixed 2 pre-existing test failures (ProviderSyncService constructor dependency)
+### Phase 3: File I/O & Manifest Engine — DONE
+- [x] #13–#16 — SkillFileParser, AgentisManifestService, ProjectScanJob, 19 tests
 
----
+### Phase 4: Provider Sync Engine — DONE
+- [x] #17, #27–#30 — 6 provider drivers, sync orchestration
 
-## Phase 15: Skill Playground with Streaming — DONE
+### Phase 5: Filament Admin Panel — DONE
+- [x] #31–#35 — ProjectResource, LibrarySkillResource, TagResource, Settings, Dashboard
 
-- [x] #59 — Streaming test runner UI with agent system prompt support
-  - New `POST /api/playground` endpoint — supports custom system prompt, multi-turn messages, model override
-  - Refactored `SkillTestController` — extracted shared `stream()` method, added `playground()` action
-  - Full `Playground` page with split-pane layout (config sidebar + chat area)
-  - Project picker → loads skills and enabled agents as system prompt sources
-  - Agent compose integration — fetches composed output via `AgentComposeService`
-  - System prompt preview with token estimate
-  - Model and max_tokens configuration
-  - Multi-turn conversation (maintained in component state)
-  - Real-time SSE streaming with cursor animation
-  - Per-turn stats: elapsed time, input/output token counts
-  - Copy per-message, clear conversation
-  - Ctrl+Enter to send, auto-scroll, abort support
-  - Added to sidebar nav and router (`/playground`)
+### Phase 6: Skills CRUD API — DONE
+- [x] #18–#20, #36–#37 — Controllers, resources, 24 routes
 
----
+### Phase 7: React SPA Core UI — DONE
+- [x] #21–#25 — Layout, Projects, ProjectDetail, SkillEditor, Search
 
-## Phase 16: Skill Dependencies & Composition — DONE
+### Phase 8: Live Test Runner — DONE
+- [x] #26, #38 — SSE streaming via Anthropic SDK
 
-- [x] #60 — Skill include/extend system for composable prompts
-  - Migration: `includes` JSON column added to `skills` table
-  - Model: `includes` added to fillable + array cast
-  - `SkillCompositionService` — recursive include resolution with circular dependency detection (max depth 5)
-  - `SkillResource` — exposes `includes`, `resolved_body`, token estimate uses resolved body
-  - `SkillController` — accepts `includes` on store/update/duplicate, writes to .agentis files
-  - `ProviderSyncService` — pre-resolves includes, passes resolved bodies to all 6 drivers
-  - `AgentComposeService` — uses resolved bodies when composing agents
-  - `SkillTestController` — tests skills with resolved body (includes prepended)
-  - `ProjectScanJob` — parses `includes` from frontmatter on scan
-  - `ProviderDriverInterface` + all 6 drivers — updated to accept `$resolvedBodies` parameter
-  - UI: Includes picker in FrontmatterForm (toggle buttons for sibling skills)
-  - UI: Token estimate shows "(resolved)" when includes are active
-  - SkillEditor loads project skills for includes picker
+### Phase 9: Version History & Diff Viewer — DONE
+- [x] #39–#41 — Version list, Monaco diff, restore flow
 
----
+### Phase 10: Global Library & Search — DONE
+- [x] #42–#45 — 25 seed skills, library import, FULLTEXT search
 
-## Phase 17: Git-Backed Skill Versioning — DONE
+### Phase 11: Settings, Polish & QA — DONE
+- [x] #46–#51 — Settings, toasts, shortcuts, empty states, navigation guards
 
-- [x] #61 — Commit skill changes to project git repos
-  - `GitService` — wraps shell git commands (commit, log, diff, showAtRef, currentBranch)
-  - Migration: `git_auto_commit` boolean on `projects` table
-  - `SkillController` — auto-commits skill file after write when project has git_auto_commit enabled
-  - `ProjectController` — new `gitLog` and `gitDiff` endpoints
-  - API: `GET /api/projects/{id}/git-log?file=` and `GET /api/projects/{id}/git-diff?file=&ref=`
-  - `ProjectResource` — exposes `git_auto_commit`
-  - Frontend: `GitLogEntry` type, `fetchGitLog` and `fetchGitDiff` API client functions
-  - Project store/update accepts `git_auto_commit`
+### Phase 12: Agent Compose & Export — DONE
+- [x] #52–#58 — Agent models, seeder, compose service, provider integration
 
----
+### Phase 13: Token Estimation & Budget Warnings — DONE
+- [x] #62 — Per-skill/agent token counts, color-coded budget warnings
 
-## Phase 18: Prompt Linting — DONE
+### Phase 14: AI-Assisted Skill Generation — DONE
+- [x] #70 — Natural language → skill via Anthropic API
 
-- [x] #63 — Rule-based prompt linting with inline feedback
-  - `PromptLinter` service — 8 lint rules (vague instructions, weak constraints, conflicting directives, missing output format, excessive length, role confusion, missing examples, redundancy)
-  - Returns array of `{severity, rule, message, suggestion, line}` objects
-  - `GET /api/skills/{id}/lint` endpoint on SkillController
-  - `LintIssue` TypeScript type, `lintSkill()` API client function
-  - `LintPanel` component — "Run Lint" button, severity icons, color-coded cards (yellow warnings, blue suggestions), summary counts
-  - Integrated as third tab in SkillEditor alongside "Test" and "Versions"
+### Phase 15: Skill Playground with Streaming — DONE
+- [x] #59 — Multi-turn chat, agent compose, model selection
+
+### Phase 16: Skill Dependencies & Composition — DONE
+- [x] #60 — Recursive includes, circular dep detection, resolved bodies
+
+### Phase 17: Git-Backed Skill Versioning — DONE
+- [x] #61 — Auto-commit, git log, git diff endpoints
+
+### Phase 18: Prompt Linting — DONE
+- [x] #63 — 8 lint rules, inline feedback
+
+### Phase 19: Team/Workspace Sharing — DONE
+- [x] #64 — ZIP/JSON bundle export/import with conflict resolution
+
+### Phase 20: Provider Diff Preview — DONE
+- [x] #65 — Preview sync diff before writing
+
+### Phase 21: Skill Templates — DONE
+- [x] #66 — {{variable}} substitution, per-project values
+
+### Phase 22: Bulk Operations — DONE
+- [x] #67 — Multi-select, batch tag/assign/move/delete
+
+### Phase 23: Command Palette — DONE
+- [x] #68 — Ctrl+K fuzzy search across skills, projects, pages
+
+### Phase 24: Skill Marketplace — DONE
+- [x] #69 — Publish, browse, install, vote
+
+### Phase 25: Webhook/Event System — DONE
+- [x] #71 — HMAC-signed webhooks, GitHub push receiver
+
+### Phase 26: Multi-Model Test Runner — DONE
+- [x] #72 — OpenAI, Gemini, Ollama support
+
+</details>
 
 ---
 
-## Phase 19: Team/Workspace Sharing — DONE
+## Tech Decisions
 
-- [x] #64 — Export/import skill bundles for team sharing
-  - `BundleExportService` — exports skills + agents as ZIP (YAML frontmatter files + agents.yaml + bundle.yaml metadata) or JSON
-  - `BundleImportService` — previews and imports bundles with conflict resolution (skip/overwrite/rename)
-  - `BundleController` — `POST /api/projects/{id}/export` and `POST /api/projects/{id}/import-bundle`
-  - ExportModal — skill/agent checkboxes, select all, ZIP/JSON format toggle, file download
-  - ImportBundleModal — drag-and-drop file upload, preview step, conflict mode selector, import summary
-  - Integrated in ProjectDetail action bar with Export and Import buttons
+- Anthropic SDK: `mozex/anthropic-laravel`
+- DB_HOST: `127.0.0.1` in .env (local), `mariadb` in .env.example (Docker)
+- FULLTEXT index conditionally skips on SQLite for tests
+- Remote uses HTTPS
+- Session-based auth (`auth:web`) on API routes
+- React Flow (`@xyflow/react`) for visualization
+- Default seeded user: `admin@admin.com` / `password`
 
----
+## Commands
 
-## Phase 20: Provider Diff Preview — DONE
-
-- [x] #65 — Preview sync diff before writing to provider files
-  - Added `generate()` method to `ProviderDriverInterface` — returns `[path => content]` without writing
-  - Refactored all 6 provider drivers: `sync()` now calls `generate()` then writes, enabling dry-run mode
-  - `ProviderSyncService::preview()` — runs generate on all enabled providers, compares against disk, returns diffs
-  - `ProjectController::syncPreview()` — `POST /api/projects/{id}/sync/preview` endpoint
-  - `SyncPreviewModal` — tabbed interface with per-provider diffs, Monaco DiffEditor, status badges (added/modified/deleted/unchanged), summary counts
-  - "Preview Sync" button added to ProjectDetail next to existing Sync button
-
----
-
-## Phase 21: Skill Templates — DONE
-
-- [x] #66 — Parameterized skill templates with `{{variable}}` substitution
-  - `TemplateResolver` service — resolves, extracts, and finds missing variables
-  - `skill_variables` table for per-project variable values, `template_variables` JSON column on skills
-  - `SkillVariableController` — GET/PUT endpoints for variable values
-  - `ProviderSyncService` and `AgentComposeService` resolve templates before output
-  - FrontmatterForm gains template variable definition editor
-  - TemplateVariablesPanel shows value inputs for saved skills with templates
-
----
-
-## Phase 22: Bulk Operations — DONE
-
-- [x] #67 — Multi-select skills with batch tag, assign, move, delete
-  - `BulkSkillController` with 4 endpoints: bulk-tag, bulk-assign, bulk-delete, bulk-move
-  - SkillCard gains selectable checkbox overlay
-  - BulkActionBar floating bottom bar with action popovers
-  - ProjectDetail gains select mode with select all/none
-
----
-
-## Phase 23: Command Palette — DONE
-
-- [x] #68 — Global Ctrl+K command palette for keyboard-driven navigation
-  - `useCommandPalette` hook with keyboard listener
-  - `CommandPalette` modal with fuzzy search across skills, projects, pages, actions
-  - Arrow key navigation, Enter to select, Escape to close
-  - Recent items in localStorage
-
----
-
-## Phase 24: Skill Marketplace — DONE
-
-- [x] #69 — Self-hosted skill marketplace for publishing and discovery
-  - `marketplace_skills` table with FULLTEXT search, ratings, downloads
-  - `MarketplaceController` — browse, publish, install, vote endpoints
-  - Marketplace page with category sidebar, search, sort, pagination
-  - Publish/Install modals, MarketplaceCard with vote buttons
-
----
-
-## Phase 25: Webhook/Event System — DONE
-
-- [x] #71 — Event-driven sync triggers and notifications
-  - `webhooks` and `webhook_deliveries` tables
-  - `WebhookDispatcher` with HMAC-SHA256 signing and queued delivery
-  - `WebhookController` — CRUD, delivery log, test endpoint
-  - `InboundWebhookController` — GitHub push webhook receiver triggers project scan
-  - SkillController and ProjectController fire webhook events
-  - WebhookSettings UI component with delivery log as project tab
-
----
-
-## Phase 26: Multi-Model Test Runner — DONE
-
-- [x] #72 — Support OpenAI, Gemini, and Ollama in the test runner
-  - `LLMProviderInterface` with `stream()` and `models()` methods
-  - 4 providers: AnthropicProvider, OpenAIProvider, GeminiProvider, OllamaProvider
-  - `LLMProviderFactory` routes models to providers by prefix
-  - `SkillTestController` refactored to use factory
-  - `ModelController` — `GET /api/models` with grouped provider status
-  - Settings page gains API key inputs for all providers
-  - Playground model selector fetches available models dynamically
-
----
-
-## Implementation Notes
-
-### Parallelizable work:
-- Phase 2 + nothing (foundation, must go first)
-- Phase 3 + Phase 6 API Resources (#19) can start together
-- Phase 4 + Phase 6 controllers can be partially parallel
-- Phase 5 Filament can run alongside Phase 6/7
-- Phase 7 frontend depends on Phase 6 API being done
-- Phase 8, 9, 10 frontend work can run after Phase 7
-
-### Tech decisions made:
-- Anthropic SDK: `mozex/anthropic-laravel` (not `anthropic-php/client` — doesn't exist on Packagist)
-- Laravel app at repo root (not in `api/` subdirectory as original plan suggested)
-- React SPA in `ui/` (not a git submodule — nested .git was removed)
-- shadcn/ui v4 initialized with Geist font
-- DB_HOST defaults to `127.0.0.1` in .env for local dev, `mariadb` in .env.example for Docker
-- Remote uses HTTPS (SSH key not configured for this machine)
-
-### Commands:
 ```bash
 # Local dev
 composer dev                    # server + queue + pail + vite
