@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { Loader2, AlertCircle, Sun, Moon } from 'lucide-react'
 import { useAuthStore } from '@/store/useAuthStore'
 import { Button } from '@/components/ui/button'
 
@@ -12,6 +12,15 @@ export function Login() {
   const { login, loading } = useAuthStore()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem('landing-theme')
+    return saved ? saved === 'dark' : true
+  })
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark)
+    localStorage.setItem('landing-theme', dark ? 'dark' : 'light')
+  }, [dark])
 
   const oauthError = searchParams.get('error')
 
@@ -33,9 +42,21 @@ export function Login() {
   const apiBase = import.meta.env.VITE_API_URL?.replace('/api', '') || ''
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 relative">
+      <button
+        onClick={() => setDark(!dark)}
+        className="absolute top-4 right-4 h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+        aria-label="Toggle theme"
+      >
+        {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      </button>
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
+          <div className="flex justify-center mb-3">
+            <div className="h-10 w-10 bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-base">A</span>
+            </div>
+          </div>
           <h1 className="text-2xl font-semibold tracking-tight">Agentis Studio</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Sign in to your account

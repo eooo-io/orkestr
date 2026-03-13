@@ -23,6 +23,7 @@ import { ExecutionPlayground } from '@/pages/ExecutionPlayground'
 import { ExecutionDashboard } from '@/pages/ExecutionDashboard'
 import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
+import { Landing } from '@/pages/Landing'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -30,7 +31,8 @@ function AppContent() {
   return (
     <>
       <Routes>
-        {/* Public auth routes (no layout, no guard) */}
+        {/* Public routes (no layout, no guard) */}
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -59,7 +61,7 @@ function AppContent() {
             <AuthGuard>
               <Layout>
                 <Routes>
-                  <Route path="/" element={<Navigate to="/projects" replace />} />
+                  <Route index element={<Navigate to="/projects" replace />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/projects/new" element={<ProjectForm />} />
                   <Route path="/projects/:id" element={<ProjectDetail />} />
