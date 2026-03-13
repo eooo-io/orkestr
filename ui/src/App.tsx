@@ -17,6 +17,8 @@ import { Billing } from '@/pages/Billing'
 import { ProjectVisualize } from '@/pages/ProjectVisualize'
 import { Agents } from '@/pages/Agents'
 import { AgentBuilder } from '@/pages/AgentBuilder'
+import { Workflows } from '@/pages/Workflows'
+import { WorkflowBuilder } from '@/pages/WorkflowBuilder'
 import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 
@@ -39,6 +41,14 @@ function AppContent() {
             </AuthGuard>
           }
         />
+        <Route
+          path="/projects/:id/workflows/:workflowId"
+          element={
+            <AuthGuard>
+              <WorkflowBuilder />
+            </AuthGuard>
+          }
+        />
 
         {/* Protected app routes */}
         <Route
@@ -54,6 +64,7 @@ function AppContent() {
                   <Route path="/projects/:id/settings" element={<ProjectSettings />} />
                   <Route path="/skills/new" element={<SkillEditor />} />
                   <Route path="/skills/:id" element={<SkillEditor />} />
+                  <Route path="/projects/:id/workflows" element={<Workflows />} />
                   <Route path="/agents" element={<Agents />} />
                   <Route path="/agents/new" element={<AgentBuilder />} />
                   <Route path="/agents/:id" element={<AgentBuilder />} />

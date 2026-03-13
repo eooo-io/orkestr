@@ -31,6 +31,11 @@ import type {
   BillingStatus,
   UsageSummary,
   ProjectGraphData,
+  Workflow,
+  WorkflowStep,
+  WorkflowEdge,
+  WorkflowVersion,
+  WorkflowValidation,
   ApiResponse,
 } from '@/types'
 
@@ -683,5 +688,84 @@ export const fetchEarnings = () =>
   api
     .get<ApiResponse<{ total_earned: number; pending: number; payout_count: number }>>('/billing/earnings')
     .then((r) => r.data.data)
+
+// Workflows
+export const fetchWorkflows = (projectId: number) =>
+  api
+    .get<ApiResponse<Workflow[]>>(`/projects/${projectId}/workflows`)
+    .then((r) => r.data.data)
+
+export const fetchWorkflow = (projectId: number, workflowId: number) =>
+  api
+    .get<ApiResponse<Workflow>>(`/projects/${projectId}/workflows/${workflowId}`)
+    .then((r) => r.data.data)
+
+export const createWorkflow = (projectId: number, data: Partial<Workflow>) =>
+  api
+    .post<ApiResponse<Workflow>>(`/projects/${projectId}/workflows`, data)
+    .then((r) => r.data.data)
+
+export const updateWorkflow = (projectId: number, workflowId: number, data: Partial<Workflow>) =>
+  api
+    .put<ApiResponse<Workflow>>(`/projects/${projectId}/workflows/${workflowId}`, data)
+    .then((r) => r.data.data)
+
+export const deleteWorkflow = (projectId: number, workflowId: number) =>
+  api.delete(`/projects/${projectId}/workflows/${workflowId}`)
+
+export const duplicateWorkflow = (projectId: number, workflowId: number) =>
+  api
+    .post<ApiResponse<Workflow>>(`/projects/${projectId}/workflows/${workflowId}/duplicate`)
+    .then((r) => r.data.data)
+
+export const updateWorkflowSteps = (
+  projectId: number,
+  workflowId: number,
+  steps: Partial<WorkflowStep>[],
+) =>
+  api
+    .put<ApiResponse<Workflow>>(`/projects/${projectId}/workflows/${workflowId}/steps`, { steps })
+    .then((r) => r.data.data)
+
+export const updateWorkflowEdges = (
+  projectId: number,
+  workflowId: number,
+  edges: Partial<WorkflowEdge>[],
+) =>
+  api
+    .put<ApiResponse<Workflow>>(`/projects/${projectId}/workflows/${workflowId}/edges`, { edges })
+    .then((r) => r.data.data)
+
+export const validateWorkflow = (projectId: number, workflowId: number) =>
+  api
+    .post<WorkflowValidation>(`/projects/${projectId}/workflows/${workflowId}/validate`)
+    .then((r) => r.data)
+
+export const fetchWorkflowVersions = (projectId: number, workflowId: number) =>
+  api
+    .get<WorkflowVersion[]>(`/projects/${projectId}/workflows/${workflowId}/versions`)
+    .then((r) => r.data)
+
+export const createWorkflowVersion = (projectId: number, workflowId: number, note?: string) =>
+  api
+    .post<WorkflowVersion>(`/projects/${projectId}/workflows/${workflowId}/versions`, { note })
+    .then((r) => r.data)
+
+export const restoreWorkflowVersion = (
+  projectId: number,
+  workflowId: number,
+  versionNumber: number,
+) =>
+  api
+    .post<ApiResponse<Workflow>>(
+      `/projects/${projectId}/workflows/${workflowId}/versions/${versionNumber}/restore`,
+    )
+    .then((r) => r.data.data)
+
+// Workflow Export
+export const exportWorkflow = (projectId: number, workflowId: number, format: 'json' | 'langgraph' | 'crewai' = 'json') =>
+  api
+    .get(`/projects/${projectId}/workflows/${workflowId}/export`, { params: { format } })
+    .then((r) => r.data)
 
 export default api

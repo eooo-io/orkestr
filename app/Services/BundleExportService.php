@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Agent;
 use App\Models\Project;
 use App\Models\Skill;
+use App\Models\Workflow;
 use Symfony\Component\Yaml\Yaml;
 use ZipArchive;
 
@@ -20,7 +21,7 @@ class BundleExportService
      * @param  string  $contentFormat  One of: json, yaml, markdown, toml
      * @return string Path to the temporary ZIP file
      */
-    public function exportZip(Project $project, array $skillIds, array $agentIds, string $contentFormat = 'markdown'): string
+    public function exportZip(Project $project, array $skillIds, array $agentIds, string $contentFormat = 'markdown', array $workflowIds = []): string
     {
         $tempPath = tempnam(sys_get_temp_dir(), 'agentis_bundle_') . '.zip';
         $zip = new ZipArchive();
@@ -40,12 +41,20 @@ class BundleExportService
             $zip->addFromString('agents.yaml', Yaml::dump($agentData, 4, 2));
         }
 
+        // Add workflows
+        $workflows = $this->resolveWorkflows($project, $workflowIds);
+        if ($workflows->isNotEmpty()) {
+            $workflowData = $workflows->map(fn (Workflow $wf) => $this->buildWorkflowData($wf))->values()->all();
+            $zip->addFromString('workflows.yaml', Yaml::dump($workflowData, 6, 2));
+        }
+
         // Add bundle metadata
         $metadata = [
             'name' => $project->name,
             'exported_at' => now()->toIso8601String(),
             'skills_count' => $skills->count(),
             'agents_count' => $agents->count(),
+            'workflows_count' => $workflows->count(),
             'content_format' => $contentFormat,
             'version' => '1.0',
         ];
@@ -198,5 +207,40 @@ class BundleExportService
         }
 
         return $project->agents()->whereIn('agents.id', $agentIds)->get();
+    }
+
+    protected function resolveWorkflows(Project $project, array $workflowIds): \Illuminate\Support\Collection
+    {
+        if (empty($workflowIds)) {
+            return collect();
+        }
+
+        return $project->workflows()->with(['steps.agent', 'edges'])->whereIn('id', $workflowIds)->get();
+    }
+
+    protected function buildWorkflowData(Workflow $workflow): array
+    {
+        return [
+            'name' => $workflow->name,
+            'slug' => $workflow->slug,
+            'description' => $workflow->description,
+            'trigger_type' => $workflow->trigger_type,
+            'status' => $workflow->status,
+            'steps' => $workflow->steps->map(fn ($step) => [
+                'type' => $step->type,
+                'name' => $step->name,
+                'agent_slug' => $step->agent?->slug,
+                'position_x' => $step->position_x,
+                'position_y' => $step->position_y,
+                'config' => $step->config,
+            ])->toArray(),
+            'edges' => $workflow->edges->map(fn ($edge) => [
+                'source_step_name' => $workflow->steps->firstWhere('id', $edge->source_step_id)?->name,
+                'target_step_name' => $workflow->steps->firstWhere('id', $edge->target_step_id)?->name,
+                'condition_expression' => $edge->condition_expression,
+                'label' => $edge->label,
+                'priority' => $edge->priority,
+            ])->toArray(),
+        ];
     }
 }

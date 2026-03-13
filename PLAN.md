@@ -71,6 +71,7 @@ Observe (result fed back into context)
 
 **Phases 1–26 COMPLETE.** Component Layer fully built.
 **Phase A COMPLETE** — Agent Designer (25 issues, all closed).
+**Phase B COMPLETE** — Orchestration (27 issues, all closed).
 
 ---
 
@@ -167,16 +168,108 @@ A.1 (data model) ──► A.2 + A.4 in parallel (API + compose) ──► A.3 (
 
 ---
 
-## Phase B: Orchestration (planned)
+## Phase B: Orchestration
 
 Multi-agent workflow designer with visual DAG builder.
 
-- **Workflow entity:** name, trigger, entry_agent, steps (DAG), checkpoints, termination
-- **Visual builder:** React Flow as actual flow designer (not just visualization)
-- **Delegation chains:** agents hand off to sub-agents based on conditions
-- **Human-in-the-loop:** checkpoint gates requiring approval before proceeding
-- **Shared context:** agents in a workflow share a context bus
-- **Export:** workflow definitions as LangGraph YAML, CrewAI configs, generic JSON
+### B.1 — Workflow Data Model
+
+| Issue | Title | Status |
+|---|---|---|
+| #108 | Create workflows table migration | DONE |
+| #109 | Create workflow_steps table migration | DONE |
+| #110 | Create workflow_edges table migration | DONE |
+| #111 | Create workflow_versions table migration | DONE |
+| #112 | Create Eloquent models and relationships | DONE |
+
+**Workflow DAG Structure:**
+```
+Workflow
+├── workflows        (uuid, project_id, name, slug, trigger_type, trigger_config,
+│                     entry_step_id, status, context_schema, termination_policy, config)
+├── workflow_steps   (uuid, workflow_id, agent_id, type, name, position_x/y, config, sort_order)
+│   types: agent, checkpoint, condition, parallel_split, parallel_join, start, end
+├── workflow_edges   (workflow_id, source_step_id, target_step_id, condition_expression, label, priority)
+└── workflow_versions (workflow_id, version_number, snapshot JSON, note)
+```
+
+### B.2 — Workflow API
+
+| Issue | Title | Status |
+|---|---|---|
+| #113 | Create WorkflowResource API resource | DONE |
+| #114 | Create WorkflowController with CRUD | DONE |
+| #115 | Workflow step and edge management endpoints | DONE |
+| #116 | DAG validation service | DONE |
+| #117 | Workflow version management | DONE |
+
+**New endpoints:**
+```
+POST   /api/projects/{p}/workflows                          # create
+GET    /api/projects/{p}/workflows                          # list
+GET    /api/projects/{p}/workflows/{w}                      # show (with steps+edges)
+PUT    /api/projects/{p}/workflows/{w}                      # update
+DELETE /api/projects/{p}/workflows/{w}                      # delete
+POST   /api/projects/{p}/workflows/{w}/duplicate            # duplicate
+PUT    /api/projects/{p}/workflows/{w}/steps                # bulk upsert steps
+PUT    /api/projects/{p}/workflows/{w}/edges                # bulk upsert edges
+POST   /api/projects/{p}/workflows/{w}/validate             # DAG validation
+GET    /api/projects/{p}/workflows/{w}/versions             # version list
+POST   /api/projects/{p}/workflows/{w}/versions             # snapshot current
+POST   /api/projects/{p}/workflows/{w}/versions/{v}/restore # restore version
+```
+
+### B.3 — Workflow Builder UI
+
+| Issue | Title | Status |
+|---|---|---|
+| #118 | Workflow list page and routing | DONE |
+| #119 | Workflow Builder canvas with React Flow | DONE |
+| #120 | Custom workflow node components | DONE |
+| #121 | Workflow properties panel | DONE |
+| #122 | Workflow save, validate, and status controls | DONE |
+
+**Builder:** Interactive React Flow canvas with drag-to-connect edges, custom nodes for each step type, properties panel for selected node/edge, and toolbar with save/validate/status controls.
+
+### B.4 — Delegation & Context Engine
+
+| Issue | Title | Status |
+|---|---|---|
+| #123 | WorkflowContextService — shared context bus | DONE |
+| #124 | WorkflowConditionEvaluator | DONE |
+| #125 | Delegation chain resolution | DONE |
+| #126 | Context schema and mapping editor UI | DONE |
+
+**Key services:**
+- `WorkflowContextService` — manages shared context bus for workflow execution
+- `WorkflowConditionEvaluator` — evaluates edge conditions for routing
+- `DelegationChainResolver` — resolves agent handoff chains
+
+### B.5 — Workflow Export
+
+| Issue | Title | Status |
+|---|---|---|
+| #127 | WorkflowExportService — generic JSON | DONE |
+| #128 | LangGraph YAML export driver | DONE |
+| #129 | CrewAI config export driver | DONE |
+| #130 | Export UI and download | DONE |
+
+**Export formats:** Generic JSON, LangGraph YAML, CrewAI config.
+
+### B.6 — Testing & Integration
+
+| Issue | Title | Status |
+|---|---|---|
+| #131 | Pest tests for Workflow models and relationships | DONE |
+| #132 | Pest tests for WorkflowController API | DONE |
+| #133 | Pest tests for validation and context services | DONE |
+| #134 | Integration — bundle export/import and visualization | DONE |
+
+### Implementation Sequence
+
+```
+B.1 (data model) ──► B.2 + B.4 in parallel (API + context engine) ──► B.3 (UI) ──► B.5 (export) ──► B.6 (tests throughout)
+```
 
 ---
 

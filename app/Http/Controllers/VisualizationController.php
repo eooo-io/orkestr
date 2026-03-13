@@ -178,6 +178,20 @@ class VisualizationController extends Controller
             }
         }
 
+        // Workflows
+        $workflows = $project->workflows()
+            ->withCount(['steps', 'edges'])
+            ->get()
+            ->map(fn ($wf) => [
+                'id' => $wf->id,
+                'name' => $wf->name,
+                'slug' => $wf->slug,
+                'status' => $wf->status,
+                'trigger_type' => $wf->trigger_type,
+                'step_count' => $wf->steps_count,
+                'edge_count' => $wf->edges_count,
+            ]);
+
         return response()->json([
             'data' => [
                 'project' => [
@@ -194,6 +208,7 @@ class VisualizationController extends Controller
                 'mcp_servers' => $mcpServers,
                 'a2a_agents' => $a2aAgents,
                 'sync_outputs' => $syncOutputs,
+                'workflows' => $workflows,
             ],
         ]);
     }

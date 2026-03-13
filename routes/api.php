@@ -26,6 +26,7 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\VisualizationController;
+use App\Http\Controllers\WorkflowController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -165,6 +166,21 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/projects/{project}/a2a-agents', [A2aAgentController::class, 'store']);
     Route::put('/a2a-agents/{a2aAgent}', [A2aAgentController::class, 'update']);
     Route::delete('/a2a-agents/{a2aAgent}', [A2aAgentController::class, 'destroy']);
+
+    // Workflows
+    Route::get('/projects/{project}/workflows', [WorkflowController::class, 'index']);
+    Route::post('/projects/{project}/workflows', [WorkflowController::class, 'store']);
+    Route::get('/projects/{project}/workflows/{workflow}', [WorkflowController::class, 'show']);
+    Route::put('/projects/{project}/workflows/{workflow}', [WorkflowController::class, 'update']);
+    Route::delete('/projects/{project}/workflows/{workflow}', [WorkflowController::class, 'destroy']);
+    Route::post('/projects/{project}/workflows/{workflow}/duplicate', [WorkflowController::class, 'duplicate']);
+    Route::put('/projects/{project}/workflows/{workflow}/steps', [WorkflowController::class, 'updateSteps']);
+    Route::put('/projects/{project}/workflows/{workflow}/edges', [WorkflowController::class, 'updateEdges']);
+    Route::post('/projects/{project}/workflows/{workflow}/validate', [WorkflowController::class, 'validate']);
+    Route::get('/projects/{project}/workflows/{workflow}/export', [WorkflowController::class, 'export']);
+    Route::get('/projects/{project}/workflows/{workflow}/versions', [WorkflowController::class, 'versions']);
+    Route::post('/projects/{project}/workflows/{workflow}/versions', [WorkflowController::class, 'createVersion']);
+    Route::post('/projects/{project}/workflows/{workflow}/versions/{versionNumber}/restore', [WorkflowController::class, 'restoreVersion']);
 
     // Visualization
     Route::get('/projects/{project}/graph', [VisualizationController::class, 'graph']);

@@ -116,4 +116,9 @@ class Project extends Model
     {
         return $this->hasMany(ProjectA2aAgent::class);
     }
+
+    public function workflows(): HasMany
+    {
+        return $this->hasMany(Workflow::class);
+    }
 }

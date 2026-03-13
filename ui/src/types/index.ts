@@ -527,6 +527,79 @@ export interface ProjectGraphData {
   sync_outputs: Record<string, string[]>
 }
 
+export interface Workflow {
+  id: number
+  uuid: string
+  project_id: number
+  name: string
+  slug: string
+  description: string | null
+  trigger_type: string
+  trigger_config: Record<string, unknown> | null
+  entry_step_id: number | null
+  status: string
+  context_schema: Record<string, unknown> | null
+  termination_policy: Record<string, unknown> | null
+  config: Record<string, unknown> | null
+  created_by: number | null
+  is_active: boolean
+  is_draft: boolean
+  step_count: number | null
+  edge_count: number | null
+  steps?: WorkflowStep[]
+  edges?: WorkflowEdge[]
+  created_at: string
+  updated_at: string
+}
+
+export interface WorkflowStep {
+  id: number
+  uuid: string
+  workflow_id: number
+  agent_id: number | null
+  type: string
+  name: string
+  position_x: number
+  position_y: number
+  config: Record<string, unknown> | null
+  sort_order: number
+  is_agent: boolean
+  is_checkpoint: boolean
+  is_condition: boolean
+  is_terminal: boolean
+  requires_agent: boolean
+  agent?: Agent
+  created_at: string
+  updated_at: string
+}
+
+export interface WorkflowEdge {
+  id: number
+  workflow_id: number
+  source_step_id: number
+  target_step_id: number
+  condition_expression: string | null
+  label: string | null
+  priority: number
+  has_condition: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface WorkflowVersion {
+  id: number
+  workflow_id: number
+  version_number: number
+  note: string | null
+  created_at: string
+}
+
+export interface WorkflowValidation {
+  valid: boolean
+  errors: string[]
+  warnings: string[]
+}
+
 export interface ApiResponse<T> {
   data: T
 }
