@@ -9,7 +9,10 @@ use App\Models\Project;
 use App\Models\ProjectA2aAgent;
 use App\Models\ProjectMcpServer;
 use App\Services\AgentComposeService;
+use App\Services\AuditLogger;
+use App\Services\Execution\Guards\ApprovalGuard;
 use App\Services\Execution\Guards\BudgetGuard;
+use App\Services\Execution\Guards\DataAccessGuard;
 use App\Services\Execution\Guards\OutputGuard;
 use App\Services\Execution\Guards\ToolGuard;
 use App\Services\LLM\CostOptimizedRouter;
@@ -28,6 +31,8 @@ class AgentExecutionService
         private CostOptimizedRouter $costRouter,
         private McpServerManager $serverManager,
         private BudgetGuard $budgetGuard,
+        private ApprovalGuard $approvalGuard = new ApprovalGuard,
+        private DataAccessGuard $dataAccessGuard = new DataAccessGuard,
     ) {}
 
     /**
@@ -44,6 +49,12 @@ class AgentExecutionService
         ]);
 
         $run->markRunning();
+
+        AuditLogger::log('agent.executed', "Agent '{$agent->name}' execution started", [
+            'run_id' => $run->id,
+            'agent_slug' => $agent->slug,
+            'input' => $input,
+        ], $agent->id, $project->id);
 
         try {
             $this->runLoop($run, $project, $agent, $input, $config);
@@ -71,9 +82,10 @@ class AgentExecutionService
         // Setup tool dispatcher
         $dispatcher = $this->setupToolDispatcher($project, $agent);
 
-        // Setup tool guard and filter allowed tools
+        // Setup tool guard and filter allowed tools (with per-agent scoping)
         $toolGuard = new ToolGuard;
         $toolGuard->configure($config);
+        $toolGuard->configureForAgent($agent);
         $toolDefinitions = $toolGuard->filterTools($dispatcher->getToolDefinitions());
 
         // Build system prompt from agent compose
@@ -110,7 +122,33 @@ class AgentExecutionService
             // Budget check before each iteration
             $budgetError = $this->budgetGuard->check($run->fresh(), $config);
             if ($budgetError) {
+                AuditLogger::log('agent.budget_exceeded', "Budget exceeded for agent '{$agent->name}': {$budgetError}", [
+                    'run_id' => $run->id,
+                    'agent_slug' => $agent->slug,
+                ], $agent->id, $project->id);
                 $run->markFailed("Budget guardrail: {$budgetError}");
+                return;
+            }
+
+            // Per-agent run budget check
+            $agentRunBudgetError = $this->budgetGuard->checkAgentRunBudget($agent, $run->fresh());
+            if ($agentRunBudgetError) {
+                AuditLogger::log('agent.budget_exceeded', $agentRunBudgetError, [
+                    'run_id' => $run->id,
+                    'agent_slug' => $agent->slug,
+                ], $agent->id, $project->id);
+                $run->markFailed("Budget guardrail: {$agentRunBudgetError}");
+                return;
+            }
+
+            // Per-agent daily budget check
+            $agentDailyBudgetError = $this->budgetGuard->checkAgentDailyBudget($agent);
+            if ($agentDailyBudgetError) {
+                AuditLogger::log('agent.budget_exceeded', $agentDailyBudgetError, [
+                    'run_id' => $run->id,
+                    'agent_slug' => $agent->slug,
+                ], $agent->id, $project->id);
+                $run->markFailed("Budget guardrail: {$agentDailyBudgetError}");
                 return;
             }
 
@@ -204,14 +242,71 @@ class AgentExecutionService
             // Add assistant message with tool_use to conversation
             $messages[] = ['role' => 'assistant', 'content' => $llmResponse['content']];
 
+            // Check ApprovalGuard before executing tools
+            $needsApproval = false;
+            foreach ($toolUseCalls as $toolCall) {
+                if ($this->approvalGuard->requiresApproval($agent, $toolCall['name'])) {
+                    $needsApproval = true;
+                    break;
+                }
+            }
+
+            if ($needsApproval) {
+                $actStep->update([
+                    'requires_approval' => true,
+                    'tool_calls' => array_map(fn ($tc) => ['name' => $tc['name'], 'input' => $tc['input'] ?? []], $toolUseCalls),
+                ]);
+                $actStep->markPendingApproval();
+
+                // Store conversation state so execution can resume later
+                $run->update([
+                    'config' => array_merge($config, [
+                        '_resume_state' => [
+                            'messages' => $messages,
+                            'step_number' => $stepNumber,
+                            'iteration' => $iteration,
+                            'model' => $model,
+                            'max_tokens' => $maxTokens,
+                            'fallback_chain' => $fallbackChain,
+                        ],
+                    ]),
+                ]);
+                $run->markAwaitingApproval();
+
+                AuditLogger::log('tool.approval_required', "Tool calls require approval for agent '{$agent->name}'", [
+                    'run_id' => $run->id,
+                    'step_id' => $actStep->id,
+                    'tools' => array_map(fn ($tc) => $tc['name'], $toolUseCalls),
+                ], $agent->id, $project->id);
+
+                return;
+            }
+
             // Execute tool calls
             $toolResults = [];
             $allToolCallData = [];
 
             foreach ($toolUseCalls as $toolCall) {
+                // Data access guard check
+                $dataAccessError = $this->dataAccessGuard->check($agent, $toolCall['name'], $toolCall['input'] ?? [], $project->id);
+                if ($dataAccessError) {
+                    AuditLogger::log('tool.blocked', "Tool '{$toolCall['name']}' blocked by data access guard: {$dataAccessError}", [
+                        'run_id' => $run->id,
+                        'tool' => $toolCall['name'],
+                    ], $agent->id, $project->id);
+                    $result = new ToolCallResult(
+                        toolName: $toolCall['name'],
+                        content: [['type' => 'text', 'text' => "Blocked: {$dataAccessError}"]],
+                        isError: true,
+                        durationMs: 0,
+                    );
+                }
                 // Tool guard check
-                $toolError = $toolGuard->check($toolCall['name'], $toolCall['input'] ?? []);
-                if ($toolError) {
+                elseif ($toolError = $toolGuard->check($toolCall['name'], $toolCall['input'] ?? [])) {
+                    AuditLogger::log('tool.blocked', "Tool '{$toolCall['name']}' blocked: {$toolError}", [
+                        'run_id' => $run->id,
+                        'tool' => $toolCall['name'],
+                    ], $agent->id, $project->id);
                     $result = new ToolCallResult(
                         toolName: $toolCall['name'],
                         content: [['type' => 'text', 'text' => "Blocked: {$toolError}"]],
@@ -253,6 +348,97 @@ class AgentExecutionService
         // Max iterations reached
         $lastText = $this->extractLastText($messages);
         $run->markCompleted(['response' => $lastText, 'reason' => 'max_iterations']);
+    }
+
+    /**
+     * Resume execution after a step has been approved.
+     */
+    public function resumeExecution(ExecutionRun $run): ExecutionRun
+    {
+        if (! $run->isAwaitingApproval()) {
+            throw new \RuntimeException('Run is not awaiting approval.');
+        }
+
+        $config = $run->config ?? [];
+        $resumeState = $config['_resume_state'] ?? null;
+
+        if (! $resumeState) {
+            throw new \RuntimeException('No resume state found. Cannot resume execution.');
+        }
+
+        $agent = $run->agent;
+        $project = $run->project;
+
+        // Remove resume state from config to avoid re-use
+        unset($config['_resume_state']);
+        $run->update(['config' => $config]);
+
+        $run->markRunning();
+
+        try {
+            // Get the approved step and execute the pending tool calls
+            $pendingStep = $run->steps()
+                ->where('status', 'approved')
+                ->where('phase', 'act')
+                ->orderByDesc('step_number')
+                ->first();
+
+            if ($pendingStep && ! empty($pendingStep->tool_calls)) {
+                $dispatcher = $this->setupToolDispatcher($project, $agent);
+                $toolGuard = new ToolGuard;
+                $toolGuard->configure($config);
+                $toolGuard->configureForAgent($agent);
+
+                $messages = $resumeState['messages'];
+
+                // Execute the tool calls that were pending
+                $toolResults = [];
+                $allToolCallData = [];
+
+                foreach ($pendingStep->tool_calls as $toolCall) {
+                    $toolName = $toolCall['name'] ?? '';
+                    $toolInput = $toolCall['input'] ?? [];
+
+                    $result = $dispatcher->dispatch($toolName, $toolInput);
+
+                    $toolResults[] = [
+                        'type' => 'tool_result',
+                        'tool_use_id' => $toolCall['id'] ?? uniqid(),
+                        'content' => $result->text(),
+                        'is_error' => $result->isError,
+                    ];
+                    $allToolCallData[] = $result->toArray();
+                }
+
+                $pendingStep->update(['tool_calls' => $allToolCallData]);
+                $pendingStep->markCompleted([
+                    'tools_executed' => count($toolResults),
+                    'any_errors' => collect($toolResults)->contains('is_error', true),
+                ], 0);
+
+                // Add tool results to messages and continue the loop
+                $messages[] = ['role' => 'user', 'content' => $toolResults];
+
+                // Continue execution from where we left off
+                $this->runLoop(
+                    $run,
+                    $project,
+                    $agent,
+                    $run->input ?? [],
+                    $config,
+                );
+            } else {
+                $run->markFailed('No approved step with tool calls found for resume.');
+            }
+        } catch (\Throwable $e) {
+            $run->markFailed($e->getMessage());
+            Log::error("Agent resume failed: {$e->getMessage()}", [
+                'run_id' => $run->id,
+                'agent' => $agent->slug,
+            ]);
+        }
+
+        return $run->fresh(['steps']);
     }
 
     private function setupToolDispatcher(Project $project, Agent $agent): ToolDispatcher

@@ -14,6 +14,7 @@ import {
   X,
   Brain,
   Building2,
+  Shield,
 } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { useTheme } from '@/hooks/useTheme'
@@ -50,6 +51,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     // { to: '/marketplace', label: 'Marketplace', icon: Store },
     { to: '/playground', label: 'Playground', icon: MessageSquare },
     { to: '/workspace', label: 'Workspace', icon: Building2 },
+    { to: '/audit-log', label: 'Audit Log', icon: Shield },
     { to: '/settings', label: 'Settings', icon: Settings },
     { to: '/billing', label: 'Billing', icon: CreditCard },
   ]

@@ -24,6 +24,10 @@ class ExecutionStep extends Model
         'error',
         'model_used',
         'model_requested',
+        'requires_approval',
+        'approved_by',
+        'approved_at',
+        'approval_note',
     ];
 
     protected $attributes = [
@@ -41,6 +45,10 @@ class ExecutionStep extends Model
             'duration_ms' => 'integer',
             'model_used' => 'string',
             'model_requested' => 'string',
+            'requires_approval' => 'boolean',
+            'approved_by' => 'integer',
+            'approved_at' => 'datetime',
+            'approval_note' => 'string',
         ];
     }
 
@@ -102,5 +110,44 @@ class ExecutionStep extends Model
             'status' => 'failed',
             'error' => $error,
         ]);
+    }
+
+    public function markPendingApproval(): void
+    {
+        $this->update([
+            'status' => 'pending_approval',
+            'requires_approval' => true,
+        ]);
+    }
+
+    public function approve(int $userId, ?string $note = null): void
+    {
+        $this->update([
+            'status' => 'approved',
+            'approved_by' => $userId,
+            'approved_at' => now(),
+            'approval_note' => $note,
+        ]);
+    }
+
+    public function reject(int $userId, ?string $note = null): void
+    {
+        $this->update([
+            'status' => 'rejected',
+            'approved_by' => $userId,
+            'approved_at' => now(),
+            'approval_note' => $note,
+            'error' => 'Tool call rejected by user',
+        ]);
+    }
+
+    public function isPendingApproval(): bool
+    {
+        return $this->status === 'pending_approval';
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 }

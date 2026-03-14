@@ -33,6 +33,9 @@ use App\Http\Controllers\AgentMemoryController;
 use App\Http\Controllers\ProviderHealthController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\AgentBudgetController;
+use App\Http\Controllers\AgentToolScopeController;
+use App\Http\Controllers\AuditLogController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -230,6 +233,21 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/projects/{project}/runs', [ExecutionController::class, 'index']);
     Route::get('/runs/{run}', [ExecutionController::class, 'show']);
     Route::post('/runs/{run}/cancel', [ExecutionController::class, 'cancel']);
+    Route::post('/runs/{run}/steps/{step}/approve', [ExecutionController::class, 'approveStep']);
+    Route::post('/runs/{run}/steps/{step}/reject', [ExecutionController::class, 'rejectStep']);
+    Route::post('/runs/{run}/resume', [ExecutionController::class, 'resume']);
+
+    // Agent Budget
+    Route::get('/agents/{agent}/budget-status', [AgentBudgetController::class, 'status']);
+    Route::put('/agents/{agent}/budget', [AgentBudgetController::class, 'update'])->middleware('org-role:editor');
+
+    // Agent Tool Scope
+    Route::get('/agents/{agent}/tool-scope', [AgentToolScopeController::class, 'show']);
+    Route::put('/agents/{agent}/tool-scope', [AgentToolScopeController::class, 'update'])->middleware('org-role:editor');
+
+    // Audit Logs
+    Route::get('/audit-logs', [AuditLogController::class, 'index']);
+    Route::get('/agents/{agent}/audit-logs', [AuditLogController::class, 'agentLogs']);
 
     // Workflow Execution
     Route::post('/projects/{project}/workflows/{workflow}/execute', [WorkflowRunController::class, 'execute']);

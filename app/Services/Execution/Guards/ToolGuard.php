@@ -2,6 +2,8 @@
 
 namespace App\Services\Execution\Guards;
 
+use App\Models\Agent;
+
 class ToolGuard
 {
     private array $allowlist = [];
@@ -15,6 +17,33 @@ class ToolGuard
     {
         $this->allowlist = $config['tool_allowlist'] ?? [];
         $this->blocklist = $config['tool_blocklist'] ?? [];
+
+        return $this;
+    }
+
+    /**
+     * Apply per-agent tool scoping.
+     * Agent's allowed_tools takes precedence over blocked_tools.
+     */
+    public function configureForAgent(Agent $agent): self
+    {
+        $agentAllowed = $agent->allowed_tools ?? [];
+        $agentBlocked = $agent->blocked_tools ?? [];
+
+        // Agent-level scoping: merge with config-level scoping
+        // Agent allowed_tools takes precedence
+        if (! empty($agentAllowed)) {
+            // If both config and agent allowlists are set, use intersection
+            if (! empty($this->allowlist)) {
+                $this->allowlist = array_values(array_intersect($this->allowlist, $agentAllowed));
+            } else {
+                $this->allowlist = $agentAllowed;
+            }
+        }
+
+        if (! empty($agentBlocked)) {
+            $this->blocklist = array_values(array_unique(array_merge($this->blocklist, $agentBlocked)));
+        }
 
         return $this;
     }

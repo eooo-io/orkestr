@@ -497,12 +497,12 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 
 | Issue | Title | Status |
 |---|---|---|
-| #188 | Agent autonomy levels | TODO |
-| #189 | Per-agent budget envelopes | TODO |
-| #190 | Agent tool scope configuration | TODO |
-| #191 | Human approval gate for tool calls | TODO |
-| #192 | Agent data access boundaries | TODO |
-| #193 | Agent audit log | TODO |
+| #188 | Agent autonomy levels | DONE |
+| #189 | Per-agent budget envelopes | DONE |
+| #190 | Agent tool scope configuration | DONE |
+| #191 | Human approval gate for tool calls | DONE |
+| #192 | Agent data access boundaries | DONE |
+| #193 | Agent audit log | DONE |
 
 ### D.5 — Agent Performance & Competitive Positioning
 

@@ -16,11 +16,18 @@ import {
   ChevronRight,
   BarChart3,
   TrendingUp,
+  ShieldAlert,
+  Check,
+  X,
+  Play,
 } from 'lucide-react'
 import {
   fetchExecutionRuns,
   fetchExecutionRun,
   fetchExecutionStats,
+  approveStep,
+  rejectStep,
+  resumeRun,
 } from '@/api/client'
 import type { ExecutionRun, ExecutionStep, ExecutionStats } from '@/types'
 
@@ -188,6 +195,7 @@ export function ExecutionDashboard() {
               <option value="completed">Completed</option>
               <option value="failed">Failed</option>
               <option value="running">Running</option>
+              <option value="awaiting_approval">Awaiting Approval</option>
               <option value="cancelled">Cancelled</option>
             </select>
           </div>
@@ -247,6 +255,19 @@ export function ExecutionDashboard() {
               )}
             </div>
 
+            {/* Approval Banner */}
+            {selectedRun.status === 'awaiting_approval' && (
+              <ApprovalBanner
+                run={selectedRun}
+                onResume={async () => {
+                  await resumeRun(selectedRun.id)
+                  const refreshed = await fetchExecutionRun(selectedRun.id)
+                  setSelectedRun(refreshed)
+                  fetchExecutionRuns(pid).then(setRuns)
+                }}
+              />
+            )}
+
             {/* Steps trace */}
             <h4 className="text-xs font-medium text-zinc-400 mb-2 uppercase">Execution Trace</h4>
             <div className="space-y-1">
@@ -254,8 +275,14 @@ export function ExecutionDashboard() {
                 <TraceStep
                   key={step.id}
                   step={step}
+                  runId={selectedRun.id}
                   expanded={expandedSteps.has(step.id)}
                   onToggle={() => toggleStep(step.id)}
+                  onApprovalAction={async () => {
+                    const refreshed = await fetchExecutionRun(selectedRun.id)
+                    setSelectedRun(refreshed)
+                    fetchExecutionRuns(pid).then(setRuns)
+                  }}
                 />
               ))}
               {(!selectedRun.steps || selectedRun.steps.length === 0) && (
@@ -309,6 +336,7 @@ function RunStatusIcon({ status }: { status: string }) {
     completed: { icon: CheckCircle2, color: 'text-emerald-400' },
     failed: { icon: XCircle, color: 'text-red-400' },
     running: { icon: Loader2, color: 'text-blue-400' },
+    awaiting_approval: { icon: ShieldAlert, color: 'text-amber-400' },
     cancelled: { icon: XCircle, color: 'text-amber-400' },
     pending: { icon: Clock, color: 'text-zinc-500' },
   }
@@ -316,20 +344,86 @@ function RunStatusIcon({ status }: { status: string }) {
   return <Icon className={`h-4 w-4 ${color} ${status === 'running' ? 'animate-spin' : ''} flex-shrink-0`} />
 }
 
-function TraceStep({
-  step,
-  expanded,
-  onToggle,
+function ApprovalBanner({
+  run,
+  onResume,
 }: {
-  step: ExecutionStep
-  expanded: boolean
-  onToggle: () => void
+  run: ExecutionRun
+  onResume: () => Promise<void>
 }) {
-  const PhaseIcon = PHASE_ICONS[step.phase] ?? Eye
-  const phaseColor = PHASE_COLORS[step.phase] ?? 'text-zinc-400'
+  const [resuming, setResuming] = useState(false)
+  const pendingStep = run.steps?.find((s) => s.requires_approval && !s.approved_at)
 
   return (
-    <div className="rounded border border-zinc-800/50 bg-zinc-900/30">
+    <div className="mb-3 p-3 rounded-md bg-amber-900/20 border border-amber-700/40">
+      <div className="flex items-center gap-2 mb-1">
+        <ShieldAlert className="h-4 w-4 text-amber-400 flex-shrink-0" />
+        <span className="text-sm font-medium text-amber-300">Awaiting Approval</span>
+      </div>
+      <p className="text-xs text-amber-400/80 mb-2">
+        This run is paused waiting for step approval.
+        {pendingStep && ` Step #${pendingStep.step_number} requires review.`}
+      </p>
+      {run.approved_at && (
+        <button
+          onClick={async () => {
+            setResuming(true)
+            try { await onResume() } finally { setResuming(false) }
+          }}
+          disabled={resuming}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-50 rounded transition-colors"
+        >
+          {resuming ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+          Resume Execution
+        </button>
+      )}
+    </div>
+  )
+}
+
+function TraceStep({
+  step,
+  runId,
+  expanded,
+  onToggle,
+  onApprovalAction,
+}: {
+  step: ExecutionStep
+  runId: number
+  expanded: boolean
+  onToggle: () => void
+  onApprovalAction: () => Promise<void>
+}) {
+  const [approvalNote, setApprovalNote] = useState('')
+  const [acting, setActing] = useState(false)
+  const PhaseIcon = PHASE_ICONS[step.phase] ?? Eye
+  const phaseColor = PHASE_COLORS[step.phase] ?? 'text-zinc-400'
+  const needsApproval = step.requires_approval && !step.approved_at && step.status !== 'failed'
+
+  const handleApprove = async () => {
+    setActing(true)
+    try {
+      await approveStep(runId, step.id, approvalNote || undefined)
+      setApprovalNote('')
+      await onApprovalAction()
+    } finally {
+      setActing(false)
+    }
+  }
+
+  const handleReject = async () => {
+    setActing(true)
+    try {
+      await rejectStep(runId, step.id, approvalNote || undefined)
+      setApprovalNote('')
+      await onApprovalAction()
+    } finally {
+      setActing(false)
+    }
+  }
+
+  return (
+    <div className={`rounded border ${needsApproval ? 'border-amber-700/50 bg-amber-900/10' : 'border-zinc-800/50 bg-zinc-900/30'}`}>
       <button
         onClick={onToggle}
         className="w-full flex items-center gap-2 px-2 py-1.5 text-left hover:bg-zinc-800/30 transition-colors"
@@ -342,6 +436,12 @@ function TraceStep({
         <PhaseIcon className={`h-3.5 w-3.5 ${phaseColor} flex-shrink-0`} />
         <span className={`text-[10px] font-medium uppercase ${phaseColor}`}>{step.phase}</span>
         <span className="text-[10px] text-zinc-600">#{step.step_number}</span>
+        {needsApproval && (
+          <span className="text-[10px] font-medium text-amber-400 ml-1">APPROVAL NEEDED</span>
+        )}
+        {step.approved_at && (
+          <span className="text-[10px] font-medium text-emerald-400 ml-1">APPROVED</span>
+        )}
         <span className="ml-auto text-[10px] text-zinc-600">
           {step.duration_ms > 0 && `${step.duration_ms}ms`}
         </span>
@@ -354,6 +454,56 @@ function TraceStep({
 
       {expanded && (
         <div className="px-2 pb-2 border-t border-zinc-800/30 space-y-2">
+          {/* Approval card */}
+          {needsApproval && (
+            <div className="mt-1 p-2 bg-amber-900/20 border border-amber-700/30 rounded space-y-2">
+              <div className="text-[11px] text-amber-300 font-medium">This step requires your approval before proceeding.</div>
+              {step.tool_calls && step.tool_calls.length > 0 && (
+                <div>
+                  <span className="text-[10px] uppercase text-amber-400/60 font-medium">Tool Calls to Execute</span>
+                  {step.tool_calls.map((tc, i) => (
+                    <div key={i} className="mt-0.5 p-1.5 bg-zinc-950/50 rounded text-[11px]">
+                      <span className="text-amber-400 font-mono">{tc.tool_name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <textarea
+                value={approvalNote}
+                onChange={(e) => setApprovalNote(e.target.value)}
+                className="w-full px-2 py-1.5 bg-zinc-950/50 border border-zinc-700 rounded text-[11px] text-zinc-300 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
+                rows={2}
+                placeholder="Optional note..."
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleApprove}
+                  disabled={acting}
+                  className="flex items-center gap-1 px-2.5 py-1 text-[11px] bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-50 rounded transition-colors"
+                >
+                  {acting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                  Approve
+                </button>
+                <button
+                  onClick={handleReject}
+                  disabled={acting}
+                  className="flex items-center gap-1 px-2.5 py-1 text-[11px] bg-red-600 text-white hover:bg-red-500 disabled:opacity-50 rounded transition-colors"
+                >
+                  {acting ? <Loader2 className="h-3 w-3 animate-spin" /> : <X className="h-3 w-3" />}
+                  Reject
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Approval note display (if already approved) */}
+          {step.approved_at && (
+            <div className="mt-1 p-2 bg-emerald-900/20 border border-emerald-700/30 rounded text-[11px] text-emerald-400">
+              Approved at {new Date(step.approved_at).toLocaleString()}
+              {step.approval_note && <span className="ml-1">- {step.approval_note}</span>}
+            </div>
+          )}
+
           {step.input && (
             <div className="mt-1">
               <span className="text-[10px] uppercase text-zinc-600 font-medium">Input</span>
@@ -370,7 +520,7 @@ function TraceStep({
               </pre>
             </div>
           )}
-          {step.tool_calls && step.tool_calls.length > 0 && (
+          {step.tool_calls && step.tool_calls.length > 0 && !needsApproval && (
             <div>
               <span className="text-[10px] uppercase text-zinc-600 font-medium">Tool Calls</span>
               {step.tool_calls.map((tc, i) => (

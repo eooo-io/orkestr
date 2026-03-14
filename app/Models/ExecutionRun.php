@@ -27,6 +27,9 @@ class ExecutionRun extends Model
         'total_cost_microcents',
         'total_duration_ms',
         'model_used',
+        'approval_required',
+        'approved_by',
+        'approved_at',
     ];
 
     protected $attributes = [
@@ -47,6 +50,9 @@ class ExecutionRun extends Model
             'total_tokens' => 'integer',
             'total_cost_microcents' => 'integer',
             'total_duration_ms' => 'integer',
+            'approval_required' => 'boolean',
+            'approved_by' => 'integer',
+            'approved_at' => 'datetime',
         ];
     }
 
@@ -90,6 +96,11 @@ class ExecutionRun extends Model
         return $this->belongsTo(AgentSchedule::class, 'schedule_id');
     }
 
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
     // --- Status helpers ---
 
     public function isPending(): bool
@@ -115,6 +126,11 @@ class ExecutionRun extends Model
     public function isCancelled(): bool
     {
         return $this->status === 'cancelled';
+    }
+
+    public function isAwaitingApproval(): bool
+    {
+        return $this->status === 'awaiting_approval';
     }
 
     public function isFinished(): bool
@@ -161,6 +177,14 @@ class ExecutionRun extends Model
         $this->update([
             'status' => 'cancelled',
             'completed_at' => now(),
+        ]);
+    }
+
+    public function markAwaitingApproval(): void
+    {
+        $this->update([
+            'status' => 'awaiting_approval',
+            'approval_required' => true,
         ]);
     }
 

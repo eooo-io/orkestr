@@ -126,6 +126,14 @@ export interface Agent {
   delegation_rules: Record<string, unknown> | null
   can_delegate: boolean
 
+  // Autonomy & Permissions
+  autonomy_level?: 'supervised' | 'semi_autonomous' | 'autonomous'
+  budget_limit_usd?: number | null
+  daily_budget_limit_usd?: number | null
+  allowed_tools?: string[] | null
+  blocked_tools?: string[] | null
+  data_access_scope?: Record<string, unknown> | null
+
   // Actions
   custom_tools: Record<string, unknown>[] | null
 
@@ -616,7 +624,10 @@ export interface ExecutionRun {
     slug: string
     icon: string | null
   }
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'awaiting_approval'
+  approval_required?: boolean
+  approved_by?: number | null
+  approved_at?: string | null
   input: Record<string, unknown> | null
   output: Record<string, unknown> | null
   config: Record<string, unknown> | null
@@ -643,6 +654,10 @@ export interface ExecutionStep {
   token_usage: TokenUsage | null
   duration_ms: number
   status: 'pending' | 'running' | 'completed' | 'failed'
+  requires_approval?: boolean
+  approved_by?: number | null
+  approved_at?: string | null
+  approval_note?: string | null
   error: string | null
   model_used?: string | null
   model_requested?: string | null
@@ -745,6 +760,28 @@ export interface OrganizationInvitation {
   role: string
   invited_by: { id: number; name: string } | null
   expires_at: string
+  created_at: string
+}
+
+export interface AgentBudgetStatus {
+  budget_limit_usd: number | null
+  daily_budget_limit_usd: number | null
+  current_run_spend_usd: number
+  daily_spend_usd: number
+  budget_remaining_usd: number | null
+  daily_remaining_usd: number | null
+}
+
+export interface AuditLogEntry {
+  id: number
+  uuid: string
+  event: string
+  description: string
+  metadata: Record<string, unknown> | null
+  user: { id: number; name: string } | null
+  agent: { id: number; name: string } | null
+  project: { id: number; name: string } | null
+  ip_address: string | null
   created_at: string
 }
 

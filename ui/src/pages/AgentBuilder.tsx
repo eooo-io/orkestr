@@ -14,6 +14,10 @@ import {
   X,
   ArrowUp,
   ArrowDown,
+  Shield,
+  DollarSign,
+  Lock,
+  Eye,
 } from 'lucide-react'
 import { fetchAgent, createAgent, updateAgent, deleteAgent, exportAgent, fetchModels } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
@@ -45,6 +49,12 @@ const EMPTY_AGENT: Partial<Agent> = {
   can_delegate: false,
   custom_tools: null,
   is_template: false,
+  autonomy_level: 'semi_autonomous',
+  budget_limit_usd: null,
+  daily_budget_limit_usd: null,
+  allowed_tools: null,
+  blocked_tools: null,
+  data_access_scope: null,
 }
 
 const ROUTING_STRATEGIES = [
@@ -72,6 +82,12 @@ const LOOP_CONDITIONS = [
   { value: 'max_iterations', label: 'Max Iterations', desc: 'Stop after N iterations' },
   { value: 'timeout', label: 'Timeout', desc: 'Stop after timeout' },
   { value: 'manual', label: 'Manual', desc: 'Human decides when to stop' },
+]
+
+const AUTONOMY_LEVELS = [
+  { value: 'supervised', label: 'Supervised', desc: 'Every tool call requires human approval', icon: Eye },
+  { value: 'semi_autonomous', label: 'Semi-Autonomous', desc: 'Sensitive operations require approval', icon: Shield },
+  { value: 'autonomous', label: 'Autonomous', desc: 'All operations execute automatically', icon: Lock },
 ]
 
 const ICONS = [
@@ -593,6 +609,150 @@ export function AgentBuilder() {
           </Field>
         </Section>
 
+        {/* Autonomy & Permissions */}
+        <Section title="Autonomy & Permissions" id="autonomy" open={openSections.has('autonomy')} onToggle={toggleSection}>
+          <Field label="Autonomy Level">
+            <div className="grid grid-cols-3 gap-2">
+              {AUTONOMY_LEVELS.map((al) => {
+                const AlIcon = al.icon
+                return (
+                  <label
+                    key={al.value}
+                    className={`flex items-start gap-2 p-3 border cursor-pointer transition-colors ${
+                      (agent.autonomy_level || 'semi_autonomous') === al.value
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-muted-foreground/30'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="autonomy_level"
+                      value={al.value}
+                      checked={(agent.autonomy_level || 'semi_autonomous') === al.value}
+                      onChange={() => update('autonomy_level', al.value)}
+                      className="mt-0.5"
+                    />
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <AlIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-sm font-medium">{al.label}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">{al.desc}</p>
+                    </div>
+                  </label>
+                )
+              })}
+            </div>
+          </Field>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Per-Run Budget (USD)" hint="Agent pauses when reached">
+              <div className="relative">
+                <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <input
+                  type="number"
+                  value={agent.budget_limit_usd ?? ''}
+                  onChange={(e) => update('budget_limit_usd', e.target.value ? parseFloat(e.target.value) : null)}
+                  className="w-full pl-8 pr-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="No limit"
+                  min={0}
+                  step={0.01}
+                />
+              </div>
+            </Field>
+            <Field label="Daily Budget (USD)" hint="Resets every 24h">
+              <div className="relative">
+                <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <input
+                  type="number"
+                  value={agent.daily_budget_limit_usd ?? ''}
+                  onChange={(e) => update('daily_budget_limit_usd', e.target.value ? parseFloat(e.target.value) : null)}
+                  className="w-full pl-8 pr-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="No limit"
+                  min={0}
+                  step={0.01}
+                />
+              </div>
+            </Field>
+          </div>
+
+          <Field label="Allowed Tools" hint="Whitelist — only these tools can be used. One per line.">
+            <ToolListEditor
+              tools={agent.allowed_tools || []}
+              onChange={(tools) => update('allowed_tools', tools.length > 0 ? tools : null)}
+              placeholder="Type a tool name and press Enter..."
+            />
+          </Field>
+
+          <Field label="Blocked Tools" hint="These tools are always excluded. One per line.">
+            <ToolListEditor
+              tools={agent.blocked_tools || []}
+              onChange={(tools) => update('blocked_tools', tools.length > 0 ? tools : null)}
+              placeholder="Type a tool name and press Enter..."
+            />
+          </Field>
+
+          <p className="text-xs text-muted-foreground">
+            Allowed tools take precedence. Leave both empty for no restrictions.
+          </p>
+
+          <Field label="Data Access">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs text-muted-foreground">External API Access</label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={(agent.data_access_scope as Record<string, unknown>)?.external_api !== false}
+                    onChange={(e) =>
+                      update('data_access_scope', {
+                        ...(agent.data_access_scope as Record<string, unknown> || {}),
+                        external_api: e.target.checked,
+                      })
+                    }
+                    className="rounded"
+                  />
+                  <span className="text-sm">Enabled</span>
+                </label>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-muted-foreground">File Access</label>
+                <select
+                  value={String((agent.data_access_scope as Record<string, unknown>)?.file_access ?? 'read_write')}
+                  onChange={(e) =>
+                    update('data_access_scope', {
+                      ...(agent.data_access_scope as Record<string, unknown> || {}),
+                      file_access: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="none">None</option>
+                  <option value="read">Read Only</option>
+                  <option value="read_write">Read + Write</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs text-muted-foreground">Memory Access</label>
+                <select
+                  value={String((agent.data_access_scope as Record<string, unknown>)?.memory_access ?? 'own')}
+                  onChange={(e) =>
+                    update('data_access_scope', {
+                      ...(agent.data_access_scope as Record<string, unknown> || {}),
+                      memory_access: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="own">Own Memory</option>
+                  <option value="shared">Shared Memory</option>
+                  <option value="none">No Memory</option>
+                </select>
+              </div>
+            </div>
+          </Field>
+        </Section>
+
         {/* Actions */}
         <Section title="Actions / Custom Tools" id="actions" open={openSections.has('actions')} onToggle={toggleSection}>
           <Field label="Custom Tools (JSON array)">
@@ -790,6 +950,77 @@ function FallbackModelsEditor({
           </select>
         </div>
       )}
+    </div>
+  )
+}
+
+function ToolListEditor({
+  tools,
+  onChange,
+  placeholder,
+}: {
+  tools: string[]
+  onChange: (tools: string[]) => void
+  placeholder?: string
+}) {
+  const [input, setInput] = useState('')
+
+  const addTool = () => {
+    const trimmed = input.trim()
+    if (trimmed && !tools.includes(trimmed)) {
+      onChange([...tools, trimmed])
+    }
+    setInput('')
+  }
+
+  const removeTool = (index: number) => {
+    onChange(tools.filter((_, i) => i !== index))
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      addTool()
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      {tools.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {tools.map((tool, index) => (
+            <span
+              key={tool}
+              className="inline-flex items-center gap-1 px-2 py-1 bg-muted/50 border border-border text-xs font-mono"
+            >
+              {tool}
+              <button
+                onClick={() => removeTool(index)}
+                className="text-muted-foreground hover:text-red-400 transition-colors"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="flex-1 px-3 py-2 bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary"
+          placeholder={placeholder}
+        />
+        <button
+          onClick={addTool}
+          disabled={!input.trim()}
+          className="px-3 py-2 text-xs bg-muted border border-border hover:bg-muted/80 disabled:opacity-30 transition-colors"
+        >
+          <Plus className="h-3.5 w-3.5" />
+        </button>
+      </div>
     </div>
   )
 }

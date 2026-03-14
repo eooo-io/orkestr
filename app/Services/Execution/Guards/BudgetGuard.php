@@ -2,8 +2,10 @@
 
 namespace App\Services\Execution\Guards;
 
+use App\Models\Agent;
 use App\Models\ExecutionRun;
 use App\Services\Execution\CostCalculator;
+use Illuminate\Support\Carbon;
 
 class BudgetGuard
 {
@@ -60,6 +62,89 @@ class BudgetGuard
         $estimatedCost = $this->costCalculator->calculate($model, $estimatedUsage);
 
         return ($run->total_cost_microcents + $estimatedCost) >= $maxCost;
+    }
+
+    /**
+     * Check per-agent per-run budget limit.
+     * Returns null if OK, or a string error if budget exceeded.
+     */
+    public function checkAgentRunBudget(Agent $agent, ExecutionRun $run): ?string
+    {
+        if ($agent->budget_limit_usd === null) {
+            return null;
+        }
+
+        $limitMicrocents = (int) ($agent->budget_limit_usd * 1_000_000);
+        $currentCost = $run->total_cost_microcents;
+
+        if ($currentCost >= $limitMicrocents) {
+            $formatted = CostCalculator::formatCost($currentCost);
+            $limitFormatted = '$' . number_format($agent->budget_limit_usd, 4);
+
+            return "Agent per-run budget exceeded: {$formatted} >= {$limitFormatted}";
+        }
+
+        return null;
+    }
+
+    /**
+     * Check per-agent daily budget limit.
+     * Returns null if OK, or a string error if budget exceeded.
+     */
+    public function checkAgentDailyBudget(Agent $agent): ?string
+    {
+        if ($agent->daily_budget_limit_usd === null) {
+            return null;
+        }
+
+        $limitMicrocents = (int) ($agent->daily_budget_limit_usd * 1_000_000);
+        $todayStart = Carbon::today();
+
+        $dailyCost = ExecutionRun::where('agent_id', $agent->id)
+            ->where('created_at', '>=', $todayStart)
+            ->sum('total_cost_microcents');
+
+        if ($dailyCost >= $limitMicrocents) {
+            $formatted = CostCalculator::formatCost($dailyCost);
+            $limitFormatted = '$' . number_format($agent->daily_budget_limit_usd, 4);
+
+            return "Agent daily budget exceeded: {$formatted} >= {$limitFormatted}";
+        }
+
+        return null;
+    }
+
+    /**
+     * Get budget status for an agent.
+     */
+    public function getAgentBudgetStatus(Agent $agent): array
+    {
+        $todayStart = Carbon::today();
+
+        $dailySpend = ExecutionRun::where('agent_id', $agent->id)
+            ->where('created_at', '>=', $todayStart)
+            ->sum('total_cost_microcents');
+
+        $runBudgetLimit = $agent->budget_limit_usd !== null
+            ? (int) ($agent->budget_limit_usd * 1_000_000)
+            : null;
+
+        $dailyBudgetLimit = $agent->daily_budget_limit_usd !== null
+            ? (int) ($agent->daily_budget_limit_usd * 1_000_000)
+            : null;
+
+        return [
+            'daily_spend_microcents' => $dailySpend,
+            'daily_spend_formatted' => CostCalculator::formatCost($dailySpend),
+            'run_budget_limit_usd' => $agent->budget_limit_usd,
+            'daily_budget_limit_usd' => $agent->daily_budget_limit_usd,
+            'run_budget_limit_microcents' => $runBudgetLimit,
+            'daily_budget_limit_microcents' => $dailyBudgetLimit,
+            'daily_remaining_microcents' => $dailyBudgetLimit !== null ? max(0, $dailyBudgetLimit - $dailySpend) : null,
+            'daily_remaining_formatted' => $dailyBudgetLimit !== null
+                ? CostCalculator::formatCost(max(0, $dailyBudgetLimit - $dailySpend))
+                : null,
+        ];
     }
 
     /**

@@ -43,6 +43,8 @@ import type {
   Organization,
   OrganizationMember,
   OrganizationInvitation,
+  AgentBudgetStatus,
+  AuditLogEntry,
   ApiResponse,
 } from '@/types'
 
@@ -887,5 +889,36 @@ export const updateMemberRole = (orgId: number, userId: number, role: string) =>
 
 export const removeMember = (orgId: number, userId: number) =>
   api.delete(`/organizations/${orgId}/members/${userId}`)
+
+// Agent Budget
+export const fetchAgentBudgetStatus = (agentId: number) =>
+  api.get<ApiResponse<AgentBudgetStatus>>(`/agents/${agentId}/budget-status`).then((r) => r.data.data)
+
+export const updateAgentBudget = (agentId: number, data: { budget_limit_usd?: number | null; daily_budget_limit_usd?: number | null }) =>
+  api.put(`/agents/${agentId}/budget`, data).then((r) => r.data)
+
+// Agent Tool Scope
+export const fetchAgentToolScope = (agentId: number) =>
+  api.get(`/agents/${agentId}/tool-scope`).then((r) => r.data)
+
+export const updateAgentToolScope = (agentId: number, data: { allowed_tools?: string[] | null; blocked_tools?: string[] | null }) =>
+  api.put(`/agents/${agentId}/tool-scope`, data).then((r) => r.data)
+
+// Step Approval
+export const approveStep = (runId: number, stepId: number, note?: string) =>
+  api.post(`/runs/${runId}/steps/${stepId}/approve`, { note }).then((r) => r.data)
+
+export const rejectStep = (runId: number, stepId: number, note?: string) =>
+  api.post(`/runs/${runId}/steps/${stepId}/reject`, { note }).then((r) => r.data)
+
+export const resumeRun = (runId: number) =>
+  api.post(`/runs/${runId}/resume`).then((r) => r.data)
+
+// Audit Logs
+export const fetchAuditLogs = (params?: { event?: string; agent_id?: number; page?: number }) =>
+  api.get<{ data: AuditLogEntry[]; current_page: number; last_page: number; total: number }>('/audit-logs', { params }).then((r) => r.data)
+
+export const fetchAgentAuditLogs = (agentId: number, params?: { page?: number }) =>
+  api.get<{ data: AuditLogEntry[]; current_page: number; last_page: number; total: number }>(`/agents/${agentId}/audit-logs`, { params }).then((r) => r.data)
 
 export default api

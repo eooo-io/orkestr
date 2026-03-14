@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ExecutionRunResource;
 use App\Models\Agent;
 use App\Models\ExecutionRun;
+use App\Models\ExecutionStep;
 use App\Models\Project;
+use App\Services\AuditLogger;
 use App\Services\Execution\AgentExecutionService;
 use App\Services\Execution\CostCalculator;
 use Illuminate\Http\JsonResponse;
@@ -96,6 +98,107 @@ class ExecutionController extends Controller
         $run->markCancelled();
 
         return response()->json(['status' => 'cancelled']);
+    }
+
+    /**
+     * POST /api/runs/{run}/steps/{step}/approve
+     *
+     * Approve a pending step.
+     */
+    public function approveStep(Request $request, ExecutionRun $run, ExecutionStep $step): JsonResponse
+    {
+        if (! $step->isPendingApproval()) {
+            return response()->json(['error' => 'Step is not pending approval.'], 422);
+        }
+
+        if ((int) $step->execution_run_id !== (int) $run->id) {
+            return response()->json(['error' => 'Step does not belong to this run.'], 404);
+        }
+
+        $validated = $request->validate([
+            'note' => 'nullable|string|max:1000',
+        ]);
+
+        $userId = $request->user()->id;
+        $step->approve($userId, $validated['note'] ?? null);
+
+        AuditLogger::log('tool.approved', "Step #{$step->step_number} approved for run #{$run->id}", [
+            'run_id' => $run->id,
+            'step_id' => $step->id,
+            'tool_calls' => $step->tool_calls,
+        ], $run->agent_id, $run->project_id);
+
+        return response()->json([
+            'message' => 'Step approved.',
+            'step_id' => $step->id,
+            'status' => 'approved',
+        ]);
+    }
+
+    /**
+     * POST /api/runs/{run}/steps/{step}/reject
+     *
+     * Reject a pending step.
+     */
+    public function rejectStep(Request $request, ExecutionRun $run, ExecutionStep $step): JsonResponse
+    {
+        if (! $step->isPendingApproval()) {
+            return response()->json(['error' => 'Step is not pending approval.'], 422);
+        }
+
+        if ((int) $step->execution_run_id !== (int) $run->id) {
+            return response()->json(['error' => 'Step does not belong to this run.'], 404);
+        }
+
+        $validated = $request->validate([
+            'note' => 'nullable|string|max:1000',
+        ]);
+
+        $userId = $request->user()->id;
+        $step->reject($userId, $validated['note'] ?? null);
+
+        // Mark the run as failed since the step was rejected
+        $run->markFailed('Tool call rejected by user');
+
+        AuditLogger::log('tool.rejected', "Step #{$step->step_number} rejected for run #{$run->id}", [
+            'run_id' => $run->id,
+            'step_id' => $step->id,
+            'tool_calls' => $step->tool_calls,
+            'note' => $validated['note'] ?? null,
+        ], $run->agent_id, $run->project_id);
+
+        return response()->json([
+            'message' => 'Step rejected. Run has been marked as failed.',
+            'step_id' => $step->id,
+            'status' => 'rejected',
+        ]);
+    }
+
+    /**
+     * POST /api/runs/{run}/resume
+     *
+     * Resume execution after step approval.
+     */
+    public function resume(ExecutionRun $run): JsonResponse
+    {
+        if (! $run->isAwaitingApproval()) {
+            return response()->json(['error' => 'Run is not awaiting approval.'], 422);
+        }
+
+        // Verify that the pending step has been approved
+        $pendingStep = $run->steps()
+            ->where('requires_approval', true)
+            ->where('phase', 'act')
+            ->orderByDesc('step_number')
+            ->first();
+
+        if ($pendingStep && $pendingStep->status !== 'approved') {
+            return response()->json(['error' => 'Pending step has not been approved yet.'], 422);
+        }
+
+        $run = $this->executionService->resumeExecution($run);
+
+        return (new ExecutionRunResource($run))->response();
     }
 
     /**

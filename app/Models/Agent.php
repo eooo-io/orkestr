@@ -54,6 +54,14 @@ class Agent extends Model
         // Actions
         'custom_tools',
 
+        // Autonomy & Permissions
+        'autonomy_level',
+        'budget_limit_usd',
+        'daily_budget_limit_usd',
+        'allowed_tools',
+        'blocked_tools',
+        'data_access_scope',
+
         // Meta
         'is_template',
         'created_by',
@@ -79,8 +87,18 @@ class Agent extends Model
             'custom_tools' => 'array',
             'fallback_models' => 'array',
             'routing_strategy' => 'string',
+            'autonomy_level' => 'string',
+            'budget_limit_usd' => 'decimal:4',
+            'daily_budget_limit_usd' => 'decimal:4',
+            'allowed_tools' => 'array',
+            'blocked_tools' => 'array',
+            'data_access_scope' => 'array',
         ];
     }
+
+    protected $attributes = [
+        'autonomy_level' => 'semi_autonomous',
+    ];
 
     protected static function booted(): void
     {
@@ -93,6 +111,9 @@ class Agent extends Model
             }
             if ($agent->routing_strategy === null) {
                 $agent->routing_strategy = 'default';
+            }
+            if ($agent->autonomy_level === null) {
+                $agent->autonomy_level = 'semi_autonomous';
             }
         });
     }
@@ -143,6 +164,11 @@ class Agent extends Model
     public function schedules(): HasMany
     {
         return $this->hasMany(AgentSchedule::class);
+    }
+
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AgentAuditLog::class);
     }
 
     // --- Scopes ---
