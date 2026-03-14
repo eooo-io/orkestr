@@ -45,6 +45,12 @@ import type {
   OrganizationInvitation,
   AgentBudgetStatus,
   AuditLogEntry,
+  PerformanceOverview,
+  AgentPerformance,
+  PerformanceTrend,
+  ModelUsage,
+  AgentsOverview,
+  OnboardingStatus,
   ApiResponse,
 } from '@/types'
 
@@ -920,5 +926,36 @@ export const fetchAuditLogs = (params?: { event?: string; agent_id?: number; pag
 
 export const fetchAgentAuditLogs = (agentId: number, params?: { page?: number }) =>
   api.get<{ data: AuditLogEntry[]; current_page: number; last_page: number; total: number }>(`/agents/${agentId}/audit-logs`, { params }).then((r) => r.data)
+
+// Performance Dashboard
+export const fetchPerformanceOverview = (params?: { period?: string; agent_id?: number; project_id?: number }) =>
+  api.get<ApiResponse<PerformanceOverview>>('/performance/overview', { params }).then(r => r.data.data)
+
+export const fetchAgentPerformance = (params?: { period?: string; project_id?: number; sort?: string }) =>
+  api.get<ApiResponse<AgentPerformance[]>>('/performance/agents', { params }).then(r => r.data.data)
+
+export const fetchPerformanceTrends = (params?: { period?: string; agent_id?: number; project_id?: number }) =>
+  api.get<ApiResponse<PerformanceTrend[]>>('/performance/trends', { params }).then(r => r.data.data)
+
+export const fetchModelUsage = (params?: { period?: string }) =>
+  api.get<ApiResponse<ModelUsage[]>>('/performance/models', { params }).then(r => r.data.data)
+
+export const fetchCostBreakdown = (params?: { period?: string; group_by?: string }) =>
+  api.get<ApiResponse<Array<{ name: string; total_cost_usd: number; run_count: number }>>>('/performance/cost-breakdown', { params }).then(r => r.data.data)
+
+// Agents Overview
+export const fetchAgentsOverview = () =>
+  api.get<ApiResponse<AgentsOverview>>('/agents/overview').then(r => r.data.data)
+
+// Agent Team
+export const fetchAgentTeam = (projectId: number) =>
+  api.get<ApiResponse<ProjectAgent[]>>(`/projects/${projectId}/agent-team`).then(r => r.data.data)
+
+// Onboarding
+export const fetchOnboardingStatus = () =>
+  api.get<ApiResponse<OnboardingStatus>>('/onboarding/status').then(r => r.data.data)
+
+export const quickStart = () =>
+  api.post<ApiResponse<{ project_id: number; agent_id: number }>>('/onboarding/quick-start').then(r => r.data.data)
 
 export default api

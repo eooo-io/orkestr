@@ -15,6 +15,8 @@ import {
   Brain,
   Building2,
   Shield,
+  LayoutDashboard,
+  TrendingUp,
 } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { useTheme } from '@/hooks/useTheme'
@@ -44,14 +46,16 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   }, [])
 
   const navItems = [
+    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/projects', label: 'Projects', icon: FolderOpen },
     { to: '/agents', label: 'Agents', icon: Brain },
+    { to: '/performance', label: 'Performance', icon: TrendingUp },
+    { to: '/audit-log', label: 'Audit Log', icon: Shield },
+    { to: '/workspace', label: 'Workspace', icon: Building2 },
     { to: '/search', label: 'Search', icon: Search, shortcut: 'K' },
     { to: '/library', label: 'Library', icon: BookOpen },
     // { to: '/marketplace', label: 'Marketplace', icon: Store },
     { to: '/playground', label: 'Playground', icon: MessageSquare },
-    { to: '/workspace', label: 'Workspace', icon: Building2 },
-    { to: '/audit-log', label: 'Audit Log', icon: Shield },
     { to: '/settings', label: 'Settings', icon: Settings },
     { to: '/billing', label: 'Billing', icon: CreditCard },
   ]

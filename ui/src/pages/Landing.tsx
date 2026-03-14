@@ -226,8 +226,8 @@ const FEATURES = [
   },
   {
     icon: Shield,
-    title: 'Runtime Guardrails',
-    description: 'Budget limits, tool allowlists, PII detection, output safety checks. Ship agents you can trust.',
+    title: 'Autonomy & Guardrails',
+    description: 'Three autonomy tiers (supervised, semi-autonomous, autonomous), per-agent budgets, tool allowlists, and human approval gates. Ship agents you can trust.',
   },
   {
     icon: Brain,
@@ -545,6 +545,9 @@ export function Landing() {
             <button onClick={() => scrollTo('faq')} className={navLinkClass('faq')}>
               FAQ
             </button>
+            <Link to="/compare" className="text-muted-foreground hover:text-foreground transition-colors">
+              Compare
+            </Link>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -595,6 +598,9 @@ export function Landing() {
               <button onClick={() => scrollTo('faq')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
                 FAQ
               </button>
+              <Link to="/compare" onClick={() => setMobileMenuOpen(false)} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
+                Compare
+              </Link>
               <div className="border-t border-border mt-2 pt-2 flex gap-2">
                 <Link to="/login" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="outline" size="sm" className="w-full">Sign In</Button>
@@ -630,7 +636,8 @@ export function Landing() {
             </p>
             <p className="mt-4 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
               Design AI agent teams, define their autonomy, and run them.
-              Multi-model workflows, real tool calls, cost tracking, and guardrails — all from one platform.
+              Provider-agnostic multi-model routing with automatic fallback chains,
+              real tool calls, cost tracking, and guardrails — all from one platform.
             </p>
             <div className="flex flex-wrap gap-3 mt-8">
               <Link to="/register">
@@ -1125,6 +1132,11 @@ export function Landing() {
                   <button onClick={() => scrollTo('faq')} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
                     FAQ
                   </button>
+                </li>
+                <li>
+                  <Link to="/compare" className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
+                    Compare
+                  </Link>
                 </li>
               </ul>
             </div>

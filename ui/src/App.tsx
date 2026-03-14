@@ -24,8 +24,11 @@ import { ExecutionDashboard } from '@/pages/ExecutionDashboard'
 import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 import { Landing } from '@/pages/Landing'
+import { Compare } from '@/pages/Compare'
 import { WorkspaceSettings } from '@/pages/WorkspaceSettings'
 import { AuditLog } from '@/pages/AuditLog'
+import { AgentsDashboard } from '@/pages/AgentsDashboard'
+import { PerformanceDashboard } from '@/pages/PerformanceDashboard'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -35,6 +38,7 @@ function AppContent() {
       <Routes>
         {/* Public routes (no layout, no guard) */}
         <Route path="/" element={<Landing />} />
+        <Route path="/compare" element={<Compare />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -63,7 +67,9 @@ function AppContent() {
             <AuthGuard>
               <Layout>
                 <Routes>
-                  <Route index element={<Navigate to="/projects" replace />} />
+                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<AgentsDashboard />} />
+                  <Route path="/performance" element={<PerformanceDashboard />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/projects/new" element={<ProjectForm />} />
                   <Route path="/projects/:id" element={<ProjectDetail />} />

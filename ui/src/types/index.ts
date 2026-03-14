@@ -785,6 +785,81 @@ export interface AuditLogEntry {
   created_at: string
 }
 
+// --- Performance & Dashboard ---
+
+export interface PerformanceOverview {
+  total_runs: number
+  successful_runs: number
+  failed_runs: number
+  success_rate: number
+  total_cost_usd: number
+  avg_cost_per_run_usd: number
+  total_tokens: number
+  avg_tokens_per_run: number
+  avg_duration_ms: number
+  active_agents: number
+}
+
+export interface AgentPerformance {
+  agent_id: number
+  agent_name: string
+  agent_icon: string | null
+  run_count: number
+  success_rate: number
+  avg_cost_usd: number
+  avg_duration_ms: number
+  total_cost_usd: number
+  last_run_at: string | null
+}
+
+export interface PerformanceTrend {
+  date: string
+  run_count: number
+  success_count: number
+  failure_count: number
+  total_cost_usd: number
+  total_tokens: number
+}
+
+export interface ModelUsage {
+  model_name: string
+  run_count: number
+  total_tokens: number
+  total_cost_usd: number
+  avg_latency_ms: number
+}
+
+export interface AgentsOverview {
+  total_agents: number
+  active_agents: number
+  total_runs_today: number
+  total_cost_today: number
+  recent_runs: Array<{
+    id: number
+    agent_name: string
+    status: string
+    duration_ms: number | null
+    cost_usd: number
+    created_at: string
+  }>
+  top_agents: Array<{
+    id: number
+    name: string
+    icon: string | null
+    run_count: number
+  }>
+}
+
+export interface OnboardingStatus {
+  has_project: boolean
+  has_agent: boolean
+  has_skill: boolean
+  has_run: boolean
+  has_schedule: boolean
+  completed_steps: number
+  total_steps: number
+}
+
 export interface ApiResponse<T> {
   data: T
 }

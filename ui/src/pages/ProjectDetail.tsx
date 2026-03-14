@@ -23,6 +23,7 @@ import {
   Terminal,
   Settings2,
   Clock,
+  Users,
 } from 'lucide-react'
 import { fetchProject, fetchSkills, syncProject, scanProject, createSkill } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
@@ -30,6 +31,7 @@ import { SkillCard } from '@/components/skills/SkillCard'
 import { ImportLibraryModal } from '@/components/library/ImportLibraryModal'
 import { SkillsShImportModal } from '@/components/library/SkillsShImportModal'
 import { AgentsTab } from '@/components/agents/AgentsTab'
+import { AgentTeamTab } from '@/components/agents/AgentTeamTab'
 import { McpServersTab } from '@/components/integrations/McpServersTab'
 import { A2aAgentsTab } from '@/components/integrations/A2aAgentsTab'
 import { OpenClawConfigTab } from '@/components/integrations/OpenClawConfigTab'
@@ -49,7 +51,7 @@ export function ProjectDetail() {
   const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [activeTab, setActiveTab] = useState<'agents' | 'skills' | 'mcp' | 'a2a' | 'openclaw' | 'schedules' | 'visualize'>('agents')
+  const [activeTab, setActiveTab] = useState<'agents' | 'skills' | 'team' | 'mcp' | 'a2a' | 'openclaw' | 'schedules' | 'visualize'>('agents')
   const [showLibrary, setShowLibrary] = useState(false)
   const [showSkillsSh, setShowSkillsSh] = useState(false)
   const [showGenerate, setShowGenerate] = useState(false)
@@ -245,6 +247,17 @@ export function ProjectDetail() {
           Agents
         </button>
         <button
+          onClick={() => setActiveTab('team')}
+          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
+            activeTab === 'team'
+              ? 'border-primary text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Users className="h-4 w-4" />
+          Agent Team
+        </button>
+        <button
           onClick={() => setActiveTab('skills')}
           className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
             activeTab === 'skills'
@@ -411,6 +424,10 @@ export function ProjectDetail() {
 
       {activeTab === 'agents' && (
         <AgentsTab projectId={project.id} skills={skills} />
+      )}
+
+      {activeTab === 'team' && (
+        <AgentTeamTab projectId={project.id} />
       )}
 
       {activeTab === 'mcp' && (

@@ -33,6 +33,7 @@ use App\Http\Controllers\AgentMemoryController;
 use App\Http\Controllers\ProviderHealthController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\PerformanceDashboardController;
 use App\Http\Controllers\AgentBudgetController;
 use App\Http\Controllers\AgentToolScopeController;
 use App\Http\Controllers\AuditLogController;
@@ -127,6 +128,7 @@ Route::middleware('auth:web')->group(function () {
 
     // Agents — global CRUD
     Route::get('/agents', [AgentController::class, 'index']);
+    Route::get('/agents/overview', [PerformanceDashboardController::class, 'agentsOverview']);
     Route::post('/agents', [AgentController::class, 'store'])->middleware('org-role:editor');
     Route::get('/agents/{agent}', [AgentController::class, 'show']);
     Route::put('/agents/{agent}', [AgentController::class, 'update'])->middleware('org-role:editor');
@@ -286,6 +288,20 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/billing/connect', [BillingController::class, 'connectSetup']);
     Route::get('/billing/connect/status', [BillingController::class, 'connectStatus']);
     Route::get('/billing/earnings', [BillingController::class, 'earnings']);
+
+    // Performance Dashboard
+    Route::get('/performance/overview', [PerformanceDashboardController::class, 'overview']);
+    Route::get('/performance/agents', [PerformanceDashboardController::class, 'agents']);
+    Route::get('/performance/trends', [PerformanceDashboardController::class, 'trends']);
+    Route::get('/performance/models', [PerformanceDashboardController::class, 'models']);
+    Route::get('/performance/cost-breakdown', [PerformanceDashboardController::class, 'costBreakdown']);
+
+    // Agent Team Overview
+    Route::get('/projects/{project}/agent-team', [PerformanceDashboardController::class, 'agentTeam']);
+
+    // Onboarding
+    Route::get('/onboarding/status', [PerformanceDashboardController::class, 'onboardingStatus']);
+    Route::post('/onboarding/quick-start', [PerformanceDashboardController::class, 'quickStart']);
 
     // Settings
     Route::get('/settings', SettingsController::class);

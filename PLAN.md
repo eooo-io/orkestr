@@ -78,7 +78,7 @@ Observe (result fed back into context)
 **Phase A COMPLETE** — Agent Designer (25 issues, all closed).
 **Phase B COMPLETE** — Orchestration (27 issues, all closed).
 **Phase C COMPLETE** — Design + Runtime (35 issues, all closed).
-**Phase D IN PROGRESS** — Production-Ready Agent Teams (29 issues across 5 milestones).
+**Phase D COMPLETE** — Production-Ready Agent Teams (29 issues across 5 milestones, all closed).
 
 ---
 
@@ -508,12 +508,12 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 
 | Issue | Title | Status |
 |---|---|---|
-| #194 | Agent performance dashboard | TODO |
-| #195 | Agents-first navigation reframe | TODO |
-| #196 | Competitive comparison content | TODO |
-| #197 | Agent team overview page | TODO |
-| #198 | Landing page: sharpen provider-agnostic positioning | TODO |
-| #199 | Onboarding flow: first agent in 3 minutes | TODO |
+| #194 | Agent performance dashboard | DONE |
+| #195 | Agents-first navigation reframe | DONE |
+| #196 | Competitive comparison content | DONE |
+| #197 | Agent team overview page | DONE |
+| #198 | Landing page: sharpen provider-agnostic positioning | DONE |
+| #199 | Onboarding flow: first agent in 3 minutes | DONE |
 
 ---
 
