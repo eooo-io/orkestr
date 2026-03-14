@@ -24,6 +24,7 @@ import { ExecutionDashboard } from '@/pages/ExecutionDashboard'
 import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 import { Landing } from '@/pages/Landing'
+import { WorkspaceSettings } from '@/pages/WorkspaceSettings'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -78,6 +79,7 @@ function AppContent() {
                   <Route path="/projects/:id/execute" element={<ExecutionPlayground />} />
                   <Route path="/projects/:id/runs" element={<ExecutionDashboard />} />
                   <Route path="/search" element={<Search />} />
+                  <Route path="/workspace" element={<WorkspaceSettings />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/billing" element={<Billing />} />
                 </Routes>

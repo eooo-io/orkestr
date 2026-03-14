@@ -69,6 +69,11 @@ class Organization extends Model
         return $this->hasMany(Tag::class);
     }
 
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(OrganizationInvitation::class);
+    }
+
     public function isOnPlan(string $plan): bool
     {
         return $this->plan === $plan;

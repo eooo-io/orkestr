@@ -40,6 +40,9 @@ import type {
   ExecutionStats,
   ProviderHealth,
   AgentSchedule,
+  Organization,
+  OrganizationMember,
+  OrganizationInvitation,
   ApiResponse,
 } from '@/types'
 
@@ -844,5 +847,45 @@ export const triggerSchedule = (scheduleId: number) =>
 
 export const fetchScheduleRuns = (scheduleId: number) =>
   api.get<ApiResponse<ExecutionRun[]>>(`/schedules/${scheduleId}/runs`).then((r) => r.data.data)
+
+// Organizations
+export const fetchOrganizations = () =>
+  api.get<ApiResponse<Organization[]>>('/organizations').then((r) => r.data.data)
+
+export const createOrganization = (data: { name: string; description?: string }) =>
+  api.post<ApiResponse<Organization>>('/organizations', data).then((r) => r.data.data)
+
+export const fetchOrganization = (orgId: number) =>
+  api.get<ApiResponse<Organization>>(`/organizations/${orgId}`).then((r) => r.data.data)
+
+export const updateOrganization = (orgId: number, data: { name?: string; description?: string }) =>
+  api.put<ApiResponse<Organization>>(`/organizations/${orgId}`, data).then((r) => r.data.data)
+
+export const deleteOrganization = (orgId: number) =>
+  api.delete(`/organizations/${orgId}`)
+
+export const switchOrganization = (orgId: number) =>
+  api.post(`/organizations/${orgId}/switch`).then((r) => r.data)
+
+export const fetchOrgMembers = (orgId: number) =>
+  api.get<ApiResponse<OrganizationMember[]>>(`/organizations/${orgId}/members`).then((r) => r.data.data)
+
+export const inviteOrgMember = (orgId: number, data: { email: string; role?: string }) =>
+  api.post(`/organizations/${orgId}/invitations`, data).then((r) => r.data)
+
+export const fetchOrgInvitations = (orgId: number) =>
+  api.get<ApiResponse<OrganizationInvitation[]>>(`/organizations/${orgId}/invitations`).then((r) => r.data.data)
+
+export const cancelInvitation = (invitationId: number) =>
+  api.delete(`/invitations/${invitationId}`)
+
+export const acceptInvitation = (token: string) =>
+  api.post(`/invitations/accept/${token}`).then((r) => r.data)
+
+export const updateMemberRole = (orgId: number, userId: number, role: string) =>
+  api.put(`/organizations/${orgId}/members/${userId}`, { role }).then((r) => r.data)
+
+export const removeMember = (orgId: number, userId: number) =>
+  api.delete(`/organizations/${orgId}/members/${userId}`)
 
 export default api

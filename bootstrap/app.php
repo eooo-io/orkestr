@@ -24,6 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         ]);
+
+        $middleware->alias([
+            'org-role' => \App\Http\Middleware\CheckOrganizationRole::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -716,6 +716,38 @@ export interface AgentSchedule {
   updated_at: string
 }
 
+export interface Organization {
+  id: number
+  uuid: string
+  name: string
+  slug: string
+  description: string | null
+  plan: 'free' | 'pro' | 'teams'
+  member_count: number
+  role: string
+  created_at: string
+  updated_at: string
+}
+
+export interface OrganizationMember {
+  id: number
+  name: string
+  email: string
+  avatar: string | null
+  role: 'owner' | 'admin' | 'editor' | 'viewer' | 'member'
+  accepted_at: string | null
+}
+
+export interface OrganizationInvitation {
+  id: number
+  uuid: string
+  email: string
+  role: string
+  invited_by: { id: number; name: string } | null
+  expires_at: string
+  created_at: string
+}
+
 export interface ApiResponse<T> {
   data: T
 }

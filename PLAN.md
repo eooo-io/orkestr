@@ -486,12 +486,12 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 
 | Issue | Title | Status |
 |---|---|---|
-| #182 | Organization switcher component | TODO |
-| #183 | Team invitation flow (API + UI) | TODO |
-| #184 | Role enforcement in API controllers | TODO |
-| #185 | Workspace settings page | TODO |
-| #186 | Organization-scoped data isolation | TODO |
-| #187 | Organization API endpoints | TODO |
+| #182 | Organization switcher component | DONE |
+| #183 | Team invitation flow (API + UI) | DONE |
+| #184 | Role enforcement in API controllers | DONE |
+| #185 | Workspace settings page | DONE |
+| #186 | Organization-scoped data isolation | DONE |
+| #187 | Organization API endpoints | DONE |
 
 ### D.4 — Agent Autonomy & Permissions
 

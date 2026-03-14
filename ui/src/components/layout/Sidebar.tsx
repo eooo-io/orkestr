@@ -13,9 +13,11 @@ import {
   ExternalLink,
   X,
   Brain,
+  Building2,
 } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { useTheme } from '@/hooks/useTheme'
+import { OrganizationSwitcher } from './OrganizationSwitcher'
 
 export function Sidebar({ onClose }: { onClose?: () => void }) {
   const { projects, activeProjectId, setActiveProjectId, loadProjects } =
@@ -47,6 +49,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     { to: '/library', label: 'Library', icon: BookOpen },
     // { to: '/marketplace', label: 'Marketplace', icon: Store },
     { to: '/playground', label: 'Playground', icon: MessageSquare },
+    { to: '/workspace', label: 'Workspace', icon: Building2 },
     { to: '/settings', label: 'Settings', icon: Settings },
     { to: '/billing', label: 'Billing', icon: CreditCard },
   ]
@@ -82,6 +85,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           </button>
         )}
       </div>
+
+      {/* Organization Switcher */}
+      <OrganizationSwitcher />
 
       {/* Navigation */}
       <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">

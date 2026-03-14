@@ -32,6 +32,7 @@ use App\Http\Controllers\WorkflowRunController;
 use App\Http\Controllers\AgentMemoryController;
 use App\Http\Controllers\ProviderHealthController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\OrganizationController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -43,12 +44,28 @@ Route::post('/webhooks/schedule/{token}', [ScheduleController::class, 'webhookTr
 
 // ─── Authenticated Routes ────────────────────────────────────
 Route::middleware('auth:web')->group(function () {
+    // Organizations
+    Route::get('/organizations', [OrganizationController::class, 'index']);
+    Route::post('/organizations', [OrganizationController::class, 'store']);
+    Route::get('/organizations/{organization}', [OrganizationController::class, 'show']);
+    Route::put('/organizations/{organization}', [OrganizationController::class, 'update']);
+    Route::delete('/organizations/{organization}', [OrganizationController::class, 'destroy']);
+    Route::post('/organizations/{organization}/switch', [OrganizationController::class, 'switch']);
+    Route::get('/organizations/{organization}/members', [OrganizationController::class, 'members']);
+    Route::post('/organizations/{organization}/members', [OrganizationController::class, 'inviteMember']);
+    Route::put('/organizations/{organization}/members/{user}', [OrganizationController::class, 'updateMemberRole']);
+    Route::delete('/organizations/{organization}/members/{user}', [OrganizationController::class, 'removeMember']);
+    Route::get('/organizations/{organization}/invitations', [OrganizationController::class, 'invitations']);
+    Route::post('/organizations/{organization}/invitations', [OrganizationController::class, 'inviteMember']);
+    Route::delete('/invitations/{invitation}', [OrganizationController::class, 'cancelInvitation']);
+    Route::post('/invitations/accept/{token}', [OrganizationController::class, 'acceptInvitation']);
+
     // Projects
     Route::get('/projects', [ProjectController::class, 'index']);
-    Route::post('/projects', [ProjectController::class, 'store']);
+    Route::post('/projects', [ProjectController::class, 'store'])->middleware('org-role:editor');
     Route::get('/projects/{project}', [ProjectController::class, 'show']);
-    Route::put('/projects/{project}', [ProjectController::class, 'update']);
-    Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
+    Route::put('/projects/{project}', [ProjectController::class, 'update'])->middleware('org-role:editor');
+    Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->middleware('org-role:editor');
     Route::post('/projects/{project}/scan', [ProjectController::class, 'scan']);
     Route::post('/projects/{project}/sync', [ProjectController::class, 'sync']);
     Route::post('/projects/{project}/sync/preview', [ProjectController::class, 'syncPreview']);
@@ -57,7 +74,7 @@ Route::middleware('auth:web')->group(function () {
 
     // Skills (nested under project for create/index)
     Route::get('/projects/{project}/skills', [SkillController::class, 'index']);
-    Route::post('/projects/{project}/skills', [SkillController::class, 'store']);
+    Route::post('/projects/{project}/skills', [SkillController::class, 'store'])->middleware('org-role:editor');
 
     // Bulk Skill Operations (must be before /skills/{skill} routes)
     Route::post('/skills/bulk-tag', [BulkSkillController::class, 'bulkTag']);
@@ -67,8 +84,8 @@ Route::middleware('auth:web')->group(function () {
 
     // Skills (standalone for show/update/delete/duplicate)
     Route::get('/skills/{skill}', [SkillController::class, 'show']);
-    Route::put('/skills/{skill}', [SkillController::class, 'update']);
-    Route::delete('/skills/{skill}', [SkillController::class, 'destroy']);
+    Route::put('/skills/{skill}', [SkillController::class, 'update'])->middleware('org-role:editor');
+    Route::delete('/skills/{skill}', [SkillController::class, 'destroy'])->middleware('org-role:editor');
     Route::post('/skills/{skill}/duplicate', [SkillController::class, 'duplicate']);
     Route::get('/skills/{skill}/lint', [SkillController::class, 'lint']);
 
@@ -107,10 +124,10 @@ Route::middleware('auth:web')->group(function () {
 
     // Agents — global CRUD
     Route::get('/agents', [AgentController::class, 'index']);
-    Route::post('/agents', [AgentController::class, 'store']);
+    Route::post('/agents', [AgentController::class, 'store'])->middleware('org-role:editor');
     Route::get('/agents/{agent}', [AgentController::class, 'show']);
-    Route::put('/agents/{agent}', [AgentController::class, 'update']);
-    Route::delete('/agents/{agent}', [AgentController::class, 'destroy']);
+    Route::put('/agents/{agent}', [AgentController::class, 'update'])->middleware('org-role:editor');
+    Route::delete('/agents/{agent}', [AgentController::class, 'destroy'])->middleware('org-role:editor');
     Route::post('/agents/{agent}/duplicate', [AgentController::class, 'duplicate']);
     Route::get('/agents/{agent}/export', [AgentController::class, 'export']);
 
@@ -138,19 +155,19 @@ Route::middleware('auth:web')->group(function () {
 
     // Schedules
     Route::get('/projects/{project}/schedules', [ScheduleController::class, 'index']);
-    Route::post('/projects/{project}/schedules', [ScheduleController::class, 'store']);
+    Route::post('/projects/{project}/schedules', [ScheduleController::class, 'store'])->middleware('org-role:editor');
     Route::get('/schedules/{schedule}', [ScheduleController::class, 'show']);
-    Route::put('/schedules/{schedule}', [ScheduleController::class, 'update']);
-    Route::delete('/schedules/{schedule}', [ScheduleController::class, 'destroy']);
-    Route::post('/schedules/{schedule}/toggle', [ScheduleController::class, 'toggle']);
-    Route::post('/schedules/{schedule}/trigger', [ScheduleController::class, 'trigger']);
+    Route::put('/schedules/{schedule}', [ScheduleController::class, 'update'])->middleware('org-role:editor');
+    Route::delete('/schedules/{schedule}', [ScheduleController::class, 'destroy'])->middleware('org-role:editor');
+    Route::post('/schedules/{schedule}/toggle', [ScheduleController::class, 'toggle'])->middleware('org-role:editor');
+    Route::post('/schedules/{schedule}/trigger', [ScheduleController::class, 'trigger'])->middleware('org-role:editor');
     Route::get('/schedules/{schedule}/runs', [ScheduleController::class, 'runs']);
 
     // Webhooks
     Route::get('/projects/{project}/webhooks', [WebhookController::class, 'index']);
-    Route::post('/projects/{project}/webhooks', [WebhookController::class, 'store']);
-    Route::put('/webhooks/{webhook}', [WebhookController::class, 'update']);
-    Route::delete('/webhooks/{webhook}', [WebhookController::class, 'destroy']);
+    Route::post('/projects/{project}/webhooks', [WebhookController::class, 'store'])->middleware('org-role:admin');
+    Route::put('/webhooks/{webhook}', [WebhookController::class, 'update'])->middleware('org-role:admin');
+    Route::delete('/webhooks/{webhook}', [WebhookController::class, 'destroy'])->middleware('org-role:admin');
     Route::get('/webhooks/{webhook}/deliveries', [WebhookController::class, 'deliveries']);
     Route::post('/webhooks/{webhook}/test', [WebhookController::class, 'test']);
 
@@ -238,9 +255,9 @@ Route::middleware('auth:web')->group(function () {
 
     // Billing & Subscriptions
     Route::get('/billing/status', [BillingController::class, 'status']);
-    Route::post('/billing/subscribe', [BillingController::class, 'subscribe']);
-    Route::post('/billing/change-plan', [BillingController::class, 'changePlan']);
-    Route::post('/billing/cancel', [BillingController::class, 'cancel']);
+    Route::post('/billing/subscribe', [BillingController::class, 'subscribe'])->middleware('org-role:owner');
+    Route::post('/billing/change-plan', [BillingController::class, 'changePlan'])->middleware('org-role:owner');
+    Route::post('/billing/cancel', [BillingController::class, 'cancel'])->middleware('org-role:owner');
     Route::post('/billing/resume', [BillingController::class, 'resume']);
     Route::post('/billing/setup-intent', [BillingController::class, 'setupIntent']);
     Route::put('/billing/payment-method', [BillingController::class, 'updatePaymentMethod']);
@@ -254,5 +271,5 @@ Route::middleware('auth:web')->group(function () {
 
     // Settings
     Route::get('/settings', SettingsController::class);
-    Route::put('/settings', [SettingsController::class, 'update']);
+    Route::put('/settings', [SettingsController::class, 'update'])->middleware('org-role:admin');
 });
