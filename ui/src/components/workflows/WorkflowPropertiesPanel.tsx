@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { X, Trash2 } from 'lucide-react'
-import type { WorkflowStep, WorkflowEdge, Agent } from '@/types'
-import { fetchAgents } from '@/api/client'
+import type { WorkflowStep, WorkflowEdge, Agent, ModelGroup } from '@/types'
+import { fetchAgents, fetchModels } from '@/api/client'
 
 interface Props {
   selectedStep: WorkflowStep | null
@@ -23,9 +23,11 @@ export function WorkflowPropertiesPanel({
   onClose,
 }: Props) {
   const [agents, setAgents] = useState<Agent[]>([])
+  const [modelGroups, setModelGroups] = useState<ModelGroup[]>([])
 
   useEffect(() => {
     fetchAgents().then(setAgents).catch(() => {})
+    fetchModels().then(setModelGroups).catch(() => {})
   }, [])
 
   if (!selectedStep && !selectedEdge) return null
@@ -84,28 +86,58 @@ export function WorkflowPropertiesPanel({
           </div>
 
           {selectedStep.type === 'agent' && (
-            <div>
-              <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                Agent
-              </label>
-              <select
-                value={selectedStep.agent_id ?? ''}
-                onChange={(e) =>
-                  onUpdateStep({
-                    ...selectedStep,
-                    agent_id: e.target.value ? Number(e.target.value) : null,
-                  })
-                }
-                className="w-full mt-1 px-3 py-1.5 text-sm bg-muted border border-border focus:border-primary focus:outline-none"
-              >
-                <option value="">Select agent...</option>
-                {agents.map((agent) => (
-                  <option key={agent.id} value={agent.id}>
-                    {agent.name} ({agent.role})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <>
+              <div>
+                <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Agent
+                </label>
+                <select
+                  value={selectedStep.agent_id ?? ''}
+                  onChange={(e) =>
+                    onUpdateStep({
+                      ...selectedStep,
+                      agent_id: e.target.value ? Number(e.target.value) : null,
+                    })
+                  }
+                  className="w-full mt-1 px-3 py-1.5 text-sm bg-muted border border-border focus:border-primary focus:outline-none"
+                >
+                  <option value="">Select agent...</option>
+                  {agents.map((agent) => (
+                    <option key={agent.id} value={agent.id}>
+                      {agent.name} ({agent.role})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Model Override
+                </label>
+                <select
+                  value={selectedStep.model_override ?? ''}
+                  onChange={(e) =>
+                    onUpdateStep({
+                      ...selectedStep,
+                      model_override: e.target.value || null,
+                    })
+                  }
+                  className="w-full mt-1 px-3 py-1.5 text-sm bg-muted border border-border focus:border-primary focus:outline-none"
+                >
+                  <option value="">Use agent's default</option>
+                  {modelGroups.map((group) =>
+                    group.models.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Override the agent's default model for this step.
+                </p>
+              </div>
+            </>
           )}
 
           {selectedStep.type === 'checkpoint' && (

@@ -10,10 +10,14 @@ import {
   Trash2,
   Download,
   Brain,
+  Plus,
+  X,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react'
-import { fetchAgent, createAgent, updateAgent, deleteAgent, exportAgent } from '@/api/client'
+import { fetchAgent, createAgent, updateAgent, deleteAgent, exportAgent, fetchModels } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
-import type { Agent } from '@/types'
+import type { Agent, ModelGroup } from '@/types'
 
 const EMPTY_AGENT: Partial<Agent> = {
   name: '',
@@ -42,6 +46,12 @@ const EMPTY_AGENT: Partial<Agent> = {
   custom_tools: null,
   is_template: false,
 }
+
+const ROUTING_STRATEGIES = [
+  { value: 'default', label: 'Default', desc: 'Use configured model order as-is' },
+  { value: 'cost_optimized', label: 'Cost Optimized', desc: 'Cheapest viable model first' },
+  { value: 'performance', label: 'Performance', desc: 'Most capable model first' },
+]
 
 const CONTEXT_STRATEGIES = [
   { value: 'full', label: 'Full Context', desc: 'Include all available context' },
@@ -79,6 +89,7 @@ export function AgentBuilder() {
   const [agent, setAgent] = useState<Partial<Agent>>(EMPTY_AGENT)
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
+  const [modelGroups, setModelGroups] = useState<ModelGroup[]>([])
   const [openSections, setOpenSections] = useState<Set<string>>(
     new Set(['identity', 'goal', 'reasoning']),
   )
@@ -92,6 +103,12 @@ export function AgentBuilder() {
         .finally(() => setLoading(false))
     }
   }, [id])
+
+  useEffect(() => {
+    fetchModels()
+      .then(setModelGroups)
+      .catch(() => {})
+  }, [])
 
   const toggleSection = (section: string) => {
     setOpenSections((prev) => {
@@ -282,6 +299,39 @@ export function AgentBuilder() {
               />
             </Field>
           </div>
+          <FallbackModelsEditor
+            primaryModel={agent.model || ''}
+            fallbackModels={agent.fallback_models || []}
+            modelGroups={modelGroups}
+            onChange={(models) => update('fallback_models', models.length > 0 ? models : null)}
+          />
+          <Field label="Routing Strategy">
+            <div className="grid grid-cols-3 gap-2">
+              {ROUTING_STRATEGIES.map((rs) => (
+                <label
+                  key={rs.value}
+                  className={`flex items-start gap-2 p-3 border cursor-pointer transition-colors ${
+                    (agent.routing_strategy || 'default') === rs.value
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-muted-foreground/30'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="routing_strategy"
+                    value={rs.value}
+                    checked={(agent.routing_strategy || 'default') === rs.value}
+                    onChange={() => update('routing_strategy', rs.value)}
+                    className="mt-0.5"
+                  />
+                  <div>
+                    <span className="text-sm font-medium">{rs.label}</span>
+                    <p className="text-xs text-muted-foreground">{rs.desc}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </Field>
           <Field label="Base Instructions">
             <textarea
               value={agent.base_instructions || ''}
@@ -621,6 +671,125 @@ function Field({
         {hint && <span className="font-normal normal-case tracking-normal ml-2 text-muted-foreground/60">({hint})</span>}
       </label>
       {children}
+    </div>
+  )
+}
+
+function FallbackModelsEditor({
+  primaryModel,
+  fallbackModels,
+  modelGroups,
+  onChange,
+}: {
+  primaryModel: string
+  fallbackModels: string[]
+  modelGroups: ModelGroup[]
+  onChange: (models: string[]) => void
+}) {
+  const allModels = modelGroups.flatMap((g) =>
+    g.models.map((m) => ({ id: m.id, name: m.name, provider: g.label })),
+  )
+  const excluded = new Set([primaryModel, ...fallbackModels])
+  const availableModels = allModels.filter((m) => !excluded.has(m.id))
+
+  const addModel = (modelId: string) => {
+    if (modelId && !fallbackModels.includes(modelId)) {
+      onChange([...fallbackModels, modelId])
+    }
+  }
+
+  const removeModel = (index: number) => {
+    onChange(fallbackModels.filter((_, i) => i !== index))
+  }
+
+  const moveUp = (index: number) => {
+    if (index === 0) return
+    const next = [...fallbackModels]
+    ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
+    onChange(next)
+  }
+
+  const moveDown = (index: number) => {
+    if (index >= fallbackModels.length - 1) return
+    const next = [...fallbackModels]
+    ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
+    onChange(next)
+  }
+
+  const getModelLabel = (modelId: string) => {
+    const found = allModels.find((m) => m.id === modelId)
+    return found ? `${found.name} (${found.provider})` : modelId
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        Fallback Models
+      </label>
+      <p className="text-xs text-muted-foreground">
+        If the primary model fails, try these models in order.
+      </p>
+
+      {fallbackModels.length > 0 && (
+        <div className="space-y-1">
+          {fallbackModels.map((modelId, index) => (
+            <div
+              key={modelId}
+              className="flex items-center gap-2 px-3 py-2 bg-muted/30 border border-border text-sm"
+            >
+              <span className="text-xs text-muted-foreground font-mono w-5 text-center">
+                {index + 1}
+              </span>
+              <span className="flex-1 truncate">{getModelLabel(modelId)}</span>
+              <button
+                onClick={() => moveUp(index)}
+                disabled={index === 0}
+                className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
+                title="Move up"
+              >
+                <ArrowUp className="h-3 w-3" />
+              </button>
+              <button
+                onClick={() => moveDown(index)}
+                disabled={index >= fallbackModels.length - 1}
+                className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
+                title="Move down"
+              >
+                <ArrowDown className="h-3 w-3" />
+              </button>
+              <button
+                onClick={() => removeModel(index)}
+                className="p-0.5 text-red-400 hover:text-red-300 transition-colors"
+                title="Remove"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {availableModels.length > 0 && (
+        <div className="flex items-center gap-2">
+          <select
+            className="flex-1 px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+            defaultValue=""
+            onChange={(e) => {
+              addModel(e.target.value)
+              e.target.value = ''
+            }}
+          >
+            <option value="" disabled>
+              Add fallback model...
+            </option>
+            {availableModels.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name} ({m.provider})
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
     </div>
   )
 }

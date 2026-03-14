@@ -465,11 +465,11 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 
 | Issue | Title | Status |
 |---|---|---|
-| #171 | Per-step model override in workflow nodes | TODO |
-| #172 | Model fallback chain configuration | TODO |
-| #173 | Cost-optimized model routing | TODO |
-| #174 | Provider health monitoring & status | TODO |
-| #175 | Multi-model execution trace attribution | TODO |
+| #171 | Per-step model override in workflow nodes | DONE |
+| #172 | Model fallback chain configuration | DONE |
+| #173 | Cost-optimized model routing | DONE |
+| #174 | Provider health monitoring & status | DONE |
+| #175 | Multi-model execution trace attribution | DONE |
 
 ### D.2 — Agent Schedules & Event Triggers
 

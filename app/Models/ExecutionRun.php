@@ -25,6 +25,7 @@ class ExecutionRun extends Model
         'total_tokens',
         'total_cost_microcents',
         'total_duration_ms',
+        'model_used',
     ];
 
     protected $attributes = [

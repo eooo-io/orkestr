@@ -22,6 +22,8 @@ class ExecutionStep extends Model
         'duration_ms',
         'status',
         'error',
+        'model_used',
+        'model_requested',
     ];
 
     protected $attributes = [
@@ -37,6 +39,8 @@ class ExecutionStep extends Model
             'tool_calls' => 'array',
             'token_usage' => 'array',
             'duration_ms' => 'integer',
+            'model_used' => 'string',
+            'model_requested' => 'string',
         ];
     }
 

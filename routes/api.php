@@ -30,6 +30,7 @@ use App\Http\Controllers\WorkflowController;
 use App\Http\Controllers\ExecutionController;
 use App\Http\Controllers\WorkflowRunController;
 use App\Http\Controllers\AgentMemoryController;
+use App\Http\Controllers\ProviderHealthController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -215,6 +216,10 @@ Route::middleware('auth:web')->group(function () {
     // Import (Reverse-Sync)
     Route::post('/import/detect', [ImportController::class, 'detect']);
     Route::post('/projects/{project}/import', [ImportController::class, 'import']);
+
+    // Provider Health
+    Route::get('/provider-health', [ProviderHealthController::class, 'index']);
+    Route::post('/provider-health/check/{provider}', [ProviderHealthController::class, 'check']);
 
     // Models
     Route::get('/models', [ModelController::class, 'index']);

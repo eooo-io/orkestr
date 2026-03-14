@@ -20,6 +20,8 @@ class Agent extends Model
         'base_instructions',
         'persona_prompt',
         'model',
+        'fallback_models',
+        'routing_strategy',
         'icon',
         'sort_order',
 
@@ -75,6 +77,8 @@ class Agent extends Model
             'output_schema' => 'array',
             'delegation_rules' => 'array',
             'custom_tools' => 'array',
+            'fallback_models' => 'array',
+            'routing_strategy' => 'string',
         ];
     }
 
@@ -86,6 +90,9 @@ class Agent extends Model
             }
             if (empty($agent->slug)) {
                 $agent->slug = Str::slug($agent->name);
+            }
+            if ($agent->routing_strategy === null) {
+                $agent->routing_strategy = 'default';
             }
         });
     }

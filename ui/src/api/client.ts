@@ -38,6 +38,7 @@ import type {
   WorkflowValidation,
   ExecutionRun,
   ExecutionStats,
+  ProviderHealth,
   ApiResponse,
 } from '@/types'
 
@@ -806,5 +807,16 @@ export const fetchExecutionStats = (projectId: number) =>
   api
     .get<ExecutionStats>(`/projects/${projectId}/runs/stats`)
     .then((r) => r.data)
+
+// Provider Health
+export const fetchProviderHealth = () =>
+  api
+    .get<ApiResponse<Record<string, ProviderHealth>>>('/provider-health')
+    .then((r) => r.data.data)
+
+export const checkProviderHealth = (provider: string) =>
+  api
+    .post<ApiResponse<ProviderHealth>>(`/provider-health/check/${provider}`)
+    .then((r) => r.data.data)
 
 export default api

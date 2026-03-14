@@ -19,6 +19,7 @@ class WorkflowStep extends Model
         'position_y',
         'config',
         'sort_order',
+        'model_override',
     ];
 
     protected function casts(): array

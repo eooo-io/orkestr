@@ -42,6 +42,51 @@ class CostCalculator
     }
 
     /**
+     * Get the cost tier for a model: economy, standard, or premium.
+     */
+    public static function getModelCostTier(string $model): string
+    {
+        $pricing = self::MODEL_PRICING[$model] ?? null;
+        if (! $pricing) {
+            return 'standard';
+        }
+
+        $avgCost = ($pricing['input'] + $pricing['output']) / 2;
+
+        if ($avgCost <= 25) {
+            return 'economy';     // Haiku, Flash, Mini
+        }
+        if ($avgCost <= 100) {
+            return 'standard';    // Sonnet, GPT-5.4, Gemini Pro
+        }
+
+        return 'premium';         // Opus, o3
+    }
+
+    /**
+     * Rank models by input cost (cheapest first).
+     */
+    public static function rankByCost(array $modelIds): array
+    {
+        usort($modelIds, function ($a, $b) {
+            $aPrice = self::MODEL_PRICING[$a]['input'] ?? 30;
+            $bPrice = self::MODEL_PRICING[$b]['input'] ?? 30;
+
+            return $aPrice <=> $bPrice;
+        });
+
+        return $modelIds;
+    }
+
+    /**
+     * Get pricing for a specific model.
+     */
+    public static function getPricing(string $model): array
+    {
+        return self::MODEL_PRICING[$model] ?? ['input' => 30, 'output' => 150];
+    }
+
+    /**
      * Format microcents as a human-readable dollar amount.
      */
     public static function formatCost(int $microcents): string
@@ -72,7 +117,7 @@ class CostCalculator
             $totalDuration += $run->total_duration_ms;
             $count++;
 
-            $model = $run->agent?->model ?? 'unknown';
+            $model = $run->model_used ?? $run->agent?->model ?? 'unknown';
             if (! isset($byModel[$model])) {
                 $byModel[$model] = ['tokens' => 0, 'cost' => 0, 'runs' => 0];
             }

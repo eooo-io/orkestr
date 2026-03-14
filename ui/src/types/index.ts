@@ -95,6 +95,8 @@ export interface Agent {
   base_instructions: string
   persona_prompt: string | null
   model: string | null
+  fallback_models: string[] | null
+  routing_strategy: string
   icon: string | null
   sort_order: number
 
@@ -562,6 +564,7 @@ export interface WorkflowStep {
   position_x: number
   position_y: number
   config: Record<string, unknown> | null
+  model_override: string | null
   sort_order: number
   is_agent: boolean
   is_checkpoint: boolean
@@ -623,6 +626,7 @@ export interface ExecutionRun {
   total_tokens: number
   total_cost_microcents: number
   total_duration_ms: number
+  model_used?: string | null
   steps?: ExecutionStep[]
   steps_count?: number
   created_at: string
@@ -640,6 +644,8 @@ export interface ExecutionStep {
   duration_ms: number
   status: 'pending' | 'running' | 'completed' | 'failed'
   error: string | null
+  model_used?: string | null
+  model_requested?: string | null
   created_at: string
 }
 
@@ -667,6 +673,15 @@ export interface ExecutionStats {
   success_rate: number
   completed_count: number
   failed_count: number
+}
+
+export interface ProviderHealth {
+  status: 'healthy' | 'degraded' | 'down'
+  error_count: number
+  last_error: string | null
+  last_success_at: string | null
+  avg_latency_ms: number
+  updated_at: string | null
 }
 
 export interface ApiResponse<T> {

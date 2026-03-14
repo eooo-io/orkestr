@@ -151,6 +151,12 @@ class WorkflowExecutionService
         $project = Project::find($run->project_id);
         $agent = $step->agent;
 
+        // Build execution config, merging step config with model override
+        $config = $step->config ?? [];
+        if ($step->model_override) {
+            $config['model_override'] = $step->model_override;
+        }
+
         // Execute agent with current context as input
         $executionRun = $this->agentExecutor->execute(
             project: $project,
@@ -159,7 +165,7 @@ class WorkflowExecutionService
                 $this->contextService->all(),
                 ['step_name' => $step->name],
             ),
-            config: $step->config ?? [],
+            config: $config,
             createdBy: $run->created_by,
         );
 

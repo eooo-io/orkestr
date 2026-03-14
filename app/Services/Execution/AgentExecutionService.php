@@ -12,7 +12,9 @@ use App\Services\AgentComposeService;
 use App\Services\Execution\Guards\BudgetGuard;
 use App\Services\Execution\Guards\OutputGuard;
 use App\Services\Execution\Guards\ToolGuard;
+use App\Services\LLM\CostOptimizedRouter;
 use App\Services\LLM\LLMProviderFactory;
+use App\Services\LLM\ModelRouter;
 use App\Services\Mcp\McpServerManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -22,6 +24,8 @@ class AgentExecutionService
     public function __construct(
         private AgentComposeService $composeService,
         private LLMProviderFactory $providerFactory,
+        private ModelRouter $modelRouter,
+        private CostOptimizedRouter $costRouter,
         private McpServerManager $serverManager,
         private BudgetGuard $budgetGuard,
     ) {}
@@ -81,7 +85,15 @@ class AgentExecutionService
         $userMessage = $input['message'] ?? $input['goal'] ?? json_encode($input);
         $messages[] = ['role' => 'user', 'content' => $userMessage];
 
-        $provider = $this->providerFactory->make($model);
+        // Resolve fallback chain from config or agent
+        $fallbackChain = $config['fallback_models'] ?? $agent->fallback_models ?? [];
+
+        // Apply cost-optimized routing strategy to reorder model list
+        $routingStrategy = $agent->routing_strategy ?? 'default';
+        $reorderedModels = $this->costRouter->selectModels($model, $fallbackChain, $routingStrategy);
+        $model = $reorderedModels[0];
+        $fallbackChain = array_slice($reorderedModels, 1);
+
         $stepNumber = 0;
         $deadline = microtime(true) + $timeout;
 
@@ -121,13 +133,21 @@ class AgentExecutionService
 
             $reasonStart = microtime(true);
             try {
-                $llmResponse = $provider->chat($systemPrompt, $messages, $model, $maxTokens, $toolDefinitions);
+                $llmResponse = $this->modelRouter->chatWithFallback(
+                    $systemPrompt,
+                    $messages,
+                    $model,
+                    $maxTokens,
+                    $toolDefinitions,
+                    $fallbackChain,
+                );
             } catch (\Throwable $e) {
                 $reasonStep->markFailed($e->getMessage());
                 $run->markFailed("LLM call failed: {$e->getMessage()}");
                 return;
             }
 
+            $actualModelUsed = $llmResponse['model_used'] ?? $model;
             $reasonDuration = (int) ((microtime(true) - $reasonStart) * 1000);
             $reasonStep->markCompleted([
                 'content' => $llmResponse['content'],
@@ -135,9 +155,18 @@ class AgentExecutionService
                 'usage' => $llmResponse['usage'],
             ], $reasonDuration);
 
-            // Track token usage
-            $reasonStep->update(['token_usage' => $llmResponse['usage']]);
+            // Track token usage and model attribution
+            $reasonStep->update([
+                'token_usage' => $llmResponse['usage'],
+                'model_used' => $actualModelUsed,
+                'model_requested' => $model,
+            ]);
             $run->addTokenUsage($llmResponse['usage']);
+
+            // Record model_used on the run (first successful LLM call sets it)
+            if (! $run->model_used) {
+                $run->update(['model_used' => $actualModelUsed]);
+            }
 
             // Check if LLM wants to use tools
             $toolUseCalls = collect($llmResponse['content'])->where('type', 'tool_use')->values()->all();
