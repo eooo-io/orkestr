@@ -14,6 +14,7 @@ class ExecutionRun extends Model
         'project_id',
         'agent_id',
         'workflow_run_id',
+        'schedule_id',
         'status',
         'input',
         'output',
@@ -82,6 +83,11 @@ class ExecutionRun extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function schedule(): BelongsTo
+    {
+        return $this->belongsTo(AgentSchedule::class, 'schedule_id');
     }
 
     // --- Status helpers ---

@@ -22,6 +22,7 @@ import {
   Network,
   Terminal,
   Settings2,
+  Clock,
 } from 'lucide-react'
 import { fetchProject, fetchSkills, syncProject, scanProject, createSkill } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
@@ -33,6 +34,7 @@ import { McpServersTab } from '@/components/integrations/McpServersTab'
 import { A2aAgentsTab } from '@/components/integrations/A2aAgentsTab'
 import { OpenClawConfigTab } from '@/components/integrations/OpenClawConfigTab'
 import VisualizationTab from '@/components/visualization/VisualizationTab'
+import { SchedulesTab } from '@/components/schedules/SchedulesTab'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
 import { ExportModal } from '@/components/bundles/ExportModal'
 import { ImportBundleModal } from '@/components/bundles/ImportBundleModal'
@@ -47,7 +49,7 @@ export function ProjectDetail() {
   const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [activeTab, setActiveTab] = useState<'agents' | 'skills' | 'mcp' | 'a2a' | 'openclaw' | 'visualize'>('agents')
+  const [activeTab, setActiveTab] = useState<'agents' | 'skills' | 'mcp' | 'a2a' | 'openclaw' | 'schedules' | 'visualize'>('agents')
   const [showLibrary, setShowLibrary] = useState(false)
   const [showSkillsSh, setShowSkillsSh] = useState(false)
   const [showGenerate, setShowGenerate] = useState(false)
@@ -290,6 +292,17 @@ export function ProjectDetail() {
           OpenClaw
         </button>
         <button
+          onClick={() => setActiveTab('schedules')}
+          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
+            activeTab === 'schedules'
+              ? 'border-primary text-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Clock className="h-4 w-4" />
+          Schedules
+        </button>
+        <button
           onClick={() => setActiveTab('visualize')}
           className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
             activeTab === 'visualize'
@@ -410,6 +423,10 @@ export function ProjectDetail() {
 
       {activeTab === 'openclaw' && (
         <OpenClawConfigTab projectId={project.id} />
+      )}
+
+      {activeTab === 'schedules' && (
+        <SchedulesTab projectId={project.id} />
       )}
 
       {activeTab === 'visualize' && (

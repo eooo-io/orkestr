@@ -684,6 +684,38 @@ export interface ProviderHealth {
   updated_at: string | null
 }
 
+export interface AgentSchedule {
+  id: number
+  uuid: string
+  project_id: number
+  agent_id: number
+  agent?: {
+    id: number
+    name: string
+    slug: string
+    icon: string | null
+  }
+  name: string
+  trigger_type: 'cron' | 'webhook' | 'event'
+  cron_expression: string | null
+  timezone: string
+  webhook_token: string | null
+  webhook_url: string | null
+  event_name: string | null
+  event_filters: Record<string, unknown> | null
+  input_template: Record<string, unknown> | null
+  execution_config: Record<string, unknown> | null
+  is_enabled: boolean
+  last_run_at: string | null
+  next_run_at: string | null
+  run_count: number
+  failure_count: number
+  max_retries: number
+  last_error: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface ApiResponse<T> {
   data: T
 }

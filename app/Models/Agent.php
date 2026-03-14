@@ -140,6 +140,11 @@ class Agent extends Model
             ->withTimestamps();
     }
 
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(AgentSchedule::class);
+    }
+
     // --- Scopes ---
 
     public function scopeTemplates($query)

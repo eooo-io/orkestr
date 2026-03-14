@@ -31,6 +31,7 @@ use App\Http\Controllers\ExecutionController;
 use App\Http\Controllers\WorkflowRunController;
 use App\Http\Controllers\AgentMemoryController;
 use App\Http\Controllers\ProviderHealthController;
+use App\Http\Controllers\ScheduleController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -38,6 +39,7 @@ Route::get('/health', fn () => response()->json(['status' => 'ok']));
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 Route::post('/webhooks/github/{project}', [InboundWebhookController::class, 'github']);
 Route::get('/billing/plans', [BillingController::class, 'plans']);
+Route::post('/webhooks/schedule/{token}', [ScheduleController::class, 'webhookTrigger']);
 
 // ─── Authenticated Routes ────────────────────────────────────
 Route::middleware('auth:web')->group(function () {
@@ -133,6 +135,16 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/marketplace/publish', [MarketplaceController::class, 'publish']);
     Route::post('/marketplace/{marketplaceSkill}/install', [MarketplaceController::class, 'install']);
     Route::post('/marketplace/{marketplaceSkill}/vote', [MarketplaceController::class, 'vote']);
+
+    // Schedules
+    Route::get('/projects/{project}/schedules', [ScheduleController::class, 'index']);
+    Route::post('/projects/{project}/schedules', [ScheduleController::class, 'store']);
+    Route::get('/schedules/{schedule}', [ScheduleController::class, 'show']);
+    Route::put('/schedules/{schedule}', [ScheduleController::class, 'update']);
+    Route::delete('/schedules/{schedule}', [ScheduleController::class, 'destroy']);
+    Route::post('/schedules/{schedule}/toggle', [ScheduleController::class, 'toggle']);
+    Route::post('/schedules/{schedule}/trigger', [ScheduleController::class, 'trigger']);
+    Route::get('/schedules/{schedule}/runs', [ScheduleController::class, 'runs']);
 
     // Webhooks
     Route::get('/projects/{project}/webhooks', [WebhookController::class, 'index']);

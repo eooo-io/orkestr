@@ -126,4 +126,9 @@ class Project extends Model
     {
         return $this->hasMany(ExecutionRun::class);
     }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(AgentSchedule::class);
+    }
 }

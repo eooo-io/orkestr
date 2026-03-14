@@ -39,6 +39,7 @@ import type {
   ExecutionRun,
   ExecutionStats,
   ProviderHealth,
+  AgentSchedule,
   ApiResponse,
 } from '@/types'
 
@@ -818,5 +819,30 @@ export const checkProviderHealth = (provider: string) =>
   api
     .post<ApiResponse<ProviderHealth>>(`/provider-health/check/${provider}`)
     .then((r) => r.data.data)
+
+// Agent Schedules
+export const fetchSchedules = (projectId: number) =>
+  api.get<ApiResponse<AgentSchedule[]>>(`/projects/${projectId}/schedules`).then((r) => r.data.data)
+
+export const createSchedule = (projectId: number, data: Partial<AgentSchedule>) =>
+  api.post<ApiResponse<AgentSchedule>>(`/projects/${projectId}/schedules`, data).then((r) => r.data.data)
+
+export const fetchSchedule = (scheduleId: number) =>
+  api.get<ApiResponse<AgentSchedule>>(`/schedules/${scheduleId}`).then((r) => r.data.data)
+
+export const updateSchedule = (scheduleId: number, data: Partial<AgentSchedule>) =>
+  api.put<ApiResponse<AgentSchedule>>(`/schedules/${scheduleId}`, data).then((r) => r.data.data)
+
+export const deleteSchedule = (scheduleId: number) =>
+  api.delete(`/schedules/${scheduleId}`)
+
+export const toggleSchedule = (scheduleId: number, isEnabled: boolean) =>
+  api.post(`/schedules/${scheduleId}/toggle`, { is_enabled: isEnabled })
+
+export const triggerSchedule = (scheduleId: number) =>
+  api.post<ApiResponse<unknown>>(`/schedules/${scheduleId}/trigger`).then((r) => r.data)
+
+export const fetchScheduleRuns = (scheduleId: number) =>
+  api.get<ApiResponse<ExecutionRun[]>>(`/schedules/${scheduleId}/runs`).then((r) => r.data.data)
 
 export default api

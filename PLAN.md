@@ -475,12 +475,12 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 
 | Issue | Title | Status |
 |---|---|---|
-| #176 | Agent schedule data model & migration | TODO |
-| #177 | Cron schedule builder UI | TODO |
-| #178 | Schedule management API endpoints | TODO |
-| #179 | Webhook-triggered agent execution | TODO |
-| #180 | Trigger configuration UI | TODO |
-| #181 | Scheduled execution queue & worker | TODO |
+| #176 | Agent schedule data model & migration | DONE |
+| #177 | Cron schedule builder UI | DONE |
+| #178 | Schedule management API endpoints | DONE |
+| #179 | Webhook-triggered agent execution | DONE |
+| #180 | Trigger configuration UI | DONE |
+| #181 | Scheduled execution queue & worker | DONE |
 
 ### D.3 — Organization & Team Completion
 
