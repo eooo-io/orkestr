@@ -1,0 +1,38 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 260">
+  <rect width="100%" height="100%" fill="#0b0b0b"/>
+
+<polygon points="100,10 180,55 180,145 100,190 20,145 20,55"
+stroke="#ffffff" stroke-width="6" fill="none"/>
+
+
+<g stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+
+  <!-- antennas -->
+  <line x1="90" y1="50" x2="90" y2="30"/>
+  <line x1="110" y1="50" x2="110" y2="30"/>
+  <circle cx="90" cy="25" r="5" fill="#ffffff" stroke="none"/>
+  <circle cx="110" cy="25" r="5" fill="#ffffff" stroke="none"/>
+
+  <!-- head -->
+  <rect x="60" y="50" width="80" height="55" rx="10"/>
+
+  <!-- eyes -->
+  <circle cx="85" cy="75" r="6" fill="#ffffff" stroke="none"/>
+  <circle cx="115" cy="75" r="6" fill="#ffffff" stroke="none"/>
+
+  <!-- mouth grill -->
+  <line x1="80" y1="90" x2="120" y2="90" stroke="black"/>
+  <line x1="80" y1="96" x2="120" y2="96" stroke="black"/>
+  <line x1="80" y1="102" x2="120" y2="102" stroke="black"/>
+
+  <!-- arms -->
+  <line x1="60" y1="75" x2="45" y2="95"/>
+  <circle cx="40" cy="100" r="4" fill="#ffffff" stroke="none"/>
+
+  <line x1="140" y1="75" x2="155" y2="95"/>
+  <circle cx="160" cy="100" r="4" fill="#ffffff" stroke="none"/>
+
+</g>
+
+</svg>
