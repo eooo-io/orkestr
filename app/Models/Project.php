@@ -20,6 +20,11 @@ class Project extends Model
         'name',
         'description',
         'path',
+        'default_model',
+        'monthly_budget_usd',
+        'environment',
+        'icon',
+        'color',
         'synced_at',
         'git_auto_commit',
         'organization_id',
@@ -30,6 +35,7 @@ class Project extends Model
         return [
             'synced_at' => 'datetime',
             'git_auto_commit' => 'boolean',
+            'monthly_budget_usd' => 'decimal:2',
         ];
     }
 

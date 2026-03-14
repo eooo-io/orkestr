@@ -3,7 +3,12 @@ export interface Project {
   uuid: string
   name: string
   description: string | null
-  path: string
+  path: string | null
+  default_model?: string | null
+  monthly_budget_usd?: number | null
+  environment?: 'development' | 'staging' | 'production'
+  icon?: string | null
+  color?: string | null
   providers: string[]
   git_auto_commit: boolean
   skills_count: number

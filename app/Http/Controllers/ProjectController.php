@@ -31,7 +31,12 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'path' => ['required', 'string', 'max:500', new SafeProjectPath],
+            'path' => ['nullable', 'string', 'max:500', new SafeProjectPath],
+            'default_model' => 'nullable|string',
+            'monthly_budget_usd' => 'nullable|numeric|min:0',
+            'environment' => 'nullable|in:development,staging,production',
+            'icon' => 'nullable|string|max:10',
+            'color' => 'nullable|string|max:7',
             'providers' => 'nullable|array',
             'providers.*' => 'string|in:claude,cursor,copilot,windsurf,cline,openai',
             'git_auto_commit' => 'nullable|boolean',
@@ -40,7 +45,12 @@ class ProjectController extends Controller
         $project = Project::create([
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
-            'path' => $validated['path'],
+            'path' => $validated['path'] ?? null,
+            'default_model' => $validated['default_model'] ?? null,
+            'monthly_budget_usd' => $validated['monthly_budget_usd'] ?? null,
+            'environment' => $validated['environment'] ?? 'development',
+            'icon' => $validated['icon'] ?? null,
+            'color' => $validated['color'] ?? null,
             'git_auto_commit' => $validated['git_auto_commit'] ?? false,
         ]);
 
@@ -63,7 +73,12 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'path' => ['sometimes', 'required', 'string', 'max:500', new SafeProjectPath],
+            'path' => ['nullable', 'string', 'max:500', new SafeProjectPath],
+            'default_model' => 'nullable|string',
+            'monthly_budget_usd' => 'nullable|numeric|min:0',
+            'environment' => 'nullable|in:development,staging,production',
+            'icon' => 'nullable|string|max:10',
+            'color' => 'nullable|string|max:7',
             'providers' => 'nullable|array',
             'providers.*' => 'string|in:claude,cursor,copilot,windsurf,cline,openai',
             'git_auto_commit' => 'nullable|boolean',
