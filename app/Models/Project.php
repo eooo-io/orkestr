@@ -27,6 +27,7 @@ class Project extends Model
         'color',
         'synced_at',
         'git_auto_commit',
+        'canvas_layout',
         'organization_id',
     ];
 
@@ -36,6 +37,7 @@ class Project extends Model
             'synced_at' => 'datetime',
             'git_auto_commit' => 'boolean',
             'monthly_budget_usd' => 'decimal:2',
+            'canvas_layout' => 'array',
         ];
     }
 

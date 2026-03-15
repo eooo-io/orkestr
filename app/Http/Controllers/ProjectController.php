@@ -131,6 +131,31 @@ class ProjectController extends Controller
         return response()->json(['data' => $preview]);
     }
 
+    public function canvasLayout(Project $project): JsonResponse
+    {
+        return response()->json([
+            'data' => $project->canvas_layout,
+        ]);
+    }
+
+    public function updateCanvasLayout(Request $request, Project $project): JsonResponse
+    {
+        $validated = $request->validate([
+            'nodes' => 'required|array',
+            'nodes.*' => 'required|array',
+            'nodes.*.x' => 'required|numeric',
+            'nodes.*.y' => 'required|numeric',
+        ]);
+
+        $project->update([
+            'canvas_layout' => $validated,
+        ]);
+
+        return response()->json([
+            'data' => $project->canvas_layout,
+        ]);
+    }
+
     public function gitLog(Request $request, Project $project, GitService $gitService): JsonResponse
     {
         $file = $request->query('file');

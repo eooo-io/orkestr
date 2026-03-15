@@ -1293,3 +1293,9 @@ export interface ModelRecommendation {
   size_gb: number | null
   local_available: boolean
 }
+
+// --- Canvas Layout ---
+
+export interface CanvasLayout {
+  nodes: Record<string, { x: number; y: number }>
+}

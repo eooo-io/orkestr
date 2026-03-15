@@ -115,6 +115,8 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/projects/{project}/sync/preview', [ProjectController::class, 'syncPreview']);
     Route::get('/projects/{project}/git-log', [ProjectController::class, 'gitLog']);
     Route::get('/projects/{project}/git-diff', [ProjectController::class, 'gitDiff']);
+    Route::get('/projects/{project}/canvas-layout', [ProjectController::class, 'canvasLayout']);
+    Route::put('/projects/{project}/canvas-layout', [ProjectController::class, 'updateCanvasLayout'])->middleware('org-role:editor');
 
     // Skills (nested under project for create/index)
     Route::get('/projects/{project}/skills', [SkillController::class, 'index']);

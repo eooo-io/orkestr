@@ -83,7 +83,7 @@ export function ProjectVisualize() {
 
       {/* Graph */}
       <div className="flex-1">
-        <FlowGraph data={data} height={graphHeight} onNodeClick={handleNodeClick} />
+        <FlowGraph data={data} height={graphHeight} onNodeClick={handleNodeClick} projectId={id ? parseInt(id) : undefined} />
       </div>
     </div>
   )

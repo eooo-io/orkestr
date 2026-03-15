@@ -90,6 +90,7 @@ import type {
   ExecutionDiff,
   PaginatedUsers,
   ManagedUser,
+  CanvasLayout,
 } from '@/types'
 
 const api = axios.create({
@@ -1424,5 +1425,13 @@ export const fetchExecutionSteps = (id: number) =>
 
 export const diffExecutions = (id1: number, id2: number) =>
   api.get<ApiResponse<ExecutionDiff>>(`/executions/${id1}/diff/${id2}`).then((r) => r.data.data)
+
+// --- Canvas Layout (#296) ---
+
+export const fetchCanvasLayout = (projectId: number) =>
+  api.get<ApiResponse<CanvasLayout | null>>(`/projects/${projectId}/canvas-layout`).then((r) => r.data.data)
+
+export const saveCanvasLayout = (projectId: number, layout: Record<string, { x: number; y: number }>) =>
+  api.put<ApiResponse<CanvasLayout>>(`/projects/${projectId}/canvas-layout`, { nodes: layout }).then((r) => r.data.data)
 
 export default api

@@ -27,6 +27,8 @@ type AgentNodeData = {
   hasLoopConfig: boolean
   mcpCount: number
   a2aCount: number
+  assignedSkills?: Array<{ id: number; name: string }>
+  isDropTarget?: boolean
 }
 
 export const AgentNode = memo(({ data }: NodeProps & { data: AgentNodeData }) => {
@@ -34,9 +36,11 @@ export const AgentNode = memo(({ data }: NodeProps & { data: AgentNodeData }) =>
   return (
     <div
       className={`px-4 py-3 rounded-lg border-2 min-w-[220px] shadow-lg transition-all ${
-        d.isEnabled
-          ? 'bg-violet-950/80 border-violet-500/60 hover:border-violet-400'
-          : 'bg-zinc-900/80 border-zinc-600/40 opacity-60'
+        d.isDropTarget
+          ? 'bg-violet-950/80 border-emerald-400 ring-2 ring-emerald-400/40'
+          : d.isEnabled
+            ? 'bg-violet-950/80 border-violet-500/60 hover:border-violet-400'
+            : 'bg-zinc-900/80 border-zinc-600/40 opacity-60'
       }`}
     >
       <Handle type="target" position={Position.Left} className="!bg-violet-500 !w-2 !h-2" />
@@ -84,6 +88,21 @@ export const AgentNode = memo(({ data }: NodeProps & { data: AgentNodeData }) =>
             <span className="text-zinc-500">max:{d.maxIterations}</span>
           )}
           <span className="text-zinc-600">{d.loopCondition}</span>
+        </div>
+      )}
+      {d.assignedSkills && d.assignedSkills.length > 0 && (
+        <div className="flex gap-1 mt-2 flex-wrap">
+          {d.assignedSkills.slice(0, 5).map((skill) => (
+            <span
+              key={skill.id}
+              className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-900/50 text-emerald-300/80 border border-emerald-700/40"
+            >
+              {skill.name}
+            </span>
+          ))}
+          {d.assignedSkills.length > 5 && (
+            <span className="text-[9px] text-zinc-500">+{d.assignedSkills.length - 5}</span>
+          )}
         </div>
       )}
     </div>

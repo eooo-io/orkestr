@@ -66,6 +66,12 @@ export default function VisualizationTab({ projectId }: Props) {
                 MCP ({data.mcp_servers.length})
               </span>
             )}
+            {(data.a2a_agents?.length ?? 0) > 0 && (
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-cyan-500/60 border border-cyan-500" />
+                A2A ({data.a2a_agents?.length ?? 0})
+              </span>
+            )}
             {data.circular_deps.length > 0 && (
               <span className="flex items-center gap-1.5 text-red-400">
                 <span className="w-2.5 h-2.5 rounded-sm bg-red-500/60 border border-red-500" />
@@ -83,7 +89,7 @@ export default function VisualizationTab({ projectId }: Props) {
         </Link>
       </div>
 
-      <FlowGraph data={data} height={500} onNodeClick={handleNodeClick} />
+      <FlowGraph data={data} height={500} onNodeClick={handleNodeClick} projectId={projectId} />
 
       <div className="flex items-center gap-4 text-[11px] text-zinc-500 px-1">
         <span>
@@ -97,6 +103,10 @@ export default function VisualizationTab({ projectId }: Props) {
         <span>
           <span className="inline-block w-4 h-0 border-t-2 border-amber-500 mr-1.5 align-middle opacity-50" />
           syncs to
+        </span>
+        <span>
+          <span className="inline-block w-4 h-0 border-t-2 border-dashed border-cyan-500 mr-1.5 align-middle" />
+          delegates to
         </span>
       </div>
     </div>
