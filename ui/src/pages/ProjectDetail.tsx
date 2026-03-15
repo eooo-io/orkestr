@@ -18,9 +18,7 @@ import {
   Square,
   CheckCheck,
   GitBranch,
-  Server,
   Network,
-  Terminal,
   Settings2,
   Clock,
   Users,
@@ -32,9 +30,7 @@ import { ImportLibraryModal } from '@/components/library/ImportLibraryModal'
 import { SkillsShImportModal } from '@/components/library/SkillsShImportModal'
 import { AgentsTab } from '@/components/agents/AgentsTab'
 import { AgentTeamTab } from '@/components/agents/AgentTeamTab'
-import { McpServersTab } from '@/components/integrations/McpServersTab'
-import { A2aAgentsTab } from '@/components/integrations/A2aAgentsTab'
-import { OpenClawConfigTab } from '@/components/integrations/OpenClawConfigTab'
+import { ConnectionsTab } from '@/components/integrations/ConnectionsTab'
 import VisualizationTab from '@/components/visualization/VisualizationTab'
 import { SchedulesTab } from '@/components/schedules/SchedulesTab'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
@@ -51,7 +47,7 @@ export function ProjectDetail() {
   const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [activeTab, setActiveTab] = useState<'agents' | 'skills' | 'team' | 'mcp' | 'a2a' | 'openclaw' | 'schedules' | 'visualize'>('agents')
+  const [activeTab, setActiveTab] = useState<'canvas' | 'skills' | 'agents' | 'team' | 'connections' | 'schedules'>('canvas')
   const [showLibrary, setShowLibrary] = useState(false)
   const [showSkillsSh, setShowSkillsSh] = useState(false)
   const [showGenerate, setShowGenerate] = useState(false)
@@ -233,99 +229,32 @@ export function ProjectDetail() {
         </div>
       </div>
 
-      {/* Tab Switcher */}
+      {/* Tab Switcher — follows natural build flow: Canvas → Skills → Agents → Team → Connections → Schedules */}
       <div className="flex items-center gap-1 mb-4 border-b border-border">
-        <button
-          onClick={() => setActiveTab('agents')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
-            activeTab === 'agents'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Bot className="h-4 w-4" />
-          Agents
-        </button>
-        <button
-          onClick={() => setActiveTab('team')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
-            activeTab === 'team'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Users className="h-4 w-4" />
-          Agent Team
-        </button>
-        <button
-          onClick={() => setActiveTab('skills')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
-            activeTab === 'skills'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Sparkles className="h-4 w-4" />
-          Skills
-          <span className="ml-1 text-xs px-1.5 py-0.5 bg-muted">
-            {skills.length}
-          </span>
-        </button>
-        <button
-          onClick={() => setActiveTab('mcp')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
-            activeTab === 'mcp'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Server className="h-4 w-4" />
-          MCP
-        </button>
-        <button
-          onClick={() => setActiveTab('a2a')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
-            activeTab === 'a2a'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Network className="h-4 w-4" />
-          A2A
-        </button>
-        <button
-          onClick={() => setActiveTab('openclaw')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
-            activeTab === 'openclaw'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Terminal className="h-4 w-4" />
-          OpenClaw
-        </button>
-        <button
-          onClick={() => setActiveTab('schedules')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
-            activeTab === 'schedules'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Clock className="h-4 w-4" />
-          Schedules
-        </button>
-        <button
-          onClick={() => setActiveTab('visualize')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
-            activeTab === 'visualize'
-              ? 'border-primary text-foreground'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <GitBranch className="h-4 w-4" />
-          Visualize
-        </button>
+        {([
+          { id: 'canvas' as const, label: 'Canvas', icon: GitBranch },
+          { id: 'skills' as const, label: 'Skills', icon: Sparkles, badge: skills.length },
+          { id: 'agents' as const, label: 'Agents', icon: Bot },
+          { id: 'team' as const, label: 'Team', icon: Users },
+          { id: 'connections' as const, label: 'Connections', icon: Network },
+          { id: 'schedules' as const, label: 'Schedules', icon: Clock },
+        ]).map(({ id, label, icon: Icon, badge }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-all duration-150 -mb-px ${
+              activeTab === id
+                ? 'border-primary text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Icon className="h-4 w-4" />
+            {label}
+            {badge !== undefined && (
+              <span className="ml-1 text-xs px-1.5 py-0.5 bg-muted">{badge}</span>
+            )}
+          </button>
+        ))}
       </div>
 
       {activeTab === 'skills' && (
@@ -422,6 +351,10 @@ export function ProjectDetail() {
         </>
       )}
 
+      {activeTab === 'canvas' && (
+        <VisualizationTab projectId={project.id} />
+      )}
+
       {activeTab === 'agents' && (
         <AgentsTab projectId={project.id} skills={skills} />
       )}
@@ -430,24 +363,12 @@ export function ProjectDetail() {
         <AgentTeamTab projectId={project.id} />
       )}
 
-      {activeTab === 'mcp' && (
-        <McpServersTab projectId={project.id} />
-      )}
-
-      {activeTab === 'a2a' && (
-        <A2aAgentsTab projectId={project.id} />
-      )}
-
-      {activeTab === 'openclaw' && (
-        <OpenClawConfigTab projectId={project.id} />
+      {activeTab === 'connections' && (
+        <ConnectionsTab projectId={project.id} />
       )}
 
       {activeTab === 'schedules' && (
         <SchedulesTab projectId={project.id} />
-      )}
-
-      {activeTab === 'visualize' && (
-        <VisualizationTab projectId={project.id} />
       )}
 
       {showLibrary && (

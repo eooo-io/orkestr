@@ -934,6 +934,27 @@ F.4 (documentation) + F.5 (install) + F.6 (polish)  ← can run in parallel
 | #286 | Remove standalone infrastructure pages and routes | DONE |
 | #287 | Update CLAUDE.md and PLAN.md for Phase H completion | DONE |
 
+---
+
+## Phase I: Interactive Canvas Builder
+
+> **Motivation:** The Canvas tab is the primary design surface — upgrade from read-only visualization to an interactive WYSIWYG builder with drag-and-drop agents, skill assignment, MCP wiring, and A2A delegation chain configuration.
+
+### I.1 — Interactive Canvas Builder
+
+| Issue | Title | Status |
+|---|---|---|
+| #288 | Canvas: agent nodes with drag-and-drop from sidebar palette | PENDING |
+| #289 | Canvas: skill chip attachment — drag skills onto agent nodes | PENDING |
+| #290 | Canvas: MCP server connection nodes | PENDING |
+| #291 | Canvas: A2A delegation edges with directional arrows | PENDING |
+| #292 | Canvas: A2A edge configuration panel | PENDING |
+| #293 | Canvas: chain visualization with numbered steps | PENDING |
+| #294 | Canvas: node detail side panel — edit agent/skill/MCP on click | PENDING |
+| #295 | Canvas: auto-layout algorithm for clean initial positioning | PENDING |
+| #296 | Canvas: persist node positions per project | PENDING |
+| #297 | Canvas: minimap, zoom controls, and fullscreen toggle | PENDING |
+
 ### Deferred (Post-Tier 2)
 
 Previously tracked as F.1-F.3, these remain deferred:
