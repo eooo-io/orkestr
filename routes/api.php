@@ -515,6 +515,13 @@ Route::middleware('auth:web')->group(function () {
     // Model Recommendations (#411)
     Route::get('/models/recommendations', [ModelRecommendationController::class, 'index']);
 
+    // OpenRouter model discovery (#300)
+    Route::get('/models/openrouter', function () {
+        $provider = new \App\Services\LLM\OpenRouterProvider();
+
+        return response()->json(['data' => $provider->modelsWithDetails()]);
+    });
+
     // Execution Replay (#412, #413, #414)
     Route::get('/executions', [ExecutionReplayController::class, 'index']);
     Route::get('/executions/{executionReplay}', [ExecutionReplayController::class, 'show']);

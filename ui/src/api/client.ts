@@ -1123,6 +1123,11 @@ export const fetchPullingModels = () =>
 export const fetchModelRecommendations = (taskType: string) =>
   api.get<ApiResponse<ModelRecommendation[]>>(`/models/recommendations?task_type=${taskType}`).then((r) => r.data.data)
 
+// --- OpenRouter (#300) ---
+
+export const fetchOpenRouterModels = () =>
+  api.get<ApiResponse<Array<{ id: string; name: string; context_length: number; pricing: { prompt: string; completion: string } }>>>('/models/openrouter').then((r) => r.data.data)
+
 // --- Air-Gap (E.4) ---
 
 export const fetchAirGapStatus = () =>

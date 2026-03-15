@@ -130,6 +130,7 @@ interface SettingsData {
   openai_api_key_set: boolean
   gemini_api_key_set: boolean
   grok_api_key_set?: boolean
+  openrouter_api_key_set?: boolean
   ollama_url: string
   default_model: string
 }
@@ -235,6 +236,7 @@ function GeneralPanel() {
   const [openaiKey, setOpenaiKey] = useState('')
   const [geminiKey, setGeminiKey] = useState('')
   const [grokKey, setGrokKey] = useState('')
+  const [openRouterKey, setOpenRouterKey] = useState('')
   const [ollamaUrl, setOllamaUrl] = useState('')
 
   useEffect(() => {
@@ -257,6 +259,7 @@ function GeneralPanel() {
     if (openaiKey) payload.openai_api_key = openaiKey
     if (geminiKey) payload.gemini_api_key = geminiKey
     if (grokKey) payload.grok_api_key = grokKey
+    if (openRouterKey) payload.openrouter_api_key = openRouterKey
     if (ollamaUrl) payload.ollama_url = ollamaUrl
 
     if (Object.keys(payload).length === 0) {
@@ -273,6 +276,7 @@ function GeneralPanel() {
       setOpenaiKey('')
       setGeminiKey('')
       setGrokKey('')
+      setOpenRouterKey('')
       setOllamaUrl(updated.ollama_url || 'http://localhost:11434')
       setSaveMessage('Settings saved successfully.')
     } catch {
@@ -303,6 +307,8 @@ function GeneralPanel() {
           <ApiKeyInput label="Google Gemini API Key" configured={settings?.gemini_api_key_set ?? false} value={geminiKey} onChange={setGeminiKey} placeholder="AIza..." />
           <div className="border-t border-border" />
           <ApiKeyInput label="Grok (xAI) API Key" configured={settings?.grok_api_key_set ?? false} value={grokKey} onChange={setGrokKey} placeholder="xai-..." />
+          <div className="border-t border-border" />
+          <ApiKeyInput label="OpenRouter API Key" configured={settings?.openrouter_api_key_set ?? false} value={openRouterKey} onChange={setOpenRouterKey} placeholder="sk-or-..." />
           <div className="border-t border-border" />
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">

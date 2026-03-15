@@ -18,6 +18,7 @@ class LLMProviderFactory
             str_starts_with($model, 'o3') => new OpenAIProvider(),
             str_starts_with($model, 'gemini-') => new GeminiProvider(),
             str_starts_with($model, 'grok-') => new GrokProvider(),
+            str_starts_with($model, 'openrouter:') => new OpenRouterProvider(),
             str_starts_with($model, 'custom:') => $this->makeCustomProvider($model),
             default => new OllamaProvider(),
         };
@@ -34,6 +35,7 @@ class LLMProviderFactory
             str_starts_with($model, 'o3') => 'openai',
             str_starts_with($model, 'gemini-') => 'gemini',
             str_starts_with($model, 'grok-') => 'grok',
+            str_starts_with($model, 'openrouter:') => 'openrouter',
             str_starts_with($model, 'custom:') => 'custom',
             default => 'ollama',
         };
@@ -60,6 +62,10 @@ class LLMProviderFactory
 
         $grokConfigured = ! empty(
             AppSetting::get('grok_api_key') ?: env('GROK_API_KEY')
+        );
+
+        $openRouterConfigured = ! empty(
+            AppSetting::get('openrouter_api_key') ?: env('OPENROUTER_API_KEY')
         );
 
         // Ollama is considered "configured" if we can reach it
@@ -94,6 +100,14 @@ class LLMProviderFactory
                 'label' => 'Grok (xAI)',
                 'configured' => $grokConfigured,
                 'models' => $this->formatModels((new GrokProvider())->models(), 'grok'),
+            ],
+            [
+                'provider' => 'openrouter',
+                'label' => 'OpenRouter',
+                'configured' => $openRouterConfigured,
+                'models' => $openRouterConfigured
+                    ? $this->formatOpenRouterModels((new OpenRouterProvider())->modelsWithDetails())
+                    : [],
             ],
             [
                 'provider' => 'ollama',
@@ -180,6 +194,17 @@ class LLMProviderFactory
             apiKey: $endpoint->api_key,
             providerName: $endpoint->name,
         );
+    }
+
+    protected function formatOpenRouterModels(array $models): array
+    {
+        return array_map(fn (array $m) => [
+            'id' => $m['id'],
+            'name' => $m['name'],
+            'provider' => 'openrouter',
+            'context_window' => $m['context_length'] ?? 0,
+            'pricing' => $m['pricing'] ?? null,
+        ], $models);
     }
 
     protected function isOllamaReachable(): bool

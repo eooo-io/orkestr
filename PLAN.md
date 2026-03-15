@@ -955,6 +955,22 @@ F.4 (documentation) + F.5 (install) + F.6 (polish)  ← can run in parallel
 | #296 | Canvas: persist node positions per project | DONE |
 | #297 | Canvas: minimap, zoom controls, and fullscreen toggle | DONE |
 
+---
+
+## Phase J: OpenRouter Integration
+
+> **Motivation:** Single API key access to 200+ models. Reduces friction for new users — one OpenRouter key replaces 4+ provider keys.
+
+### J.1 — OpenRouter Integration
+
+| Issue | Title | Status |
+|---|---|---|
+| #298 | OpenRouterProvider: LLM provider implementation | DONE |
+| #299 | OpenRouter API key setting and Settings UI | DONE |
+| #300 | OpenRouter model discovery endpoint | DONE |
+| #301 | OpenRouter Pest tests | DONE |
+| #302 | Update CLAUDE.md and PLAN.md for OpenRouter integration | DONE |
+
 ### Deferred (Post-Tier 2)
 
 Previously tracked as F.1-F.3, these remain deferred:

@@ -517,7 +517,7 @@ cd docs && npm run build  # Build static site
 - **Slugs** are auto-generated from skill names, unique within a project
 - **Version snapshots** are created on every skill save
 - **Provider sync** is triggered explicitly (not automatic on save)
-- **Multi-model** — LLMProviderFactory routes by model prefix: `claude-` → Anthropic, `gpt-`/`o3` → OpenAI, `gemini-` → Gemini, `grok-` → Grok (xAI), `custom:` → OpenAI-compatible endpoint, default → Ollama
+- **Multi-model** — LLMProviderFactory routes by model prefix: `claude-` → Anthropic, `gpt-`/`o3` → OpenAI, `gemini-` → Gemini, `grok-` → Grok (xAI), `openrouter:` → OpenRouter (200+ models), `custom:` → OpenAI-compatible endpoint, default → Ollama
 - **API token auth** — Bearer token via `AuthenticateApiToken` middleware (fallback when no session cookie)
 - **Guardrails** — Org → Project → Agent cascading policies, profiles (strict/moderate/permissive), violation tracking
 - **Token estimation** — ~1 token per 4 characters (character-based approximation)
