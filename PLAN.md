@@ -43,7 +43,7 @@ Phase F — Launch-Ready (Tier 1)  (COMPLETE)
   F.5: Install & deployment polish.
   F.6: Bug fixes & polish.
 
-Phase G — Self-Hosted Differentiation (Tier 2)  (FUTURE)
+Phase G — Self-Hosted Differentiation (Tier 2)  (COMPLETE)
   G.1: VS Code extension.
   G.2: GitHub Action for CI/CD.
   G.3: Model Pull UI (one-click Ollama downloads).
@@ -104,7 +104,7 @@ Observe (result fed back into context)
 **Phase D COMPLETE** — Production-Ready Agent Teams (29 issues across 5 milestones, all closed).
 **Phase E COMPLETE** — Ship the Self-Hosted Product (58 issues across 6 milestones: E.1–E.6, #201–#268).
 **Phase F COMPLETE** — Launch-Ready / Tier 1 (38 issues across 6 milestones: F.1–F.6, #301–#338).
-**Phase G FUTURE** — Self-Hosted Differentiation / Tier 2 (17 issues across 5 milestones: G.1–G.5, #401–#417).
+**Phase G COMPLETE** — Self-Hosted Differentiation / Tier 2 (17 issues across 5 milestones: G.1–G.5, #401–#417).
 
 **Strategic pivot (2026-03-15):** Repositioned from SaaS to self-hosted infrastructure software. Cloud tier is a free playground/demo funnel. The product runs on customer infra with local models, local MCP, local data. Revenue model is commercial self-hosted license.
 
@@ -825,43 +825,43 @@ F.4 (documentation) + F.5 (install) + F.6 (polish)  ← can run in parallel
 
 | Issue | Title | Status |
 |---|---|---|
-| #401 | VS Code extension scaffold (TypeScript, vsce packaging) | PENDING |
-| #402 | Skill browser tree view (list/search skills from Orkestr API) | PENDING |
-| #403 | Skill editor with syntax highlighting and frontmatter validation | PENDING |
-| #404 | Sync status indicator and push/pull commands | PENDING |
-| #405 | Skill test runner integration | PENDING |
+| #401 | VS Code extension scaffold (TypeScript, vsce packaging) | DONE |
+| #402 | Skill browser tree view (list/search skills from Orkestr API) | DONE |
+| #403 | Skill editor with syntax highlighting and frontmatter validation | DONE |
+| #404 | Sync status indicator and push/pull commands | DONE |
+| #405 | Skill test runner integration | DONE |
 
 ### G.2 — GitHub Action for CI/CD
 
 | Issue | Title | Status |
 |---|---|---|
-| #406 | GitHub Action: validate skill format in PRs | PENDING |
-| #407 | GitHub Action: auto-sync skills on merge to main | PENDING |
-| #408 | Workflow template `.github/workflows/orkestr-sync.yml` | PENDING |
+| #406 | GitHub Action: validate skill format in PRs | DONE |
+| #407 | GitHub Action: auto-sync skills on merge to main | DONE |
+| #408 | Workflow template `.github/workflows/orkestr-sync.yml` | DONE |
 
 ### G.3 — Model Pull UI
 
 | Issue | Title | Status |
 |---|---|---|
-| #409 | One-click Ollama model download from local model browser | PENDING |
-| #410 | Download progress tracking (SSE or polling) | PENDING |
-| #411 | Model recommendation engine (best model per task type) | PENDING |
+| #409 | One-click Ollama model download from local model browser | DONE |
+| #410 | Download progress tracking (SSE or polling) | DONE |
+| #411 | Model recommendation engine (best model per task type) | DONE |
 
 ### G.4 — Agent Execution Replay
 
 | Issue | Title | Status |
 |---|---|---|
-| #412 | Full execution trace recording (every tool call, LLM response, decision point) | PENDING |
-| #413 | Replay UI — step-through execution with timeline scrubber | PENDING |
-| #414 | Execution diff — compare two runs side-by-side | PENDING |
+| #412 | Full execution trace recording (every tool call, LLM response, decision point) | DONE |
+| #413 | Replay UI — step-through execution with timeline scrubber | DONE |
+| #414 | Execution diff — compare two runs side-by-side | DONE |
 
 ### G.5 — Helm Chart / Kubernetes Operator
 
 | Issue | Title | Status |
 |---|---|---|
-| #415 | Helm chart with configurable replicas, PVC, ingress, secrets | PENDING |
-| #416 | Kubernetes health probes and readiness checks | PENDING |
-| #417 | Horizontal scaling documentation | PENDING |
+| #415 | Helm chart with configurable replicas, PVC, ingress, secrets | DONE |
+| #416 | Kubernetes health probes and readiness checks | DONE |
+| #417 | Horizontal scaling documentation | DONE |
 
 ### Deferred (Post-Tier 2)
 

@@ -1,0 +1,43 @@
+# Orkestr Validate-Only Workflow
+#
+# Use this workflow if you only want PR validation without server sync.
+# It checks skill files for correctness and blocks merge if any are invalid.
+#
+# No secrets are required for validation-only mode.
+
+name: Validate Skills
+
+on:
+  pull_request:
+    paths:
+      - '.agentis/skills/**'
+
+jobs:
+  validate:
+    name: Validate Skills
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the PR branch
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Validate all skill files in the skills directory
+      - name: Validate skill files
+        id: validate
+        uses: eooo-io/orkestr-action@v1
+        with:
+          mode: validate
+          skills-path: '.agentis/skills'
+
+      # Write a summary to the GitHub Actions job summary
+      - name: Write job summary
+        if: always()
+        run: |
+          echo "## Skill Validation Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Metric | Count |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Total | ${{ steps.validate.outputs.total }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Valid | ${{ steps.validate.outputs.valid }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Invalid | ${{ steps.validate.outputs.invalid }} |" >> "$GITHUB_STEP_SUMMARY"

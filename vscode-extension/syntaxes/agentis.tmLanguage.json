@@ -1,0 +1,84 @@
+{
+  "scopeName": "source.agentis",
+  "patterns": [
+    { "include": "#frontmatter" },
+    { "include": "#template-variable" },
+    { "include": "#markdown" }
+  ],
+  "repository": {
+    "frontmatter": {
+      "begin": "\\A(---\\s*$)",
+      "end": "^(---\\s*$)",
+      "beginCaptures": {
+        "1": { "name": "punctuation.definition.frontmatter.begin.agentis" }
+      },
+      "endCaptures": {
+        "1": { "name": "punctuation.definition.frontmatter.end.agentis" }
+      },
+      "contentName": "meta.embedded.block.yaml",
+      "patterns": [
+        {
+          "match": "^(\\w[\\w-]*)(:)",
+          "captures": {
+            "1": { "name": "entity.name.tag.yaml" },
+            "2": { "name": "punctuation.separator.key-value.yaml" }
+          }
+        },
+        {
+          "match": "\\b(true|false|null)\\b",
+          "name": "constant.language.yaml"
+        },
+        {
+          "match": "\\b\\d+\\b",
+          "name": "constant.numeric.yaml"
+        },
+        {
+          "match": "\"[^\"]*\"",
+          "name": "string.quoted.double.yaml"
+        },
+        {
+          "match": "'[^']*'",
+          "name": "string.quoted.single.yaml"
+        },
+        {
+          "match": "\\[.*?\\]",
+          "name": "meta.flow-sequence.yaml"
+        }
+      ]
+    },
+    "template-variable": {
+      "match": "\\{\\{\\s*(\\w+)\\s*\\}\\}",
+      "name": "variable.other.template.agentis",
+      "captures": {
+        "1": { "name": "variable.other.readwrite.agentis" }
+      }
+    },
+    "markdown": {
+      "patterns": [
+        {
+          "match": "^(#{1,6})\\s+(.+)$",
+          "captures": {
+            "1": { "name": "punctuation.definition.heading.markdown" },
+            "2": { "name": "markup.heading.markdown" }
+          }
+        },
+        {
+          "match": "\\*\\*([^*]+)\\*\\*",
+          "name": "markup.bold.markdown"
+        },
+        {
+          "match": "\\*([^*]+)\\*",
+          "name": "markup.italic.markdown"
+        },
+        {
+          "match": "`[^`]+`",
+          "name": "markup.inline.raw.markdown"
+        },
+        {
+          "match": "^\\s*[-*+]\\s",
+          "name": "punctuation.definition.list.markdown"
+        }
+      ]
+    }
+  }
+}

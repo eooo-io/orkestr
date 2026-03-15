@@ -1,0 +1,219 @@
+# -- Number of application replicas
+replicaCount: 1
+
+image:
+  # -- Container image repository
+  repository: ghcr.io/eooo-io/orkestr
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image tag (defaults to Chart appVersion)
+  tag: latest
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# -- Override the release name
+nameOverride: ""
+# -- Override the full release name
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Create a service account
+  create: true
+  # -- Annotations for the service account
+  annotations: {}
+  # -- Service account name (generated if not set)
+  name: ""
+
+service:
+  # -- Service type
+  type: ClusterIP
+  # -- Service port
+  port: 8000
+
+ingress:
+  # -- Enable ingress
+  enabled: false
+  # -- Ingress class name
+  className: ""
+  # -- Ingress annotations
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: orkestr.local
+      paths:
+        - path: /
+          pathType: Prefix
+  # -- TLS configuration
+  tls: []
+  #  - secretName: orkestr-tls
+  #    hosts:
+  #      - orkestr.local
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
+  # -- Enable horizontal pod autoscaler
+  enabled: false
+  # -- Minimum replicas
+  minReplicas: 1
+  # -- Maximum replicas
+  maxReplicas: 10
+  # -- Target CPU utilization percentage
+  targetCPUUtilizationPercentage: 75
+  # -- Target memory utilization percentage (optional)
+  # targetMemoryUtilizationPercentage: 80
+
+# -- Node selector
+nodeSelector: {}
+
+# -- Tolerations
+tolerations: []
+
+# -- Affinity rules
+affinity: {}
+
+# -- Pod annotations
+podAnnotations: {}
+
+# -- Pod security context
+podSecurityContext:
+  fsGroup: 82
+
+# -- Container security context
+securityContext:
+  runAsUser: 82
+  runAsNonRoot: true
+  readOnlyRootFilesystem: false
+
+# -- Liveness probe configuration
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+# -- Readiness probe configuration
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# -- Startup probe configuration
+startupProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  failureThreshold: 30
+  periodSeconds: 10
+
+# -- Application persistent storage
+persistence:
+  # -- Enable persistence for application storage
+  enabled: true
+  # -- Storage size
+  size: 5Gi
+  # -- Storage class (empty string uses cluster default)
+  storageClass: ""
+  # -- Access modes
+  accessModes:
+    - ReadWriteOnce
+  # -- Mount path inside container
+  mountPath: /var/www/app/storage
+
+# --------------------------------------------------------------------------
+# MariaDB (bundled)
+# --------------------------------------------------------------------------
+mariadb:
+  # -- Deploy a bundled MariaDB instance
+  enabled: true
+  image:
+    repository: mariadb
+    tag: "11"
+    pullPolicy: IfNotPresent
+  auth:
+    # -- MariaDB root password
+    rootPassword: "changeme-root"
+    # -- Application database name
+    database: orkestr
+    # -- Application database user
+    username: orkestr
+    # -- Application database password
+    password: "changeme-db"
+  persistence:
+    # -- Enable MariaDB data persistence
+    enabled: true
+    # -- MariaDB PVC size
+    size: 10Gi
+    # -- Storage class (empty string uses cluster default)
+    storageClass: ""
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+# --------------------------------------------------------------------------
+# Environment variables
+# --------------------------------------------------------------------------
+env:
+  # -- Laravel app key (base64 encoded, generate with `php artisan key:generate --show`)
+  APP_KEY: ""
+  # -- Application environment
+  APP_ENV: production
+  # -- Debug mode
+  APP_DEBUG: "false"
+  # -- Application URL (set to your ingress host)
+  APP_URL: "http://localhost:8000"
+  # -- Log channel
+  LOG_CHANNEL: stderr
+  # -- Cache driver
+  CACHE_STORE: file
+  # -- Session driver
+  SESSION_DRIVER: file
+  # -- Queue connection
+  QUEUE_CONNECTION: database
+
+  # -- Anthropic API key (optional)
+  ANTHROPIC_API_KEY: ""
+  # -- OpenAI API key (optional)
+  OPENAI_API_KEY: ""
+  # -- Ollama host for local model support (optional)
+  OLLAMA_HOST: ""
+
+# -- Additional environment variables injected into the configmap
+extraEnv: {}
+
+# -- Additional secret environment variables
+extraSecrets: {}
+
+# --------------------------------------------------------------------------
+# Migration job
+# --------------------------------------------------------------------------
+migration:
+  # -- Run database migrations on install/upgrade
+  enabled: true
+  # -- Resources for the migration job
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi

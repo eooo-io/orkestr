@@ -25,6 +25,7 @@ import {
   Bell,
   FileCheck,
   BarChart3,
+  History,
 } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { useTheme } from '@/hooks/useTheme'
@@ -61,6 +62,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     { to: '/audit-log', label: 'Audit Log', icon: Shield },
     { to: '/guardrails', label: 'Guardrails', icon: FileCheck },
     { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+    { to: '/replay', label: 'Replay', icon: History },
     { to: '/workspace', label: 'Workspace', icon: Building2 },
     { to: '/search', label: 'Search', icon: Search, shortcut: 'K' },
     { to: '/library', label: 'Library', icon: BookOpen },

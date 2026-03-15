@@ -62,7 +62,10 @@ use App\Http\Controllers\SkillRegressionController;
 use App\Http\Controllers\BenchmarkController;
 use App\Http\Controllers\SkillInheritanceController;
 use App\Http\Controllers\ReportExportController;
+use App\Http\Controllers\ExecutionReplayController;
 use App\Http\Controllers\GitHubImportController;
+use App\Http\Controllers\ModelPullController;
+use App\Http\Controllers\ModelRecommendationController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -490,4 +493,18 @@ Route::middleware('auth:web')->group(function () {
     // GitHub Org Import (#241)
     Route::post('/import/github/discover', [GitHubImportController::class, 'discover']);
     Route::post('/import/github/import', [GitHubImportController::class, 'import']);
+
+    // Model Pull (#409, #410)
+    Route::post('/models/pull', [ModelPullController::class, 'pull']);
+    Route::delete('/models/{name}', [ModelPullController::class, 'destroy'])->where('name', '.*');
+    Route::get('/models/pulling', [ModelPullController::class, 'pulling']);
+
+    // Model Recommendations (#411)
+    Route::get('/models/recommendations', [ModelRecommendationController::class, 'index']);
+
+    // Execution Replay (#412, #413, #414)
+    Route::get('/executions', [ExecutionReplayController::class, 'index']);
+    Route::get('/executions/{executionReplay}', [ExecutionReplayController::class, 'show']);
+    Route::get('/executions/{executionReplay}/steps', [ExecutionReplayController::class, 'steps']);
+    Route::get('/executions/{executionReplay}/diff/{otherReplay}', [ExecutionReplayController::class, 'diff']);
 });

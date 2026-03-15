@@ -1,0 +1,176 @@
+{
+  "name": "orkestr",
+  "displayName": "Orkestr",
+  "description": "Manage AI skills, sync with Orkestr server, and run skill tests directly from VS Code.",
+  "version": "0.1.0",
+  "publisher": "eooo-io",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eooo-io/agentis-studio"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages",
+    "Testing"
+  ],
+  "keywords": [
+    "ai",
+    "skills",
+    "agents",
+    "orkestr",
+    "prompt-engineering"
+  ],
+  "activationEvents": [
+    "workspaceContains:.agentis",
+    "onView:orkestr.skillBrowser"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "orkestr.refreshSkills",
+        "title": "Orkestr: Refresh Skills",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "orkestr.filterSkills",
+        "title": "Orkestr: Filter Skills"
+      },
+      {
+        "command": "orkestr.openSkill",
+        "title": "Orkestr: Open Skill"
+      },
+      {
+        "command": "orkestr.syncPush",
+        "title": "Orkestr: Push Skills to Server",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "orkestr.syncPull",
+        "title": "Orkestr: Pull Skills from Server",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "orkestr.runTest",
+        "title": "Orkestr: Run Skill Test",
+        "icon": "$(play)"
+      },
+      {
+        "command": "orkestr.runAllTests",
+        "title": "Orkestr: Run All Skill Tests"
+      },
+      {
+        "command": "orkestr.createSkill",
+        "title": "Orkestr: Create New Skill",
+        "icon": "$(add)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "orkestr",
+          "title": "Orkestr",
+          "icon": "$(symbol-misc)"
+        }
+      ]
+    },
+    "views": {
+      "orkestr": [
+        {
+          "id": "orkestr.skillBrowser",
+          "name": "Skills",
+          "contextualTitle": "Orkestr Skills"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "orkestr.refreshSkills",
+          "when": "view == orkestr.skillBrowser",
+          "group": "navigation"
+        },
+        {
+          "command": "orkestr.createSkill",
+          "when": "view == orkestr.skillBrowser",
+          "group": "navigation"
+        },
+        {
+          "command": "orkestr.syncPush",
+          "when": "view == orkestr.skillBrowser",
+          "group": "navigation"
+        },
+        {
+          "command": "orkestr.syncPull",
+          "when": "view == orkestr.skillBrowser",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Orkestr",
+      "properties": {
+        "orkestr.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "Orkestr server URL"
+        },
+        "orkestr.apiToken": {
+          "type": "string",
+          "default": "",
+          "description": "API token for Orkestr authentication"
+        },
+        "orkestr.projectId": {
+          "type": "string",
+          "default": "",
+          "description": "Default project ID to use"
+        },
+        "orkestr.autoSync": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically sync skills on save"
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "agentis-skill",
+        "aliases": [
+          "Agentis Skill",
+          "agentis"
+        ],
+        "extensions": [
+          ".agentis"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "agentis-skill",
+        "scopeName": "source.agentis",
+        "path": "./syntaxes/agentis.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
+  }
+}

@@ -83,6 +83,11 @@ import type {
   SetupStatus,
   BackupEntry,
   DiagnosticCheck,
+  ModelPullProgress,
+  ModelRecommendation,
+  ExecutionReplay,
+  ExecutionReplayStep,
+  ExecutionDiff,
 } from '@/types'
 
 const api = axios.create({
@@ -1034,6 +1039,66 @@ export const fetchLocalModels = () =>
 export const fetchOllamaModelDetail = (model: string) =>
   api.get<ApiResponse<OllamaModelDetail>>(`/local-models/ollama/${model}`).then((r) => r.data.data)
 
+// --- Model Pull (G.3) ---
+
+export const pullOllamaModel = async (
+  model: string,
+  onProgress: (p: ModelPullProgress) => void,
+): Promise<void> => {
+  // Ensure CSRF cookie is ready
+  const baseUrl = import.meta.env.VITE_API_URL?.replace(/\/api$/, '') || ''
+  await axios.get(`${baseUrl}/csrf-cookie`, { withCredentials: true })
+
+  const apiBase = import.meta.env.VITE_API_URL || '/api'
+  const response = await fetch(`${apiBase}/models/pull`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+    credentials: 'include',
+    body: JSON.stringify({ model }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Pull request failed: ${response.status}`)
+  }
+
+  const reader = response.body?.getReader()
+  if (!reader) throw new Error('No response body')
+
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() || ''
+
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed.startsWith('data: ')) continue
+      try {
+        const data = JSON.parse(trimmed.slice(6)) as ModelPullProgress
+        onProgress(data)
+      } catch {
+        // skip malformed lines
+      }
+    }
+  }
+}
+
+export const deleteOllamaModel = (model: string) =>
+  api.delete(`/models/${model}`)
+
+export const fetchPullingModels = () =>
+  api.get<ApiResponse<Array<{ model: string; started_at: string }>>>('/models/pulling').then((r) => r.data.data)
+
+// --- Model Recommendations (G.3) ---
+
+export const fetchModelRecommendations = (taskType: string) =>
+  api.get<ApiResponse<ModelRecommendation[]>>(`/models/recommendations?task_type=${taskType}`).then((r) => r.data.data)
+
 // --- Air-Gap (E.4) ---
 
 export const fetchAirGapStatus = () =>
@@ -1319,5 +1384,19 @@ export const fetchDiagnosticCheck = (check: string) =>
 
 export const exportAuditLogs = () =>
   api.get('/audit-logs/export', { responseType: 'blob' }).then((r) => r.data as Blob)
+
+// --- Execution Replay (G.4) ---
+
+export const fetchExecutions = (params?: { project_id?: number; agent_id?: number; status?: string; page?: number }) =>
+  api.get<{ data: ExecutionReplay[]; meta?: { current_page: number; last_page: number } }>('/executions', { params }).then((r) => r.data)
+
+export const fetchExecution = (id: number) =>
+  api.get<ApiResponse<ExecutionReplay>>(`/executions/${id}`).then((r) => r.data.data)
+
+export const fetchExecutionSteps = (id: number) =>
+  api.get<ApiResponse<ExecutionReplayStep[]>>(`/executions/${id}/steps`).then((r) => r.data.data)
+
+export const diffExecutions = (id1: number, id2: number) =>
+  api.get<ApiResponse<ExecutionDiff>>(`/executions/${id1}/diff/${id2}`).then((r) => r.data.data)
 
 export default api

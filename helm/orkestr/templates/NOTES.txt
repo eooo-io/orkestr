@@ -1,0 +1,61 @@
+
+===========================================================
+  Orkestr by eooo.ai — Self-Hosted Agent Orchestration
+===========================================================
+
+Thank you for installing {{ .Chart.Name }}!
+
+Release:    {{ .Release.Name }}
+Namespace:  {{ .Release.Namespace }}
+Version:    {{ .Chart.AppVersion }}
+
+{{- if .Values.ingress.enabled }}
+
+Access Orkestr at:
+{{- range .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+
+Get the application URL by running:
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "orkestr.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo "Orkestr: http://$NODE_IP:$NODE_PORT"
+{{- else if contains "LoadBalancer" .Values.service.type }}
+
+It may take a few minutes for the LoadBalancer IP to be available.
+Watch the status with:
+  kubectl get svc --namespace {{ .Release.Namespace }} -w {{ include "orkestr.fullname" . }}
+{{- else }}
+
+Access Orkestr by running:
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "orkestr.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+
+Then open: http://localhost:{{ .Values.service.port }}
+{{- end }}
+
+{{- if not .Values.env.APP_KEY }}
+
+WARNING: APP_KEY is not set! Generate one with:
+  php artisan key:generate --show
+
+Then upgrade the release:
+  helm upgrade {{ .Release.Name }} orkestr --set env.APP_KEY="base64:YOUR_KEY_HERE"
+{{- end }}
+
+{{- if .Values.mariadb.enabled }}
+
+MariaDB is deployed as a bundled instance.
+  Host: {{ include "orkestr.mariadb.fullname" . }}
+  Port: 3306
+  Database: {{ .Values.mariadb.auth.database }}
+  User: {{ .Values.mariadb.auth.username }}
+{{- end }}
+
+Filament Admin Panel: <APP_URL>/admin
+  Default credentials: admin@admin.com / password
+  (Change these immediately after first login!)
+
+For horizontal scaling, see SCALING.md in the chart directory.

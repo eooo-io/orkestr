@@ -1173,6 +1173,62 @@ export interface GitHubImportResult {
   errors: string[]
 }
 
+// --- G.4: Execution Replay ---
+
+export interface ExecutionReplay {
+  id: number
+  uuid: string
+  project_id: number
+  agent_id: number | null
+  agent?: {
+    id: number
+    name: string
+    slug: string
+    icon: string | null
+  }
+  name: string
+  status: 'running' | 'completed' | 'failed' | 'cancelled'
+  total_steps: number
+  total_tokens: number
+  total_cost_microcents: number
+  total_duration_ms: number
+  metadata: Record<string, unknown> | null
+  started_at: string | null
+  completed_at: string | null
+  steps?: ExecutionReplayStep[]
+  steps_count?: number
+  created_at: string
+  updated_at: string
+}
+
+export interface ExecutionReplayStep {
+  id: number
+  execution_replay_id: number
+  step_number: number
+  type: 'tool_call' | 'llm_response' | 'decision' | 'observation' | 'error'
+  input: Record<string, unknown> | null
+  output: Record<string, unknown> | null
+  model: string | null
+  tokens_used: number | null
+  cost_microcents: number | null
+  duration_ms: number | null
+  metadata: Record<string, unknown> | null
+  created_at: string
+}
+
+export interface ExecutionDiff {
+  left: (ExecutionReplayStep | null)[]
+  right: (ExecutionReplayStep | null)[]
+  summary: ExecutionDiffSummary
+}
+
+export interface ExecutionDiffSummary {
+  tokens_diff: number
+  cost_diff: number
+  duration_diff: number
+  steps_diff: number
+}
+
 // --- E.2: Deployment ---
 
 export interface LicenseStatus {
@@ -1198,4 +1254,22 @@ export interface DiagnosticCheck {
   status: 'pass' | 'fail' | 'warning'
   message: string
   details: Record<string, unknown> | null
+}
+
+// --- G.3: Model Pull & Recommendations ---
+
+export interface ModelPullProgress {
+  status: string
+  completed: number
+  total: number
+  model: string
+  error?: string
+}
+
+export interface ModelRecommendation {
+  model: string
+  provider: string
+  reason: string
+  size_gb: number | null
+  local_available: boolean
 }

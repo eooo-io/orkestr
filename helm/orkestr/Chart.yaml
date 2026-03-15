@@ -1,0 +1,17 @@
+apiVersion: v2
+name: orkestr
+description: Orkestr by eooo.ai — Self-Hosted Agent Orchestration Platform
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+maintainers:
+  - name: eooo.ai
+    url: https://eooo.ai
+keywords:
+  - ai
+  - agents
+  - orchestration
+  - laravel
+home: https://eooo.ai
+sources:
+  - https://github.com/eooo-io/orkestr

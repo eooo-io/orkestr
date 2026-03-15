@@ -1,0 +1,106 @@
+# Orkestr Validate & Sync Workflow
+#
+# This workflow does two things:
+# 1. On pull requests: validates all skill files to catch errors before merge
+# 2. On push to main: validates and syncs skills to your Orkestr server
+#
+# Required secrets:
+#   ORKESTR_SERVER_URL — Your Orkestr server URL (e.g., https://app.orkestr.dev)
+#   ORKESTR_API_TOKEN  — API token from your Orkestr account settings
+
+name: Orkestr Skills
+
+on:
+  # Run validation on any PR that touches skill files
+  pull_request:
+    paths:
+      - '.agentis/skills/**'
+
+  # Run sync when skill changes are merged to main
+  push:
+    branches: [main]
+    paths:
+      - '.agentis/skills/**'
+
+jobs:
+  # ------------------------------------------------------------------
+  # Job 1: Validate
+  # Runs on every PR that modifies skills. Blocks merge if invalid.
+  # ------------------------------------------------------------------
+  validate:
+    name: Validate Skills
+    runs-on: ubuntu-latest
+    # Run on PRs only (sync job handles push to main)
+    if: github.event_name == 'pull_request'
+
+    steps:
+      # Check out the PR branch so we can read the skill files
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Run the Orkestr validator in validate mode
+      # This checks frontmatter syntax, required fields, duplicate IDs,
+      # and broken include references
+      - name: Validate skill files
+        id: validate
+        uses: eooo-io/orkestr-action@v1
+        with:
+          mode: validate
+          skills-path: '.agentis/skills'
+
+      # Post a summary comment on the PR with validation results
+      - name: Post validation summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const total = '${{ steps.validate.outputs.total }}';
+            const valid = '${{ steps.validate.outputs.valid }}';
+            const invalid = '${{ steps.validate.outputs.invalid }}';
+            const status = invalid === '0' ? 'All skills valid' : `${invalid} skill(s) have errors`;
+            const emoji = invalid === '0' ? ':white_check_mark:' : ':x:';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ${emoji} Orkestr Skill Validation\n\n| Metric | Count |\n|--------|-------|\n| Total | ${total} |\n| Valid | ${valid} |\n| Invalid | ${invalid} |\n\n**${status}**`
+            });
+
+  # ------------------------------------------------------------------
+  # Job 2: Sync
+  # Runs only when changes are pushed (merged) to main.
+  # Validates first, then pushes all skills to the Orkestr server.
+  # ------------------------------------------------------------------
+  sync:
+    name: Sync Skills to Orkestr
+    runs-on: ubuntu-latest
+    # Run on push to main only
+    if: github.event_name == 'push'
+
+    steps:
+      # Check out the main branch
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Run the Orkestr action in sync mode.
+      # This validates all skills first, then pushes them to the server.
+      # If validation fails, sync is aborted.
+      - name: Sync skills to Orkestr
+        id: sync
+        uses: eooo-io/orkestr-action@v1
+        with:
+          mode: sync
+          skills-path: '.agentis/skills'
+          server-url: ${{ secrets.ORKESTR_SERVER_URL }}
+          api-token: ${{ secrets.ORKESTR_API_TOKEN }}
+
+      # Log the sync results for visibility in the Actions tab
+      - name: Report sync results
+        if: always()
+        run: |
+          echo "### Sync Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Total skills: ${{ steps.sync.outputs.total }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Valid: ${{ steps.sync.outputs.valid }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Synced: ${{ steps.sync.outputs.synced }}" >> "$GITHUB_STEP_SUMMARY"

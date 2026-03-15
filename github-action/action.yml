@@ -1,0 +1,54 @@
+name: 'Orkestr Validate & Sync'
+description: 'Validate skill format in PRs and auto-sync skills to Orkestr on merge'
+author: 'eooo.io'
+
+branding:
+  icon: 'check-circle'
+  color: 'blue'
+
+inputs:
+  mode:
+    description: 'Action mode: "validate" to check skill files, "sync" to push skills to server'
+    required: false
+    default: 'validate'
+  skills-path:
+    description: 'Path to the skills directory relative to the repository root'
+    required: false
+    default: '.agentis/skills'
+  server-url:
+    description: 'Orkestr server URL (required for sync mode)'
+    required: false
+    default: ''
+  api-token:
+    description: 'Orkestr API token for authentication (required for sync mode)'
+    required: false
+    default: ''
+
+outputs:
+  total:
+    description: 'Total number of skill files found'
+    value: ${{ steps.run.outputs.total }}
+  valid:
+    description: 'Number of valid skill files'
+    value: ${{ steps.run.outputs.valid }}
+  invalid:
+    description: 'Number of invalid skill files'
+    value: ${{ steps.run.outputs.invalid }}
+  synced:
+    description: 'Number of skills synced (sync mode only)'
+    value: ${{ steps.run.outputs.synced }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate skill files
+      id: run
+      shell: bash
+      env:
+        INPUT_MODE: ${{ inputs.mode }}
+        INPUT_SKILLS_PATH: ${{ inputs.skills-path }}
+        INPUT_SERVER_URL: ${{ inputs.server-url }}
+        INPUT_API_TOKEN: ${{ inputs.api-token }}
+      run: |
+        chmod +x "${{ github.action_path }}/validate.sh"
+        "${{ github.action_path }}/validate.sh"

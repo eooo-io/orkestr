@@ -40,6 +40,7 @@ import { Notifications } from '@/pages/Notifications'
 import { Reports } from '@/pages/Reports'
 import { GitHubImport } from '@/pages/GitHubImport'
 import { SetupWizard } from '@/pages/SetupWizard'
+import { ExecutionReplay } from '@/pages/ExecutionReplay'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -118,6 +119,7 @@ function AppContent() {
                   <Route path="/notifications" element={<Notifications />} />
                   <Route path="/reports" element={<Reports />} />
                   <Route path="/github-import" element={<GitHubImport />} />
+                  <Route path="/replay" element={<ExecutionReplay />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/billing" element={<Billing />} />
                   <Route path="/guide" element={<UserGuide />} />
