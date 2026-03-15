@@ -48,6 +48,15 @@ Phase G — Self-Hosted Differentiation (Tier 2)  (COMPLETE)
   G.2: GitHub Action for CI/CD.
   G.3: Model Pull UI (one-click Ollama downloads).
   G.4: Agent execution replay & trace viewer.
+
+Phase H — Settings Consolidation & Filament Migration  (COMPLETE)
+  H.1: Settings hub scaffold (vertical tabs, sub-section routing).
+  H.2: License & billing migration.
+  H.3: Agent & skill administration (from Filament).
+  H.4: User & org administration (from Filament, absorb Workspace).
+  H.5: Security & policies (SSO, content policies from Filament).
+  H.6: Infrastructure & system (consolidate standalone pages, backups, diagnostics).
+  H.7: Cleanup (remove Filament link, simplify sidebar, remove dead pages).
   G.5: Helm chart / Kubernetes operator.
 ```
 
@@ -105,6 +114,8 @@ Observe (result fed back into context)
 **Phase E COMPLETE** — Ship the Self-Hosted Product (58 issues across 6 milestones: E.1–E.6, #201–#268).
 **Phase F COMPLETE** — Launch-Ready / Tier 1 (38 issues across 6 milestones: F.1–F.6, #301–#338).
 **Phase G COMPLETE** — Self-Hosted Differentiation / Tier 2 (17 issues across 5 milestones: G.1–G.5, #401–#417).
+
+**Phase H COMPLETE** — Settings Consolidation & Filament Migration (19 issues across 7 milestones: H.1–H.7, #269–#287).
 
 **Strategic pivot (2026-03-15):** Repositioned from SaaS to self-hosted infrastructure software. Cloud tier is a free playground/demo funnel. The product runs on customer infra with local models, local MCP, local data. Revenue model is commercial self-hosted license.
 
@@ -862,6 +873,66 @@ F.4 (documentation) + F.5 (install) + F.6 (polish)  ← can run in parallel
 | #415 | Helm chart with configurable replicas, PVC, ingress, secrets | DONE |
 | #416 | Kubernetes health probes and readiness checks | DONE |
 | #417 | Horizontal scaling documentation | DONE |
+
+---
+
+## Phase H: Settings Consolidation & Filament Migration
+
+> **Motivation:** Unify all admin functionality into the React SPA Settings page. Eliminate the need for a separate Filament admin panel. Settings becomes the single admin hub with vertical tab navigation.
+
+### H.1 — Settings Hub Scaffold
+
+| Issue | Title | Status |
+|---|---|---|
+| #269 | Settings hub: vertical tab layout with sub-section routing | DONE |
+| #270 | Settings General tab: migrate existing API keys and preferences | DONE |
+
+### H.2 — License & Billing Migration
+
+| Issue | Title | Status |
+|---|---|---|
+| #271 | Settings License tab: license status, activation, usage | DONE |
+| #272 | Remove standalone Billing page and sidebar item | DONE |
+
+### H.3 — Agent & Skill Administration
+
+| Issue | Title | Status |
+|---|---|---|
+| #273 | Settings Agents tab: default agent definitions CRUD | DONE |
+| #274 | Settings Library tab: skill library CRUD | DONE |
+| #275 | Settings Tags tab: tag management CRUD | DONE |
+
+### H.4 — User & Org Administration
+
+| Issue | Title | Status |
+|---|---|---|
+| #276 | Settings Users tab: user management CRUD | DONE |
+| #277 | Settings Organizations tab: org management | DONE |
+| #278 | Remove standalone Workspace page and sidebar item | DONE |
+
+### H.5 — Security & Policies
+
+| Issue | Title | Status |
+|---|---|---|
+| #279 | Settings SSO tab: SSO provider management | DONE |
+| #280 | Settings Content Policies tab: content policy management | DONE |
+
+### H.6 — Infrastructure & System
+
+| Issue | Title | Status |
+|---|---|---|
+| #281 | Settings Infrastructure tab: consolidate API tokens, endpoints, model health, local models | DONE |
+| #282 | Settings Backups tab: backup and restore management | DONE |
+| #283 | Settings Diagnostics tab: system health checks | DONE |
+
+### H.7 — Cleanup & Sidebar Simplification
+
+| Issue | Title | Status |
+|---|---|---|
+| #284 | Remove Filament admin panel link from sidebar footer | DONE |
+| #285 | Simplify sidebar Admin section to single Settings item | DONE |
+| #286 | Remove standalone infrastructure pages and routes | DONE |
+| #287 | Update CLAUDE.md and PLAN.md for Phase H completion | DONE |
 
 ### Deferred (Post-Tier 2)
 

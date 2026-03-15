@@ -768,6 +768,26 @@ export interface OrganizationInvitation {
   created_at: string
 }
 
+export interface ManagedUser {
+  id: number
+  name: string
+  email: string
+  avatar: string | null
+  role: 'owner' | 'admin' | 'editor' | 'viewer' | 'member'
+  accepted_at: string | null
+  created_at: string
+}
+
+export interface PaginatedUsers {
+  data: ManagedUser[]
+  meta: {
+    current_page: number
+    last_page: number
+    per_page: number
+    total: number
+  }
+}
+
 export interface AgentBudgetStatus {
   budget_limit_usd: number | null
   daily_budget_limit_usd: number | null

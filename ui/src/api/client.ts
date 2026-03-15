@@ -88,6 +88,8 @@ import type {
   ExecutionReplay,
   ExecutionReplayStep,
   ExecutionDiff,
+  PaginatedUsers,
+  ManagedUser,
 } from '@/types'
 
 const api = axios.create({
@@ -294,6 +296,14 @@ export const fetchLibrary = (params?: {
   tags?: string
   q?: string
 }) => api.get<LibrarySkill[]>('/library', { params }).then((r) => r.data)
+
+export const createLibrarySkill = (data: Partial<LibrarySkill>) =>
+  api.post<LibrarySkill>('/library', data).then((r) => r.data)
+
+export const updateLibrarySkill = (id: number, data: Partial<LibrarySkill>) =>
+  api.put<LibrarySkill>(`/library/${id}`, data).then((r) => r.data)
+
+export const deleteLibrarySkill = (id: number) => api.delete(`/library/${id}`)
 
 export const importLibrarySkill = (id: number, projectId: number) =>
   api
@@ -931,6 +941,19 @@ export const updateMemberRole = (orgId: number, userId: number, role: string) =>
 
 export const removeMember = (orgId: number, userId: number) =>
   api.delete(`/organizations/${orgId}/members/${userId}`)
+
+// User Management
+export const fetchManagedUsers = (params?: { per_page?: number; page?: number }) =>
+  api.get<PaginatedUsers>('/users', { params }).then((r) => r.data)
+
+export const createManagedUser = (data: { name: string; email: string; password: string; role?: string }) =>
+  api.post<{ data: ManagedUser }>('/users', data).then((r) => r.data.data)
+
+export const updateManagedUser = (userId: number, data: { name?: string; email?: string; password?: string; role?: string }) =>
+  api.put<{ data: ManagedUser }>(`/users/${userId}`, data).then((r) => r.data.data)
+
+export const deleteManagedUser = (userId: number) =>
+  api.delete(`/users/${userId}`)
 
 // Agent Budget
 export const fetchAgentBudgetStatus = (agentId: number) =>

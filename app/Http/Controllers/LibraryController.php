@@ -38,6 +38,57 @@ class LibraryController extends Controller
         return response()->json($query->orderBy('name')->get());
     }
 
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:100',
+            'description' => 'nullable|string',
+            'body' => 'nullable|string',
+            'tags' => 'nullable|array',
+            'frontmatter' => 'nullable|array',
+        ]);
+
+        $validated['slug'] = $validated['slug'] ?? Str::slug($validated['name']);
+
+        // Ensure unique slug
+        $baseSlug = $validated['slug'];
+        $counter = 1;
+        while (LibrarySkill::where('slug', $validated['slug'])->exists()) {
+            $validated['slug'] = "{$baseSlug}-{$counter}";
+            $counter++;
+        }
+
+        $skill = LibrarySkill::create($validated);
+
+        return response()->json($skill, 201);
+    }
+
+    public function update(Request $request, LibrarySkill $librarySkill): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'slug' => 'sometimes|string|max:255',
+            'category' => 'nullable|string|max:100',
+            'description' => 'nullable|string',
+            'body' => 'nullable|string',
+            'tags' => 'nullable|array',
+            'frontmatter' => 'nullable|array',
+        ]);
+
+        $librarySkill->update($validated);
+
+        return response()->json($librarySkill->fresh());
+    }
+
+    public function destroy(LibrarySkill $librarySkill): JsonResponse
+    {
+        $librarySkill->delete();
+
+        return response()->json(null, 204);
+    }
+
     public function import(Request $request, LibrarySkill $librarySkill, AgentisManifestService $manifestService): SkillResource
     {
         $validated = $request->validate([

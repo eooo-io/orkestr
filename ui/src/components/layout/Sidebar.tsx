@@ -2,26 +2,18 @@ import { useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   FolderOpen,
-  Search,
   BookOpen,
   Settings,
-  CreditCard,
   Sun,
   Moon,
   Monitor,
   MessageSquare,
-  ExternalLink,
   X,
   Brain,
-  Building2,
   Shield,
   LayoutDashboard,
   TrendingUp,
   BookOpenCheck,
-  Key,
-  Server,
-  Activity,
-  Cpu,
   Bell,
   FileCheck,
   BarChart3,
@@ -54,23 +46,39 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
-  const navItems = [
-    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/projects', label: 'Projects', icon: FolderOpen },
-    { to: '/agents', label: 'Agents', icon: Brain },
-    { to: '/performance', label: 'Performance', icon: TrendingUp },
-    { to: '/audit-log', label: 'Audit Log', icon: Shield },
-    { to: '/guardrails', label: 'Guardrails', icon: FileCheck },
-    { to: '/analytics', label: 'Analytics', icon: BarChart3 },
-    { to: '/replay', label: 'Replay', icon: History },
-    { to: '/workspace', label: 'Workspace', icon: Building2 },
-    { to: '/search', label: 'Search', icon: Search, shortcut: 'K' },
-    { to: '/library', label: 'Library', icon: BookOpen },
-    // { to: '/marketplace', label: 'Marketplace', icon: Store },
-    { to: '/playground', label: 'Playground', icon: MessageSquare },
-    { to: '/notifications', label: 'Notifications', icon: Bell },
-    { to: '/settings', label: 'Settings', icon: Settings },
-    { to: '/billing', label: 'Billing', icon: CreditCard },
+  const navSections = [
+    {
+      label: 'Design',
+      items: [
+        { to: '/projects', label: 'Projects', icon: FolderOpen },
+        { to: '/agents', label: 'Agents', icon: Brain },
+        { to: '/library', label: 'Library', icon: BookOpen },
+        { to: '/playground', label: 'Playground', icon: MessageSquare },
+      ],
+    },
+    {
+      label: 'Operate',
+      items: [
+        { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { to: '/replay', label: 'Replay', icon: History },
+        { to: '/performance', label: 'Performance', icon: TrendingUp },
+        { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+      ],
+    },
+    {
+      label: 'Govern',
+      items: [
+        { to: '/guardrails', label: 'Guardrails', icon: FileCheck },
+        { to: '/audit-log', label: 'Audit Log', icon: Shield },
+        { to: '/notifications', label: 'Notifications', icon: Bell },
+      ],
+    },
+    {
+      label: 'Admin',
+      items: [
+        { to: '/settings', label: 'Settings', icon: Settings },
+      ],
+    },
   ]
 
   const themeOptions = [
@@ -112,26 +120,28 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       <OrganizationSwitcher />
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-        {navItems.map(({ to, label, icon: Icon, shortcut }) => (
-          <Link
-            key={to}
-            to={to}
-            onClick={onClose}
-            className={`state-layer flex items-center gap-2.5 px-3 py-2 text-sm transition-all duration-150 ${
-              isActive(to)
-                ? 'bg-primary/20 text-primary font-medium'
-                : 'text-sidebar-muted hover:text-sidebar-foreground'
-            }`}
-          >
-            <Icon className={`h-[18px] w-[18px] ${isActive(to) ? 'text-primary' : ''}`} />
-            <span className="flex-1">{label}</span>
-            {shortcut && (
-              <kbd className="text-[10px] px-1.5 py-0.5 bg-sidebar-accent text-sidebar-muted font-mono">
-                {shortcut}
-              </kbd>
-            )}
-          </Link>
+      <nav className="flex-1 px-3 overflow-y-auto">
+        {navSections.map((section) => (
+          <div key={section.label} className="mb-3">
+            <p className="px-3 pt-3 pb-1 text-[11px] font-medium text-sidebar-muted uppercase tracking-widest">
+              {section.label}
+            </p>
+            {section.items.map(({ to, label, icon: Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                onClick={onClose}
+                className={`state-layer flex items-center gap-2.5 px-3 py-2 text-sm transition-all duration-150 ${
+                  isActive(to)
+                    ? 'bg-primary/20 text-primary font-medium'
+                    : 'text-sidebar-muted hover:text-sidebar-foreground'
+                }`}
+              >
+                <Icon className={`h-[18px] w-[18px] ${isActive(to) ? 'text-primary' : ''}`} />
+                <span className="flex-1">{label}</span>
+              </Link>
+            ))}
+          </div>
         ))}
 
         {/* Project list */}
@@ -200,15 +210,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           ))}
         </div>
 
-        <a
-          href="/admin"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="state-layer flex items-center gap-2 px-3 py-2 text-sm text-sidebar-muted hover:text-sidebar-foreground transition-colors duration-150"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Admin Panel
-        </a>
       </div>
     </aside>
   )

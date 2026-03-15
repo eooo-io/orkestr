@@ -12,7 +12,6 @@ import {
 } from 'lucide-react'
 import {
   fetchProject,
-  fetchSettings,
   updateProject,
   deleteProject,
 } from '@/api/client'
@@ -23,15 +22,6 @@ import ImportTab from '@/components/integrations/ImportTab'
 import { Button } from '@/components/ui/button'
 import type { Project } from '@/types'
 
-const PROVIDERS = [
-  { slug: 'claude', label: 'Claude', desc: '.claude/CLAUDE.md' },
-  { slug: 'cursor', label: 'Cursor', desc: '.cursor/rules/' },
-  { slug: 'copilot', label: 'Copilot', desc: '.github/copilot-instructions.md' },
-  { slug: 'windsurf', label: 'Windsurf', desc: '.windsurf/rules/' },
-  { slug: 'cline', label: 'Cline', desc: '.clinerules' },
-  { slug: 'openai', label: 'OpenAI', desc: '.openai/instructions.md' },
-]
-
 export function ProjectSettings() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -39,27 +29,21 @@ export function ProjectSettings() {
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [allowedPaths, setAllowedPaths] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<'general' | 'repository' | 'import' | 'webhooks'>('general')
   const [form, setForm] = useState({
     name: '',
     description: '',
-    path: '',
-    providers: [] as string[],
   })
 
   useEffect(() => {
     if (!id) return
-    Promise.all([fetchProject(parseInt(id)), fetchSettings()])
-      .then(([p, s]) => {
+    fetchProject(parseInt(id))
+      .then((p) => {
         setProject(p)
         setForm({
           name: p.name,
           description: p.description || '',
-          path: p.path,
-          providers: p.providers || [],
         })
-        if (s.allowed_project_paths) setAllowedPaths(s.allowed_project_paths)
       })
       .finally(() => setLoading(false))
   }, [id])
@@ -68,31 +52,9 @@ export function ProjectSettings() {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  const toggleProvider = (slug: string) => {
-    setForm((prev) => ({
-      ...prev,
-      providers: prev.providers.includes(slug)
-        ? prev.providers.filter((p) => p !== slug)
-        : [...prev.providers, slug],
-    }))
-  }
-
   const handleSave = async () => {
     if (!form.name.trim()) {
       showToast('Project name is required', 'error')
-      return
-    }
-    if (!form.path.trim()) {
-      showToast('Project path is required', 'error')
-      return
-    }
-    if (
-      allowedPaths.length > 0 &&
-      !allowedPaths.some(
-        (base) => form.path.trim() === base || form.path.trim().startsWith(base + '/'),
-      )
-    ) {
-      showToast(`Path must be within: ${allowedPaths.join(' or ')}`, 'error')
       return
     }
 
@@ -101,8 +63,6 @@ export function ProjectSettings() {
       await updateProject(parseInt(id!), {
         name: form.name.trim(),
         description: form.description.trim() || null,
-        path: form.path.trim(),
-        providers: form.providers,
       })
       showToast('Project updated')
       loadProjects()
@@ -238,60 +198,6 @@ export function ProjectSettings() {
               rows={2}
               className="w-full px-3 py-2 text-sm border border-input bg-background resize-none focus:outline-none focus:ring-1 focus:ring-ring"
             />
-          </div>
-
-          {/* Path */}
-          <div>
-            <label className="block text-sm font-medium mb-1.5">
-              Path <span className="text-destructive">*</span>
-            </label>
-            <input
-              type="text"
-              value={form.path}
-              onChange={(e) => handleChange('path', e.target.value)}
-              placeholder="/Users/you/projects/my-project"
-              className="w-full px-3 py-2 text-sm border border-input bg-background font-mono text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              {allowedPaths.length > 0
-                ? `Must be within: ${allowedPaths.join(' or ')}`
-                : 'Absolute path to the project directory on the host filesystem.'}
-            </p>
-          </div>
-
-          {/* Providers */}
-          <div>
-            <label className="block text-sm font-medium mb-1.5">
-              Sync Providers
-            </label>
-            <p className="text-xs text-muted-foreground mb-3">
-              Select which AI providers to sync skills to when you run Sync.
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {PROVIDERS.map((p) => (
-                <label
-                  key={p.slug}
-                  className={`flex items-start gap-3 p-3 border cursor-pointer transition-all duration-150 ${
-                    form.providers.includes(p.slug)
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/30'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={form.providers.includes(p.slug)}
-                    onChange={() => toggleProvider(p.slug)}
-                    className="mt-0.5 rounded border-input accent-primary"
-                  />
-                  <div>
-                    <span className="text-sm font-medium">{p.label}</span>
-                    <span className="block text-[11px] text-muted-foreground font-mono mt-0.5">
-                      {p.desc}
-                    </span>
-                  </div>
-                </label>
-              ))}
-            </div>
           </div>
 
           {/* Actions */}

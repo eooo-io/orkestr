@@ -13,7 +13,6 @@ import { Playground } from '@/pages/Playground'
 // import { Marketplace } from '@/pages/Marketplace'
 import { ProjectForm } from '@/pages/ProjectForm'
 import { ProjectSettings } from '@/pages/ProjectSettings'
-import { Billing } from '@/pages/Billing'
 import { ProjectVisualize } from '@/pages/ProjectVisualize'
 import { Agents } from '@/pages/Agents'
 import { AgentBuilder } from '@/pages/AgentBuilder'
@@ -25,15 +24,11 @@ import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 import { Landing } from '@/pages/Landing'
 import { Compare } from '@/pages/Compare'
-import { WorkspaceSettings } from '@/pages/WorkspaceSettings'
+// WorkspaceSettings removed — merged into Settings > Organizations panel
 import { AuditLog } from '@/pages/AuditLog'
 import { AgentsDashboard } from '@/pages/AgentsDashboard'
 import { PerformanceDashboard } from '@/pages/PerformanceDashboard'
 import { UserGuide } from '@/pages/UserGuide'
-import { ApiTokens } from '@/pages/ApiTokens'
-import { CustomEndpoints } from '@/pages/CustomEndpoints'
-import { ModelHealth } from '@/pages/ModelHealth'
-import { LocalModels } from '@/pages/LocalModels'
 import { Guardrails } from '@/pages/Guardrails'
 import { SkillAnalytics } from '@/pages/SkillAnalytics'
 import { Notifications } from '@/pages/Notifications'
@@ -109,11 +104,11 @@ function AppContent() {
                   <Route path="/projects/:id/runs" element={<ExecutionDashboard />} />
                   <Route path="/search" element={<Search />} />
                   <Route path="/audit-log" element={<AuditLog />} />
-                  <Route path="/workspace" element={<WorkspaceSettings />} />
-                  <Route path="/api-tokens" element={<ApiTokens />} />
-                  <Route path="/custom-endpoints" element={<CustomEndpoints />} />
-                  <Route path="/model-health" element={<ModelHealth />} />
-                  <Route path="/local-models" element={<LocalModels />} />
+                  <Route path="/workspace" element={<Navigate to="/settings?tab=organizations" replace />} />
+                  <Route path="/api-tokens" element={<Navigate to="/settings?tab=infrastructure" replace />} />
+                  <Route path="/custom-endpoints" element={<Navigate to="/settings?tab=infrastructure" replace />} />
+                  <Route path="/model-health" element={<Navigate to="/settings?tab=infrastructure" replace />} />
+                  <Route path="/local-models" element={<Navigate to="/settings?tab=infrastructure" replace />} />
                   <Route path="/guardrails" element={<Guardrails />} />
                   <Route path="/analytics" element={<SkillAnalytics />} />
                   <Route path="/notifications" element={<Notifications />} />
@@ -121,7 +116,6 @@ function AppContent() {
                   <Route path="/github-import" element={<GitHubImport />} />
                   <Route path="/replay" element={<ExecutionReplay />} />
                   <Route path="/settings" element={<Settings />} />
-                  <Route path="/billing" element={<Billing />} />
                   <Route path="/guide" element={<UserGuide />} />
                 </Routes>
               </Layout>

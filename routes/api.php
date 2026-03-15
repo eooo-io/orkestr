@@ -66,6 +66,7 @@ use App\Http\Controllers\ExecutionReplayController;
 use App\Http\Controllers\GitHubImportController;
 use App\Http\Controllers\ModelPullController;
 use App\Http\Controllers\ModelRecommendationController;
+use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -96,6 +97,12 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/organizations/{organization}/invitations', [OrganizationController::class, 'inviteMember']);
     Route::delete('/invitations/{invitation}', [OrganizationController::class, 'cancelInvitation']);
     Route::post('/invitations/accept/{token}', [OrganizationController::class, 'acceptInvitation']);
+
+    // Users (admin management)
+    Route::get('/users', [UserManagementController::class, 'index']);
+    Route::post('/users', [UserManagementController::class, 'store']);
+    Route::put('/users/{user}', [UserManagementController::class, 'update']);
+    Route::delete('/users/{user}', [UserManagementController::class, 'destroy']);
 
     // Projects
     Route::get('/projects', [ProjectController::class, 'index']);
@@ -152,6 +159,9 @@ Route::middleware('auth:web')->group(function () {
 
     // Library
     Route::get('/library', [LibraryController::class, 'index']);
+    Route::post('/library', [LibraryController::class, 'store'])->middleware('org-role:editor');
+    Route::put('/library/{librarySkill}', [LibraryController::class, 'update'])->middleware('org-role:editor');
+    Route::delete('/library/{librarySkill}', [LibraryController::class, 'destroy'])->middleware('org-role:editor');
     Route::post('/library/{librarySkill}/import', [LibraryController::class, 'import']);
 
     // Skills.sh
