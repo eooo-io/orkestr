@@ -30,6 +30,15 @@ import { AuditLog } from '@/pages/AuditLog'
 import { AgentsDashboard } from '@/pages/AgentsDashboard'
 import { PerformanceDashboard } from '@/pages/PerformanceDashboard'
 import { UserGuide } from '@/pages/UserGuide'
+import { ApiTokens } from '@/pages/ApiTokens'
+import { CustomEndpoints } from '@/pages/CustomEndpoints'
+import { ModelHealth } from '@/pages/ModelHealth'
+import { LocalModels } from '@/pages/LocalModels'
+import { Guardrails } from '@/pages/Guardrails'
+import { SkillAnalytics } from '@/pages/SkillAnalytics'
+import { Notifications } from '@/pages/Notifications'
+import { Reports } from '@/pages/Reports'
+import { GitHubImport } from '@/pages/GitHubImport'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -89,6 +98,15 @@ function AppContent() {
                   <Route path="/search" element={<Search />} />
                   <Route path="/audit-log" element={<AuditLog />} />
                   <Route path="/workspace" element={<WorkspaceSettings />} />
+                  <Route path="/api-tokens" element={<ApiTokens />} />
+                  <Route path="/custom-endpoints" element={<CustomEndpoints />} />
+                  <Route path="/model-health" element={<ModelHealth />} />
+                  <Route path="/local-models" element={<LocalModels />} />
+                  <Route path="/guardrails" element={<Guardrails />} />
+                  <Route path="/analytics" element={<SkillAnalytics />} />
+                  <Route path="/notifications" element={<Notifications />} />
+                  <Route path="/reports" element={<Reports />} />
+                  <Route path="/github-import" element={<GitHubImport />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/billing" element={<Billing />} />
                   <Route path="/guide" element={<UserGuide />} />

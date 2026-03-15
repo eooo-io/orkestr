@@ -868,3 +868,334 @@ export interface OnboardingStatus {
 export interface ApiResponse<T> {
   data: T
 }
+
+// --- E.4: Custom Endpoints & Model Health ---
+
+export interface CustomEndpoint {
+  id: number
+  organization_id: number
+  name: string
+  slug: string
+  base_url: string
+  models: string[]
+  enabled: boolean
+  health_status: string | null
+  last_health_check: string | null
+  avg_latency_ms: number | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ModelHealthResult {
+  provider: string
+  status: 'healthy' | 'degraded' | 'down' | 'unconfigured'
+  latency_ms: number | null
+  error: string | null
+  models: string[]
+}
+
+export interface ModelBenchmarkResult {
+  model: string
+  provider: string
+  latency_ms: number
+  tokens_per_second: number | null
+  output: string
+  error: string | null
+}
+
+export interface ModelComparisonResult {
+  prompt: string
+  results: ModelBenchmarkResult[]
+}
+
+export interface LocalModel {
+  id: string
+  name: string
+  provider: string
+  source: 'ollama' | 'custom'
+  size: string | null
+  quantization: string | null
+  modified_at: string | null
+}
+
+export interface OllamaModelDetail {
+  name: string
+  size: number | null
+  digest: string | null
+  details: Record<string, unknown>
+}
+
+export interface AirGapStatus {
+  enabled: boolean
+  allowed_hosts: string[]
+  blocked_cloud_providers: string[]
+}
+
+// --- E.5: API Tokens ---
+
+export interface ApiToken {
+  id: number
+  user_id: number
+  organization_id: number | null
+  name: string
+  abilities: string[]
+  last_used_at: string | null
+  expires_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ApiTokenCreateResult {
+  plain_token: string
+  name: string
+  id: number
+}
+
+// --- E.3: Guardrails & Security ---
+
+export interface GuardrailPolicy {
+  id: number
+  uuid: string
+  organization_id: number
+  name: string
+  description: string | null
+  scope: string
+  scope_id: number | null
+  budget_limits: Record<string, unknown> | null
+  tool_restrictions: Record<string, unknown> | null
+  output_rules: Record<string, unknown> | null
+  access_rules: Record<string, unknown> | null
+  approval_level: string | null
+  priority: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface GuardrailProfile {
+  id: number
+  uuid: string
+  name: string
+  slug: string
+  description: string | null
+  is_system: boolean
+  organization_id: number | null
+  budget_limits: Record<string, unknown> | null
+  tool_restrictions: Record<string, unknown> | null
+  output_rules: Record<string, unknown> | null
+  access_rules: Record<string, unknown> | null
+  approval_level: string | null
+  input_sanitization: Record<string, unknown> | null
+  network_rules: Record<string, unknown> | null
+  created_at: string
+  updated_at: string
+}
+
+export interface GuardrailViolation {
+  id: number
+  uuid: string
+  organization_id: number
+  project_id: number | null
+  agent_id: number | null
+  execution_run_id: number | null
+  guard_type: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  rule_name: string
+  message: string
+  context: Record<string, unknown> | null
+  action_taken: string
+  dismissed_by: number | null
+  dismissed_at: string | null
+  dismissal_reason: string | null
+  created_at: string
+}
+
+export interface GuardrailReport {
+  violations: GuardrailViolation[]
+  total: number
+  current_page: number
+  last_page: number
+}
+
+export interface GuardrailTrend {
+  date: string
+  total: number
+  by_severity: Record<string, number>
+  by_guard_type: Record<string, number>
+}
+
+export interface SecurityScanResult {
+  risk_level: 'low' | 'medium' | 'high' | 'critical'
+  findings: Array<{
+    type: string
+    severity: string
+    message: string
+    line: number | null
+  }>
+}
+
+export interface ContentReviewResult {
+  risk_score: number
+  findings: Array<{
+    category: string
+    severity: string
+    description: string
+  }>
+}
+
+export interface ContentPolicy {
+  id: number
+  uuid: string
+  organization_id: number
+  name: string
+  description: string | null
+  rules: Array<{ type: string; config: Record<string, unknown> }>
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+// --- E.1: SSO ---
+
+export interface SsoProvider {
+  id: number
+  uuid: string
+  organization_id: number
+  type: 'saml' | 'oidc'
+  name: string
+  entity_id: string | null
+  metadata_url: string | null
+  sso_url: string | null
+  client_id: string | null
+  allowed_domains: string[]
+  auto_provision: boolean
+  default_role: string
+  is_active: boolean
+  last_used_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+// --- E.6: Enterprise ---
+
+export interface SkillReview {
+  id: number
+  skill_id: number
+  skill_version_id: number | null
+  reviewer_id: number | null
+  submitted_by: number
+  status: 'pending' | 'approved' | 'rejected'
+  comments: string | null
+  reviewer?: { id: number; name: string }
+  submitter?: { id: number; name: string }
+  created_at: string
+  updated_at: string
+}
+
+export interface SkillOwnership {
+  owner_id: number | null
+  codeowners: string[] | null
+  owner?: { id: number; name: string; email: string }
+}
+
+export interface SkillAnalytic {
+  id: number
+  skill_id: number
+  date: string
+  test_runs: number
+  pass_count: number
+  fail_count: number
+  avg_tokens: number
+  avg_cost_microcents: number
+  avg_latency_ms: number
+}
+
+export interface SkillTestCase {
+  id: number
+  skill_id: number
+  name: string
+  input: string
+  expected_output: string | null
+  assertion_type: string
+  pass_threshold: number
+  created_at: string
+  updated_at: string
+}
+
+export interface SkillTestCaseResult {
+  test_case_id: number
+  name: string
+  passed: boolean
+  actual_output: string
+  score: number | null
+  error: string | null
+}
+
+export interface SkillBenchmarkResult {
+  model: string
+  output: string
+  latency_ms: number
+  tokens: number
+  cost_microcents: number
+  error: string | null
+}
+
+export interface SkillInheritanceInfo {
+  extends_skill_id: number | null
+  override_sections: Record<string, unknown> | null
+  resolved_body: string
+  parent?: { id: number; name: string; slug: string }
+  children: Array<{ id: number; name: string; slug: string }>
+}
+
+export interface Notification {
+  id: number
+  user_id: number
+  organization_id: number | null
+  type: string
+  title: string
+  body: string | null
+  data: Record<string, unknown> | null
+  read_at: string | null
+  created_at: string
+}
+
+export interface GitHubDiscoveredRepo {
+  name: string
+  full_name: string
+  skills_count: number
+  paths: string[]
+}
+
+export interface GitHubImportResult {
+  imported: number
+  skipped: number
+  errors: string[]
+}
+
+// --- E.2: Deployment ---
+
+export interface LicenseStatus {
+  valid: boolean
+  tier: string | null
+  features: Record<string, boolean>
+  expires_at: string | null
+}
+
+export interface SetupStatus {
+  completed: boolean
+  steps: Record<string, boolean>
+}
+
+export interface BackupEntry {
+  filename: string
+  size: number
+  created_at: string
+}
+
+export interface DiagnosticCheck {
+  name: string
+  status: 'pass' | 'fail' | 'warning'
+  message: string
+  details: Record<string, unknown> | null
+}

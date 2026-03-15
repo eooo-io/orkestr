@@ -52,6 +52,37 @@ import type {
   AgentsOverview,
   OnboardingStatus,
   ApiResponse,
+  CustomEndpoint,
+  ModelHealthResult,
+  ModelBenchmarkResult,
+  ModelComparisonResult,
+  LocalModel,
+  OllamaModelDetail,
+  AirGapStatus,
+  ApiToken,
+  ApiTokenCreateResult,
+  GuardrailPolicy,
+  GuardrailProfile,
+  GuardrailViolation,
+  GuardrailTrend,
+  SecurityScanResult,
+  ContentReviewResult,
+  ContentPolicy,
+  SsoProvider,
+  SkillReview,
+  SkillOwnership,
+  SkillAnalytic,
+  SkillTestCase,
+  SkillTestCaseResult,
+  SkillBenchmarkResult,
+  SkillInheritanceInfo,
+  Notification,
+  GitHubDiscoveredRepo,
+  GitHubImportResult,
+  LicenseStatus,
+  SetupStatus,
+  BackupEntry,
+  DiagnosticCheck,
 } from '@/types'
 
 const api = axios.create({
@@ -957,5 +988,336 @@ export const fetchOnboardingStatus = () =>
 
 export const quickStart = () =>
   api.post<ApiResponse<{ project_id: number; agent_id: number }>>('/onboarding/quick-start').then(r => r.data.data)
+
+// --- Custom Endpoints (E.4) ---
+
+export const fetchCustomEndpoints = () =>
+  api.get<ApiResponse<CustomEndpoint[]>>('/custom-endpoints').then((r) => r.data.data)
+
+export const createCustomEndpoint = (data: { name: string; base_url: string; api_key?: string; models?: string[] }) =>
+  api.post<ApiResponse<CustomEndpoint>>('/custom-endpoints', data).then((r) => r.data.data)
+
+export const fetchCustomEndpoint = (id: number) =>
+  api.get<ApiResponse<CustomEndpoint>>(`/custom-endpoints/${id}`).then((r) => r.data.data)
+
+export const updateCustomEndpoint = (id: number, data: Partial<CustomEndpoint> & { api_key?: string }) =>
+  api.put<ApiResponse<CustomEndpoint>>(`/custom-endpoints/${id}`, data).then((r) => r.data.data)
+
+export const deleteCustomEndpoint = (id: number) =>
+  api.delete(`/custom-endpoints/${id}`)
+
+export const checkCustomEndpointHealth = (id: number) =>
+  api.post(`/custom-endpoints/${id}/health`).then((r) => r.data)
+
+export const discoverCustomEndpointModels = (id: number) =>
+  api.post<ApiResponse<string[]>>(`/custom-endpoints/${id}/discover`).then((r) => r.data.data)
+
+// --- Model Health (E.4) ---
+
+export const fetchModelHealth = () =>
+  api.get<ApiResponse<ModelHealthResult[]>>('/model-health').then((r) => r.data.data)
+
+export const checkModelProviderHealth = (provider: string) =>
+  api.get<ApiResponse<ModelHealthResult>>(`/model-health/${provider}`).then((r) => r.data.data)
+
+export const benchmarkModel = (data: { model: string; prompt?: string }) =>
+  api.post<ApiResponse<ModelBenchmarkResult>>('/model-health/benchmark', data).then((r) => r.data.data)
+
+export const compareModels = (data: { models: string[]; prompt: string }) =>
+  api.post<ApiResponse<ModelComparisonResult>>('/model-health/compare', data).then((r) => r.data.data)
+
+// --- Local Models (E.4) ---
+
+export const fetchLocalModels = () =>
+  api.get<ApiResponse<LocalModel[]>>('/local-models').then((r) => r.data.data)
+
+export const fetchOllamaModelDetail = (model: string) =>
+  api.get<ApiResponse<OllamaModelDetail>>(`/local-models/ollama/${model}`).then((r) => r.data.data)
+
+// --- Air-Gap (E.4) ---
+
+export const fetchAirGapStatus = () =>
+  api.get<ApiResponse<AirGapStatus>>('/air-gap').then((r) => r.data.data)
+
+export const toggleAirGap = (enabled: boolean) =>
+  api.post<ApiResponse<AirGapStatus>>('/air-gap', { enabled }).then((r) => r.data.data)
+
+// --- API Tokens (E.5) ---
+
+export const fetchApiTokens = () =>
+  api.get<ApiResponse<ApiToken[]>>('/api-tokens').then((r) => r.data.data)
+
+export const createApiToken = (data: { name: string; abilities?: string[]; expires_in_days?: number }) =>
+  api.post<{ data: ApiTokenCreateResult; message: string }>('/api-tokens', data).then((r) => r.data)
+
+export const deleteApiToken = (id: number) =>
+  api.delete(`/api-tokens/${id}`)
+
+// --- SDK Downloads (E.5) ---
+
+export const downloadTypescriptSdk = () =>
+  api.get('/sdk/typescript', { responseType: 'blob' }).then((r) => r.data as Blob)
+
+export const downloadPhpSdk = () =>
+  api.get('/sdk/php', { responseType: 'blob' }).then((r) => r.data as Blob)
+
+// --- Guardrail Policies (E.3) ---
+
+export const fetchGuardrailPolicies = (orgId: number) =>
+  api.get<ApiResponse<GuardrailPolicy[]>>(`/organizations/${orgId}/guardrails`).then((r) => r.data.data)
+
+export const createGuardrailPolicy = (orgId: number, data: Partial<GuardrailPolicy>) =>
+  api.post<ApiResponse<GuardrailPolicy>>(`/organizations/${orgId}/guardrails`, data).then((r) => r.data.data)
+
+export const updateGuardrailPolicy = (id: number, data: Partial<GuardrailPolicy>) =>
+  api.put<ApiResponse<GuardrailPolicy>>(`/guardrails/${id}`, data).then((r) => r.data.data)
+
+export const deleteGuardrailPolicy = (id: number) =>
+  api.delete(`/guardrails/${id}`)
+
+export const resolveGuardrailPolicies = (orgId: number, params?: { project_id?: number; agent_id?: number }) =>
+  api.get(`/organizations/${orgId}/guardrails/resolve`, { params }).then((r) => r.data)
+
+// --- Guardrail Profiles (E.3) ---
+
+export const fetchGuardrailProfiles = () =>
+  api.get<ApiResponse<GuardrailProfile[]>>('/guardrail-profiles').then((r) => r.data.data)
+
+export const fetchGuardrailProfile = (id: number) =>
+  api.get<ApiResponse<GuardrailProfile>>(`/guardrail-profiles/${id}`).then((r) => r.data.data)
+
+export const createGuardrailProfile = (data: Partial<GuardrailProfile>) =>
+  api.post<ApiResponse<GuardrailProfile>>('/guardrail-profiles', data).then((r) => r.data.data)
+
+export const deleteGuardrailProfile = (id: number) =>
+  api.delete(`/guardrail-profiles/${id}`)
+
+// --- Guardrail Reports (E.3) ---
+
+export const fetchGuardrailViolations = (orgId: number, params?: { guard_type?: string; severity?: string; page?: number }) =>
+  api.get<{ data: GuardrailViolation[]; current_page: number; last_page: number; total: number }>(`/organizations/${orgId}/guardrail-reports`, { params }).then((r) => r.data)
+
+export const fetchGuardrailTrends = (orgId: number, params?: { period?: string }) =>
+  api.get<ApiResponse<GuardrailTrend[]>>(`/organizations/${orgId}/guardrail-reports/trends`, { params }).then((r) => r.data.data)
+
+export const exportGuardrailReport = (orgId: number) =>
+  api.get(`/organizations/${orgId}/guardrail-reports/export`, { responseType: 'blob' }).then((r) => r.data as Blob)
+
+export const dismissGuardrailViolation = (violationId: number, reason: string) =>
+  api.post(`/guardrail-violations/${violationId}/dismiss`, { reason }).then((r) => r.data)
+
+// --- Security Scanner (E.3) ---
+
+export const scanSkillSecurity = (skillId: number) =>
+  api.post<ApiResponse<SecurityScanResult>>(`/skills/${skillId}/security-scan`).then((r) => r.data.data)
+
+export const scanContentSecurity = (content: string) =>
+  api.post<ApiResponse<SecurityScanResult>>('/security-scan', { content }).then((r) => r.data.data)
+
+// --- Content Review (E.3) ---
+
+export const reviewSkillContent = (skillId: number) =>
+  api.post<ApiResponse<ContentReviewResult>>(`/skills/${skillId}/review`).then((r) => r.data.data)
+
+export const reviewAgentContent = (agentId: number) =>
+  api.post<ApiResponse<ContentReviewResult>>(`/agents/${agentId}/review`).then((r) => r.data.data)
+
+// --- Endpoint Approvals (E.3) ---
+
+export const fetchEndpointApprovals = (projectId: number) =>
+  api.get<{ mcp_servers: Array<Record<string, unknown>>; a2a_agents: Array<Record<string, unknown>> }>(`/projects/${projectId}/endpoint-approvals`).then((r) => r.data)
+
+export const approveEndpoint = (type: 'mcp' | 'a2a', id: number) =>
+  api.post(`/endpoint-approvals/${type}/${id}/approve`).then((r) => r.data)
+
+export const rejectEndpoint = (type: 'mcp' | 'a2a', id: number) =>
+  api.post(`/endpoint-approvals/${type}/${id}/reject`).then((r) => r.data)
+
+// --- Content Policies (E.1) ---
+
+export const fetchContentPolicies = (orgId: number) =>
+  api.get<ApiResponse<ContentPolicy[]>>(`/organizations/${orgId}/content-policies`).then((r) => r.data.data)
+
+export const createContentPolicy = (orgId: number, data: Partial<ContentPolicy>) =>
+  api.post<ApiResponse<ContentPolicy>>(`/organizations/${orgId}/content-policies`, data).then((r) => r.data.data)
+
+export const updateContentPolicy = (id: number, data: Partial<ContentPolicy>) =>
+  api.put<ApiResponse<ContentPolicy>>(`/content-policies/${id}`, data).then((r) => r.data.data)
+
+export const deleteContentPolicy = (id: number) =>
+  api.delete(`/content-policies/${id}`)
+
+export const checkSkillPolicy = (policyId: number, skillId: number) =>
+  api.post(`/content-policies/${policyId}/check/${skillId}`).then((r) => r.data)
+
+// --- Activity Feed (E.1) ---
+
+export const fetchActivityFeed = (orgId: number, params?: { page?: number }) =>
+  api.get(`/organizations/${orgId}/activity-feed`, { params }).then((r) => r.data)
+
+// --- SSO Providers (E.1) ---
+
+export const fetchSsoProviders = (orgId: number) =>
+  api.get<ApiResponse<SsoProvider[]>>(`/organizations/${orgId}/sso-providers`).then((r) => r.data.data)
+
+export const createSsoProvider = (orgId: number, data: Partial<SsoProvider> & { client_secret?: string; certificate?: string }) =>
+  api.post<ApiResponse<SsoProvider>>(`/organizations/${orgId}/sso-providers`, data).then((r) => r.data.data)
+
+export const updateSsoProvider = (id: number, data: Partial<SsoProvider> & { client_secret?: string; certificate?: string }) =>
+  api.put<ApiResponse<SsoProvider>>(`/sso-providers/${id}`, data).then((r) => r.data.data)
+
+export const deleteSsoProvider = (id: number) =>
+  api.delete(`/sso-providers/${id}`)
+
+export const testSsoProvider = (id: number) =>
+  api.post(`/sso-providers/${id}/test`).then((r) => r.data)
+
+// --- Skill Reviews (E.6) ---
+
+export const fetchSkillReviews = (skillId: number) =>
+  api.get<ApiResponse<SkillReview[]>>(`/skills/${skillId}/reviews`).then((r) => r.data.data)
+
+export const submitSkillReview = (skillId: number, data: { comments?: string }) =>
+  api.post<ApiResponse<SkillReview>>(`/skills/${skillId}/reviews`, data).then((r) => r.data.data)
+
+export const approveSkillReview = (reviewId: number, comments?: string) =>
+  api.post(`/skill-reviews/${reviewId}/approve`, { comments }).then((r) => r.data)
+
+export const rejectSkillReview = (reviewId: number, comments?: string) =>
+  api.post(`/skill-reviews/${reviewId}/reject`, { comments }).then((r) => r.data)
+
+// --- Skill Ownership (E.6) ---
+
+export const fetchSkillOwnership = (skillId: number) =>
+  api.get<ApiResponse<SkillOwnership>>(`/skills/${skillId}/ownership`).then((r) => r.data.data)
+
+export const updateSkillOwnership = (skillId: number, data: { owner_id?: number | null; codeowners?: string[] }) =>
+  api.put<ApiResponse<SkillOwnership>>(`/skills/${skillId}/ownership`, data).then((r) => r.data.data)
+
+// --- Notifications (E.6) ---
+
+export const fetchNotifications = (params?: { page?: number }) =>
+  api.get<{ data: Notification[]; unread_count: number }>('/notifications', { params }).then((r) => r.data)
+
+export const markNotificationRead = (id: number) =>
+  api.post(`/notifications/${id}/read`).then((r) => r.data)
+
+export const markAllNotificationsRead = () =>
+  api.post('/notifications/read-all').then((r) => r.data)
+
+// --- Skill Analytics (E.6) ---
+
+export const fetchSkillAnalytics = (skillId: number) =>
+  api.get<ApiResponse<SkillAnalytic[]>>(`/skills/${skillId}/analytics`).then((r) => r.data.data)
+
+export const fetchTopSkills = (params?: { period?: string; limit?: number }) =>
+  api.get<ApiResponse<Array<{ skill_id: number; skill_name: string; test_runs: number; pass_rate: number }>>>('/analytics/top-skills', { params }).then((r) => r.data.data)
+
+export const fetchAnalyticsTrends = (params?: { period?: string }) =>
+  api.get('/analytics/trends', { params }).then((r) => r.data)
+
+// --- Skill Regression Tests (E.6) ---
+
+export const fetchSkillTestCases = (skillId: number) =>
+  api.get<ApiResponse<SkillTestCase[]>>(`/skills/${skillId}/test-cases`).then((r) => r.data.data)
+
+export const createSkillTestCase = (skillId: number, data: Partial<SkillTestCase>) =>
+  api.post<ApiResponse<SkillTestCase>>(`/skills/${skillId}/test-cases`, data).then((r) => r.data.data)
+
+export const updateSkillTestCase = (id: number, data: Partial<SkillTestCase>) =>
+  api.put<ApiResponse<SkillTestCase>>(`/skill-test-cases/${id}`, data).then((r) => r.data.data)
+
+export const deleteSkillTestCase = (id: number) =>
+  api.delete(`/skill-test-cases/${id}`)
+
+export const runAllSkillTestCases = (skillId: number) =>
+  api.post<ApiResponse<SkillTestCaseResult[]>>(`/skills/${skillId}/test-cases/run-all`).then((r) => r.data.data)
+
+// --- Cross-Model Benchmark (E.6) ---
+
+export const benchmarkSkill = (skillId: number, models?: string[]) =>
+  api.post<ApiResponse<SkillBenchmarkResult[]>>(`/skills/${skillId}/benchmark`, { models }).then((r) => r.data.data)
+
+// --- Skill Inheritance (E.6) ---
+
+export const resolveSkillInheritance = (skillId: number) =>
+  api.get<ApiResponse<SkillInheritanceInfo>>(`/skills/${skillId}/resolve`).then((r) => r.data.data)
+
+export const fetchSkillChildren = (skillId: number) =>
+  api.get<ApiResponse<Array<{ id: number; name: string; slug: string }>>>(`/skills/${skillId}/children`).then((r) => r.data.data)
+
+export const updateSkillInheritance = (skillId: number, data: { extends_skill_id: number | null; override_sections?: Record<string, unknown> }) =>
+  api.put(`/skills/${skillId}/inheritance`, data).then((r) => r.data)
+
+// --- Reports (E.6) ---
+
+export const exportSkillsReport = () =>
+  api.get('/reports/skills', { responseType: 'blob' }).then((r) => r.data as Blob)
+
+export const exportUsageReport = () =>
+  api.get('/reports/usage', { responseType: 'blob' }).then((r) => r.data as Blob)
+
+export const exportAuditReport = () =>
+  api.get('/reports/audit', { responseType: 'blob' }).then((r) => r.data as Blob)
+
+// --- GitHub Import (E.6) ---
+
+export const discoverGitHubOrg = (org: string, token?: string) =>
+  api.post<ApiResponse<GitHubDiscoveredRepo[]>>('/import/github/discover', { org, token }).then((r) => r.data.data)
+
+export const importFromGitHub = (data: { org: string; repos: string[]; project_id: number; token?: string }) =>
+  api.post<ApiResponse<GitHubImportResult>>('/import/github/import', data).then((r) => r.data.data)
+
+// --- License (E.2) ---
+
+export const fetchLicenseStatus = () =>
+  api.get<ApiResponse<LicenseStatus>>('/license/status').then((r) => r.data.data)
+
+export const activateLicense = (key: string) =>
+  api.post<ApiResponse<LicenseStatus>>('/license/activate', { key }).then((r) => r.data.data)
+
+// --- Setup Wizard (E.2) ---
+
+export const fetchSetupStatus = () =>
+  api.get<ApiResponse<SetupStatus>>('/setup/status').then((r) => r.data.data)
+
+export const setupApiKeys = (data: Record<string, string>) =>
+  api.post('/setup/api-keys', data).then((r) => r.data)
+
+export const setupDefaultModel = (model: string) =>
+  api.post('/setup/default-model', { model }).then((r) => r.data)
+
+export const setupQuickStart = () =>
+  api.post('/setup/quick-start').then((r) => r.data)
+
+export const completeSetup = () =>
+  api.post('/setup/complete').then((r) => r.data)
+
+// --- Backups (E.2) ---
+
+export const fetchBackups = () =>
+  api.get<ApiResponse<BackupEntry[]>>('/backups').then((r) => r.data.data)
+
+export const createBackup = () =>
+  api.post<ApiResponse<BackupEntry>>('/backups').then((r) => r.data.data)
+
+export const restoreBackup = (filename: string) =>
+  api.post('/backups/restore', { filename }).then((r) => r.data)
+
+export const downloadBackup = (filename: string) =>
+  api.get(`/backups/${filename}/download`, { responseType: 'blob' }).then((r) => r.data as Blob)
+
+// --- Health Diagnostics (E.2) ---
+
+export const fetchDiagnostics = () =>
+  api.get<ApiResponse<DiagnosticCheck[]>>('/diagnostics').then((r) => r.data.data)
+
+export const fetchDiagnosticCheck = (check: string) =>
+  api.get<ApiResponse<DiagnosticCheck>>(`/diagnostics/${check}`).then((r) => r.data.data)
+
+// --- Audit Log Export ---
+
+export const exportAuditLogs = () =>
+  api.get('/audit-logs/export', { responseType: 'blob' }).then((r) => r.data as Blob)
 
 export default api

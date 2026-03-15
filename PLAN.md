@@ -27,16 +27,28 @@ Phase D — Production-Ready Agent Teams  (COMPLETE)
   Organization & team management. Agent autonomy levels & permissions.
   Performance dashboards. Competitive positioning.
 
-Phase E — Ship the Self-Hosted Product  (IN PROGRESS)
+Phase E — Ship the Self-Hosted Product  (COMPLETE)
   E.1: Admin & security (SSO, audit logs, content policies).
   E.2: Deployment & packaging (Docker hardening, license keys, setup wizard, backup/restore).
-  E.3: Local model support & air-gap (Grok, vLLM, OpenAI-compatible endpoints, air-gap mode).
-  E.4: API & developer access (OpenAPI spec, SDKs, API tokens, CLI tool).
-  E.5: Enterprise readiness (review workflows, skill analytics, cross-model benchmarking).
+  E.3: Guardrails & safety (org policies, profiles, endpoint validation, security scanner).
+  E.4: Local model support & air-gap (Grok, vLLM, OpenAI-compatible endpoints, air-gap mode).
+  E.5: API & developer access (OpenAPI spec, SDKs, API tokens, CLI tool).
+  E.6: Enterprise readiness (review workflows, skill analytics, cross-model benchmarking).
 
-Phase F — Growth & Ecosystem  (FUTURE)
-  F.1: Skill intelligence (A/B testing, similarity detection, dynamic activation).
-  F.2: Ecosystem (marketplace enhancements, Zapier/n8n, Slack/Discord bot).
+Phase F — Launch-Ready (Tier 1)  (IN PROGRESS)
+  F.1: Frontend catch-up — Settings & Infrastructure UI.
+  F.2: Frontend catch-up — Guardrails & Security UI.
+  F.3: Frontend catch-up — Enterprise Features UI.
+  F.4: Documentation site update for self-hosted pivot.
+  F.5: Install & deployment polish.
+  F.6: Bug fixes & polish.
+
+Phase G — Self-Hosted Differentiation (Tier 2)  (FUTURE)
+  G.1: VS Code extension.
+  G.2: GitHub Action for CI/CD.
+  G.3: Model Pull UI (one-click Ollama downloads).
+  G.4: Agent execution replay & trace viewer.
+  G.5: Helm chart / Kubernetes operator.
 ```
 
 The existing Component Layer (skills, provider sync, MCP, A2A) remains the foundation. Each phase builds on the previous.
@@ -91,7 +103,8 @@ Observe (result fed back into context)
 **Phase C COMPLETE** — Design + Runtime (35 issues, all closed).
 **Phase D COMPLETE** — Production-Ready Agent Teams (29 issues across 5 milestones, all closed).
 **Phase E COMPLETE** — Ship the Self-Hosted Product (58 issues across 6 milestones: E.1–E.6, #201–#268).
-**Phase F FUTURE** — Growth & Ecosystem (16 deferred issues across 3 milestones).
+**Phase F IN PROGRESS** — Launch-Ready / Tier 1 (38 issues across 6 milestones: F.1–F.6, #301–#338).
+**Phase G FUTURE** — Self-Hosted Differentiation / Tier 2 (17 issues across 5 milestones: G.1–G.5, #401–#417).
 
 **Strategic pivot (2026-03-15):** Repositioned from SaaS to self-hosted infrastructure software. Cloud tier is a free playground/demo funnel. The product runs on customer infra with local models, local MCP, local data. Revenue model is commercial self-hosted license.
 
@@ -706,21 +719,157 @@ E.5 and E.6 can run in parallel — developer access and enterprise polish.
 
 ---
 
-## Phase F: Growth & Ecosystem (Future)
+## Phase F: Launch-Ready (Tier 1)
 
-> **Deferred until post-launch.** These features matter once there are paying self-hosted customers, but are not required to ship the product.
+> **Motivation:** Phase E built all the backend APIs and services. Phase F connects them to the frontend, updates documentation for the self-hosted pivot, and polishes for launch. This is the gap between "it works" and "someone can use it."
 
-### F.1 — Skill Intelligence
+### F.1 — Frontend: Settings & Infrastructure UI
 
-Deferred issues: #226 (A/B testing), #228 (similarity detection), #229 (dynamic activation), #232 (tests).
+Wire up E.4 backend APIs (custom endpoints, API tokens, model health, local models, air-gap) to the React SPA.
 
-### F.2 — Ecosystem & Integrations
+| Issue | Title | Status |
+|---|---|---|
+| #301 | TypeScript types for E.3-E.6 entities (CustomEndpoint, ApiToken, GuardrailPolicy, etc.) | DONE |
+| #302 | API client functions for custom endpoints, model health, local models, air-gap | DONE |
+| #303 | API Tokens management page (create, list, delete, copy token) | DONE |
+| #304 | Custom Endpoints management UI (CRUD, health check, model discovery) | DONE |
+| #305 | Model Health dashboard (provider status, latency, benchmarks) | DONE |
+| #306 | Local Models browser (Ollama/vLLM discovery, model details) | DONE |
+| #307 | Air-Gap mode toggle and status indicator in Settings | DONE |
+| #308 | Settings page expansion — Grok API key, custom endpoints link, model health link | DONE |
+| #309 | Sidebar navigation updates for new pages | DONE |
 
-Deferred issues: #233-#237 (marketplace enhancements), #238 (Zapier/n8n), #239 (Slack/Discord bot), #242 (tests).
+### F.2 — Frontend: Guardrails & Security UI
 
-### F.3 — Collaboration (Advanced)
+Wire up E.3 guardrail APIs to the React SPA.
 
-Deferred issues: #209-#211 (VS Code extension, GitHub Action), #218 (real-time editing), #221 (three-way merge), #222 (inline commenting).
+| Issue | Title | Status |
+|---|---|---|
+| #310 | API client functions for guardrails, profiles, violations, security scanner, endpoint approvals | DONE |
+| #311 | Guardrail Policies management page (CRUD, org-level) | DONE |
+| #312 | Guardrail Profiles page (strict/moderate/permissive presets) | DONE |
+| #313 | Guardrail Violations dashboard (violation trends, dismissal workflow) | DONE |
+| #314 | Endpoint Approvals page (approve/reject MCP/A2A on first connect) | DONE |
+| #315 | Security Scanner integration in Skill Editor (scan button, inline results) | PENDING |
+| #316 | Content Review trigger in Skill Editor (risk score display) | PENDING |
+| #317 | Notifications dropdown component (bell icon, unread count, mark as read) | DONE |
+
+### F.3 — Frontend: Enterprise Features UI
+
+Wire up E.6 enterprise APIs to the React SPA.
+
+| Issue | Title | Status |
+|---|---|---|
+| #318 | API client functions for reviews, ownership, analytics, regression tests, inheritance, reports, GitHub import | DONE |
+| #319 | Skill Review workflow UI (submit, approve/reject, comments in Skill Editor) | PENDING |
+| #320 | Skill Ownership display and assignment in Skill Editor | PENDING |
+| #321 | Skill Analytics dashboard page (usage, pass rates, token trends, cost per run) | DONE |
+| #322 | Regression Test Cases panel in Skill Editor (CRUD, run all, results) | PENDING |
+| #323 | Cross-Model Benchmark trigger and results display | PENDING |
+| #324 | Skill Inheritance UI (extends selector, resolved preview, children list) | PENDING |
+| #325 | Reports export page (skill inventory CSV, usage CSV, audit log CSV) | DONE |
+| #326 | GitHub Org Import wizard (discover repos, select skills, import) | DONE |
+
+### F.4 — Documentation Update
+
+Update VitePress docs site for the self-hosted pivot and new features.
+
+| Issue | Title | Status |
+|---|---|---|
+| #327 | Update getting-started guide for self-hosted installation | PENDING |
+| #328 | Self-hosted deployment guide (Docker, Docker Compose, env config, reverse proxy) | PENDING |
+| #329 | API reference update (E.3-E.6 endpoints, authentication methods) | PENDING |
+| #330 | Architecture overview doc (agent loop, orchestration, component layers) | PENDING |
+| #331 | Local models & air-gap guide | PENDING |
+| #332 | Guardrails & security configuration guide | PENDING |
+
+### F.5 — Install & Deployment Polish
+
+| Issue | Title | Status |
+|---|---|---|
+| #333 | One-line install script (`curl ... \| bash`) with env wizard | PENDING |
+| #334 | Production docker-compose validation and hardening | PENDING |
+| #335 | First-run setup wizard frontend integration | PENDING |
+
+### F.6 — Bug Fixes & Polish
+
+| Issue | Title | Status |
+|---|---|---|
+| #336 | Fix ProviderSyncTest `alwaysApply: false` assertion | PENDING |
+| #337 | Update CLAUDE.md with E.3-E.6 endpoints and models | PENDING |
+| #338 | TypeScript type-check pass (`npx tsc --noEmit`) | DONE |
+
+### Implementation Sequence
+
+```
+F.1 (types + API client + settings UI)
+  │
+  ├──────────────────┐
+  ▼                  ▼
+F.2 (guardrails UI)  F.3 (enterprise UI)  ← can run in parallel
+  │                  │
+  └────────┬─────────┘
+           ▼
+F.4 (documentation) + F.5 (install) + F.6 (polish)  ← can run in parallel
+```
+
+**Priority order:** F.1 first (shared types/client needed by F.2 and F.3), then F.2 + F.3 in parallel, then F.4-F.6.
+
+---
+
+## Phase G: Self-Hosted Differentiation (Tier 2)
+
+> **Motivation:** These features are what make Orkestr uniquely valuable on customer infrastructure — beyond what cloud-only tools offer. Build after Tier 1 launches.
+
+### G.1 — VS Code Extension
+
+| Issue | Title | Status |
+|---|---|---|
+| #401 | VS Code extension scaffold (TypeScript, vsce packaging) | PENDING |
+| #402 | Skill browser tree view (list/search skills from Orkestr API) | PENDING |
+| #403 | Skill editor with syntax highlighting and frontmatter validation | PENDING |
+| #404 | Sync status indicator and push/pull commands | PENDING |
+| #405 | Skill test runner integration | PENDING |
+
+### G.2 — GitHub Action for CI/CD
+
+| Issue | Title | Status |
+|---|---|---|
+| #406 | GitHub Action: validate skill format in PRs | PENDING |
+| #407 | GitHub Action: auto-sync skills on merge to main | PENDING |
+| #408 | Workflow template `.github/workflows/orkestr-sync.yml` | PENDING |
+
+### G.3 — Model Pull UI
+
+| Issue | Title | Status |
+|---|---|---|
+| #409 | One-click Ollama model download from local model browser | PENDING |
+| #410 | Download progress tracking (SSE or polling) | PENDING |
+| #411 | Model recommendation engine (best model per task type) | PENDING |
+
+### G.4 — Agent Execution Replay
+
+| Issue | Title | Status |
+|---|---|---|
+| #412 | Full execution trace recording (every tool call, LLM response, decision point) | PENDING |
+| #413 | Replay UI — step-through execution with timeline scrubber | PENDING |
+| #414 | Execution diff — compare two runs side-by-side | PENDING |
+
+### G.5 — Helm Chart / Kubernetes Operator
+
+| Issue | Title | Status |
+|---|---|---|
+| #415 | Helm chart with configurable replicas, PVC, ingress, secrets | PENDING |
+| #416 | Kubernetes health probes and readiness checks | PENDING |
+| #417 | Horizontal scaling documentation | PENDING |
+
+### Deferred (Post-Tier 2)
+
+Previously tracked as F.1-F.3, these remain deferred:
+
+- Skill intelligence: #226 (A/B testing), #228 (similarity detection), #229 (dynamic activation)
+- Ecosystem: #233-#237 (marketplace), #238 (n8n/Temporal integration)
+- Collaboration: #218 (real-time editing), #221 (three-way merge), #222 (inline commenting)
 
 ---
 
