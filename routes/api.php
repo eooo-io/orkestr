@@ -28,6 +28,9 @@ use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\VisualizationController;
 use App\Http\Controllers\CustomEndpointController;
 use App\Http\Controllers\ModelHealthController;
+use App\Http\Controllers\ApiTokenController;
+use App\Http\Controllers\OpenApiController;
+use App\Http\Controllers\SdkController;
 use App\Http\Controllers\WorkflowController;
 use App\Http\Controllers\ExecutionController;
 use App\Http\Controllers\WorkflowRunController;
@@ -51,6 +54,15 @@ use App\Http\Controllers\GuardrailController;
 use App\Http\Controllers\GuardrailReportController;
 use App\Http\Controllers\SecurityScanController;
 use App\Http\Controllers\HealthCheckController;
+use App\Http\Controllers\SkillReviewController;
+use App\Http\Controllers\SkillOwnershipController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SkillAnalyticsController;
+use App\Http\Controllers\SkillRegressionController;
+use App\Http\Controllers\BenchmarkController;
+use App\Http\Controllers\SkillInheritanceController;
+use App\Http\Controllers\ReportExportController;
+use App\Http\Controllers\GitHubImportController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -59,6 +71,10 @@ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 Route::post('/webhooks/github/{project}', [InboundWebhookController::class, 'github']);
 Route::get('/billing/plans', [BillingController::class, 'plans']);
 Route::post('/webhooks/schedule/{token}', [ScheduleController::class, 'webhookTrigger']);
+
+// OpenAPI spec & docs (public)
+Route::get('/openapi.json', [OpenApiController::class, 'spec']);
+Route::get('/docs', [OpenApiController::class, 'docs']);
 
 // ─── Authenticated Routes ────────────────────────────────────
 Route::middleware('auth:web')->group(function () {
@@ -390,6 +406,15 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/skills/{skill}/security-scan', [SecurityScanController::class, 'scanSkill']);
     Route::post('/security-scan', [SecurityScanController::class, 'scanContent']);
 
+    // API Tokens (#215)
+    Route::get('/api-tokens', [ApiTokenController::class, 'index']);
+    Route::post('/api-tokens', [ApiTokenController::class, 'store']);
+    Route::delete('/api-tokens/{apiToken}', [ApiTokenController::class, 'destroy']);
+
+    // SDK Downloads (#213, #214)
+    Route::get('/sdk/typescript', [SdkController::class, 'typescript']);
+    Route::get('/sdk/php', [SdkController::class, 'php']);
+
     // Custom Endpoints (#253)
     Route::get('/custom-endpoints', [CustomEndpointController::class, 'index']);
     Route::post('/custom-endpoints', [CustomEndpointController::class, 'store']);
@@ -419,4 +444,50 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/organizations/{org}/guardrail-reports/trends', [GuardrailReportController::class, 'trends']);
     Route::get('/organizations/{org}/guardrail-reports/export', [GuardrailReportController::class, 'export']);
     Route::post('/guardrail-violations/{violation}/dismiss', [GuardrailReportController::class, 'dismiss']);
+
+    // ─── Phase E.6: Enterprise Readiness ────────────────────────
+
+    // Skill Reviews (#219)
+    Route::get('/skills/{skill}/reviews', [SkillReviewController::class, 'index']);
+    Route::post('/skills/{skill}/reviews', [SkillReviewController::class, 'store']);
+    Route::post('/skill-reviews/{review}/approve', [SkillReviewController::class, 'approve']);
+    Route::post('/skill-reviews/{review}/reject', [SkillReviewController::class, 'reject']);
+
+    // Skill Ownership (#220)
+    Route::get('/skills/{skill}/ownership', [SkillOwnershipController::class, 'show']);
+    Route::put('/skills/{skill}/ownership', [SkillOwnershipController::class, 'update']);
+
+    // Notifications (#223)
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'read']);
+
+    // Skill Analytics (#225)
+    Route::get('/skills/{skill}/analytics', [SkillAnalyticsController::class, 'show']);
+    Route::get('/analytics/top-skills', [SkillAnalyticsController::class, 'topSkills']);
+    Route::get('/analytics/trends', [SkillAnalyticsController::class, 'trends']);
+
+    // Skill Regression Testing (#227)
+    Route::get('/skills/{skill}/test-cases', [SkillRegressionController::class, 'index']);
+    Route::post('/skills/{skill}/test-cases', [SkillRegressionController::class, 'store']);
+    Route::put('/skill-test-cases/{testCase}', [SkillRegressionController::class, 'update']);
+    Route::delete('/skill-test-cases/{testCase}', [SkillRegressionController::class, 'destroy']);
+    Route::post('/skills/{skill}/test-cases/run-all', [SkillRegressionController::class, 'runAll']);
+
+    // Cross-Model Benchmarking (#230)
+    Route::post('/skills/{skill}/benchmark', [BenchmarkController::class, 'benchmark']);
+
+    // Skill Inheritance (#231)
+    Route::get('/skills/{skill}/resolve', [SkillInheritanceController::class, 'resolve']);
+    Route::get('/skills/{skill}/children', [SkillInheritanceController::class, 'children']);
+    Route::put('/skills/{skill}/inheritance', [SkillInheritanceController::class, 'update']);
+
+    // Reports (#240)
+    Route::get('/reports/skills', [ReportExportController::class, 'skills']);
+    Route::get('/reports/usage', [ReportExportController::class, 'usage']);
+    Route::get('/reports/audit', [ReportExportController::class, 'audit']);
+
+    // GitHub Org Import (#241)
+    Route::post('/import/github/discover', [GitHubImportController::class, 'discover']);
+    Route::post('/import/github/import', [GitHubImportController::class, 'import']);
 });

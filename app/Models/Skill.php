@@ -23,6 +23,10 @@ class Skill extends Model
         'body',
         'conditions',
         'template_variables',
+        'owner_id',
+        'codeowners',
+        'extends_skill_id',
+        'override_sections',
     ];
 
     protected function casts(): array
@@ -32,6 +36,8 @@ class Skill extends Model
             'includes' => 'array',
             'conditions' => 'array',
             'template_variables' => 'array',
+            'codeowners' => 'array',
+            'override_sections' => 'array',
             'max_tokens' => 'integer',
         ];
     }
@@ -72,5 +78,35 @@ class Skill extends Model
     public function skillVariables(): HasMany
     {
         return $this->hasMany(SkillVariable::class);
+    }
+
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function parentSkill(): BelongsTo
+    {
+        return $this->belongsTo(Skill::class, 'extends_skill_id');
+    }
+
+    public function childSkills(): HasMany
+    {
+        return $this->hasMany(Skill::class, 'extends_skill_id');
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(SkillReview::class);
+    }
+
+    public function testCases(): HasMany
+    {
+        return $this->hasMany(SkillTestCase::class);
+    }
+
+    public function analytics(): HasMany
+    {
+        return $this->hasMany(SkillAnalytic::class);
     }
 }
