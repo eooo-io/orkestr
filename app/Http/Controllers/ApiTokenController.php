@@ -38,7 +38,7 @@ class ApiTokenController extends Controller
             ? now()->addDays($validated['expires_in_days'])
             : null;
 
-        $org = app('current_organization');
+        $org = app()->bound('current_organization') ? app('current_organization') : null;
 
         $result = ApiToken::createToken(
             user: $request->user(),

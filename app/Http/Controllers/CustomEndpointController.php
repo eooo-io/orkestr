@@ -11,7 +11,7 @@ class CustomEndpointController extends Controller
 {
     public function index(): JsonResponse
     {
-        $org = app('current_organization');
+        $org = app()->bound('current_organization') ? app('current_organization') : null;
         $endpoints = CustomEndpoint::where('organization_id', $org?->id)
             ->orWhereNull('organization_id')
             ->orderBy('name')
@@ -30,7 +30,7 @@ class CustomEndpointController extends Controller
             'models.*' => 'string|max:255',
         ]);
 
-        $org = app('current_organization');
+        $org = app()->bound('current_organization') ? app('current_organization') : null;
         $validated['organization_id'] = $org?->id;
 
         $endpoint = CustomEndpoint::create($validated);
