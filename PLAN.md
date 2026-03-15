@@ -90,7 +90,7 @@ Observe (result fed back into context)
 **Phase B COMPLETE** — Orchestration (27 issues, all closed).
 **Phase C COMPLETE** — Design + Runtime (35 issues, all closed).
 **Phase D COMPLETE** — Production-Ready Agent Teams (29 issues across 5 milestones, all closed).
-**Phase E IN PROGRESS** — Ship the Self-Hosted Product (42 issues across 5 milestones: E.1–E.5, #201–#258).
+**Phase E COMPLETE** — Ship the Self-Hosted Product (58 issues across 6 milestones: E.1–E.6, #201–#268).
 **Phase F FUTURE** — Growth & Ecosystem (16 deferred issues across 3 milestones).
 
 **Strategic pivot (2026-03-15):** Repositioned from SaaS to self-hosted infrastructure software. Cloud tier is a free playground/demo funnel. The product runs on customer infra with local models, local MCP, local data. Revenue model is commercial self-hosted license.
@@ -540,14 +540,14 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 
 | Issue | Title | Status |
 |---|---|---|
-| #201 | SAML/OIDC SSO provider integration | TODO |
-| #202 | SSO configuration UI in Filament admin | TODO |
-| #203 | Secret scanning in skill prompts | TODO |
-| #204 | Skill content policies | TODO |
-| #205 | Immutable audit log enhancements | TODO |
-| #206 | Organization-wide activity feed | TODO |
-| #207 | Admin dashboard stats expansion | TODO |
-| #208 | Pest tests for E.1 admin features | TODO |
+| #201 | SAML/OIDC SSO provider integration | DONE |
+| #202 | SSO configuration UI in Filament admin | DONE |
+| #203 | Secret scanning in skill prompts | DONE |
+| #204 | Skill content policies | DONE |
+| #205 | Immutable audit log enhancements | DONE |
+| #206 | Organization-wide activity feed | DONE |
+| #207 | Admin dashboard stats expansion | DONE |
+| #208 | Pest tests for E.1 admin features | DONE |
 
 **Key deliverables:**
 - Enterprise SSO (SAML 2.0 + OIDC) with auto-provisioning
@@ -559,15 +559,15 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 
 | Issue | Title | Status |
 |---|---|---|
-| #243 | Production Docker Compose with health checks, restart policies, and volume management | TODO |
-| #244 | One-command deploy script with environment validation | TODO |
-| #245 | Self-hosted license key generation and validation system | TODO |
-| #246 | First-run setup wizard — API keys, model config, MCP server, first agent | TODO |
-| #247 | Instance backup and restore tooling | TODO |
-| #248 | Upgrade mechanism — versioned migrations and zero-downtime updates | TODO |
-| #249 | Reverse proxy configuration templates (nginx, Caddy, Traefik) | TODO |
-| #250 | Self-hosted health diagnostics dashboard | TODO |
-| #251 | Pest tests for E.2 deployment features | TODO |
+| #243 | Production Docker Compose with health checks, restart policies, and volume management | DONE |
+| #244 | One-command deploy script with environment validation | DONE |
+| #245 | Self-hosted license key generation and validation system | DONE |
+| #246 | First-run setup wizard — API keys, model config, MCP server, first agent | DONE |
+| #247 | Instance backup and restore tooling | DONE |
+| #248 | Upgrade mechanism — versioned migrations and zero-downtime updates | DONE |
+| #249 | Reverse proxy configuration templates (nginx, Caddy, Traefik) | DONE |
+| #250 | Self-hosted health diagnostics dashboard | DONE |
+| #251 | Pest tests for E.2 deployment features | DONE |
 
 **Key deliverables:**
 - Production Docker Compose with health checks, named volumes, restart policies
@@ -583,16 +583,16 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 
 | Issue | Title | Status |
 |---|---|---|
-| #259 | Organization-level guardrail policy engine — org-wide defaults for budgets, approval levels, blocked tools | TODO |
-| #260 | Configurable guardrail profiles — strict, moderate, permissive presets assignable to agents or projects | TODO |
-| #261 | MCP server and A2A endpoint validation — allowlists, approval-on-first-connect, URL verification | TODO |
-| #262 | Static security scanner — extend PromptLinter with SecurityRuleSet | TODO |
-| #263 | Input sanitization guard — validate and sanitize user input before agent execution loop | TODO |
-| #264 | LLM-based content review service — on-demand risk scoring for skills and agent configs | TODO |
-| #265 | Agent delegation boundary enforcement — cascading budget and scope limits through delegation chains | TODO |
-| #266 | Network enforcement guard — validate and enforce air-gap mode, block unexpected outbound calls | TODO |
-| #267 | Guardrail reporting dashboard — trigger history, violation trends, dismissal audit trail | TODO |
-| #268 | Pest tests for E.3 guardrail features | TODO |
+| #259 | Organization-level guardrail policy engine — org-wide defaults for budgets, approval levels, blocked tools | DONE |
+| #260 | Configurable guardrail profiles — strict, moderate, permissive presets assignable to agents or projects | DONE |
+| #261 | MCP server and A2A endpoint validation — allowlists, approval-on-first-connect, URL verification | DONE |
+| #262 | Static security scanner — extend PromptLinter with SecurityRuleSet | DONE |
+| #263 | Input sanitization guard — validate and sanitize user input before agent execution loop | DONE |
+| #264 | LLM-based content review service — on-demand risk scoring for skills and agent configs | DONE |
+| #265 | Agent delegation boundary enforcement — cascading budget and scope limits through delegation chains | DONE |
+| #266 | Network enforcement guard — validate and enforce air-gap mode, block unexpected outbound calls | DONE |
+| #267 | Guardrail reporting dashboard — trigger history, violation trends, dismissal audit trail | DONE |
+| #268 | Pest tests for E.3 guardrail features | DONE |
 
 **Key deliverables:**
 - Org-level guardrail policies that cascade: org → project → agent (each level can tighten, not loosen)
@@ -616,13 +616,13 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 
 | Issue | Title | Status |
 |---|---|---|
-| #252 | Grok/xAI provider — OpenAI-compatible with x.ai base URL | TODO |
-| #253 | Generic OpenAI-compatible endpoint configuration for vLLM, TGI, LM Studio | TODO |
-| #254 | Model health check and latency benchmarking per provider | TODO |
-| #255 | Air-gap mode — disable all external network calls, validate no outbound traffic | TODO |
-| #256 | Local model browser — discover and test available Ollama/vLLM models | TODO |
-| #257 | Model performance comparison dashboard — cloud vs local side-by-side | TODO |
-| #258 | Pest tests for E.4 local model features | TODO |
+| #252 | Grok/xAI provider — OpenAI-compatible with x.ai base URL | DONE |
+| #253 | Generic OpenAI-compatible endpoint configuration for vLLM, TGI, LM Studio | DONE |
+| #254 | Model health check and latency benchmarking per provider | DONE |
+| #255 | Air-gap mode — disable all external network calls, validate no outbound traffic | DONE |
+| #256 | Local model browser — discover and test available Ollama/vLLM models | DONE |
+| #257 | Model performance comparison dashboard — cloud vs local side-by-side | DONE |
+| #258 | Pest tests for E.4 local model features | DONE |
 
 **Key deliverables:**
 - Grok/xAI provider (OpenAI-compatible API with x.ai base URL)
@@ -638,12 +638,12 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 
 | Issue | Title | Status |
 |---|---|---|
-| #212 | OpenAPI 3.1 specification generation | TODO |
-| #213 | REST API SDK — npm package | TODO |
-| #214 | REST API SDK — Composer package | TODO |
-| #215 | API token authentication for programmatic access | TODO |
-| #216 | CLI tool — orkestr deploy, manage, backup | TODO |
-| #217 | Pest tests for E.5 developer experience | TODO |
+| #212 | OpenAPI 3.1 specification generation | DONE |
+| #213 | REST API SDK — npm package | DONE |
+| #214 | REST API SDK — Composer package | DONE |
+| #215 | API token authentication for programmatic access | DONE |
+| #216 | CLI tool — orkestr deploy, manage, backup | DONE |
+| #217 | Pest tests for E.5 developer experience | DONE |
 
 **Key deliverables:**
 - OpenAPI 3.1 spec with Swagger UI at /api/docs
@@ -655,16 +655,16 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 
 | Issue | Title | Status |
 |---|---|---|
-| #219 | Skill review and approval workflow | TODO |
-| #220 | Skill ownership and CODEOWNERS model | TODO |
-| #223 | Change request notifications | TODO |
-| #225 | Skill analytics dashboard | TODO |
-| #227 | Automated regression testing for skills | TODO |
-| #230 | Cross-model performance benchmarking — cloud vs local | TODO |
-| #231 | Skill inheritance and extension | TODO |
-| #240 | Export reports — PDF and CSV | TODO |
-| #241 | Bulk import from GitHub organizations | TODO |
-| #224 | Pest tests for E.6 enterprise features | TODO |
+| #219 | Skill review and approval workflow | DONE |
+| #220 | Skill ownership and CODEOWNERS model | DONE |
+| #223 | Change request notifications | DONE |
+| #225 | Skill analytics dashboard | DONE |
+| #227 | Automated regression testing for skills | DONE |
+| #230 | Cross-model performance benchmarking — cloud vs local | DONE |
+| #231 | Skill inheritance and extension | DONE |
+| #240 | Export reports — PDF and CSV | DONE |
+| #241 | Bulk import from GitHub organizations | DONE |
+| #224 | Pest tests for E.6 enterprise features | DONE |
 
 **Key deliverables:**
 - Review/approval workflow: submit → review → approve/reject with comments
