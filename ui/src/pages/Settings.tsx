@@ -673,12 +673,22 @@ function InfrastructurePanel() {
     }
   }, [])
 
+  // Only load data when a section is expanded — avoids failing API calls blanking the page
   useEffect(() => {
-    loadTokens()
-    loadEndpoints()
-    loadHealth()
-    loadLocalModels()
-  }, [loadTokens, loadEndpoints, loadHealth, loadLocalModels])
+    if (openSections.tokens) loadTokens()
+  }, [openSections.tokens, loadTokens])
+
+  useEffect(() => {
+    if (openSections.endpoints) loadEndpoints()
+  }, [openSections.endpoints, loadEndpoints])
+
+  useEffect(() => {
+    if (openSections.health) loadHealth()
+  }, [openSections.health, loadHealth])
+
+  useEffect(() => {
+    if (openSections.local) loadLocalModels()
+  }, [openSections.local, loadLocalModels])
 
   const handleCreateToken = async () => {
     if (!newTokenName.trim()) return
