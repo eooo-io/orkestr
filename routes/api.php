@@ -43,6 +43,11 @@ use App\Http\Controllers\SsoProviderController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\SetupWizardController;
 use App\Http\Controllers\BackupController;
+use App\Http\Controllers\ContentReviewController;
+use App\Http\Controllers\EndpointApprovalController;
+use App\Http\Controllers\GuardrailController;
+use App\Http\Controllers\GuardrailReportController;
+use App\Http\Controllers\SecurityScanController;
 use App\Http\Controllers\HealthCheckController;
 use Illuminate\Support\Facades\Route;
 
@@ -356,4 +361,36 @@ Route::middleware('auth:web')->group(function () {
     // Health Diagnostics
     Route::get('/diagnostics', [HealthCheckController::class, 'index']);
     Route::get('/diagnostics/{check}', [HealthCheckController::class, 'show']);
+
+    // Content Review (#264)
+    Route::post('/skills/{skill}/review', [ContentReviewController::class, 'reviewSkill']);
+    Route::post('/agents/{agent}/review', [ContentReviewController::class, 'reviewAgent']);
+
+    // Endpoint Approvals (#261)
+    Route::get('/projects/{project}/endpoint-approvals', [EndpointApprovalController::class, 'index']);
+    Route::post('/endpoint-approvals/{type}/{id}/approve', [EndpointApprovalController::class, 'approve']);
+    Route::post('/endpoint-approvals/{type}/{id}/reject', [EndpointApprovalController::class, 'reject']);
+
+    // Guardrail Policies (#259)
+    Route::get('/organizations/{org}/guardrails', [GuardrailController::class, 'index']);
+    Route::post('/organizations/{org}/guardrails', [GuardrailController::class, 'store']);
+    Route::put('/guardrails/{policy}', [GuardrailController::class, 'update']);
+    Route::delete('/guardrails/{policy}', [GuardrailController::class, 'destroy']);
+    Route::get('/organizations/{org}/guardrails/resolve', [GuardrailController::class, 'resolve']);
+
+    // Guardrail Profiles (#260)
+    Route::get('/guardrail-profiles', [GuardrailController::class, 'profiles']);
+    Route::get('/guardrail-profiles/{profile}', [GuardrailController::class, 'showProfile']);
+    Route::post('/guardrail-profiles', [GuardrailController::class, 'storeProfile']);
+    Route::delete('/guardrail-profiles/{profile}', [GuardrailController::class, 'destroyProfile']);
+
+    // Security Scanner (#262)
+    Route::post('/skills/{skill}/security-scan', [SecurityScanController::class, 'scanSkill']);
+    Route::post('/security-scan', [SecurityScanController::class, 'scanContent']);
+
+    // Guardrail Reports (#267)
+    Route::get('/organizations/{org}/guardrail-reports', [GuardrailReportController::class, 'index']);
+    Route::get('/organizations/{org}/guardrail-reports/trends', [GuardrailReportController::class, 'trends']);
+    Route::get('/organizations/{org}/guardrail-reports/export', [GuardrailReportController::class, 'export']);
+    Route::post('/guardrail-violations/{violation}/dismiss', [GuardrailReportController::class, 'dismiss']);
 });

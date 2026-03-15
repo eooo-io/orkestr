@@ -84,6 +84,16 @@ class Organization extends Model
         return $this->hasMany(SsoProvider::class);
     }
 
+    public function guardrailPolicies(): HasMany
+    {
+        return $this->hasMany(GuardrailPolicy::class);
+    }
+
+    public function guardrailViolations(): HasMany
+    {
+        return $this->hasMany(GuardrailViolation::class);
+    }
+
     public function isOnPlan(string $plan): bool
     {
         return $this->plan === $plan;

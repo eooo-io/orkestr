@@ -16,6 +16,9 @@ class ProjectA2aAgent extends Model
         'description',
         'skills',
         'enabled',
+        'approval_status',
+        'approved_at',
+        'approved_by',
     ];
 
     protected function casts(): array
@@ -23,6 +26,7 @@ class ProjectA2aAgent extends Model
         return [
             'skills' => 'array',
             'enabled' => 'boolean',
+            'approved_at' => 'datetime',
         ];
     }
 

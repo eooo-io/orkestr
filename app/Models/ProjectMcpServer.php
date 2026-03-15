@@ -17,6 +17,9 @@ class ProjectMcpServer extends Model
         'env',
         'headers',
         'enabled',
+        'approval_status',
+        'approved_at',
+        'approved_by',
     ];
 
     protected function casts(): array
@@ -26,6 +29,7 @@ class ProjectMcpServer extends Model
             'env' => 'array',
             'headers' => 'array',
             'enabled' => 'boolean',
+            'approved_at' => 'datetime',
         ];
     }
 
