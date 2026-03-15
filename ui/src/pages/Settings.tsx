@@ -68,6 +68,27 @@ import {
   restoreBackup,
   downloadBackup,
   fetchDiagnostics,
+  fetchAgents,
+  createAgent,
+  updateAgent,
+  deleteAgent,
+  fetchLibrary,
+  createLibrarySkill,
+  updateLibrarySkill,
+  deleteLibrarySkill,
+  fetchTags,
+  createTag,
+  deleteTag,
+  fetchManagedUsers,
+  createManagedUser,
+  updateManagedUser,
+  deleteManagedUser,
+  fetchOrganizations,
+  updateOrganization,
+  fetchOrgMembers,
+  inviteOrgMember,
+  updateMemberRole,
+  removeMember,
 } from '@/api/client'
 import { Button } from '@/components/ui/button'
 import type {
@@ -81,6 +102,12 @@ import type {
   LocalModel,
   BackupEntry,
   DiagnosticCheck,
+  Agent,
+  LibrarySkill,
+  Tag,
+  ManagedUser,
+  Organization,
+  OrganizationMember,
 } from '@/types'
 
 // --- Tab registry -----------------------------------------------------------
@@ -1277,13 +1304,1293 @@ function DiagnosticsPanel() {
   )
 }
 
-function PlaceholderPanel({ name }: { name: string }) {
+// --- Agents Panel ------------------------------------------------------------
+
+function AgentsPanel() {
+  const [agents, setAgents] = useState<Agent[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [showAdd, setShowAdd] = useState(false)
+  const [form, setForm] = useState({ name: '', slug: '', description: '', model: '', autonomy_level: 'supervised' as string, system_prompt: '' })
+  const [saving, setSaving] = useState(false)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { setAgents(await fetchAgents()) } catch { /* */ }
+    finally { setLoading(false) }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const resetForm = () => {
+    setForm({ name: '', slug: '', description: '', model: '', autonomy_level: 'supervised', system_prompt: '' })
+    setShowAdd(false)
+    setEditingId(null)
+  }
+
+  const handleSave = async () => {
+    if (!form.name.trim()) return
+    setSaving(true)
+    try {
+      const payload: Partial<Agent> = {
+        name: form.name,
+        slug: form.slug || form.name.toLowerCase().replace(/\s+/g, '-'),
+        description: form.description || null,
+        model: form.model || null,
+        autonomy_level: form.autonomy_level as Agent['autonomy_level'],
+        system_prompt: form.system_prompt || null,
+      }
+      if (editingId) {
+        await updateAgent(editingId, payload)
+      } else {
+        await createAgent(payload)
+      }
+      resetForm()
+      await load()
+    } catch { /* */ }
+    finally { setSaving(false) }
+  }
+
+  const handleEdit = (a: Agent) => {
+    setEditingId(a.id)
+    setShowAdd(true)
+    setForm({
+      name: a.name,
+      slug: a.slug,
+      description: a.description || '',
+      model: a.model || '',
+      autonomy_level: a.autonomy_level || 'supervised',
+      system_prompt: a.system_prompt || '',
+    })
+  }
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Delete this agent?')) return
+    try { await deleteAgent(id); await load() } catch { /* */ }
+  }
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+  }
+
   return (
-    <div className="flex items-center justify-center py-20 text-muted-foreground">
-      <p className="text-sm">{name} -- coming soon</p>
+    <div className="space-y-8">
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold">Agents</h2>
+          <Button size="sm" variant="outline" onClick={() => { resetForm(); setShowAdd(true) }}>
+            <Plus className="h-4 w-4 mr-1.5" /> Add Agent
+          </Button>
+        </div>
+
+        {showAdd && (
+          <div className="bg-card elevation-1 p-4 space-y-3 mb-4">
+            <h3 className="text-sm font-medium">{editingId ? 'Edit Agent' : 'New Agent'}</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring" />
+              <input placeholder="Slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring" />
+            </div>
+            <input placeholder="Model (e.g. claude-sonnet-4-6)" value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })} className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring" />
+            <input placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring" />
+            <select value={form.autonomy_level} onChange={(e) => setForm({ ...form, autonomy_level: e.target.value })} className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring">
+              <option value="supervised">Supervised</option>
+              <option value="semi_autonomous">Semi-Autonomous</option>
+              <option value="autonomous">Autonomous</option>
+            </select>
+            <textarea placeholder="System prompt" value={form.system_prompt} onChange={(e) => setForm({ ...form, system_prompt: e.target.value })} rows={3} className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring resize-y" />
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleSave} disabled={saving || !form.name.trim()}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Save className="h-4 w-4 mr-1.5" />}
+                {editingId ? 'Update' : 'Create'}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={resetForm}>Cancel</Button>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-card elevation-1">
+          {agents.length === 0 ? (
+            <p className="p-4 text-sm text-muted-foreground">No agents defined yet.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left">
+                  <th className="p-3 font-medium">Name</th>
+                  <th className="p-3 font-medium">Slug</th>
+                  <th className="p-3 font-medium">Model</th>
+                  <th className="p-3 font-medium">Autonomy</th>
+                  <th className="p-3 font-medium w-20" />
+                </tr>
+              </thead>
+              <tbody>
+                {agents.map((a) => (
+                  <tr key={a.id} className="border-b border-border last:border-0 hover:bg-accent/30">
+                    <td className="p-3 font-medium">{a.name}</td>
+                    <td className="p-3 font-mono text-muted-foreground">{a.slug}</td>
+                    <td className="p-3 text-muted-foreground">{a.model || '--'}</td>
+                    <td className="p-3">
+                      <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary">
+                        {(a.autonomy_level || 'supervised').replace(/_/g, ' ')}
+                      </span>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex gap-1">
+                        <button onClick={() => handleEdit(a)} className="p-1 text-muted-foreground hover:text-foreground"><Pencil className="h-3.5 w-3.5" /></button>
+                        <button onClick={() => handleDelete(a.id)} className="p-1 text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
     </div>
   )
 }
+
+// --- Library Panel -----------------------------------------------------------
+
+function LibraryPanel() {
+  const [skills, setSkills] = useState<LibrarySkill[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [showAdd, setShowAdd] = useState(false)
+  const [form, setForm] = useState({ name: '', slug: '', category: '', description: '', body: '' })
+  const [saving, setSaving] = useState(false)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { setSkills(await fetchLibrary()) } catch { /* */ }
+    finally { setLoading(false) }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const resetForm = () => {
+    setForm({ name: '', slug: '', category: '', description: '', body: '' })
+    setShowAdd(false)
+    setEditingId(null)
+  }
+
+  const handleSave = async () => {
+    if (!form.name.trim()) return
+    setSaving(true)
+    try {
+      const payload: Partial<LibrarySkill> = {
+        name: form.name,
+        slug: form.slug || form.name.toLowerCase().replace(/\s+/g, '-'),
+        category: form.category || null,
+        description: form.description || null,
+        body: form.body,
+      }
+      if (editingId) {
+        await updateLibrarySkill(editingId, payload)
+      } else {
+        await createLibrarySkill(payload)
+      }
+      resetForm()
+      await load()
+    } catch { /* */ }
+    finally { setSaving(false) }
+  }
+
+  const handleEdit = (s: LibrarySkill) => {
+    setEditingId(s.id)
+    setShowAdd(true)
+    setForm({
+      name: s.name,
+      slug: s.slug,
+      category: s.category || '',
+      description: s.description || '',
+      body: s.body || '',
+    })
+  }
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Delete this library skill?')) return
+    try { await deleteLibrarySkill(id); await load() } catch { /* */ }
+  }
+
+  const filtered = skills.filter((s) => {
+    if (!searchQuery) return true
+    const q = searchQuery.toLowerCase()
+    return s.name.toLowerCase().includes(q) || (s.description || '').toLowerCase().includes(q) || (s.category || '').toLowerCase().includes(q)
+  })
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+  }
+
+  return (
+    <div className="space-y-8">
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold">Library Skills</h2>
+          <Button size="sm" variant="outline" onClick={() => { resetForm(); setShowAdd(true) }}>
+            <Plus className="h-4 w-4 mr-1.5" /> Add Skill
+          </Button>
+        </div>
+
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              placeholder="Search library..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+        </div>
+
+        {showAdd && (
+          <div className="bg-card elevation-1 p-4 space-y-3 mb-4">
+            <h3 className="text-sm font-medium">{editingId ? 'Edit Skill' : 'New Library Skill'}</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring" />
+              <input placeholder="Slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <input placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring" />
+              <input placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring" />
+            </div>
+            <textarea placeholder="Skill body (Markdown)" value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} rows={5} className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring resize-y font-mono" />
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleSave} disabled={saving || !form.name.trim()}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Save className="h-4 w-4 mr-1.5" />}
+                {editingId ? 'Update' : 'Create'}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={resetForm}>Cancel</Button>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-card elevation-1">
+          {filtered.length === 0 ? (
+            <p className="p-4 text-sm text-muted-foreground">{searchQuery ? 'No matching skills.' : 'No library skills yet.'}</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left">
+                  <th className="p-3 font-medium">Name</th>
+                  <th className="p-3 font-medium">Category</th>
+                  <th className="p-3 font-medium">Tags</th>
+                  <th className="p-3 font-medium">Description</th>
+                  <th className="p-3 font-medium w-20" />
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((s) => (
+                  <tr key={s.id} className="border-b border-border last:border-0 hover:bg-accent/30">
+                    <td className="p-3 font-medium">{s.name}</td>
+                    <td className="p-3 text-muted-foreground">{s.category || '--'}</td>
+                    <td className="p-3">
+                      <div className="flex flex-wrap gap-1">
+                        {(s.tags || []).map((t) => (
+                          <span key={t} className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary/10 text-primary">{t}</span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="p-3 text-muted-foreground max-w-[200px] truncate">{s.description || '--'}</td>
+                    <td className="p-3">
+                      <div className="flex gap-1">
+                        <button onClick={() => handleEdit(s)} className="p-1 text-muted-foreground hover:text-foreground"><Pencil className="h-3.5 w-3.5" /></button>
+                        <button onClick={() => handleDelete(s.id)} className="p-1 text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+// --- Tags Panel --------------------------------------------------------------
+
+function TagsPanel() {
+  const [tags, setTags] = useState<Tag[]>([])
+  const [loading, setLoading] = useState(true)
+  const [newTag, setNewTag] = useState('')
+  const [creating, setCreating] = useState(false)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const data = await fetchTags()
+      setTags(Array.isArray(data) ? data : (data as { data: Tag[] }).data ?? [])
+    } catch { /* */ }
+    finally { setLoading(false) }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const handleCreate = async () => {
+    if (!newTag.trim()) return
+    setCreating(true)
+    try {
+      await createTag({ name: newTag.trim() })
+      setNewTag('')
+      await load()
+    } catch { /* */ }
+    finally { setCreating(false) }
+  }
+
+  const handleDelete = async (id: number) => {
+    try { await deleteTag(id); await load() } catch { /* */ }
+  }
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+  }
+
+  return (
+    <div className="space-y-8">
+      <section>
+        <h2 className="text-lg font-semibold mb-3">Tags</h2>
+        <div className="bg-card elevation-1 p-4 space-y-4">
+          <div className="flex gap-2">
+            <input
+              placeholder="New tag name..."
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleCreate() }}
+              className="flex-1 px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+            <Button size="sm" onClick={handleCreate} disabled={creating || !newTag.trim()}>
+              {creating ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Plus className="h-4 w-4 mr-1.5" />}
+              Add
+            </Button>
+          </div>
+
+          {tags.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No tags yet.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span key={tag.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 text-sm rounded-full bg-primary/10 text-primary">
+                  {tag.name}
+                  {tag.skills_count !== undefined && (
+                    <span className="text-[10px] text-muted-foreground">({tag.skills_count})</span>
+                  )}
+                  <button onClick={() => handleDelete(tag.id)} className="ml-0.5 text-muted-foreground hover:text-destructive transition-colors">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+// --- Users Panel -------------------------------------------------------------
+
+function UsersPanel() {
+  const [users, setUsers] = useState<ManagedUser[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [showAdd, setShowAdd] = useState(false)
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'member' })
+  const [saving, setSaving] = useState(false)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetchManagedUsers({ per_page: 100 })
+      setUsers(res.data)
+    } catch { /* */ }
+    finally { setLoading(false) }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const resetForm = () => {
+    setForm({ name: '', email: '', password: '', role: 'member' })
+    setShowAdd(false)
+    setEditingId(null)
+  }
+
+  const handleSave = async () => {
+    if (!form.name.trim() || !form.email.trim()) return
+    setSaving(true)
+    try {
+      if (editingId) {
+        const payload: { name?: string; email?: string; password?: string; role?: string } = {
+          name: form.name,
+          email: form.email,
+          role: form.role,
+        }
+        if (form.password) payload.password = form.password
+        await updateManagedUser(editingId, payload)
+      } else {
+        await createManagedUser({ name: form.name, email: form.email, password: form.password, role: form.role })
+      }
+      resetForm()
+      await load()
+    } catch { /* */ }
+    finally { setSaving(false) }
+  }
+
+  const handleEdit = (u: ManagedUser) => {
+    setEditingId(u.id)
+    setShowAdd(true)
+    setForm({ name: u.name, email: u.email, password: '', role: u.role })
+  }
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Delete this user?')) return
+    try { await deleteManagedUser(id); await load() } catch { /* */ }
+  }
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+  }
+
+  return (
+    <div className="space-y-8">
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold">Users</h2>
+          <Button size="sm" variant="outline" onClick={() => { resetForm(); setShowAdd(true) }}>
+            <Plus className="h-4 w-4 mr-1.5" /> Add User
+          </Button>
+        </div>
+
+        {showAdd && (
+          <div className="bg-card elevation-1 p-4 space-y-3 mb-4">
+            <h3 className="text-sm font-medium">{editingId ? 'Edit User' : 'New User'}</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring" />
+              <input placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring" />
+            </div>
+            <input placeholder={editingId ? 'Password (leave blank to keep)' : 'Password'} type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring" />
+            <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring">
+              <option value="owner">Owner</option>
+              <option value="admin">Admin</option>
+              <option value="editor">Editor</option>
+              <option value="viewer">Viewer</option>
+              <option value="member">Member</option>
+            </select>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleSave} disabled={saving || !form.name.trim() || !form.email.trim() || (!editingId && !form.password)}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Save className="h-4 w-4 mr-1.5" />}
+                {editingId ? 'Update' : 'Create'}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={resetForm}>Cancel</Button>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-card elevation-1">
+          {users.length === 0 ? (
+            <p className="p-4 text-sm text-muted-foreground">No users found.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left">
+                  <th className="p-3 font-medium">Name</th>
+                  <th className="p-3 font-medium">Email</th>
+                  <th className="p-3 font-medium">Role</th>
+                  <th className="p-3 font-medium">Created</th>
+                  <th className="p-3 font-medium w-20" />
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr key={u.id} className="border-b border-border last:border-0 hover:bg-accent/30">
+                    <td className="p-3 font-medium">{u.name}</td>
+                    <td className="p-3 text-muted-foreground">{u.email}</td>
+                    <td className="p-3">
+                      <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary capitalize">{u.role}</span>
+                    </td>
+                    <td className="p-3 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
+                    <td className="p-3">
+                      <div className="flex gap-1">
+                        <button onClick={() => handleEdit(u)} className="p-1 text-muted-foreground hover:text-foreground"><Pencil className="h-3.5 w-3.5" /></button>
+                        <button onClick={() => handleDelete(u.id)} className="p-1 text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+// --- Organizations Panel -----------------------------------------------------
+
+function OrganizationsPanel() {
+  const [orgs, setOrgs] = useState<Organization[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null)
+  const [members, setMembers] = useState<OrganizationMember[]>([])
+  const [membersLoading, setMembersLoading] = useState(false)
+  const [editingName, setEditingName] = useState(false)
+  const [orgName, setOrgName] = useState('')
+  const [savingName, setSavingName] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState('member')
+  const [inviting, setInviting] = useState(false)
+
+  const loadOrgs = useCallback(async () => {
+    setLoading(true)
+    try {
+      const data = await fetchOrganizations()
+      setOrgs(data)
+      if (data.length > 0 && !selectedOrg) {
+        setSelectedOrg(data[0])
+      }
+    } catch { /* */ }
+    finally { setLoading(false) }
+  }, [selectedOrg])
+
+  useEffect(() => { loadOrgs() }, [loadOrgs])
+
+  const loadMembers = useCallback(async () => {
+    if (!selectedOrg) return
+    setMembersLoading(true)
+    try { setMembers(await fetchOrgMembers(selectedOrg.id)) } catch { /* */ }
+    finally { setMembersLoading(false) }
+  }, [selectedOrg])
+
+  useEffect(() => {
+    if (selectedOrg) {
+      setOrgName(selectedOrg.name)
+      loadMembers()
+    }
+  }, [selectedOrg, loadMembers])
+
+  const handleSaveName = async () => {
+    if (!selectedOrg || !orgName.trim()) return
+    setSavingName(true)
+    try {
+      const updated = await updateOrganization(selectedOrg.id, { name: orgName })
+      setSelectedOrg(updated)
+      setOrgs((prev) => prev.map((o) => (o.id === updated.id ? updated : o)))
+      setEditingName(false)
+    } catch { /* */ }
+    finally { setSavingName(false) }
+  }
+
+  const handleInvite = async () => {
+    if (!selectedOrg || !inviteEmail.trim()) return
+    setInviting(true)
+    try {
+      await inviteOrgMember(selectedOrg.id, { email: inviteEmail.trim(), role: inviteRole })
+      setInviteEmail('')
+      setInviteRole('member')
+      await loadMembers()
+    } catch { /* */ }
+    finally { setInviting(false) }
+  }
+
+  const handleRoleChange = async (userId: number, role: string) => {
+    if (!selectedOrg) return
+    try {
+      await updateMemberRole(selectedOrg.id, userId, role)
+      await loadMembers()
+    } catch { /* */ }
+  }
+
+  const handleRemoveMember = async (userId: number) => {
+    if (!selectedOrg || !confirm('Remove this member?')) return
+    try {
+      await removeMember(selectedOrg.id, userId)
+      await loadMembers()
+    } catch { /* */ }
+  }
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+  }
+
+  if (orgs.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-20 text-muted-foreground">
+        <p className="text-sm">No organizations found. Create one from the admin panel.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-8">
+      {orgs.length > 1 && (
+        <section>
+          <h2 className="text-lg font-semibold mb-3">Select Organization</h2>
+          <div className="bg-card elevation-1 p-4">
+            <select
+              value={selectedOrg?.id ?? ''}
+              onChange={(e) => {
+                const org = orgs.find((o) => o.id === Number(e.target.value))
+                if (org) setSelectedOrg(org)
+              }}
+              className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              {orgs.map((o) => (
+                <option key={o.id} value={o.id}>{o.name}</option>
+              ))}
+            </select>
+          </div>
+        </section>
+      )}
+
+      {selectedOrg && (
+        <>
+          <section>
+            <h2 className="text-lg font-semibold mb-3">Organization Details</h2>
+            <div className="bg-card elevation-1 p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Name</span>
+                {editingName ? (
+                  <div className="flex gap-2 items-center">
+                    <input
+                      value={orgName}
+                      onChange={(e) => setOrgName(e.target.value)}
+                      className="px-2 py-1 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleSaveName() }}
+                    />
+                    <Button size="sm" onClick={handleSaveName} disabled={savingName}>
+                      {savingName ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => { setEditingName(false); setOrgName(selectedOrg.name) }}>
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{selectedOrg.name}</span>
+                    <button onClick={() => setEditingName(true)} className="text-muted-foreground hover:text-foreground"><Pencil className="h-3.5 w-3.5" /></button>
+                  </div>
+                )}
+              </div>
+              <div className="border-t border-border" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Slug</span>
+                <span className="text-sm font-mono">{selectedOrg.slug}</span>
+              </div>
+              <div className="border-t border-border" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Plan</span>
+                <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary capitalize">{selectedOrg.plan}</span>
+              </div>
+              <div className="border-t border-border" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Members</span>
+                <span className="text-sm font-medium">{selectedOrg.member_count}</span>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold mb-3">Members</h2>
+            <div className="bg-card elevation-1 p-4 space-y-4">
+              <div className="flex gap-2">
+                <input
+                  placeholder="Email address"
+                  type="email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleInvite() }}
+                  className="flex-1 px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <select
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value)}
+                  className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="admin">Admin</option>
+                  <option value="editor">Editor</option>
+                  <option value="viewer">Viewer</option>
+                  <option value="member">Member</option>
+                </select>
+                <Button size="sm" onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
+                  {inviting ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Plus className="h-4 w-4 mr-1.5" />}
+                  Invite
+                </Button>
+              </div>
+
+              {membersLoading ? (
+                <div className="flex items-center justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
+              ) : members.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No members.</p>
+              ) : (
+                <div className="space-y-2">
+                  {members.map((m) => (
+                    <div key={m.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
+                          {m.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{m.name}</p>
+                          <p className="text-xs text-muted-foreground">{m.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={m.role}
+                          onChange={(e) => handleRoleChange(m.id, e.target.value)}
+                          className="px-2 py-1 text-xs border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring rounded"
+                          disabled={m.role === 'owner'}
+                        >
+                          <option value="owner">Owner</option>
+                          <option value="admin">Admin</option>
+                          <option value="editor">Editor</option>
+                          <option value="viewer">Viewer</option>
+                          <option value="member">Member</option>
+                        </select>
+                        {m.role !== 'owner' && (
+                          <button onClick={() => handleRemoveMember(m.id)} className="p-1 text-muted-foreground hover:text-destructive">
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        </>
+      )}
+    </div>
+  )
+}
+
+// --- SSO Panel ---------------------------------------------------------------
+
+function SsoPanel() {
+  // TODO: get orgId from auth context once available
+  const orgId = 1
+
+  const [providers, setProviders] = useState<SsoProvider[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [testingId, setTestingId] = useState<number | null>(null)
+  const [testResult, setTestResult] = useState<{ id: number; ok: boolean; message: string } | null>(null)
+
+  const emptyForm = {
+    name: '',
+    type: 'saml' as 'saml' | 'oidc',
+    metadata_url: '',
+    client_id: '',
+    client_secret: '',
+    allowed_domains: '',
+    is_active: true,
+  }
+  const [form, setForm] = useState(emptyForm)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const data = await fetchSsoProviders(orgId)
+      setProviders(data)
+    } catch {
+      /* handled */
+    } finally {
+      setLoading(false)
+    }
+  }, [orgId])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  const resetForm = () => {
+    setForm(emptyForm)
+    setEditingId(null)
+    setShowForm(false)
+  }
+
+  const startEdit = (p: SsoProvider) => {
+    setForm({
+      name: p.name,
+      type: p.type,
+      metadata_url: p.metadata_url || '',
+      client_id: p.client_id || '',
+      client_secret: '',
+      allowed_domains: p.allowed_domains.join(', '),
+      is_active: p.is_active,
+    })
+    setEditingId(p.id)
+    setShowForm(true)
+  }
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const payload: Partial<SsoProvider> & { client_secret?: string } = {
+        name: form.name,
+        type: form.type,
+        metadata_url: form.metadata_url || null,
+        client_id: form.client_id || null,
+        allowed_domains: form.allowed_domains
+          .split(',')
+          .map((d) => d.trim())
+          .filter(Boolean),
+        is_active: form.is_active,
+      }
+      if (form.client_secret) payload.client_secret = form.client_secret
+
+      if (editingId) {
+        const updated = await updateSsoProvider(editingId, payload)
+        setProviders((prev) => prev.map((p) => (p.id === editingId ? updated : p)))
+      } else {
+        const created = await createSsoProvider(orgId, payload)
+        setProviders((prev) => [...prev, created])
+      }
+      resetForm()
+    } catch {
+      /* handled */
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteSsoProvider(id)
+      setProviders((prev) => prev.filter((p) => p.id !== id))
+    } catch {
+      /* handled */
+    }
+  }
+
+  const handleToggle = async (p: SsoProvider) => {
+    try {
+      const updated = await updateSsoProvider(p.id, { is_active: !p.is_active })
+      setProviders((prev) => prev.map((x) => (x.id === p.id ? updated : x)))
+    } catch {
+      /* handled */
+    }
+  }
+
+  const handleTest = async (id: number) => {
+    setTestingId(id)
+    setTestResult(null)
+    try {
+      const res = await testSsoProvider(id)
+      setTestResult({ id, ok: res.success ?? true, message: res.message ?? 'Connection successful' })
+    } catch {
+      setTestResult({ id, ok: false, message: 'Connection failed' })
+    } finally {
+      setTestingId(null)
+    }
+  }
+
+  return (
+    <div className="space-y-8">
+      <section>
+        <h2 className="text-lg font-semibold mb-3">SSO Providers</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Configure SAML2 or OIDC single sign-on providers for your organization.
+        </p>
+
+        <div className="bg-card elevation-1 p-4 space-y-4">
+          {!showForm && (
+            <Button size="sm" onClick={() => setShowForm(true)}>
+              <Plus className="h-4 w-4 mr-1.5" />
+              Add Provider
+            </Button>
+          )}
+
+          {showForm && (
+            <div className="border border-border p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">{editingId ? 'Edit Provider' : 'New Provider'}</span>
+                <Button variant="ghost" size="sm" onClick={resetForm}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="Provider name"
+                  className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <select
+                  value={form.type}
+                  onChange={(e) => setForm({ ...form, type: e.target.value as 'saml' | 'oidc' })}
+                  className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="saml">SAML2</option>
+                  <option value="oidc">OIDC</option>
+                </select>
+                <input
+                  type="text"
+                  value={form.metadata_url}
+                  onChange={(e) => setForm({ ...form, metadata_url: e.target.value })}
+                  placeholder="Metadata URL"
+                  className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring col-span-2 font-mono"
+                />
+                <input
+                  type="text"
+                  value={form.client_id}
+                  onChange={(e) => setForm({ ...form, client_id: e.target.value })}
+                  placeholder="Client ID"
+                  className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <input
+                  type="password"
+                  value={form.client_secret}
+                  onChange={(e) => setForm({ ...form, client_secret: e.target.value })}
+                  placeholder={editingId ? 'Client secret (leave blank to keep)' : 'Client secret'}
+                  className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <input
+                  type="text"
+                  value={form.allowed_domains}
+                  onChange={(e) => setForm({ ...form, allowed_domains: e.target.value })}
+                  placeholder="Allowed domains (comma-separated)"
+                  className="px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring col-span-2"
+                />
+              </div>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={form.is_active}
+                  onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
+                />
+                Enabled
+              </label>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleSave} disabled={saving || !form.name.trim()}>
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Save className="h-4 w-4 mr-1.5" />}
+                  {editingId ? 'Update' : 'Create'}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={resetForm}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          ) : providers.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-2">No SSO providers configured yet.</p>
+          ) : (
+            <div className="space-y-1">
+              {providers.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                >
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">{p.name}</p>
+                      <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary font-medium uppercase rounded">
+                        {p.type === 'saml' ? 'SAML2' : 'OIDC'}
+                      </span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                          p.is_active
+                            ? 'bg-green-500/10 text-green-500'
+                            : 'bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        {p.is_active ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </div>
+                    {p.allowed_domains.length > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        Domains: {p.allowed_domains.join(', ')}
+                      </p>
+                    )}
+                    {testResult && testResult.id === p.id && (
+                      <p className={`text-xs ${testResult.ok ? 'text-green-500' : 'text-destructive'}`}>
+                        {testResult.ok ? <CheckCircle className="h-3 w-3 inline mr-1" /> : <XCircle className="h-3 w-3 inline mr-1" />}
+                        {testResult.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleTest(p.id)}
+                      disabled={testingId === p.id}
+                      title="Test connection"
+                    >
+                      {testingId === p.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <FlaskConical className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleToggle(p)} title="Toggle enabled">
+                      {p.is_active ? (
+                        <Shield className="h-3.5 w-3.5 text-green-500" />
+                      ) : (
+                        <ShieldOff className="h-3.5 w-3.5 text-muted-foreground" />
+                      )}
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => startEdit(p)} title="Edit">
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(p.id)} title="Delete">
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+// --- Content Policies Panel --------------------------------------------------
+
+function ContentPoliciesPanel() {
+  // TODO: get orgId from auth context once available
+  const orgId = 1
+
+  const [policies, setPolicies] = useState<ContentPolicy[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  const emptyForm = {
+    name: '',
+    description: '',
+    rules: '[]',
+    is_active: true,
+  }
+  const [form, setForm] = useState(emptyForm)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const data = await fetchContentPolicies(orgId)
+      setPolicies(data)
+    } catch {
+      /* handled */
+    } finally {
+      setLoading(false)
+    }
+  }, [orgId])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  const resetForm = () => {
+    setForm(emptyForm)
+    setEditingId(null)
+    setShowForm(false)
+  }
+
+  const startEdit = (p: ContentPolicy) => {
+    setForm({
+      name: p.name,
+      description: p.description || '',
+      rules: JSON.stringify(p.rules, null, 2),
+      is_active: p.is_active,
+    })
+    setEditingId(p.id)
+    setShowForm(true)
+  }
+
+  const handleSave = async () => {
+    let parsedRules: ContentPolicy['rules']
+    try {
+      parsedRules = JSON.parse(form.rules)
+    } catch {
+      return
+    }
+    setSaving(true)
+    try {
+      const payload: Partial<ContentPolicy> = {
+        name: form.name,
+        description: form.description || null,
+        rules: parsedRules,
+        is_active: form.is_active,
+      }
+
+      if (editingId) {
+        const updated = await updateContentPolicy(editingId, payload)
+        setPolicies((prev) => prev.map((p) => (p.id === editingId ? updated : p)))
+      } else {
+        const created = await createContentPolicy(orgId, payload)
+        setPolicies((prev) => [...prev, created])
+      }
+      resetForm()
+    } catch {
+      /* handled */
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteContentPolicy(id)
+      setPolicies((prev) => prev.filter((p) => p.id !== id))
+    } catch {
+      /* handled */
+    }
+  }
+
+  const handleToggle = async (p: ContentPolicy) => {
+    try {
+      const updated = await updateContentPolicy(p.id, { is_active: !p.is_active })
+      setPolicies((prev) => prev.map((x) => (x.id === p.id ? updated : x)))
+    } catch {
+      /* handled */
+    }
+  }
+
+  return (
+    <div className="space-y-8">
+      <section>
+        <h2 className="text-lg font-semibold mb-3">Content Policies</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Define rules that govern what content is allowed in skills and agent outputs.
+        </p>
+
+        <div className="bg-card elevation-1 p-4 space-y-4">
+          {!showForm && (
+            <Button size="sm" onClick={() => setShowForm(true)}>
+              <Plus className="h-4 w-4 mr-1.5" />
+              Add Policy
+            </Button>
+          )}
+
+          {showForm && (
+            <div className="border border-border p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">{editingId ? 'Edit Policy' : 'New Policy'}</span>
+                <Button variant="ghost" size="sm" onClick={resetForm}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="Policy name"
+                  className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <input
+                  type="text"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="Description (optional)"
+                  className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Rules (JSON array)</label>
+                  <textarea
+                    value={form.rules}
+                    onChange={(e) => setForm({ ...form, rules: e.target.value })}
+                    placeholder='[{"type": "keyword_block", "config": {"keywords": ["secret"]}}]'
+                    rows={4}
+                    className="w-full px-3 py-2 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring font-mono"
+                  />
+                </div>
+              </div>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={form.is_active}
+                  onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
+                />
+                Enabled
+              </label>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleSave} disabled={saving || !form.name.trim()}>
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Save className="h-4 w-4 mr-1.5" />}
+                  {editingId ? 'Update' : 'Create'}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={resetForm}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          ) : policies.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-2">No content policies defined yet.</p>
+          ) : (
+            <div className="space-y-1">
+              {policies.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                >
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">{p.name}</p>
+                      <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary font-medium rounded">
+                        {p.rules.length} rule{p.rules.length !== 1 ? 's' : ''}
+                      </span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                          p.is_active
+                            ? 'bg-green-500/10 text-green-500'
+                            : 'bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        {p.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                    {p.description && (
+                      <p className="text-xs text-muted-foreground">{p.description}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => handleToggle(p)} title="Toggle active">
+                      {p.is_active ? (
+                        <Shield className="h-3.5 w-3.5 text-green-500" />
+                      ) : (
+                        <ShieldOff className="h-3.5 w-3.5 text-muted-foreground" />
+                      )}
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => startEdit(p)} title="Edit">
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(p.id)} title="Delete">
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
+
 
 // --- Main Settings page ------------------------------------------------------
 
@@ -1333,13 +2640,13 @@ export function Settings() {
       <div className="flex-1 overflow-y-auto p-6 max-w-3xl">
         {activeTab === 'general' && <GeneralPanel />}
         {activeTab === 'license' && <LicensePanel />}
-        {activeTab === 'agents' && <PlaceholderPanel name="Agents" />}
-        {activeTab === 'library' && <PlaceholderPanel name="Library" />}
-        {activeTab === 'tags' && <PlaceholderPanel name="Tags" />}
-        {activeTab === 'users' && <PlaceholderPanel name="Users" />}
-        {activeTab === 'organizations' && <PlaceholderPanel name="Organizations" />}
-        {activeTab === 'sso' && <PlaceholderPanel name="SSO" />}
-        {activeTab === 'content-policies' && <PlaceholderPanel name="Content Policies" />}
+        {activeTab === 'agents' && <AgentsPanel />}
+        {activeTab === 'library' && <LibraryPanel />}
+        {activeTab === 'tags' && <TagsPanel />}
+        {activeTab === 'users' && <UsersPanel />}
+        {activeTab === 'organizations' && <OrganizationsPanel />}
+        {activeTab === 'sso' && <SsoPanel />}
+        {activeTab === 'content-policies' && <ContentPoliciesPanel />}
         {activeTab === 'infrastructure' && <InfrastructurePanel />}
         {activeTab === 'backups' && <BackupsPanel />}
         {activeTab === 'diagnostics' && <DiagnosticsPanel />}
