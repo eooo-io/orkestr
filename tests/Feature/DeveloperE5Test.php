@@ -57,27 +57,47 @@ test('API docs page returns HTML', function () {
 
 // --- #213 & #214 SDK generation ---
 
-test('TypeScript SDK is generated', function () {
+test('TypeScript SDK is generated with SOLID architecture', function () {
     $specService = new OpenApiSpecService();
     $generator = new SdkGeneratorService($specService);
 
     $ts = $generator->generateTypeScript();
 
-    expect($ts)->toContain('OrkestrClient');
-    expect($ts)->toContain('export class');
+    // Facade client
+    expect($ts)->toContain('export class OrkestrClient');
+    // Interface segregation — resource classes
+    expect($ts)->toContain('Api {');
+    // Dependency inversion — HttpClientInterface
+    expect($ts)->toContain('HttpClientInterface');
+    expect($ts)->toContain('FetchHttpClient');
+    // Error handling — dedicated error class
+    expect($ts)->toContain('OrkestrApiError');
+    // Google TS style — async/await, readonly
     expect($ts)->toContain('async');
-    expect($ts)->toContain('baseUrl');
+    expect($ts)->toContain('readonly');
 });
 
-test('PHP SDK is generated', function () {
+test('PHP SDK is generated with SOLID architecture', function () {
     $specService = new OpenApiSpecService();
     $generator = new SdkGeneratorService($specService);
 
     $php = $generator->generatePhp();
 
-    expect($php)->toContain('OrkestrClient');
-    expect($php)->toContain('namespace Eooo');
-    expect($php)->toContain('function request');
+    // PSR-12 namespace
+    expect($php)->toContain('namespace Eooo\\Sdk');
+    expect($php)->toContain('declare(strict_types=1)');
+    // Facade client
+    expect($php)->toContain('class OrkestrClient');
+    // Interface segregation — resource classes
+    expect($php)->toContain('Api');
+    // Dependency inversion — HttpClientInterface
+    expect($php)->toContain('HttpClientInterface');
+    expect($php)->toContain('CurlHttpClient');
+    // Error handling — dedicated exceptions
+    expect($php)->toContain('class ApiException');
+    expect($php)->toContain('class OrkestrException');
+    // Config object
+    expect($php)->toContain('SdkConfig');
 });
 
 test('TypeScript SDK download endpoint works', function () {
@@ -92,16 +112,27 @@ test('PHP SDK download endpoint works', function () {
     expect($response->headers->get('Content-Disposition'))->toContain('OrkestrClient.php');
 });
 
-test('Python SDK is generated', function () {
+test('Python SDK is generated with SOLID architecture', function () {
     $specService = new OpenApiSpecService();
     $generator = new SdkGeneratorService($specService);
 
     $py = $generator->generatePython();
 
-    expect($py)->toContain('OrkestrClient');
+    // Facade client
     expect($py)->toContain('class OrkestrClient');
-    expect($py)->toContain('def _request');
-    expect($py)->toContain('urllib');
+    // Interface segregation — resource classes
+    expect($py)->toContain('Api:');
+    // Dependency inversion — Protocol
+    expect($py)->toContain('HttpClientProtocol');
+    expect($py)->toContain('UrllibHttpClient');
+    // PEP 8 — type annotations, docstrings
+    expect($py)->toContain('-> dict');
+    expect($py)->toContain('def __init__');
+    // Error handling — dedicated exceptions
+    expect($py)->toContain('class ApiError');
+    expect($py)->toContain('class OrkestrError');
+    // Config object
+    expect($py)->toContain('class SdkConfig');
 });
 
 test('Python SDK download endpoint works', function () {
