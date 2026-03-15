@@ -30,4 +30,14 @@ class SdkController extends Controller
             'Content-Disposition' => 'attachment; filename="OrkestrClient.php"',
         ]);
     }
+
+    public function python(): Response
+    {
+        $content = $this->generator->generatePython();
+
+        return response($content, 200, [
+            'Content-Type' => 'text/x-python',
+            'Content-Disposition' => 'attachment; filename="orkestr_client.py"',
+        ]);
+    }
 }

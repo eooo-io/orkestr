@@ -377,6 +377,7 @@ DELETE         /api/api-tokens/{id}
 # SDK Downloads (E.5)
 GET            /api/sdk/typescript
 GET            /api/sdk/php
+GET            /api/sdk/python
 
 # OpenAPI Spec (E.5)
 GET            /api/openapi.json            # Public

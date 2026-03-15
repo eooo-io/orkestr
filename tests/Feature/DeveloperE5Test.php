@@ -92,6 +92,24 @@ test('PHP SDK download endpoint works', function () {
     expect($response->headers->get('Content-Disposition'))->toContain('OrkestrClient.php');
 });
 
+test('Python SDK is generated', function () {
+    $specService = new OpenApiSpecService();
+    $generator = new SdkGeneratorService($specService);
+
+    $py = $generator->generatePython();
+
+    expect($py)->toContain('OrkestrClient');
+    expect($py)->toContain('class OrkestrClient');
+    expect($py)->toContain('def _request');
+    expect($py)->toContain('urllib');
+});
+
+test('Python SDK download endpoint works', function () {
+    $response = $this->get('/api/sdk/python');
+    $response->assertOk();
+    expect($response->headers->get('Content-Disposition'))->toContain('orkestr_client.py');
+});
+
 // --- #215 API token authentication ---
 
 test('ApiToken model creates with hashed token', function () {

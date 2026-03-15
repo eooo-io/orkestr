@@ -43,6 +43,7 @@ import {
   toggleAirGap,
   downloadTypescriptSdk,
   downloadPhpSdk,
+  downloadPythonSdk,
   fetchLicenseStatus,
   activateLicense,
   fetchSsoProviders,
@@ -400,6 +401,14 @@ function GeneralPanel() {
             URL.revokeObjectURL(url)
           }}>
             <Download className="h-4 w-4 mr-1.5" /> PHP SDK
+          </Button>
+          <Button variant="outline" size="sm" onClick={async () => {
+            const blob = await downloadPythonSdk()
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a'); a.href = url; a.download = 'orkestr_client.py'; a.click()
+            URL.revokeObjectURL(url)
+          }}>
+            <Download className="h-4 w-4 mr-1.5" /> Python SDK
           </Button>
         </div>
       </section>

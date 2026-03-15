@@ -1149,6 +1149,9 @@ export const downloadTypescriptSdk = () =>
 export const downloadPhpSdk = () =>
   api.get('/sdk/php', { responseType: 'blob' }).then((r) => r.data as Blob)
 
+export const downloadPythonSdk = () =>
+  api.get('/sdk/python', { responseType: 'blob' }).then((r) => r.data as Blob)
+
 // --- Guardrail Policies (E.3) ---
 
 export const fetchGuardrailPolicies = (orgId: number) =>

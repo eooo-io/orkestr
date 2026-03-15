@@ -192,4 +192,83 @@ class OrkestrClient
 }
 PHP;
     }
+
+    /**
+     * Generate a Python SDK client.
+     */
+    public function generatePython(): string
+    {
+        $spec = $this->specService->generate();
+        $paths = $spec['paths'] ?? [];
+
+        $methods = [];
+        foreach ($paths as $path => $operations) {
+            foreach ($operations as $method => $operation) {
+                $opId = $operation['operationId'] ?? $method . str_replace(['/', '-'], '_', $path);
+                $summary = $operation['summary'] ?? '';
+                $hasBody = in_array($method, ['post', 'put', 'patch']);
+
+                $params = [];
+                foreach ($operation['parameters'] ?? [] as $param) {
+                    $params[] = $param['name'];
+                }
+
+                $pyPath = preg_replace('/\{(\w+)\}/', '{$1}', $path);
+                $paramsStr = implode(', ', array_map(fn ($p) => "{$p}: str", $params));
+                $bodyParam = $hasBody ? 'data: dict | None = None' : '';
+                if ($paramsStr && $bodyParam) {
+                    $paramsStr .= ", {$bodyParam}";
+                } elseif ($bodyParam) {
+                    $paramsStr = $bodyParam;
+                }
+
+                $bodyArg = $hasBody ? ', data=data' : '';
+
+                $methods[] = "    def {$opId}(self, {$paramsStr}) -> dict:\n        \"\"\"{$summary}\"\"\"\n        return self._request(\"{$method}\", f\"{$pyPath}\"{$bodyArg})";
+            }
+        }
+
+        $methodsStr = implode("\n\n", $methods);
+
+        return <<<PYTHON
+# eooo/sdk - Auto-generated Python SDK
+# Generated from OpenAPI 3.1 specification
+
+from __future__ import annotations
+
+import json
+from typing import Any
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError
+
+
+class OrkestrClient:
+    \"\"\"Python client for the Orkestr API.\"\"\"
+
+    def __init__(self, base_url: str, token: str | None = None) -> None:
+        self.base_url = base_url.rstrip("/")
+        self.token = token
+
+    def _request(self, method: str, path: str, data: dict | None = None) -> dict:
+        url = f"{self.base_url}{path}"
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+
+        if self.token:
+            headers["Authorization"] = f"Bearer {self.token}"
+
+        body = json.dumps(data).encode() if data else None
+        req = Request(url, data=body, headers=headers, method=method.upper())
+
+        try:
+            with urlopen(req, timeout=30) as resp:
+                return json.loads(resp.read().decode())
+        except HTTPError as e:
+            raise RuntimeError(f"API error: HTTP {e.code}") from e
+
+{$methodsStr}
+PYTHON;
+    }
 }

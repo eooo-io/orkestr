@@ -427,6 +427,7 @@ Route::middleware('auth:web')->group(function () {
     // SDK Downloads (#213, #214)
     Route::get('/sdk/typescript', [SdkController::class, 'typescript']);
     Route::get('/sdk/php', [SdkController::class, 'php']);
+    Route::get('/sdk/python', [SdkController::class, 'python']);
 
     // Custom Endpoints (#253)
     Route::get('/custom-endpoints', [CustomEndpointController::class, 'index']);
