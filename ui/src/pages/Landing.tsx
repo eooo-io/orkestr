@@ -73,6 +73,14 @@ function GrokIcon({ className }: { className?: string }) {
   )
 }
 
+function OpenRouterIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm-5.5 9.5L9 12l3 3 3-3 2.5 2.5L15 17H9l-2.5-2.5z" />
+    </svg>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Scroll fade-in (Intersection Observer)
 // ---------------------------------------------------------------------------
@@ -184,6 +192,7 @@ const INTEGRATIONS: { label: string; icon: React.ComponentType<{ className?: str
   { label: 'OpenAI', icon: OpenAIIcon },
   { label: 'Gemini', icon: GeminiIcon },
   { label: 'Grok', icon: GrokIcon },
+  { label: 'OpenRouter', icon: OpenRouterIcon },
   { label: 'Ollama / Local', icon: OllamaIcon },
   { label: 'MCP Servers', icon: Plug2 },
   { label: 'A2A Protocol', icon: Share2 },
@@ -237,7 +246,7 @@ const FEATURES = [
   {
     icon: Cpu,
     title: 'Any Model — Cloud or Local',
-    description: 'Use Claude, GPT, Gemini, Grok, or run your own models with Ollama, vLLM, or any OpenAI-compatible endpoint. Swap models per agent. Go fully air-gapped with local inference.',
+    description: 'Use Claude, GPT, Gemini, Grok — or access 200+ models via OpenRouter with a single key. Run your own models with Ollama, vLLM, or any OpenAI-compatible endpoint. Go fully air-gapped.',
   },
   {
     icon: GitBranch,
@@ -405,7 +414,7 @@ const FAQ = [
   },
   {
     q: 'What models are supported?',
-    a: 'Cloud providers: Anthropic (Claude Opus 4.6, Sonnet 4.6, Haiku 4.5), OpenAI (GPT-5.4, o3), Google (Gemini 3.1 Pro, Gemini 3 Flash), xAI (Grok). Local inference: any model running via Ollama, vLLM, or any OpenAI-compatible API endpoint. You can mix cloud and local models in the same project — route critical agents to Claude, routine tasks to a local Llama model. The execution engine routes per agent based on model configuration.',
+    a: 'Cloud providers: Anthropic (Claude Opus 4.6, Sonnet 4.6, Haiku 4.5), OpenAI (GPT-5.4, o3), Google (Gemini 3.1 Pro, Gemini 3 Flash), xAI (Grok). Or use OpenRouter for single-key access to 200+ models including Llama, Mistral, and more. Local inference: any model running via Ollama, vLLM, or any OpenAI-compatible API endpoint. Mix cloud and local models in the same project — the execution engine routes per agent.',
   },
   {
     q: 'Can I run Orkestr completely air-gapped?',
