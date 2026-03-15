@@ -1393,7 +1393,10 @@ export const completeSetup = () =>
 // --- Backups (E.2) ---
 
 export const fetchBackups = () =>
-  api.get<ApiResponse<BackupEntry[]>>('/backups').then((r) => r.data.data)
+  api.get<BackupEntry[]>('/backups').then((r) => {
+    const d = r.data as BackupEntry[] | { data: BackupEntry[] }
+    return Array.isArray(d) ? d : d.data
+  })
 
 export const createBackup = () =>
   api.post<ApiResponse<BackupEntry>>('/backups').then((r) => r.data.data)
@@ -1407,7 +1410,13 @@ export const downloadBackup = (filename: string) =>
 // --- Health Diagnostics (E.2) ---
 
 export const fetchDiagnostics = () =>
-  api.get<ApiResponse<DiagnosticCheck[]>>('/diagnostics').then((r) => r.data.data)
+  api.get('/diagnostics').then((r) => {
+    const d = r.data as { checks?: Record<string, { status: string; message: string; latency_ms?: number | null }> }
+    if (d.checks && !Array.isArray(d.checks)) {
+      return Object.entries(d.checks).map(([name, check]) => ({ name, ...check })) as DiagnosticCheck[]
+    }
+    return (d.checks ?? []) as DiagnosticCheck[]
+  })
 
 export const fetchDiagnosticCheck = (check: string) =>
   api.get<ApiResponse<DiagnosticCheck>>(`/diagnostics/${check}`).then((r) => r.data.data)

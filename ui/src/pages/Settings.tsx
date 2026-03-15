@@ -1203,12 +1203,17 @@ function DiagnosticsPanel() {
     runDiagnostics()
   }, [runDiagnostics])
 
-  const statusIcon = (status: DiagnosticCheck['status']) => {
+  const statusIcon = (status: string) => {
     switch (status) {
+      case 'healthy':
+      case 'configured':
       case 'pass':
         return <CheckCircle className="h-4 w-4 text-green-500" />
+      case 'degraded':
       case 'warning':
+      case 'not_configured':
         return <AlertTriangle className="h-4 w-4 text-yellow-500" />
+      case 'unhealthy':
       case 'fail':
         return <XCircle className="h-4 w-4 text-destructive" />
       default:
@@ -1216,16 +1221,20 @@ function DiagnosticsPanel() {
     }
   }
 
-  const statusLabel = (status: DiagnosticCheck['status']) => {
+  const statusLabel = (status: string) => {
     switch (status) {
-      case 'pass':
-        return 'Pass'
-      case 'warning':
-        return 'Warning'
-      case 'fail':
-        return 'Fail'
+      case 'healthy':
+        return 'Healthy'
+      case 'unhealthy':
+        return 'Unhealthy'
+      case 'degraded':
+        return 'Degraded'
+      case 'configured':
+        return 'Configured'
+      case 'not_configured':
+        return 'Not Configured'
       default:
-        return status
+        return status.charAt(0).toUpperCase() + status.slice(1)
     }
   }
 

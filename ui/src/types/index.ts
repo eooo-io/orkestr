@@ -1271,9 +1271,10 @@ export interface BackupEntry {
 
 export interface DiagnosticCheck {
   name: string
-  status: 'pass' | 'fail' | 'warning'
+  status: string
   message: string
-  details: Record<string, unknown> | null
+  latency_ms?: number | null
+  details?: Record<string, unknown> | null
 }
 
 // --- G.3: Model Pull & Recommendations ---
