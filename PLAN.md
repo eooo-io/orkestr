@@ -58,6 +58,16 @@ Phase H — Settings Consolidation & Filament Migration  (COMPLETE)
   H.6: Infrastructure & system (consolidate standalone pages, backups, diagnostics).
   H.7: Cleanup (remove Filament link, simplify sidebar, remove dead pages).
   G.5: Helm chart / Kubernetes operator.
+
+Phase I — Interactive Canvas Builder  (COMPLETE)
+  I.1: WYSIWYG canvas with drag-drop, A2A chains, node editing, auto-layout.
+
+Phase J — OpenRouter Integration  (COMPLETE)
+  J.1: Single API key access to 200+ models.
+
+Phase K — QA & Documentation  (COMPLETE)
+  K.1: Playwright setup, browser test suites, QA plan with manual checklist.
+  K.2: 18 new docs pages, 5 expanded, sidebar restructured.
 ```
 
 The existing Component Layer (skills, provider sync, MCP, A2A) remains the foundation. Each phase builds on the previous.
@@ -970,6 +980,52 @@ F.4 (documentation) + F.5 (install) + F.6 (polish)  ← can run in parallel
 | #300 | OpenRouter model discovery endpoint | DONE |
 | #301 | OpenRouter Pest tests | DONE |
 | #302 | Update CLAUDE.md and PLAN.md for OpenRouter integration | DONE |
+
+---
+
+## Phase K: QA & Documentation
+
+> **Motivation:** Production readiness requires comprehensive testing and documentation. Playwright browser tests + manual QA plan for test coverage. Full user documentation for every feature.
+
+### K.1 — QA Infrastructure & Browser Tests
+
+| Issue | Title | Status |
+|---|---|---|
+| #303 | Playwright setup: install, config, CI integration | DONE |
+| #304 | E2E: auth flows | DONE |
+| #305 | E2E: project CRUD and navigation | DONE |
+| #306 | E2E: skill editor | DONE |
+| #307 | E2E: canvas interactions | DONE |
+| #308 | E2E: settings hub | DONE |
+| #309 | E2E: sidebar navigation and command palette | DONE |
+| #310 | E2E: landing page and setup wizard | DONE |
+| #311 | E2E: responsive layout | DONE |
+| #312 | QA plan: manual test checklist document | DONE |
+
+### K.2 — Comprehensive User Documentation
+
+| Issue | Title | Status |
+|---|---|---|
+| #313 | Docs: projects guide | DONE |
+| #314 | Docs: skill editor guide | DONE |
+| #315 | Docs: agent teams guide | DONE |
+| #316 | Docs: canvas builder guide | DONE |
+| #317 | Docs: workflows guide | DONE |
+| #318 | Docs: execution guide | DONE |
+| #319 | Docs: connections guide | DONE |
+| #320 | Docs: schedules guide | DONE |
+| #321 | Docs: models guide | DONE |
+| #322 | Docs: organizations guide | DONE |
+| #323 | Docs: settings guide | DONE |
+| #324 | Docs: API access guide | DONE |
+| #325 | Docs: security guide | DONE |
+| #326 | Docs: analytics guide | DONE |
+| #327 | Docs: import/export guide | DONE |
+| #328 | Docs: troubleshooting guide | DONE |
+| #329 | Docs: skill format reference | DONE |
+| #330 | Docs: keyboard shortcuts reference | DONE |
+| #331 | Docs: expand existing pages | DONE |
+| #332 | Docs: update VitePress sidebar | DONE |
 
 ### Deferred (Post-Tier 2)
 

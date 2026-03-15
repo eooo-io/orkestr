@@ -107,6 +107,41 @@ From the project detail page, enter select mode to multi-select skills. The bulk
 - **Move** -- Move selected skills to another project
 - **Delete** -- Delete all selected skills
 
+## Includes Composition
+
+Skills can include other skills using the `includes` frontmatter field. When a skill is resolved (for sync, test, or compose), the bodies of included skills are prepended in order.
+
+```yaml
+includes: [coding-standards, project-context]
+```
+
+Includes are resolved recursively up to a maximum depth of 5 levels. Circular dependencies are detected and reported as an error. See [Includes & Composition](./includes) for the full guide.
+
+## Template Variables
+
+Define `{{variable}}` placeholders in the skill body and declare them in frontmatter:
+
+```yaml
+template_variables:
+  - name: language
+    description: Output language
+    default: English
+```
+
+Variables are resolved at compose/sync time, not edit time. Each project can override default values at **Skills > Variables**. See [Template Variables](./templates) for details.
+
+## Conditional Activation
+
+Skills can be scoped to specific agents or contexts through assignment. A skill that is created but not assigned to any agent is still synced as an individual skill during provider sync. However, skills assigned to a disabled agent are excluded from the composed output.
+
+To conditionally include a skill:
+
+1. Assign it to a specific agent via the Agent Configuration modal
+2. Toggle the agent on or off per project
+3. Only enabled agents include their assigned skills in composed output
+
+This lets you maintain a library of skills and activate them selectively by project and agent context.
+
 ## AI-Assisted Generation
 
 Click **Generate** in the action bar or on the project detail page to describe what you want in plain language. Claude generates a complete skill with frontmatter and body that you can review and edit before saving.

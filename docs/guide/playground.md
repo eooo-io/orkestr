@@ -57,6 +57,53 @@ All previous messages are sent with each request, so the model has full conversa
 
 The chat area auto-scrolls as new tokens arrive.
 
+## Multi-Turn Chat
+
+The Playground maintains full conversation history in the session. Each request sends all previous messages to the model, providing full context for multi-turn interactions. This is different from the Test Tab, which is single-turn only.
+
+The conversation context grows with each turn. Monitor the token estimate in the sidebar to stay within the model's context window. If you approach the limit, clear the conversation and start fresh.
+
+## SSE Streaming
+
+Responses are delivered via Server-Sent Events (SSE). Tokens appear incrementally with a cursor animation as they arrive from the model. The SSE connection:
+
+- Streams token-by-token for real-time feedback
+- Sends a final event with usage statistics (input tokens, output tokens, latency)
+- Can be cancelled mid-stream using the **Stop** button or `Escape`
+
+The API endpoint behind the Playground:
+
+```
+POST /api/playground
+```
+
+```json
+{
+  "system_prompt": "You are a helpful assistant...",
+  "messages": [
+    { "role": "user", "content": "Hello" },
+    { "role": "assistant", "content": "Hi there!" },
+    { "role": "user", "content": "What can you do?" }
+  ],
+  "model": "claude-sonnet-4-6",
+  "max_tokens": 4096
+}
+```
+
+## Model Selection
+
+The model dropdown dynamically fetches available models from all configured providers via `/api/models`. Models are grouped by provider:
+
+- **Anthropic** -- Claude Opus 4.6, Sonnet 4.6, Haiku 4.5
+- **OpenAI** -- GPT-5.4, o3
+- **Gemini** -- Gemini 3.1 Pro, Gemini 3 Flash
+- **Grok** -- Grok 3 family
+- **OpenRouter** -- 200+ models via single API key
+- **Ollama** -- Any locally running model
+- **Custom** -- Any OpenAI-compatible endpoint
+
+Only providers with valid API keys (or running local servers) appear in the dropdown.
+
 ## Differences from the Test Tab
 
 | Feature | Test Tab | Playground |

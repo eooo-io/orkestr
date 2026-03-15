@@ -799,48 +799,258 @@ DELETE /api/guardrail-profiles/{id}       # Delete a profile
 
 ---
 
-## Security Scanner
+## Security Scanner (E.3)
+
+### Scan a Skill
 
 ```
-POST /api/skills/{id}/security-scan       # Scan a skill for security issues
+POST /api/skills/{id}/security-scan
 ```
 
-Returns findings with severity, description, and remediation suggestions.
+Returns findings with severity (`critical`, `high`, `medium`, `low`, `info`), category, description, and remediation suggestions.
+
+### Scan Arbitrary Content
+
+```
+POST /api/security-scan
+```
+
+```json
+{
+  "content": "Skill body text to analyze for security risks..."
+}
+```
 
 ---
 
-## Skill Reviews
+## Content Review (E.3)
+
+### Submit for Review
 
 ```
-GET  /api/skills/{id}/reviews             # List reviews for a skill
-POST /api/skills/{id}/reviews             # Submit a review (approve/reject)
+POST /api/skills/{id}/review
+POST /api/agents/{id}/review
+```
+
+### Approve or Reject
+
+```
+POST /api/skill-reviews/{id}/approve
+POST /api/skill-reviews/{id}/reject
+```
+
+```json
+{
+  "reason": "Needs more specific error handling guidance"
+}
 ```
 
 ---
 
-## Skill Analytics
+## Endpoint Approvals (E.3)
+
+### List Pending Approvals
+
+```
+GET /api/projects/{id}/endpoint-approvals
+```
+
+### Approve or Reject
+
+```
+POST /api/endpoint-approvals/{type}/{id}/approve
+POST /api/endpoint-approvals/{type}/{id}/reject
+```
+
+`{type}` is `custom-endpoint` or `mcp-server`.
+
+---
+
+## Guardrail Reports (E.3)
+
+```
+GET /api/organizations/{org}/guardrail-reports           # Violation summary
+GET /api/organizations/{org}/guardrail-reports/trends     # Violation trends over time
+GET /api/organizations/{org}/guardrail-reports/export     # CSV export
+```
+
+### Dismiss a Violation
+
+```
+POST /api/guardrail-violations/{id}/dismiss
+```
+
+```json
+{
+  "reason": "False positive -- pattern matched a code example"
+}
+```
+
+---
+
+## Skill Reviews (E.6)
+
+### List Reviews
+
+```
+GET /api/skills/{id}/reviews
+```
+
+### Submit a Review
+
+```
+POST /api/skills/{id}/reviews
+```
+
+```json
+{
+  "status": "approved",
+  "comment": "Looks good, clear structure and examples."
+}
+```
+
+### Approve or Reject
+
+```
+POST /api/skill-reviews/{id}/approve
+POST /api/skill-reviews/{id}/reject
+```
+
+---
+
+## Skill Ownership (E.6)
+
+```
+GET /api/skills/{id}/ownership
+PUT /api/skills/{id}/ownership
+```
+
+```json
+{
+  "owner_id": "user-uuid",
+  "codeowners": ["user-uuid-1", "user-uuid-2"]
+}
+```
+
+---
+
+## Skill Analytics (E.6)
 
 ```
 GET /api/skills/{id}/analytics            # Usage analytics for a single skill
 GET /api/analytics/top-skills             # Most-used skills across all projects
+GET /api/analytics/trends                 # Usage trends over time
+```
+
+Query parameters: `period` (`7d`, `30d`, `90d`, `all`), `limit`.
+
+---
+
+## Regression Tests (E.6)
+
+### Manage Test Cases
+
+```
+GET    /api/skills/{id}/test-cases        # List test cases
+POST   /api/skills/{id}/test-cases        # Create a test case
+PUT    /api/skill-test-cases/{id}         # Update a test case
+DELETE /api/skill-test-cases/{id}         # Delete a test case
+```
+
+### Run All Tests
+
+```
+POST /api/skills/{id}/test-cases/run-all
+```
+
+Returns pass/fail results for each test case with model output.
+
+---
+
+## Cross-Model Benchmark (E.6)
+
+```
+POST /api/skills/{id}/benchmark
+```
+
+```json
+{
+  "models": ["claude-sonnet-4-6", "gpt-5.4", "gemini-3.1-pro"],
+  "message": "Test input message...",
+  "max_tokens": 2048
+}
+```
+
+Returns side-by-side results with output, latency, token counts, and estimated cost per model.
+
+---
+
+## Skill Inheritance (E.6)
+
+```
+GET /api/skills/{id}/resolve              # Resolved skill with parent chain
+GET /api/skills/{id}/children             # List child skills
+PUT /api/skills/{id}/inheritance          # Set parent skill
+```
+
+```json
+{
+  "parent_id": "parent-skill-uuid"
+}
 ```
 
 ---
 
-## Reports
+## Reports (E.6)
 
 ```
-GET /api/reports/skills                   # Skill inventory report
-GET /api/reports/usage                    # Usage and token consumption report
-GET /api/reports/audit                    # Audit log with guardrail violations
+GET /api/reports/skills                   # Skill inventory CSV
+GET /api/reports/usage                    # Token consumption CSV
+GET /api/reports/audit                    # Audit log CSV
 ```
+
+All report endpoints return downloadable CSV data.
 
 ---
 
-## Notifications
+## Notifications (E.6)
 
 ```
-GET /api/notifications                    # List notifications for current user
+GET  /api/notifications                   # List notifications for current user
+POST /api/notifications/read-all          # Mark all as read
+POST /api/notifications/{id}/read         # Mark one as read
 ```
 
 Returns guardrail violations, review requests, sync results, and system alerts.
+
+---
+
+## GitHub Org Import (E.6)
+
+### Discover Repositories
+
+```
+POST /api/import/github/discover
+```
+
+```json
+{
+  "org": "my-github-org"
+}
+```
+
+### Import Selected Skills
+
+```
+POST /api/import/github/import
+```
+
+```json
+{
+  "org": "my-github-org",
+  "selections": [
+    { "repo": "my-github-org/api-service", "path": ".agentis/skills/review.md" }
+  ],
+  "project_id": "target-project-uuid"
+}
+```

@@ -72,19 +72,52 @@ description: Code Review Standards
 
 ### GitHub Copilot
 
-All skills are concatenated into `.github/copilot-instructions.md` separated by headings.
+All skills are concatenated into a single `.github/copilot-instructions.md` file, separated by H2 headings:
+
+```markdown
+## Code Review Standards
+
+[resolved body of code-review skill]
+
+## Testing Strategy
+
+[resolved body of testing-strategy skill]
+```
+
+This file is read by GitHub Copilot as custom instructions for the repository.
 
 ### Windsurf
 
-Each skill gets its own `.md` file in `.windsurf/rules/`, similar to the Cursor format but without MDC-specific frontmatter.
+Each skill gets its own `.md` file in `.windsurf/rules/`:
+
+```
+.windsurf/
+  rules/
+    code-review.md
+    testing-strategy.md
+```
+
+Each file contains the skill's resolved body as plain Markdown, without any frontmatter. Windsurf reads all files in the `rules/` directory.
 
 ### Cline
 
-Everything is written to a single `.clinerules` file as plain text.
+Everything is written to a single `.clinerules` file as plain text. Skills are separated by headings:
+
+```
+## Code Review Standards
+
+[resolved body]
+
+## Testing Strategy
+
+[resolved body]
+```
+
+Cline reads this file as additional system prompt context.
 
 ### OpenAI
 
-All skills are concatenated into `.openai/instructions.md`, similar to the Copilot format.
+All skills are concatenated into `.openai/instructions.md` with H2 headings separating each skill, following the same format as Copilot. This is used by OpenAI's custom instructions feature in ChatGPT and the API.
 
 ## Preview Before Syncing
 

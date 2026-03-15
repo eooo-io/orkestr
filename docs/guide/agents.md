@@ -54,6 +54,41 @@ In the agent configuration modal, you can assign skills from the current project
 
 This lets you build an agent that combines its base persona with your project's specific skill prompts. For example, assign your "Coding Standards" and "API Conventions" skills to the Code Review Agent so it knows your project's rules when reviewing code.
 
+## Agent Compose
+
+The compose process merges three layers into a single output:
+
+1. **Base instructions** -- The agent's built-in system prompt defining its role and behavior
+2. **Custom instructions** -- Your project-specific additions
+3. **Assigned skill bodies** -- The resolved body of each assigned skill (includes and template variables expanded)
+
+Preview the composed output from the agent modal or via the API:
+
+```
+GET /api/projects/{id}/agents/{agentId}/compose
+```
+
+This returns the full Markdown output and a token estimate.
+
+To compose all enabled agents at once:
+
+```
+GET /api/projects/{id}/agents/compose
+```
+
+## Export Formats
+
+Agents can be exported to multiple orchestration framework formats:
+
+| Format | Description |
+|---|---|
+| **Claude Agent SDK** | Python code using Anthropic's agent SDK with tool definitions |
+| **LangGraph** | Python graph definition compatible with LangChain's LangGraph |
+| **CrewAI** | Python agent and task definitions for the CrewAI framework |
+| **JSON** | Generic JSON representation with all agent configuration |
+
+Export from the agent configuration modal by selecting the target format. The export includes the composed instructions, tool definitions, model settings, and autonomy level.
+
 ## Agents and Provider Sync
 
 When you run a provider sync, all enabled agents are composed (base instructions + custom instructions + assigned skill bodies) and included in the output alongside individual skills. See [Agent Compose](./agent-compose) for details on how composition works and [Provider Sync](./provider-sync) for how the output maps to provider files.
