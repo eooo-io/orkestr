@@ -2,9 +2,9 @@
 layout: home
 
 hero:
-  name: Agentis Studio
-  text: Universal AI Skill Manager
-  tagline: Define, edit, and sync reusable AI skills across every provider from a single source of truth.
+  name: Orkestr
+  text: Self-Hosted Agent Orchestration Platform
+  tagline: Deploy a multi-model, multi-user agent orchestration platform on your own infrastructure. Supports Anthropic, OpenAI, Gemini, Grok, and local models via Ollama.
   actions:
     - theme: brand
       text: Get Started
@@ -14,22 +14,22 @@ hero:
       link: https://github.com/eooo-io/agentis-studio
 
 features:
-  - title: Provider-Agnostic Skills
-    details: Write skills once in a portable YAML + Markdown format. Sync to Claude, Cursor, Copilot, Windsurf, Cline, and OpenAI with one click.
-    icon: 🔄
-  - title: Multi-Model Test Runner
-    details: Stream test responses from Anthropic, OpenAI, Google Gemini, and local Ollama models. Full playground with multi-turn chat.
-    icon: ⚡
-  - title: Agent Compose System
-    details: 9 pre-built agent roles. Assign skills, set custom instructions per project, and compose everything into a single deployable output.
-    icon: 🤖
-  - title: Smart Editing
-    details: Monaco editor with prompt linting, template variables, skill dependencies, live token estimation, and version history with diff viewer.
-    icon: ✏️
-  - title: Diff Before You Sync
-    details: Preview exactly what will change in each provider's config files with side-by-side diffs before writing anything to disk.
-    icon: 🔍
-  - title: Share & Discover
-    details: Export skill bundles, browse the built-in marketplace, and automate workflows with webhook integrations.
-    icon: 🌐
+  - title: Agent Orchestration
+    details: Design agent teams with goal-driven execution loops. Assign skills, compose instructions, and deploy orchestrated workflows across your organization.
+    icon: "\U0001F916"
+  - title: Local & Air-Gapped Models
+    details: Run fully offline with Ollama, vLLM, TGI, or LM Studio. Air-gap mode ensures zero external calls. Monitor model health and benchmark performance.
+    icon: "\U0001F512"
+  - title: Guardrails & Security
+    details: Organization-level guardrail policies with strict, moderate, and permissive profiles. Security scanning, content review, and endpoint approval workflows.
+    icon: "\U0001F6E1\uFE0F"
+  - title: Multi-Model Provider Sync
+    details: Write skills once in portable YAML + Markdown. Sync to Claude, Cursor, Copilot, Windsurf, Cline, and OpenAI config formats with diff preview.
+    icon: "\U0001F504"
+  - title: Workflow Builder
+    details: Visual workflow editor for multi-step agent pipelines. Chain skills, add branching logic, and monitor execution in real time with SSE streaming.
+    icon: "\U0001F3D7\uFE0F"
+  - title: Multi-User & Organizations
+    details: Role-based access control with owner, admin, editor, and viewer roles. Per-organization settings, billing, and usage tracking.
+    icon: "\U0001F465"
 ---

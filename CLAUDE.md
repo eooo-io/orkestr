@@ -124,10 +124,19 @@ agentis-studio/
 | Bundle export/import | React SPA |
 | Webhook configuration | React SPA |
 | Command palette | React SPA |
+| API token management | React SPA |
+| Custom endpoints CRUD | React SPA |
+| Model health dashboard | React SPA |
+| Local model browser | React SPA |
+| Guardrail policies/profiles/violations | React SPA |
+| Skill analytics & reports | React SPA |
+| Skill reviews & ownership | React SPA |
+| Notifications | React SPA |
+| GitHub org import | React SPA |
 
 ## Database Schema
 
-Tables: `projects`, `project_providers`, `skills`, `skill_versions`, `tags`, `skill_tag` (pivot), `library_skills`, `app_settings`, `agents`, `project_agent` (pivot), `agent_skill` (pivot), `marketplace_skills`, `webhooks`, `webhook_deliveries`, `skill_variables`.
+Tables: `projects`, `project_providers`, `skills`, `skill_versions`, `tags`, `skill_tag` (pivot), `library_skills`, `app_settings`, `agents`, `project_agent` (pivot), `agent_skill` (pivot), `marketplace_skills`, `webhooks`, `webhook_deliveries`, `skill_variables`, `workflows`, `workflow_steps`, `workflow_edges`, `workflow_versions`, `execution_runs`, `execution_steps`, `agent_memories`, `agent_schedules`, `organizations`, `organization_user` (pivot), `organization_invitations`, `sso_providers`, `content_policies`, `guardrail_policies`, `guardrail_profiles`, `guardrail_violations`, `custom_endpoints`, `api_tokens`, `skill_reviews`, `skill_analytics`, `skill_test_cases`, `notifications`, `licenses`, `backups`.
 
 - `skills.tools` is a JSON column
 - `skills.includes` is a JSON column (skill slug references)
@@ -341,6 +350,134 @@ GET            /api/billing/usage
 POST           /api/billing/connect
 GET            /api/billing/connect/status
 GET            /api/billing/earnings
+
+# Custom Endpoints (E.4)
+GET|POST       /api/custom-endpoints
+GET|PUT|DELETE /api/custom-endpoints/{id}
+POST           /api/custom-endpoints/{id}/health
+POST           /api/custom-endpoints/{id}/discover
+
+# Model Health & Benchmarking (E.4)
+GET            /api/model-health
+GET            /api/model-health/{provider}
+POST           /api/model-health/benchmark
+POST           /api/model-health/compare
+
+# Local Models (E.4)
+GET            /api/local-models
+GET            /api/local-models/ollama/{model}
+
+# Air-Gap Mode (E.4)
+GET|POST       /api/air-gap
+
+# API Tokens (E.5)
+GET|POST       /api/api-tokens
+DELETE         /api/api-tokens/{id}
+
+# SDK Downloads (E.5)
+GET            /api/sdk/typescript
+GET            /api/sdk/php
+
+# OpenAPI Spec (E.5)
+GET            /api/openapi.json            # Public
+GET            /api/docs                     # Swagger UI, public
+
+# Guardrail Policies (E.3)
+GET|POST       /api/organizations/{org}/guardrails
+PUT|DELETE     /api/guardrails/{id}
+GET            /api/organizations/{org}/guardrails/resolve
+
+# Guardrail Profiles (E.3)
+GET|POST       /api/guardrail-profiles
+GET|DELETE     /api/guardrail-profiles/{id}
+
+# Guardrail Reports (E.3)
+GET            /api/organizations/{org}/guardrail-reports
+GET            /api/organizations/{org}/guardrail-reports/trends
+GET            /api/organizations/{org}/guardrail-reports/export
+POST           /api/guardrail-violations/{id}/dismiss
+
+# Security Scanner (E.3)
+POST           /api/skills/{id}/security-scan
+POST           /api/security-scan
+
+# Content Review (E.3)
+POST           /api/skills/{id}/review
+POST           /api/agents/{id}/review
+
+# Endpoint Approvals (E.3)
+GET            /api/projects/{id}/endpoint-approvals
+POST           /api/endpoint-approvals/{type}/{id}/approve
+POST           /api/endpoint-approvals/{type}/{id}/reject
+
+# Content Policies (E.1)
+GET|POST       /api/organizations/{org}/content-policies
+GET|PUT|DELETE /api/content-policies/{id}
+
+# SSO Providers (E.1)
+GET|POST       /api/organizations/{org}/sso-providers
+GET|PUT|DELETE /api/sso-providers/{id}
+POST           /api/sso-providers/{id}/test
+
+# Skill Reviews (E.6)
+GET|POST       /api/skills/{id}/reviews
+POST           /api/skill-reviews/{id}/approve
+POST           /api/skill-reviews/{id}/reject
+
+# Skill Ownership (E.6)
+GET|PUT        /api/skills/{id}/ownership
+
+# Notifications (E.6)
+GET            /api/notifications
+POST           /api/notifications/read-all
+POST           /api/notifications/{id}/read
+
+# Skill Analytics (E.6)
+GET            /api/skills/{id}/analytics
+GET            /api/analytics/top-skills
+GET            /api/analytics/trends
+
+# Regression Tests (E.6)
+GET|POST       /api/skills/{id}/test-cases
+PUT|DELETE     /api/skill-test-cases/{id}
+POST           /api/skills/{id}/test-cases/run-all
+
+# Cross-Model Benchmark (E.6)
+POST           /api/skills/{id}/benchmark
+
+# Skill Inheritance (E.6)
+GET            /api/skills/{id}/resolve
+GET            /api/skills/{id}/children
+PUT            /api/skills/{id}/inheritance
+
+# Reports (E.6)
+GET            /api/reports/skills
+GET            /api/reports/usage
+GET            /api/reports/audit
+
+# GitHub Org Import (E.6)
+POST           /api/import/github/discover
+POST           /api/import/github/import
+
+# License (E.2)
+GET            /api/license/status
+POST           /api/license/activate
+
+# Setup Wizard (E.2)
+GET            /api/setup/status
+POST           /api/setup/api-keys
+POST           /api/setup/default-model
+POST           /api/setup/quick-start
+POST           /api/setup/complete
+
+# Backups (E.2)
+GET|POST       /api/backups
+POST           /api/backups/restore
+GET            /api/backups/{filename}/download
+
+# Health Diagnostics (E.2)
+GET            /api/diagnostics
+GET            /api/diagnostics/{check}
 ```
 
 ## Development Commands
@@ -379,7 +516,9 @@ cd docs && npm run build  # Build static site
 - **Slugs** are auto-generated from skill names, unique within a project
 - **Version snapshots** are created on every skill save
 - **Provider sync** is triggered explicitly (not automatic on save)
-- **Multi-model** — LLMProviderFactory routes by model prefix: `claude-` → Anthropic, `gpt-`/`o` → OpenAI, `gemini-` → Gemini, default → Ollama
+- **Multi-model** — LLMProviderFactory routes by model prefix: `claude-` → Anthropic, `gpt-`/`o3` → OpenAI, `gemini-` → Gemini, `grok-` → Grok (xAI), `custom:` → OpenAI-compatible endpoint, default → Ollama
+- **API token auth** — Bearer token via `AuthenticateApiToken` middleware (fallback when no session cookie)
+- **Guardrails** — Org → Project → Agent cascading policies, profiles (strict/moderate/permissive), violation tracking
 - **Token estimation** — ~1 token per 4 characters (character-based approximation)
 - **Include resolution** — recursive, max depth 5, with circular dependency detection
 - **Template resolution** — `{{variable}}` placeholders resolved at compose/sync time, not edit time

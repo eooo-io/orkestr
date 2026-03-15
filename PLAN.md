@@ -35,7 +35,7 @@ Phase E — Ship the Self-Hosted Product  (COMPLETE)
   E.5: API & developer access (OpenAPI spec, SDKs, API tokens, CLI tool).
   E.6: Enterprise readiness (review workflows, skill analytics, cross-model benchmarking).
 
-Phase F — Launch-Ready (Tier 1)  (IN PROGRESS)
+Phase F — Launch-Ready (Tier 1)  (COMPLETE)
   F.1: Frontend catch-up — Settings & Infrastructure UI.
   F.2: Frontend catch-up — Guardrails & Security UI.
   F.3: Frontend catch-up — Enterprise Features UI.
@@ -103,7 +103,7 @@ Observe (result fed back into context)
 **Phase C COMPLETE** — Design + Runtime (35 issues, all closed).
 **Phase D COMPLETE** — Production-Ready Agent Teams (29 issues across 5 milestones, all closed).
 **Phase E COMPLETE** — Ship the Self-Hosted Product (58 issues across 6 milestones: E.1–E.6, #201–#268).
-**Phase F IN PROGRESS** — Launch-Ready / Tier 1 (38 issues across 6 milestones: F.1–F.6, #301–#338).
+**Phase F COMPLETE** — Launch-Ready / Tier 1 (38 issues across 6 milestones: F.1–F.6, #301–#338).
 **Phase G FUTURE** — Self-Hosted Differentiation / Tier 2 (17 issues across 5 milestones: G.1–G.5, #401–#417).
 
 **Strategic pivot (2026-03-15):** Repositioned from SaaS to self-hosted infrastructure software. Cloud tier is a free playground/demo funnel. The product runs on customer infra with local models, local MCP, local data. Revenue model is commercial self-hosted license.
@@ -776,27 +776,27 @@ Update VitePress docs site for the self-hosted pivot and new features.
 
 | Issue | Title | Status |
 |---|---|---|
-| #327 | Update getting-started guide for self-hosted installation | PENDING |
-| #328 | Self-hosted deployment guide (Docker, Docker Compose, env config, reverse proxy) | PENDING |
-| #329 | API reference update (E.3-E.6 endpoints, authentication methods) | PENDING |
-| #330 | Architecture overview doc (agent loop, orchestration, component layers) | PENDING |
-| #331 | Local models & air-gap guide | PENDING |
-| #332 | Guardrails & security configuration guide | PENDING |
+| #327 | Update getting-started guide for self-hosted installation | DONE |
+| #328 | Self-hosted deployment guide (Docker, Docker Compose, env config, reverse proxy) | DONE |
+| #329 | API reference update (E.3-E.6 endpoints, authentication methods) | DONE |
+| #330 | Architecture overview doc (agent loop, orchestration, component layers) | DONE |
+| #331 | Local models & air-gap guide | DONE |
+| #332 | Guardrails & security configuration guide | DONE |
 
 ### F.5 — Install & Deployment Polish
 
 | Issue | Title | Status |
 |---|---|---|
-| #333 | One-line install script (`curl ... \| bash`) with env wizard | PENDING |
-| #334 | Production docker-compose validation and hardening | PENDING |
-| #335 | First-run setup wizard frontend integration | PENDING |
+| #333 | One-line install script (`curl ... \| bash`) with env wizard | DONE |
+| #334 | Production docker-compose validation and hardening | DONE |
+| #335 | First-run setup wizard frontend integration | DONE |
 
 ### F.6 — Bug Fixes & Polish
 
 | Issue | Title | Status |
 |---|---|---|
-| #336 | Fix ProviderSyncTest `alwaysApply: false` assertion | PENDING |
-| #337 | Update CLAUDE.md with E.3-E.6 endpoints and models | PENDING |
+| #336 | Fix ProviderSyncTest `alwaysApply: false` assertion | DONE |
+| #337 | Update CLAUDE.md with E.3-E.6 endpoints and models | DONE |
 | #338 | TypeScript type-check pass (`npx tsc --noEmit`) | DONE |
 
 ### Implementation Sequence

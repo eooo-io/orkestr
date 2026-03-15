@@ -1,6 +1,34 @@
 # API Endpoints
 
-All endpoints are served at `http://localhost:8000/api`. There is no authentication -- Agentis Studio is a single-user application.
+All endpoints are served at `http://localhost:8000/api`.
+
+## Authentication
+
+Orkestr uses **session-based authentication** (`auth:web` guard). The React SPA shares session cookies with the Laravel backend via CORS. All API routes require authentication unless noted otherwise.
+
+For programmatic access, Orkestr also supports **API token authentication**. Generate tokens at **Settings > API Tokens** or via the API:
+
+```
+POST /api/api-tokens
+```
+
+Include the token in requests as a Bearer token:
+
+```
+Authorization: Bearer ork_token_...
+```
+
+## Public Endpoints (No Auth Required)
+
+```
+GET  /api/health                        # Basic health check
+GET  /api/diagnostics                   # Detailed system diagnostics
+POST /api/stripe/webhook                # Stripe webhooks
+POST /api/webhooks/github/{projectId}   # Inbound GitHub push events
+GET  /api/billing/plans                 # Plan listing
+```
+
+---
 
 ## Health
 
@@ -480,15 +508,13 @@ GET /api/agents
 GET /api/projects/{id}/agents
 ```
 
-Returns all 9 agents with their per-project state (enabled, custom instructions, assigned skills).
+Returns all agents with their per-project state (enabled, custom instructions, assigned skills).
 
 ### Toggle Agent
 
 ```
 PUT /api/projects/{id}/agents/{agentId}/toggle
 ```
-
-Toggles the agent's enabled state for the project.
 
 ### Update Custom Instructions
 
@@ -692,3 +718,129 @@ PUT /api/settings
   "default_model": "claude-sonnet-4-6"
 }
 ```
+
+---
+
+## Custom Endpoints
+
+Manage custom LLM inference endpoints (vLLM, TGI, LM Studio).
+
+```
+GET    /api/custom-endpoints              # List all custom endpoints
+POST   /api/custom-endpoints              # Create a custom endpoint
+PUT    /api/custom-endpoints/{id}         # Update a custom endpoint
+DELETE /api/custom-endpoints/{id}         # Delete a custom endpoint
+```
+
+---
+
+## Model Health
+
+Monitor model provider connectivity and performance.
+
+```
+GET  /api/model-health                    # Health status for all providers
+POST /api/model-health/benchmark          # Run benchmark against specified models
+GET  /api/model-health/compare            # Compare performance across models
+```
+
+---
+
+## Local Models
+
+```
+GET /api/local-models                     # List available local models (Ollama + custom endpoints)
+```
+
+---
+
+## Air-Gap Mode
+
+Control network isolation for restricted environments.
+
+```
+GET  /api/air-gap                         # Get current air-gap status
+POST /api/air-gap                         # Enable or disable air-gap mode
+```
+
+---
+
+## API Tokens
+
+Manage programmatic API access tokens.
+
+```
+GET    /api/api-tokens                    # List tokens for current user
+POST   /api/api-tokens                    # Create a new token
+DELETE /api/api-tokens/{id}               # Revoke a token
+```
+
+---
+
+## Guardrails
+
+Organization-level safety and compliance policies.
+
+```
+GET    /api/organizations/{org}/guardrails          # List guardrail policies
+POST   /api/organizations/{org}/guardrails          # Create a guardrail policy
+PUT    /api/organizations/{org}/guardrails/{id}     # Update a policy
+DELETE /api/organizations/{org}/guardrails/{id}     # Delete a policy
+```
+
+### Guardrail Profiles
+
+```
+GET    /api/guardrail-profiles            # List profiles (strict, moderate, permissive)
+POST   /api/guardrail-profiles            # Create a custom profile
+PUT    /api/guardrail-profiles/{id}       # Update a profile
+DELETE /api/guardrail-profiles/{id}       # Delete a profile
+```
+
+---
+
+## Security Scanner
+
+```
+POST /api/skills/{id}/security-scan       # Scan a skill for security issues
+```
+
+Returns findings with severity, description, and remediation suggestions.
+
+---
+
+## Skill Reviews
+
+```
+GET  /api/skills/{id}/reviews             # List reviews for a skill
+POST /api/skills/{id}/reviews             # Submit a review (approve/reject)
+```
+
+---
+
+## Skill Analytics
+
+```
+GET /api/skills/{id}/analytics            # Usage analytics for a single skill
+GET /api/analytics/top-skills             # Most-used skills across all projects
+```
+
+---
+
+## Reports
+
+```
+GET /api/reports/skills                   # Skill inventory report
+GET /api/reports/usage                    # Usage and token consumption report
+GET /api/reports/audit                    # Audit log with guardrail violations
+```
+
+---
+
+## Notifications
+
+```
+GET /api/notifications                    # List notifications for current user
+```
+
+Returns guardrail violations, review requests, sync results, and system alerts.

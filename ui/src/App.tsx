@@ -39,6 +39,7 @@ import { SkillAnalytics } from '@/pages/SkillAnalytics'
 import { Notifications } from '@/pages/Notifications'
 import { Reports } from '@/pages/Reports'
 import { GitHubImport } from '@/pages/GitHubImport'
+import { SetupWizard } from '@/pages/SetupWizard'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -51,6 +52,16 @@ function AppContent() {
         <Route path="/compare" element={<Compare />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Setup wizard (full-screen, authenticated) */}
+        <Route
+          path="/setup"
+          element={
+            <AuthGuard>
+              <SetupWizard />
+            </AuthGuard>
+          }
+        />
 
         {/* Full-screen routes (no sidebar layout) */}
         <Route

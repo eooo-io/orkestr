@@ -1,8 +1,8 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'Agentis Studio',
-  description: 'Universal AI skill/agent configuration manager for multi-provider development workflows.',
+  title: 'Orkestr by eooo.ai',
+  description: 'Self-hosted agent orchestration platform with multi-model support, guardrails, and provider sync.',
   base: '/agentis-studio/',
 
   ignoreDeadLinks: [
@@ -34,8 +34,17 @@ export default defineConfig({
           text: 'Introduction',
           items: [
             { text: 'Getting Started', link: '/guide/getting-started' },
+            { text: 'Architecture', link: '/guide/architecture' },
             { text: 'User Guide', link: '/guide/user-guide' },
             { text: 'Core Concepts', link: '/guide/core-concepts' },
+          ],
+        },
+        {
+          text: 'Deployment',
+          items: [
+            { text: 'Self-Hosted Deployment', link: '/guide/self-hosted-deployment' },
+            { text: 'Local Models', link: '/guide/local-models' },
+            { text: 'Guardrails', link: '/guide/guardrails' },
           ],
         },
         {
@@ -111,7 +120,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright 2026 eooo.io',
+      copyright: 'Copyright 2026 eooo.ai',
     },
   },
 })

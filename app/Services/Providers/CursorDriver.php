@@ -19,14 +19,13 @@ class CursorDriver implements ProviderDriverInterface
 
         foreach ($skills as $skill) {
             $body = $resolvedBodies[$skill->id] ?? $skill->body;
-            $hasConditions = ! empty($skill->conditions);
             $frontmatter = [
                 'description' => $skill->description ?? '',
-                'alwaysApply' => ! $hasConditions,
+                'alwaysApply' => false,
             ];
 
             // Cursor uses "globs" for conditional activation
-            if ($hasConditions && ! empty($skill->conditions['file_patterns'])) {
+            if (! empty($skill->conditions['file_patterns'])) {
                 $frontmatter['globs'] = $skill->conditions['file_patterns'];
             }
 
