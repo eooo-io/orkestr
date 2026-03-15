@@ -26,6 +26,8 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\VisualizationController;
+use App\Http\Controllers\CustomEndpointController;
+use App\Http\Controllers\ModelHealthController;
 use App\Http\Controllers\WorkflowController;
 use App\Http\Controllers\ExecutionController;
 use App\Http\Controllers\WorkflowRunController;
@@ -387,6 +389,30 @@ Route::middleware('auth:web')->group(function () {
     // Security Scanner (#262)
     Route::post('/skills/{skill}/security-scan', [SecurityScanController::class, 'scanSkill']);
     Route::post('/security-scan', [SecurityScanController::class, 'scanContent']);
+
+    // Custom Endpoints (#253)
+    Route::get('/custom-endpoints', [CustomEndpointController::class, 'index']);
+    Route::post('/custom-endpoints', [CustomEndpointController::class, 'store']);
+    Route::get('/custom-endpoints/{customEndpoint}', [CustomEndpointController::class, 'show']);
+    Route::put('/custom-endpoints/{customEndpoint}', [CustomEndpointController::class, 'update']);
+    Route::delete('/custom-endpoints/{customEndpoint}', [CustomEndpointController::class, 'destroy']);
+    Route::post('/custom-endpoints/{customEndpoint}/health', [CustomEndpointController::class, 'healthCheck']);
+    Route::post('/custom-endpoints/{customEndpoint}/discover', [CustomEndpointController::class, 'discoverModels']);
+
+    // Model Health & Benchmarking (#254)
+    Route::get('/model-health', [ModelHealthController::class, 'checkAll']);
+    Route::get('/model-health/{provider}', [ModelHealthController::class, 'checkProvider']);
+    Route::post('/model-health/benchmark', [ModelHealthController::class, 'benchmark']);
+    Route::post('/model-health/compare', [ModelHealthController::class, 'compare']);
+
+    // Local Model Browser (#256)
+    Route::get('/local-models', [ModelHealthController::class, 'localModels']);
+    Route::get('/local-models/ollama/{model}', [ModelHealthController::class, 'ollamaModelDetail'])
+        ->where('model', '.*');
+
+    // Air-Gap Mode (#255)
+    Route::get('/air-gap', [ModelHealthController::class, 'airGapStatus']);
+    Route::post('/air-gap', [ModelHealthController::class, 'airGapToggle'])->middleware('org-role:admin');
 
     // Guardrail Reports (#267)
     Route::get('/organizations/{org}/guardrail-reports', [GuardrailReportController::class, 'index']);

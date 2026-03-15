@@ -3,6 +3,7 @@
 namespace App\Services\LLM;
 
 use App\Models\AppSetting;
+use App\Models\CustomEndpoint;
 
 class LLMProviderFactory
 {
@@ -16,6 +17,8 @@ class LLMProviderFactory
             str_starts_with($model, 'gpt-'),
             str_starts_with($model, 'o3') => new OpenAIProvider(),
             str_starts_with($model, 'gemini-') => new GeminiProvider(),
+            str_starts_with($model, 'grok-') => new GrokProvider(),
+            str_starts_with($model, 'custom:') => $this->makeCustomProvider($model),
             default => new OllamaProvider(),
         };
     }
@@ -30,6 +33,8 @@ class LLMProviderFactory
             str_starts_with($model, 'gpt-'),
             str_starts_with($model, 'o3') => 'openai',
             str_starts_with($model, 'gemini-') => 'gemini',
+            str_starts_with($model, 'grok-') => 'grok',
+            str_starts_with($model, 'custom:') => 'custom',
             default => 'ollama',
         };
     }
@@ -53,10 +58,17 @@ class LLMProviderFactory
             AppSetting::get('gemini_api_key') ?: env('GEMINI_API_KEY')
         );
 
+        $grokConfigured = ! empty(
+            AppSetting::get('grok_api_key') ?: env('GROK_API_KEY')
+        );
+
         // Ollama is considered "configured" if we can reach it
         $ollamaProvider = new OllamaProvider();
         $ollamaModels = $ollamaProvider->models();
         $ollamaConfigured = $this->isOllamaReachable();
+
+        // Custom OpenAI-compatible endpoints
+        $customEndpoints = CustomEndpoint::where('enabled', true)->get();
 
         return [
             [
@@ -78,11 +90,26 @@ class LLMProviderFactory
                 'models' => $this->formatModels((new GeminiProvider())->models(), 'gemini'),
             ],
             [
+                'provider' => 'grok',
+                'label' => 'Grok (xAI)',
+                'configured' => $grokConfigured,
+                'models' => $this->formatModels((new GrokProvider())->models(), 'grok'),
+            ],
+            [
                 'provider' => 'ollama',
                 'label' => 'Ollama (Local)',
                 'configured' => $ollamaConfigured,
                 'models' => $this->formatModels($ollamaModels, 'ollama'),
             ],
+            ...array_map(fn (CustomEndpoint $ep) => [
+                'provider' => 'custom:' . $ep->slug,
+                'label' => $ep->name,
+                'configured' => true,
+                'models' => $this->formatModels(
+                    array_map(fn (string $m) => "custom:{$ep->slug}:{$m}", $ep->models ?? []),
+                    'custom:' . $ep->slug,
+                ),
+            ], $customEndpoints->all()),
         ];
     }
 
@@ -100,6 +127,10 @@ class LLMProviderFactory
             'gemini-3.1-pro' => 1048576,
             'gemini-3-flash' => 1048576,
             'gemini-3.1-flash-lite' => 1048576,
+            'grok-3' => 131072,
+            'grok-3-fast' => 131072,
+            'grok-3-mini' => 131072,
+            'grok-3-mini-fast' => 131072,
         ];
 
         $labels = [
@@ -114,6 +145,10 @@ class LLMProviderFactory
             'gemini-3.1-pro' => 'Gemini 3.1 Pro',
             'gemini-3-flash' => 'Gemini 3 Flash',
             'gemini-3.1-flash-lite' => 'Gemini 3.1 Flash Lite',
+            'grok-3' => 'Grok 3',
+            'grok-3-fast' => 'Grok 3 Fast',
+            'grok-3-mini' => 'Grok 3 Mini',
+            'grok-3-mini-fast' => 'Grok 3 Mini Fast',
         ];
 
         return array_map(fn (string $id) => [
@@ -122,6 +157,29 @@ class LLMProviderFactory
             'provider' => $provider,
             'context_window' => $contextWindows[$id] ?? 0,
         ], $modelIds);
+    }
+
+    /**
+     * Create a custom OpenAI-compatible provider from endpoint config.
+     * Model format: "custom:{slug}:{model_name}"
+     */
+    protected function makeCustomProvider(string $model): OpenAICompatibleProvider
+    {
+        // Parse "custom:slug:model" or "custom:slug"
+        $parts = explode(':', $model, 3);
+        $slug = $parts[1] ?? '';
+
+        $endpoint = CustomEndpoint::where('slug', $slug)->where('enabled', true)->first();
+
+        if (! $endpoint) {
+            throw new \RuntimeException("Custom endpoint '{$slug}' not found or disabled.");
+        }
+
+        return new OpenAICompatibleProvider(
+            baseUrl: $endpoint->base_url,
+            apiKey: $endpoint->api_key,
+            providerName: $endpoint->name,
+        );
     }
 
     protected function isOllamaReachable(): bool
