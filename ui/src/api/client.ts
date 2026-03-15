@@ -1044,7 +1044,14 @@ export const discoverCustomEndpointModels = (id: number) =>
 // --- Model Health (E.4) ---
 
 export const fetchModelHealth = () =>
-  api.get<ApiResponse<ModelHealthResult[]>>('/model-health').then((r) => r.data.data)
+  api.get('/model-health').then((r) => {
+    const d = r.data?.data
+    if (Array.isArray(d)) return d as ModelHealthResult[]
+    if (d && typeof d === 'object') {
+      return Object.entries(d).map(([provider, result]) => ({ provider, ...(result as object) })) as ModelHealthResult[]
+    }
+    return [] as ModelHealthResult[]
+  })
 
 export const checkModelProviderHealth = (provider: string) =>
   api.get<ApiResponse<ModelHealthResult>>(`/model-health/${provider}`).then((r) => r.data.data)

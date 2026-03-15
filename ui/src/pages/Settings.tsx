@@ -629,9 +629,9 @@ function InfrastructurePanel() {
     setTokensLoading(true)
     try {
       const data = await fetchApiTokens()
-      setTokens(data)
+      setTokens(Array.isArray(data) ? data : [])
     } catch {
-      /* handled */
+      setTokens([])
     } finally {
       setTokensLoading(false)
     }
@@ -641,9 +641,9 @@ function InfrastructurePanel() {
     setEndpointsLoading(true)
     try {
       const data = await fetchCustomEndpoints()
-      setEndpoints(data)
+      setEndpoints(Array.isArray(data) ? data : [])
     } catch {
-      /* handled */
+      setEndpoints([])
     } finally {
       setEndpointsLoading(false)
     }
@@ -653,9 +653,9 @@ function InfrastructurePanel() {
     setHealthLoading(true)
     try {
       const data = await fetchModelHealth()
-      setHealthResults(data)
+      setHealthResults(Array.isArray(data) ? data : [])
     } catch {
-      /* handled */
+      setHealthResults([])
     } finally {
       setHealthLoading(false)
     }
@@ -665,9 +665,9 @@ function InfrastructurePanel() {
     setLocalModelsLoading(true)
     try {
       const data = await fetchLocalModels()
-      setLocalModels(data)
+      setLocalModels(Array.isArray(data) ? data : [])
     } catch {
-      /* handled */
+      setLocalModels([])
     } finally {
       setLocalModelsLoading(false)
     }
