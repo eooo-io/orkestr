@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Organization;
+use App\Models\SsoProvider;
 use App\Models\User;
 use App\Services\SocialAuthService;
+use App\Services\SsoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,6 +18,7 @@ class AuthController extends Controller
 {
     public function __construct(
         private SocialAuthService $socialAuth,
+        private SsoService $ssoService,
     ) {}
 
     // ─── Email Registration ───────────────────────────────────────
@@ -178,6 +181,111 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return redirect($this->spaUrl('/login?error=' . urlencode($e->getMessage())));
         }
+    }
+
+    // ─── SAML SSO ──────────────────────────────────────────────────
+
+    public function samlRedirect(Request $request, string $uuid): RedirectResponse
+    {
+        $provider = SsoProvider::where('uuid', $uuid)->active()->firstOrFail();
+
+        $relayState = Str::random(40);
+        $request->session()->put('sso_relay_state', $relayState);
+        $request->session()->put('sso_provider_uuid', $uuid);
+
+        return redirect($this->ssoService->samlRedirectUrl($provider, $relayState));
+    }
+
+    public function samlAcs(Request $request, string $uuid): RedirectResponse
+    {
+        $provider = SsoProvider::where('uuid', $uuid)->firstOrFail();
+
+        $samlResponse = $request->input('SAMLResponse');
+        if (! $samlResponse) {
+            return redirect($this->spaUrl('/login?error=missing_saml_response'));
+        }
+
+        try {
+            $userData = $this->ssoService->processSamlResponse($provider, $samlResponse);
+            $user = $this->ssoService->findOrCreateUser($provider, $userData);
+
+            $provider->update(['last_used_at' => now()]);
+
+            Auth::login($user, remember: true);
+            $request->session()->regenerate();
+
+            return redirect($this->spaUrl('/projects'));
+        } catch (\Exception $e) {
+            return redirect($this->spaUrl('/login?error=' . urlencode($e->getMessage())));
+        }
+    }
+
+    // ─── OIDC SSO ──────────────────────────────────────────────────
+
+    public function oidcRedirect(Request $request, string $uuid): RedirectResponse
+    {
+        $provider = SsoProvider::where('uuid', $uuid)->active()->firstOrFail();
+
+        $state = Str::random(40);
+        $request->session()->put('sso_state', $state);
+        $request->session()->put('sso_provider_uuid', $uuid);
+
+        return redirect($this->ssoService->oidcRedirectUrl($provider, $state));
+    }
+
+    public function oidcCallback(Request $request, string $uuid): RedirectResponse
+    {
+        $provider = SsoProvider::where('uuid', $uuid)->firstOrFail();
+
+        $storedState = $request->session()->pull('sso_state');
+        if (! $storedState || $storedState !== $request->query('state')) {
+            return redirect($this->spaUrl('/login?error=invalid_state'));
+        }
+
+        $code = $request->query('code');
+        if (! $code) {
+            return redirect($this->spaUrl('/login?error=no_code'));
+        }
+
+        try {
+            $userData = $this->ssoService->processOidcCallback($provider, $code);
+            $user = $this->ssoService->findOrCreateUser($provider, $userData);
+
+            $provider->update(['last_used_at' => now()]);
+
+            Auth::login($user, remember: true);
+            $request->session()->regenerate();
+
+            return redirect($this->spaUrl('/projects'));
+        } catch (\Exception $e) {
+            return redirect($this->spaUrl('/login?error=' . urlencode($e->getMessage())));
+        }
+    }
+
+    // ─── SSO Discovery ─────────────────────────────────────────────
+
+    /**
+     * GET /api/auth/sso/{organization}
+     * Returns active SSO providers for an organization (used on login page).
+     */
+    public function ssoProviders(int $organization): JsonResponse
+    {
+        $providers = SsoProvider::forOrganization($organization)
+            ->active()
+            ->get(['uuid', 'type', 'name']);
+
+        return response()->json([
+            'data' => $providers->map(fn (SsoProvider $p) => [
+                'uuid' => $p->uuid,
+                'type' => $p->type,
+                'name' => $p->name,
+                'redirect_url' => match ($p->type) {
+                    'saml' => url("/auth/saml/{$p->uuid}/redirect"),
+                    'oidc' => url("/auth/oidc/{$p->uuid}/redirect"),
+                    default => null,
+                },
+            ]),
+        ]);
     }
 
     // ─── Helpers ──────────────────────────────────────────────────

@@ -32,6 +32,7 @@ class PromptLinter
         $this->checkRoleConfusion($body, $issues);
         $this->checkMissingExamples($body, $issues);
         $this->checkRedundancy($lines, $issues);
+        $this->checkSecrets($lines, $issues);
 
         return $issues;
     }
@@ -197,6 +198,39 @@ class PromptLinter
             }
 
             $normalized[] = [$idx, $trimmed];
+        }
+    }
+
+    protected function checkSecrets(array $lines, array &$issues): void
+    {
+        $suggestion = 'Remove the hardcoded secret. Use template variables (e.g., {{api_key}}) or environment references instead.';
+
+        $secretPatterns = [
+            '/sk-ant-/i' => 'Potential Anthropic API key detected.',
+            '/sk-[a-zA-Z0-9]{20,}/' => 'Potential OpenAI API key detected.',
+            '/AKIA[A-Z0-9]{16}/' => 'Potential AWS Access Key detected.',
+            '/aws_secret_access_key\s*[:=]/i' => 'Potential AWS Secret Key assignment detected.',
+            '/(ghp_|ghs_|ghu_|gho_|github_pat_)[a-zA-Z0-9_]+/' => 'Potential GitHub token detected.',
+            '/-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----/' => 'Potential private key detected.',
+            '/password\s*[:=]\s*["\'][^"\']+["\']/i' => 'Potential password assignment detected.',
+            '/(mysql|postgres|mongodb|redis|amqp):\/\/[^\s]+:[^\s]+@/' => 'Potential connection string with credentials detected.',
+            '/(api[_\-]?key|api[_\-]?secret|access[_\-]?token|auth[_\-]?token)\s*[:=]\s*["\'][^"\']{8,}["\']/i' => 'Potential API key or token assignment detected.',
+            '/Bearer\s+[a-zA-Z0-9._\-]{20,}/' => 'Potential Bearer token detected.',
+        ];
+
+        foreach ($lines as $idx => $line) {
+            foreach ($secretPatterns as $pattern => $message) {
+                if (preg_match($pattern, $line)) {
+                    $issues[] = [
+                        'severity' => 'error',
+                        'rule' => 'secret_in_prompt',
+                        'message' => $message,
+                        'suggestion' => $suggestion,
+                        'line' => $idx + 1,
+                    ];
+                    break; // One issue per line for this rule
+                }
+            }
         }
     }
 }

@@ -37,6 +37,9 @@ use App\Http\Controllers\PerformanceDashboardController;
 use App\Http\Controllers\AgentBudgetController;
 use App\Http\Controllers\AgentToolScopeController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\ContentPolicyController;
+use App\Http\Controllers\ActivityFeedController;
+use App\Http\Controllers\SsoProviderController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -249,7 +252,29 @@ Route::middleware('auth:web')->group(function () {
 
     // Audit Logs
     Route::get('/audit-logs', [AuditLogController::class, 'index']);
+    Route::get('/audit-logs/export', [AuditLogController::class, 'export']);
     Route::get('/agents/{agent}/audit-logs', [AuditLogController::class, 'agentLogs']);
+
+    // Content Policies
+    Route::get('/content-policies/rule-types', [ContentPolicyController::class, 'ruleTypes']);
+    Route::get('/organizations/{organization}/content-policies', [ContentPolicyController::class, 'index']);
+    Route::post('/organizations/{organization}/content-policies', [ContentPolicyController::class, 'store'])->middleware('org-role:admin');
+    Route::get('/content-policies/{contentPolicy}', [ContentPolicyController::class, 'show']);
+    Route::put('/content-policies/{contentPolicy}', [ContentPolicyController::class, 'update'])->middleware('org-role:admin');
+    Route::delete('/content-policies/{contentPolicy}', [ContentPolicyController::class, 'destroy'])->middleware('org-role:admin');
+    Route::post('/content-policies/{contentPolicy}/check/{skill}', [ContentPolicyController::class, 'checkSkill']);
+    Route::post('/skills/{skill}/check-policies', [ContentPolicyController::class, 'checkSkillPolicies']);
+
+    // Activity Feed
+    Route::get('/organizations/{organization}/activity-feed', [ActivityFeedController::class, 'index']);
+
+    // SSO Providers
+    Route::get('/organizations/{organization}/sso-providers', [SsoProviderController::class, 'index'])->middleware('org-role:admin');
+    Route::post('/organizations/{organization}/sso-providers', [SsoProviderController::class, 'store'])->middleware('org-role:owner');
+    Route::get('/sso-providers/{ssoProvider}', [SsoProviderController::class, 'show'])->middleware('org-role:admin');
+    Route::put('/sso-providers/{ssoProvider}', [SsoProviderController::class, 'update'])->middleware('org-role:owner');
+    Route::delete('/sso-providers/{ssoProvider}', [SsoProviderController::class, 'destroy'])->middleware('org-role:owner');
+    Route::post('/sso-providers/{ssoProvider}/test', [SsoProviderController::class, 'test'])->middleware('org-role:admin');
 
     // Workflow Execution
     Route::post('/projects/{project}/workflows/{workflow}/execute', [WorkflowRunController::class, 'execute']);

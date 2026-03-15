@@ -171,6 +171,11 @@ class Agent extends Model
         return $this->hasMany(AgentAuditLog::class);
     }
 
+    public function executionRuns(): HasMany
+    {
+        return $this->hasMany(ExecutionRun::class);
+    }
+
     // --- Scopes ---
 
     public function scopeTemplates($query)

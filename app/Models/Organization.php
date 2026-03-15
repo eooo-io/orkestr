@@ -74,6 +74,16 @@ class Organization extends Model
         return $this->hasMany(OrganizationInvitation::class);
     }
 
+    public function contentPolicies(): HasMany
+    {
+        return $this->hasMany(ContentPolicy::class);
+    }
+
+    public function ssoProviders(): HasMany
+    {
+        return $this->hasMany(SsoProvider::class);
+    }
+
     public function isOnPlan(string $plan): bool
     {
         return $this->plan === $plan;

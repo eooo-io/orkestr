@@ -31,4 +31,21 @@ Route::prefix('auth')->group(function () {
         ->name('auth.apple.redirect');
     Route::post('/apple/callback', [AuthController::class, 'appleCallback'])
         ->name('auth.apple.callback');
+
+    // SAML SSO
+    Route::get('/saml/{uuid}/redirect', [AuthController::class, 'samlRedirect'])
+        ->name('auth.saml.redirect');
+    Route::post('/saml/{uuid}/acs', [AuthController::class, 'samlAcs'])
+        ->name('auth.saml.acs');
+
+    // OIDC SSO
+    Route::get('/oidc/{uuid}/redirect', [AuthController::class, 'oidcRedirect'])
+        ->name('auth.oidc.redirect');
+    Route::get('/oidc/{uuid}/callback', [AuthController::class, 'oidcCallback'])
+        ->name('auth.oidc.callback');
+});
+
+// ─── SSO Discovery (no auth required — used on login page) ────
+Route::prefix('api/auth')->group(function () {
+    Route::get('/sso/{organization}', [AuthController::class, 'ssoProviders']);
 });
