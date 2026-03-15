@@ -1,0 +1,58 @@
+FROM php:8.4-fpm-alpine AS base
+
+# Install system dependencies
+RUN apk add --no-cache \
+    git curl zip unzip icu-dev libpng-dev libxml2-dev oniguruma-dev \
+    linux-headers $PHPIZE_DEPS \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd opcache intl \
+    && apk del $PHPIZE_DEPS linux-headers \
+    && rm -rf /var/cache/apk/*
+
+# Production PHP configuration
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+COPY docker/php/php-prod.ini /usr/local/etc/php/conf.d/99-production.ini
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/app
+
+# ─── Dependencies stage ─────────────────────────────────────────
+FROM base AS dependencies
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+# ─── Application stage ──────────────────────────────────────────
+FROM base AS production
+
+# Copy dependencies
+COPY --from=dependencies /var/www/app/vendor /var/www/app/vendor
+
+# Copy application code
+COPY . /var/www/app
+
+# Generate optimized autoloader
+RUN composer dump-autoload --optimize --no-dev
+
+# Optimize Laravel for production
+RUN php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
+
+# Create necessary directories
+RUN mkdir -p storage/framework/{sessions,views,cache} \
+    && mkdir -p storage/logs storage/backups \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8000/api/health || exit 1
+
+USER www-data
+
+EXPOSE 8000
+
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

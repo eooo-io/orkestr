@@ -40,6 +40,10 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ContentPolicyController;
 use App\Http\Controllers\ActivityFeedController;
 use App\Http\Controllers\SsoProviderController;
+use App\Http\Controllers\LicenseController;
+use App\Http\Controllers\SetupWizardController;
+use App\Http\Controllers\BackupController;
+use App\Http\Controllers\HealthCheckController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -331,4 +335,25 @@ Route::middleware('auth:web')->group(function () {
     // Settings
     Route::get('/settings', SettingsController::class);
     Route::put('/settings', [SettingsController::class, 'update'])->middleware('org-role:admin');
+
+    // License
+    Route::get('/license/status', [LicenseController::class, 'status']);
+    Route::post('/license/activate', [LicenseController::class, 'activate']);
+
+    // Setup Wizard
+    Route::get('/setup/status', [SetupWizardController::class, 'status']);
+    Route::post('/setup/api-keys', [SetupWizardController::class, 'configureApiKeys']);
+    Route::post('/setup/default-model', [SetupWizardController::class, 'configureDefaultModel']);
+    Route::post('/setup/quick-start', [SetupWizardController::class, 'quickStart']);
+    Route::post('/setup/complete', [SetupWizardController::class, 'complete']);
+
+    // Backups
+    Route::get('/backups', [BackupController::class, 'index'])->middleware('org-role:admin');
+    Route::post('/backups', [BackupController::class, 'store'])->middleware('org-role:admin');
+    Route::post('/backups/restore', [BackupController::class, 'restore'])->middleware('org-role:owner');
+    Route::get('/backups/{filename}/download', [BackupController::class, 'download'])->middleware('org-role:admin');
+
+    // Health Diagnostics
+    Route::get('/diagnostics', [HealthCheckController::class, 'index']);
+    Route::get('/diagnostics/{check}', [HealthCheckController::class, 'show']);
 });

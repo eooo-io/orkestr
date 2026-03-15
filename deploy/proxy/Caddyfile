@@ -1,0 +1,47 @@
+# Orkestr — Caddy Reverse Proxy Configuration
+# Usage: Replace YOUR_DOMAIN and run `caddy run` or `caddy start`
+# Caddy handles SSL/TLS automatically via Let's Encrypt
+
+YOUR_DOMAIN {
+    # Reverse proxy to Orkestr
+    reverse_proxy localhost:8000 {
+        # Health checks
+        health_uri /api/health
+        health_interval 30s
+        health_timeout 5s
+
+        # Headers
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+
+        # Flush for SSE streaming
+        flush_interval -1
+    }
+
+    # Request size limit
+    request_body {
+        max_size 100MB
+    }
+
+    # Security headers
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    # Compression
+    encode gzip zstd
+
+    # Logging
+    log {
+        output file /var/log/caddy/orkestr.log {
+            roll_size 100mb
+            roll_keep 5
+        }
+    }
+}

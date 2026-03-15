@@ -1,0 +1,131 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+      target: production
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - app_storage:/var/www/app/storage
+      - projects:/projects
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-orkestr}
+      DB_USERNAME: ${DB_USERNAME:-orkestr}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - orkestr
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+      target: production
+    restart: unless-stopped
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    volumes:
+      - app_storage:/var/www/app/storage
+      - projects:/projects
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-orkestr}
+      DB_USERNAME: ${DB_USERNAME:-orkestr}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    networks:
+      - orkestr
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+      target: production
+    restart: unless-stopped
+    command: >
+      sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
+    volumes:
+      - app_storage:/var/www/app/storage
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-orkestr}
+      DB_USERNAME: ${DB_USERNAME:-orkestr}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    networks:
+      - orkestr
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  mariadb:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD is required}
+      MARIADB_DATABASE: ${DB_DATABASE:-orkestr}
+      MARIADB_USER: ${DB_USERNAME:-orkestr}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - orkestr
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+volumes:
+  mariadb_data:
+    name: orkestr_mariadb_data
+  app_storage:
+    name: orkestr_app_storage
+  projects:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PROJECTS_HOST_PATH:-.}
+
+networks:
+  orkestr:
+    driver: bridge
+    name: orkestr_network

@@ -1,0 +1,78 @@
+# Orkestr — Traefik Reverse Proxy Configuration
+# Usage: Add these labels to your docker-compose.prod.yml app service,
+# or use this as a standalone Traefik dynamic configuration file.
+
+# ─── Static Configuration (traefik.yml) ─────────────────────────
+# Place this in your Traefik config directory
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+
+  websecure:
+    address: ":443"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: admin@YOUR_DOMAIN
+      storage: /etc/traefik/acme.json
+      httpChallenge:
+        entryPoint: web
+
+providers:
+  file:
+    filename: /etc/traefik/dynamic.yml
+
+api:
+  dashboard: true
+  insecure: false
+
+---
+# ─── Dynamic Configuration (dynamic.yml) ────────────────────────
+
+http:
+  routers:
+    orkestr:
+      rule: "Host(`YOUR_DOMAIN`)"
+      entryPoints:
+        - websecure
+      service: orkestr
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - security-headers
+        - rate-limit
+
+  services:
+    orkestr:
+      loadBalancer:
+        servers:
+          - url: "http://app:8000"
+        healthCheck:
+          path: /api/health
+          interval: 30s
+          timeout: 5s
+
+  middlewares:
+    security-headers:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        customResponseHeaders:
+          X-Powered-By: ""
+
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 200
+        period: 1s
