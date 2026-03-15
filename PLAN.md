@@ -944,16 +944,16 @@ F.4 (documentation) + F.5 (install) + F.6 (polish)  ← can run in parallel
 
 | Issue | Title | Status |
 |---|---|---|
-| #288 | Canvas: agent nodes with drag-and-drop from sidebar palette | PENDING |
-| #289 | Canvas: skill chip attachment — drag skills onto agent nodes | PENDING |
-| #290 | Canvas: MCP server connection nodes | PENDING |
-| #291 | Canvas: A2A delegation edges with directional arrows | PENDING |
-| #292 | Canvas: A2A edge configuration panel | PENDING |
-| #293 | Canvas: chain visualization with numbered steps | PENDING |
-| #294 | Canvas: node detail side panel — edit agent/skill/MCP on click | PENDING |
-| #295 | Canvas: auto-layout algorithm for clean initial positioning | PENDING |
-| #296 | Canvas: persist node positions per project | PENDING |
-| #297 | Canvas: minimap, zoom controls, and fullscreen toggle | PENDING |
+| #288 | Canvas: agent nodes with drag-and-drop from sidebar palette | DONE |
+| #289 | Canvas: skill chip attachment — drag skills onto agent nodes | DONE |
+| #290 | Canvas: MCP server connection nodes | DONE |
+| #291 | Canvas: A2A delegation edges with directional arrows | DONE |
+| #292 | Canvas: A2A edge configuration panel | DONE |
+| #293 | Canvas: chain visualization with numbered steps | DONE |
+| #294 | Canvas: node detail side panel — edit agent/skill/MCP on click | DONE |
+| #295 | Canvas: auto-layout algorithm for clean initial positioning | DONE |
+| #296 | Canvas: persist node positions per project | DONE |
+| #297 | Canvas: minimap, zoom controls, and fullscreen toggle | DONE |
 
 ### Deferred (Post-Tier 2)
 
