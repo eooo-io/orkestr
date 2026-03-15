@@ -750,8 +750,8 @@ Wire up E.3 guardrail APIs to the React SPA.
 | #312 | Guardrail Profiles page (strict/moderate/permissive presets) | DONE |
 | #313 | Guardrail Violations dashboard (violation trends, dismissal workflow) | DONE |
 | #314 | Endpoint Approvals page (approve/reject MCP/A2A on first connect) | DONE |
-| #315 | Security Scanner integration in Skill Editor (scan button, inline results) | PENDING |
-| #316 | Content Review trigger in Skill Editor (risk score display) | PENDING |
+| #315 | Security Scanner integration in Skill Editor (scan button, inline results) | DONE |
+| #316 | Content Review trigger in Skill Editor (risk score display) | DONE |
 | #317 | Notifications dropdown component (bell icon, unread count, mark as read) | DONE |
 
 ### F.3 — Frontend: Enterprise Features UI
@@ -761,12 +761,12 @@ Wire up E.6 enterprise APIs to the React SPA.
 | Issue | Title | Status |
 |---|---|---|
 | #318 | API client functions for reviews, ownership, analytics, regression tests, inheritance, reports, GitHub import | DONE |
-| #319 | Skill Review workflow UI (submit, approve/reject, comments in Skill Editor) | PENDING |
-| #320 | Skill Ownership display and assignment in Skill Editor | PENDING |
+| #319 | Skill Review workflow UI (submit, approve/reject, comments in Skill Editor) | DONE |
+| #320 | Skill Ownership display and assignment in Skill Editor | DONE |
 | #321 | Skill Analytics dashboard page (usage, pass rates, token trends, cost per run) | DONE |
-| #322 | Regression Test Cases panel in Skill Editor (CRUD, run all, results) | PENDING |
-| #323 | Cross-Model Benchmark trigger and results display | PENDING |
-| #324 | Skill Inheritance UI (extends selector, resolved preview, children list) | PENDING |
+| #322 | Regression Test Cases panel in Skill Editor (CRUD, run all, results) | DONE |
+| #323 | Cross-Model Benchmark trigger and results display | DONE |
+| #324 | Skill Inheritance UI (extends selector, resolved preview, children list) | DONE |
 | #325 | Reports export page (skill inventory CSV, usage CSV, audit log CSV) | DONE |
 | #326 | GitHub Org Import wizard (discover repos, select skills, import) | DONE |
 

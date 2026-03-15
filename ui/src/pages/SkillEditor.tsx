@@ -16,6 +16,10 @@ import { ActionBar } from '@/components/skills/ActionBar'
 import { LiveTestPanel } from '@/components/skills/LiveTestPanel'
 import { VersionHistoryPanel } from '@/components/skills/VersionHistoryPanel'
 import { LintPanel } from '@/components/skills/LintPanel'
+import { SecurityPanel } from '@/components/skills/SecurityPanel'
+import { ReviewPanel } from '@/components/skills/ReviewPanel'
+import { RegressionTestPanel } from '@/components/skills/RegressionTestPanel'
+import { InheritancePanel } from '@/components/skills/InheritancePanel'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
 import type { Skill, GeneratedSkill } from '@/types'
 
@@ -41,7 +45,7 @@ export function SkillEditor() {
   const [projectSkills, setProjectSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'test' | 'versions' | 'lint'>('test')
+  const [activeTab, setActiveTab] = useState<'test' | 'versions' | 'lint' | 'security' | 'review' | 'regression' | 'inherit'>('test')
   const [showGenerate, setShowGenerate] = useState(false)
   const { isDirty, setDirty, showToast, loadProjects } = useAppStore()
   const initialBody = useRef<string>('')
@@ -237,49 +241,26 @@ export function SkillEditor() {
 
         {/* Right: Tabs */}
         <div className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l border-border flex flex-col bg-muted/20 min-h-[300px] lg:min-h-0">
-          <div className="flex border-b border-border">
-            <button
-              onClick={() => setActiveTab('test')}
-              className={`flex-1 px-4 py-2 text-sm font-medium transition-all duration-150 ${
-                activeTab === 'test'
-                  ? 'border-b-2 border-primary text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Test
-            </button>
-            <button
-              onClick={() => setActiveTab('versions')}
-              className={`flex-1 px-4 py-2 text-sm font-medium transition-all duration-150 ${
-                activeTab === 'versions'
-                  ? 'border-b-2 border-primary text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Versions
-            </button>
-            <button
-              onClick={() => setActiveTab('lint')}
-              className={`flex-1 px-4 py-2 text-sm font-medium transition-all duration-150 ${
-                activeTab === 'lint'
-                  ? 'border-b-2 border-primary text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Lint
-            </button>
+          <div className="flex border-b border-border overflow-x-auto">
+            {(['test', 'versions', 'lint', 'security', 'review', 'regression', 'inherit'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`shrink-0 px-3 py-2 text-xs font-medium transition-all duration-150 capitalize ${
+                  activeTab === tab
+                    ? 'border-b-2 border-primary text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {tab === 'regression' ? 'Tests' : tab}
+              </button>
+            ))}
           </div>
-          <div className="flex-1 overflow-hidden">
-            {activeTab === 'test' ? (
-              !isNew && skill.id ? (
+          <div className="flex-1 overflow-y-auto">
+            {!isNew && skill.id ? (
+              activeTab === 'test' ? (
                 <LiveTestPanel skillId={skill.id} />
-              ) : (
-                <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                  Save the skill first to test it.
-                </div>
-              )
-            ) : activeTab === 'versions' ? (
-              !isNew && skill.id ? (
+              ) : activeTab === 'versions' ? (
                 <VersionHistoryPanel
                   skillId={skill.id}
                   onRestore={() => {
@@ -289,16 +270,20 @@ export function SkillEditor() {
                     })
                   }}
                 />
+              ) : activeTab === 'lint' ? (
+                <LintPanel skillId={skill.id} />
+              ) : activeTab === 'security' ? (
+                <SecurityPanel skillId={skill.id} />
+              ) : activeTab === 'review' ? (
+                <ReviewPanel skillId={skill.id} />
+              ) : activeTab === 'regression' ? (
+                <RegressionTestPanel skillId={skill.id} />
               ) : (
-                <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                  Save the skill first to see versions.
-                </div>
+                <InheritancePanel skillId={skill.id} />
               )
-            ) : !isNew && skill.id ? (
-              <LintPanel skillId={skill.id} />
             ) : (
               <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                Save the skill first to lint it.
+                Save the skill first.
               </div>
             )}
           </div>
