@@ -53,9 +53,10 @@ export function Login() {
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
           <div className="flex justify-center mb-3">
-            <img src="/logo.png" alt="eooo.ai" className="h-10 w-10 object-contain" />
+            <img src="/logo.png" alt="Orkestr" className="h-10 w-10 object-contain" />
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">eooo.ai</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Orkestr</h1>
+          <p className="text-[11px] text-muted-foreground tracking-wide">by eooo.ai</p>
           <p className="text-sm text-muted-foreground mt-1">
             Sign in to your account
           </p>

@@ -29,6 +29,7 @@ import { WorkspaceSettings } from '@/pages/WorkspaceSettings'
 import { AuditLog } from '@/pages/AuditLog'
 import { AgentsDashboard } from '@/pages/AgentsDashboard'
 import { PerformanceDashboard } from '@/pages/PerformanceDashboard'
+import { UserGuide } from '@/pages/UserGuide'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -90,6 +91,7 @@ function AppContent() {
                   <Route path="/workspace" element={<WorkspaceSettings />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/billing" element={<Billing />} />
+                  <Route path="/guide" element={<UserGuide />} />
                 </Routes>
               </Layout>
             </AuthGuard>

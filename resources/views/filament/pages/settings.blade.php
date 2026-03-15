@@ -7,17 +7,13 @@
                 Save Settings
             </x-filament::button>
 
-            <x-filament::button color="gray" wire:click="rescanAll">
-                Rescan All Projects
-            </x-filament::button>
-
             <x-filament::button
                 color="gray"
                 tag="a"
                 href="http://localhost:5173"
                 target="_blank"
             >
-                Open Skill Editor
+                Open App
             </x-filament::button>
         </div>
     </form>

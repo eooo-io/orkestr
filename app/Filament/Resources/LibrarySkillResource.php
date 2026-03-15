@@ -17,9 +17,11 @@ class LibrarySkillResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
-    protected static ?string $navigationLabel = 'Library';
+    protected static ?string $navigationLabel = 'Library Skills';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationGroup = 'Content';
+
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

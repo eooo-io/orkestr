@@ -2,9 +2,7 @@
 
 namespace App\Filament\Pages;
 
-use App\Jobs\ProjectScanJob;
 use App\Models\AppSetting;
-use App\Models\Project;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -16,6 +14,8 @@ class Settings extends Page
 
     protected static ?int $navigationSort = 10;
 
+    protected static ?string $navigationGroup = 'Administration';
+
     protected static string $view = 'filament.pages.settings';
 
     public ?array $data = [];
@@ -24,6 +24,9 @@ class Settings extends Page
     {
         $this->form->fill([
             'anthropic_api_key' => AppSetting::get('anthropic_api_key', ''),
+            'openai_api_key' => AppSetting::get('openai_api_key', ''),
+            'gemini_api_key' => AppSetting::get('gemini_api_key', ''),
+            'ollama_url' => AppSetting::get('ollama_url', 'http://localhost:11434'),
             'default_model' => AppSetting::get('default_model', 'claude-sonnet-4-6'),
         ]);
     }
@@ -32,41 +35,57 @@ class Settings extends Page
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('API Configuration')
+                Forms\Components\Section::make('LLM Provider API Keys')
+                    ->description('Configure API keys for the LLM providers your agents will use.')
                     ->schema([
                         Forms\Components\TextInput::make('anthropic_api_key')
                             ->label('Anthropic API Key')
                             ->password()
                             ->revealable()
-                            ->helperText('Used for the live skill test runner'),
+                            ->placeholder('sk-ant-...')
+                            ->helperText('Required for Claude models'),
 
+                        Forms\Components\TextInput::make('openai_api_key')
+                            ->label('OpenAI API Key')
+                            ->password()
+                            ->revealable()
+                            ->placeholder('sk-...')
+                            ->helperText('Required for GPT and o-series models'),
+
+                        Forms\Components\TextInput::make('gemini_api_key')
+                            ->label('Google Gemini API Key')
+                            ->password()
+                            ->revealable()
+                            ->placeholder('AIza...')
+                            ->helperText('Required for Gemini models'),
+
+                        Forms\Components\TextInput::make('ollama_url')
+                            ->label('Ollama URL')
+                            ->placeholder('http://localhost:11434')
+                            ->helperText('Local Ollama instance for open-source models'),
+                    ]),
+
+                Forms\Components\Section::make('Defaults')
+                    ->schema([
                         Forms\Components\Select::make('default_model')
                             ->label('Default Model')
                             ->options([
-                                'claude-sonnet-4-6' => 'Claude Sonnet 4.6',
-                                'claude-opus-4-6' => 'Claude Opus 4.6',
-                                'claude-haiku-4-5-20251001' => 'Claude Haiku 4.5',
-                            ]),
-                    ]),
-
-                Forms\Components\Section::make('Provider Output Reference')
-                    ->schema([
-                        Forms\Components\Placeholder::make('provider_reference')
-                            ->content(
-                                new \Illuminate\Support\HtmlString('
-                                    <table class="w-full text-sm">
-                                        <thead><tr class="border-b"><th class="text-left p-2">Provider</th><th class="text-left p-2">Output Path</th><th class="text-left p-2">Format</th></tr></thead>
-                                        <tbody>
-                                            <tr class="border-b"><td class="p-2">Claude</td><td class="p-2 font-mono text-xs">.claude/CLAUDE.md</td><td class="p-2">Concatenated H2</td></tr>
-                                            <tr class="border-b"><td class="p-2">Cursor</td><td class="p-2 font-mono text-xs">.cursor/rules/{slug}.mdc</td><td class="p-2">Per-file MDC</td></tr>
-                                            <tr class="border-b"><td class="p-2">Copilot</td><td class="p-2 font-mono text-xs">.github/copilot-instructions.md</td><td class="p-2">Concatenated H2</td></tr>
-                                            <tr class="border-b"><td class="p-2">Windsurf</td><td class="p-2 font-mono text-xs">.windsurf/rules/{slug}.md</td><td class="p-2">Per-file</td></tr>
-                                            <tr class="border-b"><td class="p-2">Cline</td><td class="p-2 font-mono text-xs">.clinerules</td><td class="p-2">Single flat file</td></tr>
-                                            <tr><td class="p-2">OpenAI</td><td class="p-2 font-mono text-xs">.openai/instructions.md</td><td class="p-2">Concatenated H2</td></tr>
-                                        </tbody>
-                                    </table>
-                                ')
-                            ),
+                                'Anthropic' => [
+                                    'claude-sonnet-4-6' => 'Claude Sonnet 4.6',
+                                    'claude-opus-4-6' => 'Claude Opus 4.6',
+                                    'claude-haiku-4-5-20251001' => 'Claude Haiku 4.5',
+                                ],
+                                'OpenAI' => [
+                                    'gpt-4o' => 'GPT-4o',
+                                    'gpt-4o-mini' => 'GPT-4o Mini',
+                                    'o3' => 'o3',
+                                ],
+                                'Google' => [
+                                    'gemini-2.5-pro' => 'Gemini 2.5 Pro',
+                                    'gemini-2.5-flash' => 'Gemini 2.5 Flash',
+                                ],
+                            ])
+                            ->helperText('Default model for new agents and playground sessions'),
                     ]),
             ])
             ->statePath('data');
@@ -77,25 +96,13 @@ class Settings extends Page
         $data = $this->form->getState();
 
         AppSetting::set('anthropic_api_key', $data['anthropic_api_key'] ?? '');
+        AppSetting::set('openai_api_key', $data['openai_api_key'] ?? '');
+        AppSetting::set('gemini_api_key', $data['gemini_api_key'] ?? '');
+        AppSetting::set('ollama_url', $data['ollama_url'] ?? 'http://localhost:11434');
         AppSetting::set('default_model', $data['default_model'] ?? 'claude-sonnet-4-6');
 
         Notification::make()
             ->title('Settings saved')
-            ->success()
-            ->send();
-    }
-
-    public function rescanAll(): void
-    {
-        $projects = Project::all();
-
-        foreach ($projects as $project) {
-            ProjectScanJob::dispatch($project);
-        }
-
-        Notification::make()
-            ->title('Rescan started')
-            ->body("Queued scan for {$projects->count()} projects")
             ->success()
             ->send();
     }

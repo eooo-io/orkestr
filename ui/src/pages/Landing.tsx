@@ -65,6 +65,14 @@ function OllamaIcon({ className }: { className?: string }) {
   )
 }
 
+function GrokIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M2.3 22L10.7 10.4 2.8 2H6.2L12.2 10.4 18.3 2H21.7L13.8 10.4 22.2 22H18.8L12.2 13.2 5.7 22H2.3Z" />
+    </svg>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Scroll fade-in (Intersection Observer)
 // ---------------------------------------------------------------------------
@@ -170,12 +178,13 @@ function useActiveSection(ids: string[]) {
 // Data
 // ---------------------------------------------------------------------------
 
-const SECTION_IDS = ['features', 'how-it-works', 'architecture', 'pricing', 'faq']
+const SECTION_IDS = ['use-cases', 'features', 'how-it-works', 'architecture', 'pricing', 'faq']
 const INTEGRATIONS: { label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { label: 'Claude', icon: ClaudeIcon },
   { label: 'OpenAI', icon: OpenAIIcon },
   { label: 'Gemini', icon: GeminiIcon },
-  { label: 'Ollama', icon: OllamaIcon },
+  { label: 'Grok', icon: GrokIcon },
+  { label: 'Ollama / Local', icon: OllamaIcon },
   { label: 'MCP Servers', icon: Plug2 },
   { label: 'A2A Protocol', icon: Share2 },
 ]
@@ -198,51 +207,72 @@ workflow:
   steps: [review, scan, report]
   checkpoints: [human-approval]`
 
+const USE_CASES = [
+  {
+    icon: Bot,
+    persona: 'Engineering Lead',
+    title: 'Automated code review pipeline',
+    description: 'I set up a code review agent and a security scanner. They run on every push via webhook, flag issues, and post summaries. My team reviews the output, not the raw diff. Everything runs on our infra.',
+  },
+  {
+    icon: Lock,
+    persona: 'Head of Security',
+    title: 'Fully air-gapped agent operations',
+    description: 'We run Llama and Mistral locally via Ollama — no data leaves our network. Orkestr orchestrates agents against our internal systems using local models only. Compliance never even had to review it.',
+  },
+  {
+    icon: BarChart3,
+    persona: 'VP of Engineering',
+    title: 'Mixed model fleet with cost control',
+    description: 'Critical agents use Claude, routine tasks run on local Ollama models at zero API cost. Per-agent budgets, model fallback chains, and full cost visibility across the whole fleet.',
+  },
+]
+
 const FEATURES = [
   {
     icon: Bot,
-    title: 'Agent Designer',
-    description: 'Design agents as full loop definitions — Goal, Perceive, Reason, Act, Observe. Export to any framework.',
+    title: 'No-Code Agent Design',
+    description: 'Configure agents through forms, not Python scripts. Define goals, reasoning strategies, tools, and autonomy levels — all visually.',
+  },
+  {
+    icon: Cpu,
+    title: 'Any Model — Cloud or Local',
+    description: 'Use Claude, GPT, Gemini, Grok, or run your own models with Ollama, vLLM, or any OpenAI-compatible endpoint. Swap models per agent. Go fully air-gapped with local inference.',
   },
   {
     icon: GitBranch,
-    title: 'Workflow Orchestration',
-    description: 'Build multi-agent workflows as visual DAGs. Delegation chains, parallel execution, conditional routing.',
+    title: 'Visual Workflow Builder',
+    description: 'Wire agents into multi-step workflows with a drag-and-drop DAG editor. Parallel execution, conditions, checkpoints.',
   },
   {
     icon: Play,
     title: 'Live Execution Engine',
-    description: 'Run agents with real tool calls. Watch the execution loop step by step with full trace visibility.',
-  },
-  {
-    icon: Wrench,
-    title: 'MCP & A2A Integration',
-    description: 'Connect to any MCP tool server or delegate to remote agents via the A2A protocol. Plug in, not bolt on.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Cost & Observability',
-    description: 'Per-model token pricing, execution traces, run analytics. Know exactly what your agents cost.',
+    description: 'Agents actually do things — real tool calls via MCP, real delegation via A2A. Watch every step in real time.',
   },
   {
     icon: Shield,
-    title: 'Autonomy & Guardrails',
-    description: 'Three autonomy tiers (supervised, semi-autonomous, autonomous), per-agent budgets, tool allowlists, and human approval gates. Ship agents you can trust.',
+    title: 'Built-in Guardrails',
+    description: 'Three autonomy tiers, per-agent budgets, tool allowlists, human approval gates. Ship agents you can trust.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Full Observability',
+    description: 'Every token, every dollar, every decision is tracked. Cost breakdowns by model, execution traces, audit logs.',
+  },
+  {
+    icon: Wrench,
+    title: 'Composable Skills',
+    description: 'Build a library of reusable prompt modules. Assign skills to agents. Include and compose them at runtime.',
   },
   {
     icon: Brain,
     title: 'Agent Memory',
-    description: 'Working memory, long-term persistence, conversation history. Agents that remember context across runs.',
-  },
-  {
-    icon: Layers,
-    title: 'Provider Sync',
-    description: 'Define skills once, sync to Claude, Cursor, Copilot, Windsurf, Cline, and OpenAI config formats.',
+    description: 'Working memory and conversation history that persists across runs. Agents that remember context.',
   },
   {
     icon: Eye,
     title: 'Human-in-the-Loop',
-    description: 'Checkpoint gates in workflows that pause for human approval before proceeding. Stay in control.',
+    description: 'Pause workflows for human approval at any step. Review what the agent wants to do before it does it.',
   },
 ]
 
@@ -268,117 +298,126 @@ const HOW_IT_WORKS = [
 ]
 
 const STATS = [
-  { value: '6', label: 'LLM Providers' },
+  { value: '7', label: 'LLM Providers' },
   { value: 'MCP + A2A', label: 'Tool Protocols' },
-  { value: 'Cloud + On-Prem', label: 'Deployment' },
-  { value: '3 min', label: 'To First Agent Run' },
+  { value: '1 Command', label: 'To Deploy' },
+  { value: '100%', label: 'Your Infrastructure' },
 ]
 
 const TESTIMONIALS = [
   {
-    quote: 'We went from manually wiring LangChain agents to designing full multi-agent workflows visually. eooo is what we needed all along.',
-    name: 'Sarah Chen',
+    quote: 'We needed agents that could access our internal systems. Every cloud tool required tunneling or API exposure. Orkestr runs on our infra — agents just connect to MCP servers on the local network.',
+    name: 'Sarah C.',
     role: 'Staff Engineer',
-    company: 'Vercel',
+    company: 'SaaS Startup',
   },
   {
-    quote: 'The execution engine with MCP tool integration means our agents actually do things, not just talk about doing things. Game changer.',
-    name: 'Marcus Rivera',
-    role: 'Senior Developer',
-    company: 'Stripe',
+    quote: 'The real value is that we own the whole stack. Our API keys, our data, our execution logs. We can see exactly what each agent costs and swap models without rewriting anything.',
+    name: 'Marcus R.',
+    role: 'Engineering Manager',
+    company: 'FinTech Company',
   },
   {
-    quote: 'Budget guardrails and cost tracking gave us the confidence to let agents run in production. We know exactly what every run costs.',
-    name: 'Anya Kapoor',
-    role: 'Engineering Lead',
-    company: 'Shopify',
+    quote: 'Budget guardrails and approval gates were the unlock. We went from "too risky for production" to running agent teams on a schedule with full audit trails.',
+    name: 'Anya K.',
+    role: 'VP Engineering',
+    company: 'Enterprise SaaS',
   },
 ]
 
 const PRICING = [
   {
-    name: 'Free',
+    name: 'Playground',
     price: '$0',
     period: 'forever',
-    description: 'For individual developers and experimentation',
+    description: 'Design agents and test them in the cloud sandbox',
     features: [
+      'Agent designer & workflow builder',
+      'Sandbox execution (BYO keys)',
       'Up to 3 projects',
-      'Agent designer & workflows',
-      'MCP tool integration',
-      'Execution playground',
       'Community support',
+      'No data access (design only)',
     ],
-    cta: 'Get Started',
+    cta: 'Try the Playground',
+    href: '/register',
     highlighted: false,
   },
   {
-    name: 'Pro',
-    price: '$19',
+    name: 'Self-Hosted',
+    price: '$49',
     period: '/month',
-    description: 'For developers shipping agents to production',
+    description: 'Full Orkestr on your infrastructure',
     features: [
       'Unlimited projects & agents',
       'Full execution engine',
-      'Cost analytics & traces',
-      'A2A agent delegation',
-      'Priority support',
+      'Local MCP server connections',
+      'Your API keys, your data',
+      'Cost tracking & audit logs',
+      'Docker Compose deployment',
     ],
-    cta: 'Start Free Trial',
+    cta: 'Deploy Now',
+    href: '/register',
     highlighted: true,
   },
   {
-    name: 'Team',
-    price: '$39',
-    period: '/seat/month',
-    description: 'For teams building multi-agent systems',
+    name: 'Enterprise',
+    price: 'Custom',
+    period: 'annual license',
+    description: 'For teams running agent fleets in production',
     features: [
-      'Everything in Pro',
-      'Shared agent library',
-      'Workflow collaboration',
+      'Everything in Self-Hosted',
+      'Multi-team / org management',
       'SSO / SAML',
-      'Dedicated support',
+      'Priority support & SLA',
+      'Deployment assistance',
+      'Custom integrations',
     ],
-    cta: 'Contact Sales',
+    cta: 'Contact Us',
+    href: 'mailto:hello@eooo.ai',
     highlighted: false,
   },
 ]
 
 const FAQ = [
   {
-    q: 'What is eooo.ai?',
-    a: 'eooo is an agent orchestration platform — pronounced "yo." Design AI agent teams, define their autonomy, and run them. The name stands for Execute, Orchestrate, Observe, Optimize — the agent lifecycle loop. Define agents as complete loop definitions, wire them into multi-agent workflows, connect real tools via MCP and A2A protocols, and run everything with built-in cost tracking and safety guardrails.',
+    q: 'What is Orkestr?',
+    a: 'Orkestr is the agent orchestration platform from eooo.ai. Design AI agent teams, define their autonomy, and run them. The eooo name stands for Execute, Orchestrate, Observe, Optimize — the agent lifecycle loop. Orkestr lets you define agents as complete loop definitions, wire them into multi-agent workflows, connect real tools via MCP and A2A protocols, and run everything with built-in cost tracking and safety guardrails.',
   },
   {
     q: 'How is this different from Lovable, Replit, or other AI app builders?',
-    a: 'Lovable and Replit use AI to generate application code — they build apps for you. eooo builds the AI agents themselves. You define how an agent thinks (goal, reasoning, tool use), wire agents into multi-step workflows, and run them with real tool calls. The output is not a web app — it is a running agent system with cost controls, execution traces, and safety guardrails. eooo is infrastructure for AI agents, not a code generator.',
+    a: 'Lovable and Replit use AI to generate application code — they build apps for you. Orkestr builds the AI agents themselves. You define how an agent thinks (goal, reasoning, tool use), wire agents into multi-step workflows, and run them with real tool calls. The output is not a web app — it is a running agent system with cost controls, execution traces, and safety guardrails. Orkestr is infrastructure for AI agents, not a code generator.',
   },
   {
     q: 'How is this different from LangChain or CrewAI?',
-    a: 'LangChain and CrewAI are code frameworks — you write Python to define agents and chains. eooo is a visual design-and-runtime platform. You design agents and workflows in a UI, run them directly in the built-in execution engine, or export to LangGraph, CrewAI, or generic JSON for use in your own codebase. No framework lock-in.',
+    a: 'LangChain and CrewAI are code frameworks — you write Python to define agents and chains. Orkestr is a visual design-and-runtime platform. You design agents and workflows in a UI, run them directly in the built-in execution engine, or export to LangGraph, CrewAI, or generic JSON for use in your own codebase. No framework lock-in.',
   },
   {
     q: 'What are MCP and A2A?',
-    a: 'MCP (Model Context Protocol) lets agents call tools hosted on external servers — file systems, databases, APIs. A2A (Agent-to-Agent) lets agents delegate tasks to other agents over HTTP. eooo has built-in clients for both protocols.',
+    a: 'MCP (Model Context Protocol) lets agents call tools hosted on external servers — file systems, databases, APIs. A2A (Agent-to-Agent) lets agents delegate tasks to other agents over HTTP. Orkestr has built-in clients for both protocols.',
   },
   {
     q: 'Can agents actually execute tools, or is this just configuration?',
-    a: 'Both. You can design agents and export configs, or run them live in the execution engine. The engine connects to real MCP tool servers, dispatches tool calls, tracks token usage and costs, and enforces budget guardrails — all in real time.',
+    a: 'Both. The free playground lets you design agents and test in a sandbox. Self-hosted Orkestr runs the full execution engine — it connects to MCP tool servers on your network, dispatches real tool calls, tracks token usage and costs, and enforces budget guardrails. The key difference: self-hosted agents can reach your internal systems directly.',
   },
   {
-    q: 'Can I self-host eooo?',
-    a: 'Yes. eooo offers a self-hosted option with a commercial license. Deploy on your own infrastructure with Docker Compose, keeping full control over your data, API keys, and execution environment. Contact us for self-hosted licensing details.',
+    q: 'Why is self-hosted the primary deployment model?',
+    a: 'Agents are only useful when they can access your data — your codebase, databases, internal APIs, file systems. Cloud-hosted agents can\'t reach those without tunneling or exposing internal endpoints. Self-hosted Orkestr runs on your network, so MCP tool servers connect locally. Your API keys, execution data, and agent definitions never leave your infrastructure.',
   },
   {
-    q: 'What LLM providers are supported?',
-    a: 'Anthropic (Claude Opus 4.6, Sonnet 4.6, Haiku 4.5), OpenAI (GPT-5.4, GPT-5.4 Thinking, GPT-5 Mini, o3), Google (Gemini 3.1 Pro, Gemini 3 Flash, Gemini 3.1 Flash Lite), and any Ollama-compatible local model. The execution engine routes to the correct provider based on the model configured for each agent.',
+    q: 'What models are supported?',
+    a: 'Cloud providers: Anthropic (Claude Opus 4.6, Sonnet 4.6, Haiku 4.5), OpenAI (GPT-5.4, o3), Google (Gemini 3.1 Pro, Gemini 3 Flash), xAI (Grok). Local inference: any model running via Ollama, vLLM, or any OpenAI-compatible API endpoint. You can mix cloud and local models in the same project — route critical agents to Claude, routine tasks to a local Llama model. The execution engine routes per agent based on model configuration.',
+  },
+  {
+    q: 'Can I run Orkestr completely air-gapped?',
+    a: 'Yes. Point all agents to local models via Ollama or any OpenAI-compatible inference server on your network. Connect MCP tool servers locally. No external API calls, no data leaving your infrastructure. This is a primary use case for regulated industries and security-conscious organizations.',
   },
   {
     q: 'How do guardrails work?',
-    a: 'Every execution run enforces configurable budget limits (max tokens, max cost, max iterations), tool allowlists/blocklists with dangerous input detection, and output safety checks for PII and credential leakage. Guardrails are built into the execution loop, not bolted on.',
+    a: 'Every execution run enforces configurable budget limits (max tokens, max cost, max iterations), tool allowlists/blocklists with dangerous input detection, and output safety checks for PII and credential leakage. Guardrails are built into the execution loop, not bolted on. Because Orkestr runs on your infra, you have full control over what agents can and cannot access.',
   },
   {
-    q: 'Why build eooo, and why now?',
-    a: 'AI models are now capable enough to reason, use tools, and collaborate — but there is no good way to manage them as a team. eooo exists to close that gap. We believe the next step is building agent teams that operate as first-class members of your organization: each with a defined role, clear boundaries, and the right level of autonomy — from fully supervised to fully autonomous. The models are ready. The tooling to manage them at that level has not existed until now.',
+    q: 'Why build Orkestr, and why now?',
+    a: 'AI models are now capable enough to reason, use tools, and collaborate — but there is no good way to manage them as a team. Orkestr exists to close that gap. We believe the next step is building agent teams that operate as first-class members of your organization: each with a defined role, clear boundaries, and the right level of autonomy — from fully supervised to fully autonomous. The models are ready. The tooling to manage them at that level has not existed until now.',
   },
 ]
 
@@ -525,19 +564,22 @@ export function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="eooo.ai" className="h-8 w-8 object-contain" />
-            <span className="font-semibold text-foreground tracking-tight">eooo.ai</span>
+            <div className="flex flex-col">
+              <span className="font-semibold text-foreground tracking-tight leading-none">Orkestr</span>
+              <span className="text-[10px] text-muted-foreground tracking-wide leading-none mt-0.5">by eooo.ai</span>
+            </div>
           </div>
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+            <button onClick={() => scrollTo('use-cases')} className={navLinkClass('use-cases')}>
+              Use Cases
+            </button>
             <button onClick={() => scrollTo('features')} className={navLinkClass('features')}>
               Features
             </button>
             <button onClick={() => scrollTo('how-it-works')} className={navLinkClass('how-it-works')}>
               How It Works
-            </button>
-            <button onClick={() => scrollTo('architecture')} className={navLinkClass('architecture')}>
-              Architecture
             </button>
             <button onClick={() => scrollTo('pricing')} className={navLinkClass('pricing')}>
               Pricing
@@ -583,14 +625,14 @@ export function Landing() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
             <nav className="flex flex-col px-4 py-3 gap-1 text-sm">
+              <button onClick={() => scrollTo('use-cases')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
+                Use Cases
+              </button>
               <button onClick={() => scrollTo('features')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
                 Features
               </button>
               <button onClick={() => scrollTo('how-it-works')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
                 How It Works
-              </button>
-              <button onClick={() => scrollTo('architecture')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
-                Architecture
               </button>
               <button onClick={() => scrollTo('pricing')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
                 Pricing
@@ -635,20 +677,21 @@ export function Landing() {
               Execute &middot; Orchestrate &middot; Observe &middot; Optimize
             </p>
             <p className="mt-4 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-              Design AI agent teams, define their autonomy, and run them.
-              Provider-agnostic multi-model routing with automatic fallback chains,
-              real tool calls, cost tracking, and guardrails — all from one platform.
+              Agent orchestration infrastructure that runs on your machines, connects to your data,
+              and works with any model — cloud APIs or your own local inference.
+              Design agent teams, wire them into workflows, and execute with full cost control
+              and safety guardrails. Fully air-gappable.
             </p>
             <div className="flex flex-wrap gap-3 mt-8">
+              <Button size="lg" className="gap-2" onClick={() => scrollTo('pricing')}>
+                Deploy Self-Hosted
+                <ArrowRight className="h-4 w-4" />
+              </Button>
               <Link to="/register">
-                <Button size="lg" className="gap-2">
-                  Get Started Free
-                  <ArrowRight className="h-4 w-4" />
+                <Button variant="outline" size="lg">
+                  Try the Playground
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" onClick={() => scrollTo('features')}>
-                Learn More
-              </Button>
             </div>
           </div>
 
@@ -718,6 +761,200 @@ export function Landing() {
       </section>
 
       {/* ----------------------------------------------------------------- */}
+      {/* Use Cases                                                         */}
+      {/* ----------------------------------------------------------------- */}
+      <section id="use-cases" className="py-20 sm:py-28 px-4 sm:px-6 bg-muted/30">
+        <div className="max-w-6xl mx-auto">
+          <FadeIn>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                How people use Orkestr
+              </h2>
+              <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
+                Real scenarios from teams running AI agents in production.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {USE_CASES.map((uc) => (
+              <FadeIn key={uc.title}>
+                <div className="bg-card border border-border p-6 elevation-1 h-full flex flex-col">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-10 w-10 bg-primary/10 flex items-center justify-center shrink-0">
+                      <uc.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      {uc.persona}
+                    </span>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2">{uc.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed flex-1 italic">
+                    &ldquo;{uc.description}&rdquo;
+                  </p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* What eooo is NOT                                                  */}
+      {/* ----------------------------------------------------------------- */}
+      <FadeIn>
+        <section className="py-16 px-4 sm:px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                Built for agent orchestration. Nothing else.
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-card border border-border p-5 elevation-1">
+                <p className="text-sm font-semibold text-foreground mb-1">Not a chatbot builder</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Orkestr is for autonomous and semi-autonomous agent work, not conversational UI. Agents run jobs, not chat sessions.
+                </p>
+              </div>
+              <div className="bg-card border border-border p-5 elevation-1">
+                <p className="text-sm font-semibold text-foreground mb-1">Not an API wrapper</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Orkestr runs on your infrastructure. Your API keys, your local models, your data. It orchestrates — it does not proxy, mark up, or touch your inference billing.
+                </p>
+              </div>
+              <div className="bg-card border border-border p-5 elevation-1">
+                <p className="text-sm font-semibold text-foreground mb-1">Not a code framework</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Unlike LangChain or CrewAI, you configure agents through forms, not Python. Design, run, and monitor from a single dashboard.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </FadeIn>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Deployment flexibility — cloud, hybrid, air-gapped                */}
+      {/* ----------------------------------------------------------------- */}
+      <FadeIn>
+        <section className="py-20 sm:py-28 px-4 sm:px-6 bg-muted/30">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                One platform. Three deployment postures.
+              </h2>
+              <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
+                Choose where inference happens — per agent, not per platform.
+                Mix cloud and local models in the same instance. Change your mind anytime.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Cloud-connected */}
+              <div className="bg-card border border-border p-6 elevation-1 h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 bg-primary/10 flex items-center justify-center shrink-0">
+                    <Network className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-foreground text-sm">Cloud-Connected</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  Use the best foundation models from every provider. Your keys, direct billing, zero markup.
+                </p>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>Claude, GPT, Gemini, Grok</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>Data stays local via MCP</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>Best model quality available</span>
+                  </div>
+                </div>
+                <p className="mt-4 text-[11px] text-muted-foreground/60 uppercase tracking-wider font-medium">
+                  Best for: teams wanting top-tier reasoning
+                </p>
+              </div>
+
+              {/* Hybrid */}
+              <div className="bg-card border border-primary/30 p-6 elevation-2 h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 bg-primary flex items-center justify-center shrink-0">
+                    <Zap className="h-5 w-5 text-primary-foreground" />
+                  </div>
+                  <h3 className="font-semibold text-foreground text-sm">Hybrid</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  Route critical tasks to cloud models, routine work to local inference. Per-agent model assignment with automatic fallback chains.
+                </p>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>Claude for complex reasoning</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>Llama/Mistral for routine tasks</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>Automatic fallback if provider is down</span>
+                  </div>
+                </div>
+                <p className="mt-4 text-[11px] text-primary/60 uppercase tracking-wider font-medium">
+                  Best for: cost-conscious teams at scale
+                </p>
+              </div>
+
+              {/* Air-gapped */}
+              <div className="bg-card border border-border p-6 elevation-1 h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 bg-primary/10 flex items-center justify-center shrink-0">
+                    <Shield className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-foreground text-sm">Fully Air-Gapped</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  Zero external network calls. All inference on local hardware via Ollama, vLLM, or any OpenAI-compatible server.
+                </p>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>No data leaves your network</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>Zero API costs</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>Compliance without review</span>
+                  </div>
+                </div>
+                <p className="mt-4 text-[11px] text-muted-foreground/60 uppercase tracking-wider font-medium">
+                  Best for: regulated industries &amp; security-first orgs
+                </p>
+              </div>
+            </div>
+
+            <FadeIn>
+              <div className="mt-8 bg-card border border-border p-5 elevation-1">
+                <p className="text-sm text-center text-muted-foreground">
+                  <span className="text-foreground font-medium">Design once, deploy anywhere.</span>{' '}
+                  Agent definitions are model-agnostic. Switch a single agent from Claude to Llama — or an entire fleet from cloud to air-gapped — without changing a single workflow.
+                </p>
+              </div>
+            </FadeIn>
+          </div>
+        </section>
+      </FadeIn>
+
+      {/* ----------------------------------------------------------------- */}
       {/* Features                                                          */}
       {/* ----------------------------------------------------------------- */}
       <section id="features" className="py-20 sm:py-28 px-4 sm:px-6">
@@ -725,10 +962,10 @@ export function Landing() {
           <FadeIn>
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                The complete agent development platform
+                Everything you need to run agent teams
               </h2>
               <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
-                From agent design to multi-agent orchestration to live execution — everything you need to build, run, and monitor AI agent systems.
+                Configure what each agent knows. Define how it thinks. Control when it runs and how much it can spend. Monitor everything from one place.
               </p>
             </div>
           </FadeIn>
@@ -799,10 +1036,10 @@ export function Landing() {
           <FadeIn>
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                Built for agent developers
+                From teams running agents on their own infra
               </h2>
               <p className="text-muted-foreground mt-3 text-lg">
-                See what engineers building with agents are saying.
+                What changes when agents can actually reach your systems.
               </p>
             </div>
           </FadeIn>
@@ -838,7 +1075,7 @@ export function Landing() {
                 Three layers, one platform
               </h2>
               <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
-                eooo is built as a layered architecture. Each layer builds on the one below.
+                Orkestr is built as a layered architecture. Each layer builds on the one below.
               </p>
             </div>
           </FadeIn>
@@ -905,48 +1142,65 @@ export function Landing() {
       </section>
 
       {/* ----------------------------------------------------------------- */}
-      {/* Security & self-host callout                                      */}
+      {/* Why self-hosted — the core value prop                             */}
       {/* ----------------------------------------------------------------- */}
       <FadeIn>
-        <section className="py-16 px-4 sm:px-6">
-          <div className="max-w-5xl mx-auto bg-card border border-border elevation-2 p-8 sm:p-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">
-                  Your agents, your infrastructure
-                </h2>
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  Run eooo on your own infrastructure with a self-hosted license. Your agent definitions, execution data, and API keys never leave your servers. Deploy with Docker Compose in minutes.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Link to="/register">
-                    <Button size="sm" className="gap-2">
-                      Get Started
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
+        <section className="py-20 sm:py-28 px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                Your models. Your data. Your orchestration.
+              </h2>
+              <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
+                A cloud-hosted agent can&apos;t reach your codebase, your database, or your local models.
+                Orkestr deploys next to everything so agents can actually act on it — with zero external dependencies if you need it.
+              </p>
+            </div>
+
+            <div className="bg-card border border-border elevation-2 p-8 sm:p-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">How it works</h3>
+                  <div className="space-y-4 text-sm text-muted-foreground">
+                    <div className="flex gap-3">
+                      <span className="text-primary font-mono text-xs mt-0.5 shrink-0">01</span>
+                      <p><span className="text-foreground font-medium">Deploy with Docker Compose</span> — one command, runs on any Linux/macOS server. Your cloud, your office, your laptop.</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-primary font-mono text-xs mt-0.5 shrink-0">02</span>
+                      <p><span className="text-foreground font-medium">Point to your models</span> — cloud APIs (Anthropic, OpenAI, Gemini) with your own keys, or local inference via Ollama, vLLM, or any OpenAI-compatible endpoint. Mix and match per agent. Go fully air-gapped if needed.</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-primary font-mono text-xs mt-0.5 shrink-0">03</span>
+                      <p><span className="text-foreground font-medium">Connect MCP servers</span> — filesystem, databases, Slack, GitHub, internal APIs. All on your local network, no tunneling.</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-primary font-mono text-xs mt-0.5 shrink-0">04</span>
+                      <p><span className="text-foreground font-medium">Run agents</span> — they execute with real tool calls against your real systems, with budget guardrails and full audit trails.</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-muted/50 border border-border p-4">
-                  <Shield className="h-5 w-5 text-primary mb-2" />
-                  <h4 className="text-sm font-semibold text-foreground">Encrypted</h4>
-                  <p className="text-xs text-muted-foreground mt-1">Data at rest and in transit</p>
-                </div>
-                <div className="bg-muted/50 border border-border p-4">
-                  <Server className="h-5 w-5 text-primary mb-2" />
-                  <h4 className="text-sm font-semibold text-foreground">Self-Hosted</h4>
-                  <p className="text-xs text-muted-foreground mt-1">Full control, no vendor lock-in</p>
-                </div>
-                <div className="bg-muted/50 border border-border p-4">
-                  <Layers className="h-5 w-5 text-primary mb-2" />
-                  <h4 className="text-sm font-semibold text-foreground">Docker Ready</h4>
-                  <p className="text-xs text-muted-foreground mt-1">One command to deploy</p>
-                </div>
-                <div className="bg-muted/50 border border-border p-4">
-                  <Lock className="h-5 w-5 text-primary mb-2" />
-                  <h4 className="text-sm font-semibold text-foreground">Guardrails</h4>
-                  <p className="text-xs text-muted-foreground mt-1">Budget limits, PII detection, tool sandboxing</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-muted/50 border border-border p-4">
+                    <Server className="h-5 w-5 text-primary mb-2" />
+                    <h4 className="text-sm font-semibold text-foreground">Your Infra</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Nothing leaves your network</p>
+                  </div>
+                  <div className="bg-muted/50 border border-border p-4">
+                    <Cpu className="h-5 w-5 text-primary mb-2" />
+                    <h4 className="text-sm font-semibold text-foreground">Your Models</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Cloud APIs or local inference</p>
+                  </div>
+                  <div className="bg-muted/50 border border-border p-4">
+                    <Plug2 className="h-5 w-5 text-primary mb-2" />
+                    <h4 className="text-sm font-semibold text-foreground">Local MCP</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Agents reach your data directly</p>
+                  </div>
+                  <div className="bg-muted/50 border border-border p-4">
+                    <Shield className="h-5 w-5 text-primary mb-2" />
+                    <h4 className="text-sm font-semibold text-foreground">Guardrails</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Budgets, PII detection, audit logs</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -962,10 +1216,10 @@ export function Landing() {
           <FadeIn>
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                Simple, transparent pricing
+                Design in the cloud. Deploy on your infra.
               </h2>
               <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
-                Start free, upgrade when you need more.
+                The playground is free. The real product runs on your machines.
               </p>
             </div>
           </FadeIn>
@@ -1002,14 +1256,25 @@ export function Landing() {
                   </ul>
 
                   <div className="mt-6">
-                    <Link to="/register">
-                      <Button
-                        variant={tier.highlighted ? 'default' : 'outline'}
-                        className="w-full"
-                      >
-                        {tier.cta}
-                      </Button>
-                    </Link>
+                    {tier.href?.startsWith('mailto:') ? (
+                      <a href={tier.href}>
+                        <Button
+                          variant={tier.highlighted ? 'default' : 'outline'}
+                          className="w-full"
+                        >
+                          {tier.cta}
+                        </Button>
+                      </a>
+                    ) : (
+                      <Link to={tier.href || '/register'}>
+                        <Button
+                          variant={tier.highlighted ? 'default' : 'outline'}
+                          className="w-full"
+                        >
+                          {tier.cta}
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </div>
               </FadeIn>
@@ -1074,16 +1339,19 @@ export function Landing() {
             </div>
             <div className="relative">
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                Ready to build your first agent?
+                Ready to deploy your first agent team?
               </h2>
               <p className="text-muted-foreground mt-3 max-w-lg mx-auto">
-                Start orchestrating in minutes. Free to start, no credit card required.
+                Design agents in the free playground. When you&apos;re ready, deploy on your own infrastructure with one command.
               </p>
-              <div className="mt-8">
+              <div className="mt-8 flex flex-wrap gap-3 justify-center">
+                <Button size="lg" className="gap-2" onClick={() => scrollTo('pricing')}>
+                  View Deployment Options
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
                 <Link to="/register">
-                  <Button size="lg" className="gap-2">
-                    Create Your Account
-                    <ArrowRight className="h-4 w-4" />
+                  <Button variant="outline" size="lg">
+                    Try the Playground
                   </Button>
                 </Link>
               </div>
@@ -1101,10 +1369,13 @@ export function Landing() {
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-3">
                 <img src="/logo.png" alt="eooo.ai" className="h-7 w-7 object-contain" />
-                <span className="font-semibold text-sm">eooo.ai</span>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm leading-none">Orkestr</span>
+                  <span className="text-[9px] text-muted-foreground tracking-wide leading-none mt-0.5">by eooo.ai</span>
+                </div>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                You Orchestrate. Your agents execute.
+                Agent orchestration infrastructure. Runs on your machines, connects to your data, uses your keys.
               </p>
             </div>
 
@@ -1114,13 +1385,13 @@ export function Landing() {
               </h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <button onClick={() => scrollTo('features')} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
-                    Features
+                  <button onClick={() => scrollTo('use-cases')} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
+                    Use Cases
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => scrollTo('architecture')} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
-                    Architecture
+                  <button onClick={() => scrollTo('features')} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
+                    Features
                   </button>
                 </li>
                 <li>

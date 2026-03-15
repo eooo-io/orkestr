@@ -1,4 +1,4 @@
-# Agentis Studio — Implementation Plan
+# Orkestr by eooo.ai — Implementation Plan
 
 > This file tracks implementation progress across sessions.
 > Refer to `CLAUDE.md` for architecture details.
@@ -7,7 +7,7 @@
 
 ## Roadmap Overview
 
-Agentis Studio is evolving from a skill/config sync tool into a full agent configuration, orchestration, and runtime platform. The roadmap has four phases:
+Orkestr is a self-hosted agent orchestration platform. It runs on customer infrastructure, connects to local data via MCP, and works with any model — cloud APIs or local inference. The roadmap:
 
 ```
 Phase A — Agent Designer  (COMPLETE)
@@ -19,13 +19,24 @@ Phase B — Orchestration  (COMPLETE)
   Delegation chains, handoff conditions, shared context.
 
 Phase C — Design + Runtime  (COMPLETE)
-  Lightweight agent runtime inside Agentis. Execute agent loops with real tool calls.
+  Agent runtime inside Orkestr. Execute agent loops with real tool calls.
   Playground evolves into execution environment. Memory persistence. Traces & cost tracking.
 
-Phase D — Production-Ready Agent Teams  (IN PROGRESS)
+Phase D — Production-Ready Agent Teams  (COMPLETE)
   Multi-model routing & fallback chains. Agent schedules & event triggers.
   Organization & team management. Agent autonomy levels & permissions.
   Performance dashboards. Competitive positioning.
+
+Phase E — Ship the Self-Hosted Product  (IN PROGRESS)
+  E.1: Admin & security (SSO, audit logs, content policies).
+  E.2: Deployment & packaging (Docker hardening, license keys, setup wizard, backup/restore).
+  E.3: Local model support & air-gap (Grok, vLLM, OpenAI-compatible endpoints, air-gap mode).
+  E.4: API & developer access (OpenAPI spec, SDKs, API tokens, CLI tool).
+  E.5: Enterprise readiness (review workflows, skill analytics, cross-model benchmarking).
+
+Phase F — Growth & Ecosystem  (FUTURE)
+  F.1: Skill intelligence (A/B testing, similarity detection, dynamic activation).
+  F.2: Ecosystem (marketplace enhancements, Zapier/n8n, Slack/Discord bot).
 ```
 
 The existing Component Layer (skills, provider sync, MCP, A2A) remains the foundation. Each phase builds on the previous.
@@ -79,6 +90,10 @@ Observe (result fed back into context)
 **Phase B COMPLETE** — Orchestration (27 issues, all closed).
 **Phase C COMPLETE** — Design + Runtime (35 issues, all closed).
 **Phase D COMPLETE** — Production-Ready Agent Teams (29 issues across 5 milestones, all closed).
+**Phase E IN PROGRESS** — Ship the Self-Hosted Product (42 issues across 5 milestones: E.1–E.5, #201–#258).
+**Phase F FUTURE** — Growth & Ecosystem (16 deferred issues across 3 milestones).
+
+**Strategic pivot (2026-03-15):** Repositioned from SaaS to self-hosted infrastructure software. Cloud tier is a free playground/demo funnel. The product runs on customer infra with local models, local MCP, local data. Revenue model is commercial self-hosted license.
 
 ---
 
@@ -282,7 +297,7 @@ B.1 (data model) ──► B.2 + B.4 in parallel (API + context engine) ──�
 
 ## Phase C: Design + Runtime
 
-Lightweight agent runtime inside Agentis Studio — transforming from a design-time configuration tool into a full execution platform.
+Lightweight agent runtime inside Orkestr — transforming from a design-time configuration tool into a full execution platform.
 
 ### C.1 — MCP Client
 
@@ -459,7 +474,7 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 
 ## Phase D: Production-Ready Agent Teams
 
-> **Motivation:** Address five strategic concerns identified during competitive analysis — ensure Agentis Studio has a defensible moat against provider-native tooling, code frameworks, and funded competitors.
+> **Motivation:** Address five strategic concerns identified during competitive analysis — ensure Orkestr has a defensible moat against provider-native tooling, code frameworks, and funded competitors.
 
 ### D.1 — Multi-Model Routing & Fallbacks
 
@@ -514,6 +529,198 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 | #197 | Agent team overview page | DONE |
 | #198 | Landing page: sharpen provider-agnostic positioning | DONE |
 | #199 | Onboarding flow: first agent in 3 minutes | DONE |
+
+---
+
+## Phase E: Ship the Self-Hosted Product
+
+> **Motivation:** Orkestr is self-hosted infrastructure software. Phase E transforms the working platform into a deployable, licensable, and trustworthy product that runs on customer infrastructure with local models, local data, and full enterprise controls.
+
+### E.1 — Admin & Security
+
+| Issue | Title | Status |
+|---|---|---|
+| #201 | SAML/OIDC SSO provider integration | TODO |
+| #202 | SSO configuration UI in Filament admin | TODO |
+| #203 | Secret scanning in skill prompts | TODO |
+| #204 | Skill content policies | TODO |
+| #205 | Immutable audit log enhancements | TODO |
+| #206 | Organization-wide activity feed | TODO |
+| #207 | Admin dashboard stats expansion | TODO |
+| #208 | Pest tests for E.1 admin features | TODO |
+
+**Key deliverables:**
+- Enterprise SSO (SAML 2.0 + OIDC) with auto-provisioning
+- Security: secret scanning in prompts, org-level content policies
+- Observability: immutable audit logs with export, real-time activity feed
+- Admin dashboard with active user counts, cost tracking, error monitoring
+
+### E.2 — Deployment & Packaging
+
+| Issue | Title | Status |
+|---|---|---|
+| #243 | Production Docker Compose with health checks, restart policies, and volume management | TODO |
+| #244 | One-command deploy script with environment validation | TODO |
+| #245 | Self-hosted license key generation and validation system | TODO |
+| #246 | First-run setup wizard — API keys, model config, MCP server, first agent | TODO |
+| #247 | Instance backup and restore tooling | TODO |
+| #248 | Upgrade mechanism — versioned migrations and zero-downtime updates | TODO |
+| #249 | Reverse proxy configuration templates (nginx, Caddy, Traefik) | TODO |
+| #250 | Self-hosted health diagnostics dashboard | TODO |
+| #251 | Pest tests for E.2 deployment features | TODO |
+
+**Key deliverables:**
+- Production Docker Compose with health checks, named volumes, restart policies
+- `orkestr deploy` — one command to validate environment and start services
+- License key system — generate, validate, feature-gate by tier (self-hosted vs enterprise)
+- First-run setup wizard — walks through API keys, model config, first MCP server, first agent
+- Instance backup/restore — export and import full instance state
+- Zero-downtime upgrade path with versioned migrations
+- Reverse proxy templates for nginx, Caddy, Traefik
+- Health diagnostics dashboard — connectivity checks for models, MCP servers, database
+
+### E.3 — Guardrails & Safety
+
+| Issue | Title | Status |
+|---|---|---|
+| #259 | Organization-level guardrail policy engine — org-wide defaults for budgets, approval levels, blocked tools | TODO |
+| #260 | Configurable guardrail profiles — strict, moderate, permissive presets assignable to agents or projects | TODO |
+| #261 | MCP server and A2A endpoint validation — allowlists, approval-on-first-connect, URL verification | TODO |
+| #262 | Static security scanner — extend PromptLinter with SecurityRuleSet | TODO |
+| #263 | Input sanitization guard — validate and sanitize user input before agent execution loop | TODO |
+| #264 | LLM-based content review service — on-demand risk scoring for skills and agent configs | TODO |
+| #265 | Agent delegation boundary enforcement — cascading budget and scope limits through delegation chains | TODO |
+| #266 | Network enforcement guard — validate and enforce air-gap mode, block unexpected outbound calls | TODO |
+| #267 | Guardrail reporting dashboard — trigger history, violation trends, dismissal audit trail | TODO |
+| #268 | Pest tests for E.3 guardrail features | TODO |
+
+**Key deliverables:**
+- Org-level guardrail policies that cascade: org → project → agent (each level can tighten, not loosen)
+- Pre-built guardrail profiles (strict/moderate/permissive) for simplified agent configuration
+- MCP/A2A endpoint validation with allowlists and approval-on-first-connect
+- Static security scanner: prompt injection, exfiltration, credential harvesting, obfuscation detection
+- Input sanitization before agent execution (defense against prompt injection via user input)
+- LLM-based content review with structured risk scoring (0-100) for skills and configs
+- Delegation boundary enforcement: child agents inherit intersected scope and remaining budget
+- Network enforcement for air-gap mode: validate all endpoints are local, block unexpected outbound
+- Guardrail reporting dashboard with violation trends and exportable compliance reports
+
+**Existing guards (built in Phase C.6) that E.3 extends:**
+- `ToolGuard` — allowlist/blocklist, dangerous input patterns → E.3 adds org-level policies
+- `BudgetGuard` — per-run/per-agent/daily budgets → E.3 adds delegation cascading
+- `OutputGuard` — PII/secret detection and redaction → E.3 adds org-level policies
+- `ApprovalGuard` — 3 autonomy tiers → E.3 adds configurable profiles
+- `DataAccessGuard` — project/file/API scope → E.3 adds delegation enforcement
+
+### E.4 — Local Model Support & Air-Gap
+
+| Issue | Title | Status |
+|---|---|---|
+| #252 | Grok/xAI provider — OpenAI-compatible with x.ai base URL | TODO |
+| #253 | Generic OpenAI-compatible endpoint configuration for vLLM, TGI, LM Studio | TODO |
+| #254 | Model health check and latency benchmarking per provider | TODO |
+| #255 | Air-gap mode — disable all external network calls, validate no outbound traffic | TODO |
+| #256 | Local model browser — discover and test available Ollama/vLLM models | TODO |
+| #257 | Model performance comparison dashboard — cloud vs local side-by-side | TODO |
+| #258 | Pest tests for E.4 local model features | TODO |
+
+**Key deliverables:**
+- Grok/xAI provider (OpenAI-compatible API with x.ai base URL)
+- Generic OpenAI-compatible endpoint config — vLLM, TGI, LM Studio, any local server
+- Per-provider health checks and latency benchmarking
+- Air-gap mode — explicit toggle that disables all outbound network, validates isolation
+- Local model browser — auto-discover models from Ollama/vLLM, test with sample prompts
+- Cloud vs local performance comparison — latency, quality, cost side-by-side
+
+**Note:** Air-gap mode (#255) depends on the network enforcement guard (#266) from E.3.
+
+### E.5 — API & Developer Access
+
+| Issue | Title | Status |
+|---|---|---|
+| #212 | OpenAPI 3.1 specification generation | TODO |
+| #213 | REST API SDK — npm package | TODO |
+| #214 | REST API SDK — Composer package | TODO |
+| #215 | API token authentication for programmatic access | TODO |
+| #216 | CLI tool — orkestr deploy, manage, backup | TODO |
+| #217 | Pest tests for E.5 developer experience | TODO |
+
+**Key deliverables:**
+- OpenAPI 3.1 spec with Swagger UI at /api/docs
+- Published SDKs (@eooo/sdk npm + eooo/sdk Composer) for programmatic access
+- Personal API tokens for automation and CI/CD integration
+- `orkestr` CLI — deploy, manage agents, backup/restore, health check
+
+### E.6 — Enterprise Readiness
+
+| Issue | Title | Status |
+|---|---|---|
+| #219 | Skill review and approval workflow | TODO |
+| #220 | Skill ownership and CODEOWNERS model | TODO |
+| #223 | Change request notifications | TODO |
+| #225 | Skill analytics dashboard | TODO |
+| #227 | Automated regression testing for skills | TODO |
+| #230 | Cross-model performance benchmarking — cloud vs local | TODO |
+| #231 | Skill inheritance and extension | TODO |
+| #240 | Export reports — PDF and CSV | TODO |
+| #241 | Bulk import from GitHub organizations | TODO |
+| #224 | Pest tests for E.6 enterprise features | TODO |
+
+**Key deliverables:**
+- Review/approval workflow: submit → review → approve/reject with comments
+- Skill ownership (CODEOWNERS-style) with auto-review-request
+- In-app + email notifications for reviews, comments, mentions
+- Per-skill analytics: usage, pass rates, token trends, cost per run
+- Regression testing: saved test cases per skill, run on edit, block/warn on failure
+- Cross-model benchmarking: compare cloud (Claude/GPT/Gemini/Grok) vs local (Ollama/vLLM)
+- Skill inheritance: extends/overrides via frontmatter
+- PDF/CSV exports for skill inventories, usage, audit logs
+- Bulk import from GitHub organizations
+
+### Implementation Sequence
+
+```
+E.1 (admin/security)
+  │
+  ▼
+E.2 (deployment/packaging)
+  │
+  ▼
+E.3 (guardrails/safety)
+  │
+  ▼
+E.4 (local models/air-gap)  ◄── depends on E.3 network enforcement
+  │
+  ├──────────────────┐
+  ▼                  ▼
+E.5 (API/CLI)    E.6 (enterprise)
+```
+
+**Priority order:** E.1 → E.2 → E.3 → E.4 → E.5 + E.6 in parallel
+
+E.1 is the admin foundation (SSO, security, audit).
+E.2 makes the product deployable and licensable — this is the monetization gate.
+E.3 makes it trustworthy — guardrails are what let enterprise customers say "yes" to production deployment.
+E.4 expands model flexibility — Grok, vLLM, air-gap mode (depends on E.3 network guard).
+E.5 and E.6 can run in parallel — developer access and enterprise polish.
+
+---
+
+## Phase F: Growth & Ecosystem (Future)
+
+> **Deferred until post-launch.** These features matter once there are paying self-hosted customers, but are not required to ship the product.
+
+### F.1 — Skill Intelligence
+
+Deferred issues: #226 (A/B testing), #228 (similarity detection), #229 (dynamic activation), #232 (tests).
+
+### F.2 — Ecosystem & Integrations
+
+Deferred issues: #233-#237 (marketplace enhancements), #238 (Zapier/n8n), #239 (Slack/Discord bot), #242 (tests).
+
+### F.3 — Collaboration (Advanced)
+
+Deferred issues: #209-#211 (VS Code extension, GitHub Action), #218 (real-time editing), #221 (three-way merge), #222 (inline commenting).
 
 ---
 

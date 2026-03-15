@@ -17,6 +17,7 @@ import {
   Shield,
   LayoutDashboard,
   TrendingUp,
+  BookOpenCheck,
 } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { useTheme } from '@/hooks/useTheme'
@@ -75,10 +76,13 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       {/* Brand */}
       <div className="px-5 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 group" onClick={onClose}>
-          <img src="/logo.png" alt="eooo.ai" className="h-8 w-8 object-contain" />
-          <div>
-            <span className="font-semibold text-[15px] text-sidebar-foreground tracking-tight">
-              eooo.ai
+          <img src="/logo.png" alt="Orkestr" className="h-8 w-8 object-contain" />
+          <div className="flex flex-col">
+            <span className="font-semibold text-[15px] text-sidebar-foreground tracking-tight leading-none">
+              Orkestr
+            </span>
+            <span className="text-[10px] text-sidebar-muted tracking-wide leading-none mt-0.5">
+              by eooo.ai
             </span>
           </div>
         </Link>
@@ -152,6 +156,20 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
 
       {/* Footer */}
       <div className="px-3 pb-3 pt-2 space-y-2">
+        {/* User Guide */}
+        <Link
+          to="/guide"
+          onClick={onClose}
+          className={`state-layer flex items-center gap-2 px-3 py-2 text-sm transition-colors duration-150 ${
+            isActive('/guide')
+              ? 'bg-primary/20 text-primary font-medium'
+              : 'text-sidebar-muted hover:text-sidebar-foreground'
+          }`}
+        >
+          <BookOpenCheck className={`h-4 w-4 ${isActive('/guide') ? 'text-primary' : ''}`} />
+          User Guide
+        </Link>
+
         {/* Theme toggle */}
         <div className="flex items-center bg-sidebar-accent p-1">
           {themeOptions.map(({ value, icon: Icon, label }) => (

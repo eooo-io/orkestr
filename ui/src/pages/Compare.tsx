@@ -26,7 +26,7 @@ const COMPARISON_DATA: ComparisonRow[] = [
   { feature: 'Self-hostable', eooo: true, dify: true, langflow: true, autogen: true, relevance: false },
 ]
 
-const COMPETITORS = ['eooo.ai', 'Dify', 'LangFlow', 'AutoGen Studio', 'Relevance AI']
+const COMPETITORS = ['Orkestr', 'Dify', 'LangFlow', 'AutoGen Studio', 'Relevance AI']
 
 function CellValue({ value }: { value: boolean | string }) {
   if (value === true) return <Check className="h-4 w-4 text-emerald-400 mx-auto" />
@@ -42,8 +42,8 @@ export function Compare() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
             <ArrowLeft className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-            <img src="/logo.png" alt="eooo.ai" className="h-6 w-6 object-contain" />
-            <span className="font-semibold text-sm">eooo.ai</span>
+            <img src="/logo.png" alt="Orkestr" className="h-6 w-6 object-contain" />
+            <span className="font-semibold text-sm">Orkestr</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link to="/login">
@@ -62,11 +62,11 @@ export function Compare() {
         {/* Hero */}
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            How eooo.ai compares
+            How Orkestr compares
           </h1>
           <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
-            A side-by-side look at eooo.ai versus other AI agent platforms.
-            Multi-model routing, agent autonomy controls, and runtime guardrails set eooo apart.
+            A side-by-side look at Orkestr versus other AI agent platforms.
+            Multi-model routing, agent autonomy controls, and runtime guardrails set Orkestr apart.
           </p>
         </div>
 

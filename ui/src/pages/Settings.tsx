@@ -11,45 +11,6 @@ interface SettingsData {
   default_model: string
 }
 
-const SYNC_PROVIDERS = [
-  {
-    name: 'Claude',
-    slug: 'claude',
-    output: '.claude/CLAUDE.md',
-    format: 'H2 headings per skill',
-  },
-  {
-    name: 'Cursor',
-    slug: 'cursor',
-    output: '.cursor/rules/{slug}.mdc',
-    format: 'One MDC file per skill',
-  },
-  {
-    name: 'Copilot',
-    slug: 'copilot',
-    output: '.github/copilot-instructions.md',
-    format: 'All skills concatenated',
-  },
-  {
-    name: 'Windsurf',
-    slug: 'windsurf',
-    output: '.windsurf/rules/{slug}.md',
-    format: 'One file per skill',
-  },
-  {
-    name: 'Cline',
-    slug: 'cline',
-    output: '.clinerules',
-    format: 'Single flat file',
-  },
-  {
-    name: 'OpenAI',
-    slug: 'openai',
-    output: '.openai/instructions.md',
-    format: 'All skills concatenated',
-  },
-]
-
 function StatusBadge({ configured }: { configured: boolean }) {
   return configured ? (
     <span className="flex items-center gap-1.5 text-sm text-green-500">
@@ -254,33 +215,6 @@ export function Settings() {
               {settings?.default_model || 'claude-sonnet-4-6'}
             </span>
           </div>
-        </div>
-      </section>
-
-      {/* Provider Sync Reference */}
-      <section className="mb-8">
-        <h2 className="text-lg font-semibold mb-3">Provider Sync Reference</h2>
-        <div className="bg-card elevation-1 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="text-left px-4 py-2 font-medium">Provider</th>
-                <th className="text-left px-4 py-2 font-medium">Output Path</th>
-                <th className="text-left px-4 py-2 font-medium">Format</th>
-              </tr>
-            </thead>
-            <tbody>
-              {SYNC_PROVIDERS.map((p) => (
-                <tr key={p.slug} className="border-b border-border last:border-0">
-                  <td className="px-4 py-2 font-medium">{p.name}</td>
-                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
-                    {p.output}
-                  </td>
-                  <td className="px-4 py-2 text-muted-foreground">{p.format}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </section>
 

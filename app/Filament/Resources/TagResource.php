@@ -16,6 +16,8 @@ class TagResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
 
+    protected static ?string $navigationGroup = 'Content';
+
     protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
