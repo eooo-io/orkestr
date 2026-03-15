@@ -43,6 +43,7 @@ export default defineConfig({
           text: 'Deployment',
           items: [
             { text: 'Self-Hosted Deployment', link: '/guide/self-hosted-deployment' },
+            { text: 'Hardware Recommendations', link: '/guide/hardware' },
             { text: 'Local Models', link: '/guide/local-models' },
             { text: 'Guardrails', link: '/guide/guardrails' },
           ],
