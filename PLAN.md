@@ -1063,16 +1063,16 @@ Full-featured entity editors in the right flyout. Every field editable, every ch
 
 | Issue | Title | Status |
 |---|---|---|
-| #418 | Agent detail panel: full editor with all loop fields (model, planning, autonomy, max iterations, timeout, persona) | TODO |
-| #419 | Agent detail panel: skill assignment manager (add/remove skills with search dropdown) | TODO |
-| #420 | Agent detail panel: MCP server binding (add/remove with dropdown, show connected tools) | TODO |
-| #421 | Agent detail panel: A2A agent binding (add/remove with dropdown) | TODO |
-| #422 | Agent detail panel: enable/disable toggle and delete button with confirmation | TODO |
-| #423 | Skill detail panel: inline frontmatter editor (model, tags, max_tokens, description) | TODO |
-| #424 | Skill detail panel: prompt body editor (Monaco Editor embedded in flyout) | TODO |
-| #425 | MCP server detail panel: full editor (name, transport, command/URL, args, env vars) | TODO |
-| #426 | A2A agent detail panel: full editor (name, URL, description, capabilities) | TODO |
-| #427 | Edge config panel: persist delegation config to backend (trigger, handoff, return behavior) | TODO |
+| #338 | Agent detail panel: full editor with all loop fields | PENDING |
+| #339 | Agent detail panel: skill assignment manager | PENDING |
+| #340 | Agent detail panel: MCP server binding | PENDING |
+| #341 | Agent detail panel: A2A agent binding | PENDING |
+| #342 | Agent detail panel: enable/disable toggle and delete | PENDING |
+| #343 | Skill detail panel: inline frontmatter editor | PENDING |
+| #344 | Skill detail panel: embedded Monaco prompt editor | PENDING |
+| #345 | MCP server detail panel: full editor | PENDING |
+| #346 | A2A agent detail panel: full editor | PENDING |
+| #347 | Edge config panel: persist delegation config to backend | PENDING |
 
 **Key changes:**
 - AgentDetail becomes a tabbed editor: Identity, Reasoning, Tools, Orchestration
@@ -1087,14 +1087,14 @@ Create new entities directly from the canvas. No more switching to other pages j
 
 | Issue | Title | Status |
 |---|---|---|
-| #428 | Canvas palette: "+" button on each section to create a new agent/MCP/A2A inline | TODO |
-| #429 | Create agent from canvas: opens flyout with empty agent form, saves via API, adds node | TODO |
-| #430 | Create MCP server from canvas: opens flyout with MCP form, saves via API, adds node | TODO |
-| #431 | Create A2A agent from canvas: opens flyout with A2A form, saves via API, adds node | TODO |
-| #432 | Create skill from canvas: opens flyout with skill name/description form, saves, adds node | TODO |
-| #433 | Delete node from canvas: right-click or detail panel delete with confirmation dialog | TODO |
-| #434 | Delete edge from canvas: click edge + delete key or right-click context menu | TODO |
-| #435 | Unassign skill from agent: remove edge and update API (without deleting the skill) | TODO |
+| #348 | Canvas palette: + button to create new entities | PENDING |
+| #349 | Create agent from canvas flyout | PENDING |
+| #350 | Create MCP server from canvas flyout | PENDING |
+| #351 | Create A2A agent from canvas flyout | PENDING |
+| #352 | Create skill from canvas flyout | PENDING |
+| #353 | Delete node from canvas with confirmation | PENDING |
+| #354 | Delete edge from canvas | PENDING |
+| #355 | Unassign skill from agent via canvas | PENDING |
 
 **Key behaviors:**
 - "+" button in palette header opens the detail flyout in "create" mode
@@ -1109,13 +1109,13 @@ Drag-to-connect between nodes to create relationships. The canvas becomes the wi
 
 | Issue | Title | Status |
 |---|---|---|
-| #436 | Drag-to-connect: agent → skill creates skill assignment edge | TODO |
-| #437 | Drag-to-connect: agent → MCP server creates tool binding edge | TODO |
-| #438 | Drag-to-connect: agent → A2A agent creates delegation edge | TODO |
-| #439 | Drag-to-connect: agent → agent creates delegation edge | TODO |
-| #440 | Connection validation rules: prevent invalid edges (skill→skill, MCP→skill, duplicate edges) | TODO |
-| #441 | Connection handles: show connect anchors on node hover with type-appropriate colors | TODO |
-| #442 | Visual feedback during connection: dashed line preview with valid/invalid indicator | TODO |
+| #356 | Drag-to-connect: agent → skill assignment | PENDING |
+| #357 | Drag-to-connect: agent → MCP server binding | PENDING |
+| #358 | Drag-to-connect: agent → A2A delegation | PENDING |
+| #359 | Drag-to-connect: agent → agent delegation | PENDING |
+| #360 | Connection validation rules | PENDING |
+| #361 | Connection handles on nodes | PENDING |
+| #362 | Visual feedback during connection drag | PENDING |
 
 **Implementation:**
 - React Flow `onConnect` handler with source/target node type checking
@@ -1130,13 +1130,13 @@ Quality-of-life features that make the canvas feel like a real design tool.
 
 | Issue | Title | Status |
 |---|---|---|
-| #443 | Multi-select: shift+click and box selection for bulk move/delete | TODO |
-| #444 | Context menu: right-click on nodes, edges, and canvas background | TODO |
-| #445 | Keyboard shortcuts: Delete (remove), Cmd+Z (undo), Cmd+A (select all), Escape (deselect) | TODO |
-| #446 | Undo/redo: track canvas operations (create, delete, move, connect) with Cmd+Z / Cmd+Shift+Z | TODO |
-| #447 | Auto-save: debounced position persistence (500ms after last move) | TODO |
-| #448 | Empty state: helpful onboarding when canvas has no nodes (create first agent prompt) | TODO |
-| #449 | Node search/filter: filter visible nodes by type, name, or tag from toolbar | TODO |
+| #363 | Multi-select: shift+click and box selection | PENDING |
+| #364 | Context menu: right-click on nodes, edges, and canvas | PENDING |
+| #365 | Keyboard shortcuts for canvas | PENDING |
+| #366 | Undo/redo for canvas operations | PENDING |
+| #367 | Auto-save canvas positions (debounced) | PENDING |
+| #368 | Empty canvas onboarding state | PENDING |
+| #369 | Node search and filter in toolbar | PENDING |
 
 ### L.5 — Backend & Persistence
 
@@ -1144,11 +1144,11 @@ API changes needed to support canvas-driven composition.
 
 | Issue | Title | Status |
 |---|---|---|
-| #450 | Edge config model: migration + endpoints to persist delegation edge configs per project | TODO |
-| #451 | Canvas-aware graph endpoint: return edge configs and creation metadata with graph data | TODO |
-| #452 | Optimistic graph refresh: after canvas mutation, merge local changes before full refetch | TODO |
-| #453 | Agent quick-create API: minimal endpoint for canvas (name + model only, defaults for rest) | TODO |
-| #454 | Pest tests for canvas CRUD operations and edge config persistence | TODO |
+| #370 | Edge config model and API endpoints | PENDING |
+| #371 | Include edge configs in graph endpoint response | PENDING |
+| #372 | Optimistic graph refresh after canvas mutations | PENDING |
+| #373 | Agent quick-create API endpoint | PENDING |
+| #374 | Pest tests for canvas CRUD and edge config persistence | PENDING |
 
 ### Implementation Sequence
 
