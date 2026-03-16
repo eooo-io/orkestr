@@ -146,12 +146,13 @@ function buildGraph(data: ProjectGraphData) {
   const edges: Edge[] = []
 
   const skillIdMap = new Map(data.skills.map((s) => [s.id, s]))
-  const assignedSkillIds = new Set(data.agents.flatMap((a) => a.skill_ids))
+  const enabledAgents = data.agents.filter((a) => a.is_enabled)
+  const assignedSkillIds = new Set(enabledAgents.flatMap((a) => a.skill_ids))
   const unassignedSkills = data.skills.filter((s) => !assignedSkillIds.has(s.id))
 
   // Build agent → skill names map for chip display
   const agentSkillNames = new Map<number, Array<{ id: number; name: string }>>()
-  for (const agent of data.agents) {
+  for (const agent of enabledAgents) {
     const names: Array<{ id: number; name: string }> = []
     for (const skillId of agent.skill_ids) {
       const skill = skillIdMap.get(skillId)
@@ -169,7 +170,7 @@ function buildGraph(data: ProjectGraphData) {
     id: 'lane-agents',
     type: 'laneLabel',
     position: { x: LANE.agents, y: 0 },
-    data: { label: 'Agents', count: data.agents.length },
+    data: { label: 'Agents', count: enabledAgents.length },
     draggable: false,
     selectable: false,
   })
@@ -195,8 +196,8 @@ function buildGraph(data: ProjectGraphData) {
 
   const skillPositions = new Map<number, { x: number; y: number }>()
 
-  // Place agents and their assigned skills
-  data.agents.forEach((agent) => {
+  // Place agents and their assigned skills (skip disabled agents)
+  data.agents.filter((a) => a.is_enabled).forEach((agent) => {
     const agentNodeY = agentY
 
     nodes.push({
@@ -653,8 +654,8 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId }: Props) {
   const paletteAgents = useMemo(
     () =>
       data.agents
-        .filter((a) => !canvasNodeIds.has(`agent-${a.id}`))
-        .map((a) => ({ id: `agent-${a.id}`, name: a.name, type: 'agent' })),
+        .filter((a) => a.is_enabled && !canvasNodeIds.has(`agent-${a.id}`))
+        .map((a) => ({ id: `agent-${a.id}`, name: a.display_name || a.name, type: 'agent' })),
     [data.agents, canvasNodeIds],
   )
 
