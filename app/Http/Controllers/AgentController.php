@@ -222,6 +222,42 @@ class AgentController extends Controller
     }
 
     /**
+     * Quick-create an agent and attach it to a project.
+     *
+     * POST /api/projects/{project}/agents/quick-create
+     */
+    public function quickCreate(Request $request, Project $project): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'model' => 'nullable|string|max:100',
+            'role' => 'nullable|string|max:255',
+        ]);
+
+        $agent = Agent::create([
+            'name' => $validated['name'],
+            'role' => $validated['role'] ?? 'general',
+            'model' => $validated['model'] ?? 'claude-sonnet-4-6',
+            'base_instructions' => '',
+            'planning_mode' => 'plan_then_act',
+            'context_strategy' => 'full',
+            'max_iterations' => 10,
+            'can_delegate' => false,
+        ]);
+
+        // Attach to project with is_enabled = true
+        ProjectAgent::create([
+            'project_id' => $project->id,
+            'agent_id' => $agent->id,
+            'is_enabled' => true,
+        ]);
+
+        $agent->load('parentAgent', 'childAgents');
+
+        return (new AgentResource($agent))->response()->setStatusCode(201);
+    }
+
+    /**
      * List agents for a project with their enabled status and assigned skills.
      */
     public function projectAgents(Project $project): JsonResponse

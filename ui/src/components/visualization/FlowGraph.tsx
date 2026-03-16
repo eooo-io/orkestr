@@ -77,6 +77,7 @@ interface Props {
   height?: number
   onNodeClick?: (nodeId: string, type: string) => void
   projectId?: number
+  onRefresh?: () => void
 }
 
 // ─── Dagre-style auto-layout (simple LR directed graph layout) ─────
@@ -575,7 +576,7 @@ function CanvasToolbar({ onAutoLayout, onFitView, onZoomIn, onZoomOut, isFullscr
 }
 
 // ─── Main interactive graph component ──────────────────────────────
-function FlowGraphInner({ data, height = 500, onNodeClick, projectId }: Props) {
+function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh }: Props) {
   const initialGraph = useMemo(() => buildGraph(data), [data])
   const [nodes, setNodes] = useState<Node[]>(initialGraph.nodes)
   const [edges, setEdges] = useState<Edge[]>(initialGraph.edges)
@@ -1241,6 +1242,9 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId }: Props) {
             edgeId={selectedEdgeId}
             sourceAgentName={getAgentNameFromNodeId(selectedEdge.source)}
             targetAgentName={getAgentNameFromNodeId(selectedEdge.target)}
+            sourceAgentId={selectedEdge.source.startsWith('agent-') ? parseInt(selectedEdge.source.replace('agent-', ''), 10) : undefined}
+            targetAgentId={selectedEdge.target.startsWith('agent-') ? parseInt(selectedEdge.target.replace('agent-', ''), 10) : undefined}
+            projectId={projectId}
             config={selectedEdgeConfig}
             onSave={handleEdgeConfigSave}
             onClose={() => setSelectedEdgeId(null)}
@@ -1253,7 +1257,15 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId }: Props) {
             nodeId={selectedNodeInfo.id}
             nodeType={selectedNodeInfo.type as 'agent' | 'skill' | 'mcp' | 'a2a' | 'provider'}
             data={data}
+            projectId={projectId}
             onClose={() => setSelectedNodeInfo(null)}
+            onRefresh={onRefresh}
+            onNodeDeleted={(nodeId) => {
+              setNodes((nds) => nds.filter((n) => n.id !== nodeId))
+              setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId))
+              setSelectedNodeInfo(null)
+              onRefresh?.()
+            }}
           />
         )}
       </div>

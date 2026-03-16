@@ -1309,3 +1309,52 @@ export interface ModelRecommendation {
 export interface CanvasLayout {
   nodes: Record<string, { x: number; y: number }>
 }
+
+// --- Canvas Delegation Config (#347) ---
+
+export interface DelegationConfig {
+  edge_id: string
+  source_agent_id: number
+  target_agent_id: number
+  delegation_trigger: string
+  handoff_context: {
+    pass_conversation: boolean
+    pass_memory: boolean
+    pass_tools: boolean
+    custom_json: string
+  }
+  return_behavior: 'report_back' | 'fire_and_forget' | 'chain_forward'
+}
+
+// --- MCP Server full detail (for canvas detail panel) ---
+
+export interface McpServerDetail {
+  id: number
+  project_id: number
+  name: string
+  transport: string
+  command: string | null
+  args: string[] | null
+  url: string | null
+  env: Record<string, string> | null
+  headers: Record<string, string> | null
+  enabled: boolean
+  approval_status: string | null
+  created_at: string
+  updated_at: string
+}
+
+// --- A2A Agent full detail (for canvas detail panel) ---
+
+export interface A2aAgentDetail {
+  id: number
+  project_id: number
+  name: string
+  url: string
+  description: string | null
+  skills: string[] | null
+  enabled: boolean
+  approval_status: string | null
+  created_at: string
+  updated_at: string
+}

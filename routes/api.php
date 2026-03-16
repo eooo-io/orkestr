@@ -64,6 +64,7 @@ use App\Http\Controllers\GitHubImportController;
 use App\Http\Controllers\ModelPullController;
 use App\Http\Controllers\ModelRecommendationController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\DelegationConfigController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -177,6 +178,7 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/agents/{agent}/export', [AgentController::class, 'export']);
 
     // Agents — project-scoped
+    Route::post('/projects/{project}/agents/quick-create', [AgentController::class, 'quickCreate'])->middleware('org-role:editor');
     Route::get('/projects/{project}/agents', [AgentController::class, 'projectAgents']);
     Route::put('/projects/{project}/agents/{agent}/toggle', [AgentController::class, 'toggle']);
     Route::put('/projects/{project}/agents/{agent}/instructions', [AgentController::class, 'updateInstructions']);
@@ -323,6 +325,11 @@ Route::middleware('auth:web')->group(function () {
 
     // Visualization
     Route::get('/projects/{project}/graph', [VisualizationController::class, 'graph']);
+
+    // Delegation Configs (Canvas edge configs)
+    Route::get('/projects/{project}/delegation-configs', [DelegationConfigController::class, 'index']);
+    Route::put('/projects/{project}/delegation-configs', [DelegationConfigController::class, 'upsert'])->middleware('org-role:editor');
+    Route::delete('/delegation-configs/{delegationConfig}', [DelegationConfigController::class, 'destroy'])->middleware('org-role:editor');
 
     // Import (Reverse-Sync)
     Route::post('/import/detect', [ImportController::class, 'detect']);

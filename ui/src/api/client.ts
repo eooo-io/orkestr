@@ -91,6 +91,9 @@ import type {
   PaginatedUsers,
   ManagedUser,
   CanvasLayout,
+  McpServerDetail,
+  A2aAgentDetail,
+  DelegationConfig,
 } from '@/types'
 
 const api = axios.create({
@@ -1454,5 +1457,32 @@ export const fetchCanvasLayout = (projectId: number) =>
 
 export const saveCanvasLayout = (projectId: number, layout: Record<string, { x: number; y: number }>) =>
   api.put<ApiResponse<CanvasLayout>>(`/projects/${projectId}/canvas-layout`, { nodes: layout }).then((r) => r.data.data)
+
+// --- MCP Server CRUD (L.1 #345) ---
+
+export const fetchMcpServers = (projectId: number) =>
+  api.get<{ mcp_servers: McpServerDetail[] }>(`/projects/${projectId}/mcp-servers`).then((r) => r.data.mcp_servers)
+
+export const updateMcpServer = (id: number, data: Partial<McpServerDetail>) =>
+  api.put<{ mcp_server: McpServerDetail }>(`/mcp-servers/${id}`, data).then((r) => r.data.mcp_server)
+
+export const deleteMcpServer = (id: number) =>
+  api.delete(`/mcp-servers/${id}`)
+
+// --- A2A Agent CRUD (L.1 #346) ---
+
+export const fetchA2aAgents = (projectId: number) =>
+  api.get<{ a2a_agents: A2aAgentDetail[] }>(`/projects/${projectId}/a2a-agents`).then((r) => r.data.a2a_agents)
+
+export const updateA2aAgent = (id: number, data: Partial<A2aAgentDetail>) =>
+  api.put<{ a2a_agent: A2aAgentDetail }>(`/a2a-agents/${id}`, data).then((r) => r.data.a2a_agent)
+
+export const deleteA2aAgent = (id: number) =>
+  api.delete(`/a2a-agents/${id}`)
+
+// --- Delegation Config (L.1 #347) ---
+
+export const saveDelegationConfigs = (projectId: number, configs: DelegationConfig[]) =>
+  api.put(`/projects/${projectId}/delegation-configs`, { configs }).then((r) => r.data)
 
 export default api

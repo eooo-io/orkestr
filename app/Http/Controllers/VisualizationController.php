@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DelegationConfig;
 use App\Models\Project;
 use App\Services\ProviderSyncService;
 use Illuminate\Http\JsonResponse;
@@ -180,6 +181,22 @@ class VisualizationController extends Controller
             }
         }
 
+        // Delegation Configs (edge configs for canvas)
+        $delegationConfigs = DelegationConfig::where('project_id', $project->id)
+            ->get()
+            ->map(fn ($dc) => [
+                'id' => $dc->id,
+                'source_agent_id' => $dc->source_agent_id,
+                'target_agent_id' => $dc->target_agent_id,
+                'target_a2a_agent_id' => $dc->target_a2a_agent_id,
+                'trigger_condition' => $dc->trigger_condition,
+                'pass_conversation_history' => $dc->pass_conversation_history,
+                'pass_agent_memory' => $dc->pass_agent_memory,
+                'pass_available_tools' => $dc->pass_available_tools,
+                'custom_context' => $dc->custom_context,
+                'return_behavior' => $dc->return_behavior,
+            ]);
+
         // Workflows
         $workflows = $project->workflows()
             ->withCount(['steps', 'edges'])
@@ -210,6 +227,7 @@ class VisualizationController extends Controller
                 'mcp_servers' => $mcpServers,
                 'a2a_agents' => $a2aAgents,
                 'sync_outputs' => $syncOutputs,
+                'delegation_configs' => $delegationConfigs,
                 'workflows' => $workflows,
             ],
         ]);

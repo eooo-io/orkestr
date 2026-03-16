@@ -43,6 +43,10 @@ export default function VisualizationTab({ projectId }: Props) {
     }
   }
 
+  const handleRefresh = () => {
+    fetchProjectGraph(projectId).then(setData)
+  }
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -89,7 +93,7 @@ export default function VisualizationTab({ projectId }: Props) {
         </Link>
       </div>
 
-      <FlowGraph data={data} height={500} onNodeClick={handleNodeClick} projectId={projectId} />
+      <FlowGraph data={data} height={500} onNodeClick={handleNodeClick} projectId={projectId} onRefresh={handleRefresh} />
 
       <div className="flex items-center gap-4 text-[11px] text-zinc-500 px-1">
         <span>

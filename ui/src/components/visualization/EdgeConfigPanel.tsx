@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
-import { X, ArrowRight, Save } from 'lucide-react'
+import { X, ArrowRight, Save, Check, AlertTriangle } from 'lucide-react'
+import { saveDelegationConfigs } from '@/api/client'
+import type { DelegationConfig } from '@/types'
 
 export interface EdgeConfigData {
   edgeId: string
   sourceAgentName: string
   targetAgentName: string
+  sourceAgentId?: number
+  targetAgentId?: number
   delegationTrigger: string
   handoffContext: {
     pass_conversation: boolean
@@ -19,6 +23,9 @@ interface Props {
   edgeId: string
   sourceAgentName: string
   targetAgentName: string
+  sourceAgentId?: number
+  targetAgentId?: number
+  projectId?: number
   config: EdgeConfigData | null
   onSave: (data: EdgeConfigData) => void
   onClose: () => void
@@ -28,6 +35,9 @@ export default function EdgeConfigPanel({
   edgeId,
   sourceAgentName,
   targetAgentName,
+  sourceAgentId,
+  targetAgentId,
+  projectId,
   config,
   onSave,
   onClose,
@@ -40,6 +50,9 @@ export default function EdgeConfigPanel({
   const [returnBehavior, setReturnBehavior] = useState<EdgeConfigData['returnBehavior']>(
     config?.returnBehavior ?? 'report_back',
   )
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
 
   useEffect(() => {
     setTrigger(config?.delegationTrigger ?? '')
@@ -50,11 +63,13 @@ export default function EdgeConfigPanel({
     setReturnBehavior(config?.returnBehavior ?? 'report_back')
   }, [config, edgeId])
 
-  const handleSave = useCallback(() => {
-    onSave({
+  const handleSave = useCallback(async () => {
+    const configData: EdgeConfigData = {
       edgeId,
       sourceAgentName,
       targetAgentName,
+      sourceAgentId,
+      targetAgentId,
       delegationTrigger: trigger,
       handoffContext: {
         pass_conversation: passConversation,
@@ -63,8 +78,42 @@ export default function EdgeConfigPanel({
         custom_json: customJson,
       },
       returnBehavior,
-    })
-  }, [edgeId, sourceAgentName, targetAgentName, trigger, passConversation, passMemory, passTools, customJson, returnBehavior, onSave])
+    }
+
+    // Save optimistically to local state
+    onSave(configData)
+
+    // Attempt to persist to backend (#347)
+    if (projectId && sourceAgentId && targetAgentId) {
+      setSaving(true)
+      setApiError(null)
+      setSaved(false)
+      try {
+        const delegationConfig: DelegationConfig = {
+          edge_id: edgeId,
+          source_agent_id: sourceAgentId,
+          target_agent_id: targetAgentId,
+          delegation_trigger: trigger,
+          handoff_context: {
+            pass_conversation: passConversation,
+            pass_memory: passMemory,
+            pass_tools: passTools,
+            custom_json: customJson,
+          },
+          return_behavior: returnBehavior,
+        }
+        await saveDelegationConfigs(projectId, [delegationConfig])
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2000)
+      } catch {
+        // Gracefully handle 404 if backend endpoint doesn't exist yet
+        setApiError('Saved locally (backend sync pending)')
+        setTimeout(() => setApiError(null), 3000)
+      } finally {
+        setSaving(false)
+      }
+    }
+  }, [edgeId, sourceAgentName, targetAgentName, sourceAgentId, targetAgentId, projectId, trigger, passConversation, passMemory, passTools, customJson, returnBehavior, onSave])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -183,16 +232,25 @@ export default function EdgeConfigPanel({
         {/* Save */}
         <button
           onClick={handleSave}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-cyan-700 hover:bg-cyan-600 text-white text-xs font-medium rounded-md transition-colors"
+          disabled={saving}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-cyan-700 hover:bg-cyan-600 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
         >
-          <Save className="h-3.5 w-3.5" />
-          Save Configuration
+          {saved ? <Check className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}
+          {saving ? 'Saving...' : saved ? 'Saved' : 'Save Configuration'}
         </button>
 
-        <p className="text-[10px] text-zinc-600 text-center">
-          {/* TODO: Persist to A2A agent relationship via API */}
-          Configuration stored in local canvas state
-        </p>
+        {apiError && (
+          <p className="text-[10px] text-amber-400 text-center flex items-center justify-center gap-1">
+            <AlertTriangle className="h-3 w-3" />
+            {apiError}
+          </p>
+        )}
+
+        {!apiError && !saved && (
+          <p className="text-[10px] text-zinc-600 text-center">
+            {projectId ? 'Saves to local state and backend' : 'Configuration stored in local canvas state'}
+          </p>
+        )}
       </div>
     </div>
   )

@@ -25,6 +25,11 @@ export function ProjectVisualize() {
     }
   }
 
+  const handleRefresh = () => {
+    if (!id) return
+    fetchProjectGraph(parseInt(id)).then(setData)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -83,7 +88,7 @@ export function ProjectVisualize() {
 
       {/* Graph */}
       <div className="flex-1">
-        <FlowGraph data={data} height={graphHeight} onNodeClick={handleNodeClick} projectId={id ? parseInt(id) : undefined} />
+        <FlowGraph data={data} height={graphHeight} onNodeClick={handleNodeClick} projectId={id ? parseInt(id) : undefined} onRefresh={handleRefresh} />
       </div>
     </div>
   )
