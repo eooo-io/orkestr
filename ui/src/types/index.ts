@@ -90,6 +90,14 @@ export interface LibrarySkill {
   created_at: string
 }
 
+export interface AgentPersona {
+  name?: string
+  aliases?: string[]
+  avatar?: string
+  personality?: string
+  bio?: string
+}
+
 export interface Agent {
   id: number
   uuid: string
@@ -103,6 +111,7 @@ export interface Agent {
   fallback_models: string[] | null
   routing_strategy: string
   icon: string | null
+  persona: AgentPersona | null
   sort_order: number
 
   // Goal

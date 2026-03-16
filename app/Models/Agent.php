@@ -23,6 +23,7 @@ class Agent extends Model
         'fallback_models',
         'routing_strategy',
         'icon',
+        'persona',
         'sort_order',
 
         // Goal
@@ -93,11 +94,13 @@ class Agent extends Model
             'allowed_tools' => 'array',
             'blocked_tools' => 'array',
             'data_access_scope' => 'array',
+            'persona' => 'array',
         ];
     }
 
     protected $attributes = [
         'autonomy_level' => 'semi_autonomous',
+        'base_instructions' => '',
     ];
 
     protected static function booted(): void
@@ -186,6 +189,68 @@ class Agent extends Model
     public function scopeDelegators($query)
     {
         return $query->where('can_delegate', true);
+    }
+
+    // --- Persona Helpers ---
+
+    public function personaName(): ?string
+    {
+        return $this->persona['name'] ?? null;
+    }
+
+    public function personaAvatar(): ?string
+    {
+        return $this->persona['avatar'] ?? null;
+    }
+
+    public function personaAliases(): array
+    {
+        return $this->persona['aliases'] ?? [];
+    }
+
+    public function personaPersonality(): ?string
+    {
+        return $this->persona['personality'] ?? null;
+    }
+
+    public function personaBio(): ?string
+    {
+        return $this->persona['bio'] ?? null;
+    }
+
+    /**
+     * Get the display name — persona name if set, otherwise agent name.
+     */
+    public function displayName(): string
+    {
+        return $this->personaName() ?: $this->name;
+    }
+
+    /**
+     * Build the persona context to prepend to the system prompt.
+     */
+    public function personaContext(): ?string
+    {
+        $parts = [];
+
+        if ($name = $this->personaName()) {
+            $parts[] = "You are {$name}.";
+        }
+
+        if ($bio = $this->personaBio()) {
+            $parts[] = $bio;
+        }
+
+        if ($personality = $this->personaPersonality()) {
+            $parts[] = "Communicate in a {$personality} style.";
+        }
+
+        $aliases = $this->personaAliases();
+        if (! empty($aliases)) {
+            $parts[] = 'You also respond to: ' . implode(', ', $aliases) . '.';
+        }
+
+        return ! empty($parts) ? implode(' ', $parts) : null;
     }
 
     // --- Helpers ---

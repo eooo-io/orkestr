@@ -29,6 +29,7 @@ const EMPTY_AGENT: Partial<Agent> = {
   description: '',
   base_instructions: '',
   persona_prompt: null,
+  persona: null,
   model: 'claude-sonnet-4-6',
   icon: 'brain',
   objective_template: null,
@@ -348,6 +349,59 @@ export function AgentBuilder() {
               ))}
             </div>
           </Field>
+          {/* Persona */}
+          <div className="border border-border rounded p-4 space-y-3">
+            <h3 className="text-sm font-semibold">Persona</h3>
+            <p className="text-xs text-muted-foreground">Give this agent a personality and identity. Persona context is prepended to the system prompt.</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Persona Name">
+                <input
+                  type="text"
+                  value={agent.persona?.name || ''}
+                  onChange={(e) => update('persona', { ...agent.persona, name: e.target.value || undefined })}
+                  className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder='e.g. "Aria" or "The Analyst"'
+                />
+              </Field>
+              <Field label="Avatar">
+                <input
+                  type="text"
+                  value={agent.persona?.avatar || ''}
+                  onChange={(e) => update('persona', { ...agent.persona, avatar: e.target.value || undefined })}
+                  className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Emoji or icon (e.g. 🔬)"
+                />
+              </Field>
+            </div>
+            <Field label="Aliases">
+              <input
+                type="text"
+                value={(agent.persona?.aliases ?? []).join(', ')}
+                onChange={(e) => update('persona', { ...agent.persona, aliases: e.target.value ? e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean) : undefined })}
+                className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Comma-separated aliases (e.g. aria, research-lead)"
+              />
+            </Field>
+            <Field label="Personality">
+              <input
+                type="text"
+                value={agent.persona?.personality || ''}
+                onChange={(e) => update('persona', { ...agent.persona, personality: e.target.value || undefined })}
+                className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="e.g. concise and analytical, friendly, formal"
+              />
+            </Field>
+            <Field label="Bio">
+              <textarea
+                value={agent.persona?.bio || ''}
+                onChange={(e) => update('persona', { ...agent.persona, bio: e.target.value || undefined })}
+                rows={2}
+                className="w-full px-3 py-2 bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+                placeholder="One-liner backstory (e.g. Senior security researcher with 10 years of experience)"
+              />
+            </Field>
+          </div>
+
           <Field label="Base Instructions">
             <textarea
               value={agent.base_instructions || ''}
@@ -355,15 +409,6 @@ export function AgentBuilder() {
               rows={8}
               className="w-full px-3 py-2 bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary resize-y"
               placeholder="Core instructions for this agent (Markdown supported)"
-            />
-          </Field>
-          <Field label="Persona Prompt">
-            <textarea
-              value={agent.persona_prompt || ''}
-              onChange={(e) => update('persona_prompt', e.target.value || null)}
-              rows={3}
-              className="w-full px-3 py-2 bg-background border border-border text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary resize-y"
-              placeholder="Optional persona layer on top of base instructions"
             />
           </Field>
           <div className="flex items-center gap-4">

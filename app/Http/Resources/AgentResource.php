@@ -17,6 +17,8 @@ class AgentResource extends JsonResource
             'role' => $this->role,
             'description' => $this->description,
             'icon' => $this->icon,
+            'persona' => $this->persona,
+            'display_name' => $this->displayName(),
             'sort_order' => $this->sort_order,
 
             // Identity

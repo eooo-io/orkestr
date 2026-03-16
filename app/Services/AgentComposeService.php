@@ -41,6 +41,8 @@ class AgentComposeService
                 'slug' => $agent->slug,
                 'role' => $agent->role,
                 'icon' => $agent->icon,
+                'persona' => $agent->persona,
+                'display_name' => $agent->displayName(),
             ],
             'skill_count' => $skills->count(),
         ];
@@ -294,8 +296,13 @@ class AgentComposeService
     {
         $sections = [];
 
-        // Header
-        $sections[] = "# {$agent->name}";
+        // Header — use persona name if available
+        $sections[] = "# {$agent->displayName()}";
+
+        // Persona context
+        if ($personaContext = $agent->personaContext()) {
+            $sections[] = $personaContext;
+        }
 
         // Base instructions
         if ($agent->base_instructions) {

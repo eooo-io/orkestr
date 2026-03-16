@@ -15,6 +15,8 @@ type AgentNodeData = {
   label: string
   role: string
   icon: string | null
+  persona?: { name?: string; avatar?: string; aliases?: string[]; personality?: string; bio?: string } | null
+  displayName?: string
   isEnabled: boolean
   hasCustomInstructions: boolean
   skillCount: number
@@ -46,8 +48,17 @@ export const AgentNode = memo(({ data }: NodeProps & { data: AgentNodeData }) =>
       <Handle type="target" position={Position.Left} className="!bg-violet-500 !w-2 !h-2" />
       <Handle type="source" position={Position.Right} className="!bg-violet-500 !w-2 !h-2" />
       <div className="flex items-center gap-2 mb-1">
-        <Bot className="h-4 w-4 text-violet-400 shrink-0" />
-        <span className="text-sm font-semibold text-violet-100 truncate">{d.label}</span>
+        {d.persona?.avatar ? (
+          <span className="text-base shrink-0" title={d.persona.name}>{d.persona.avatar}</span>
+        ) : (
+          <Bot className="h-4 w-4 text-violet-400 shrink-0" />
+        )}
+        <div className="flex flex-col min-w-0">
+          <span className="text-sm font-semibold text-violet-100 truncate">{d.displayName || d.label}</span>
+          {d.persona?.name && d.persona.name !== d.label && (
+            <span className="text-[10px] text-zinc-500 truncate">{d.label}</span>
+          )}
+        </div>
         {!d.isEnabled && (
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-700 text-zinc-400 shrink-0">off</span>
         )}

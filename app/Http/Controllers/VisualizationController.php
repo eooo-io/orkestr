@@ -80,6 +80,8 @@ class VisualizationController extends Controller
             'slug' => $pa->agent->slug,
             'role' => $pa->agent->role,
             'icon' => $pa->agent->icon,
+            'persona' => $pa->agent->persona,
+            'display_name' => $pa->agent->displayName(),
             'is_enabled' => $pa->is_enabled,
             'has_custom_instructions' => ! empty($pa->custom_instructions),
             'skill_ids' => $pa->skills->pluck('id')->values()->all(),
