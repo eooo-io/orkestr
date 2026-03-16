@@ -10,6 +10,10 @@ import {
   Zap,
 } from 'lucide-react'
 
+/* ─── Shared handle styles ────────────────────────────────── */
+// Handles are 10px circles, hidden by default, visible on node hover via CSS
+const handleBaseClass = '!w-[10px] !h-[10px] !opacity-0 group-hover:!opacity-100 !transition-opacity !duration-150'
+
 /* ─── Agent Node ───────────────────────────────────────────── */
 type AgentNodeData = {
   label: string
@@ -37,7 +41,7 @@ export const AgentNode = memo(({ data }: NodeProps & { data: AgentNodeData }) =>
   const d = data as AgentNodeData
   return (
     <div
-      className={`px-4 py-3 rounded-lg border-2 min-w-[220px] shadow-lg transition-all ${
+      className={`group px-4 py-3 rounded-lg border-2 min-w-[220px] shadow-lg transition-all ${
         d.isDropTarget
           ? 'bg-violet-950/80 border-emerald-400 ring-2 ring-emerald-400/40'
           : d.isEnabled
@@ -45,8 +49,8 @@ export const AgentNode = memo(({ data }: NodeProps & { data: AgentNodeData }) =>
             : 'bg-zinc-900/80 border-zinc-600/40 opacity-60'
       }`}
     >
-      <Handle type="target" position={Position.Left} className="!bg-violet-500 !w-2 !h-2" />
-      <Handle type="source" position={Position.Right} className="!bg-violet-500 !w-2 !h-2" />
+      <Handle type="target" position={Position.Left} className={`!bg-violet-500 ${handleBaseClass}`} />
+      <Handle type="source" position={Position.Right} className={`!bg-violet-500 ${handleBaseClass}`} />
       <div className="flex items-center gap-2 mb-1">
         {d.persona?.avatar ? (
           <span className="text-base shrink-0" title={d.persona.name}>{d.persona.avatar}</span>
@@ -138,7 +142,7 @@ export const SkillNode = memo(({ data }: NodeProps & { data: SkillNodeData }) =>
   const d = data as SkillNodeData
   return (
     <div
-      className={`px-3 py-2.5 rounded-lg border min-w-[180px] shadow-md transition-all ${
+      className={`group px-3 py-2.5 rounded-lg border min-w-[180px] shadow-md transition-all ${
         d.isCircular
           ? 'bg-red-950/60 border-red-500/60 hover:border-red-400'
           : d.unassigned
@@ -146,8 +150,8 @@ export const SkillNode = memo(({ data }: NodeProps & { data: SkillNodeData }) =>
             : 'bg-emerald-950/60 border-emerald-500/40 hover:border-emerald-400'
       }`}
     >
-      <Handle type="target" position={Position.Left} className="!bg-emerald-500 !w-2 !h-2" />
-      <Handle type="source" position={Position.Right} className="!bg-emerald-500 !w-2 !h-2" />
+      <Handle type="target" position={Position.Left} className={`!bg-emerald-500 ${handleBaseClass}`} />
+      <Handle type="source" position={Position.Right} className={`!bg-emerald-500 ${handleBaseClass}`} />
       <div className="flex items-center gap-2 mb-1">
         {d.isCircular ? (
           <AlertTriangle className="h-3.5 w-3.5 text-red-400 shrink-0" />
@@ -214,8 +218,8 @@ type ProviderNodeData = {
 export const ProviderNode = memo(({ data }: NodeProps & { data: ProviderNodeData }) => {
   const d = data as ProviderNodeData
   return (
-    <div className="px-4 py-3 rounded-lg border border-amber-500/40 bg-amber-950/50 min-w-[200px] shadow-md hover:border-amber-400 transition-all">
-      <Handle type="target" position={Position.Left} className="!bg-amber-500 !w-2 !h-2" />
+    <div className="group px-4 py-3 rounded-lg border border-amber-500/40 bg-amber-950/50 min-w-[200px] shadow-md hover:border-amber-400 transition-all">
+      <Handle type="target" position={Position.Left} className={`!bg-amber-500 ${handleBaseClass}`} />
       <div className="flex items-center gap-2 mb-1">
         <FileCode className="h-4 w-4 text-amber-400 shrink-0" />
         <span className="text-sm font-semibold text-amber-100">{d.label}</span>
@@ -249,8 +253,8 @@ type McpNodeData = {
 export const McpNode = memo(({ data }: NodeProps & { data: McpNodeData }) => {
   const d = data as McpNodeData
   return (
-    <div className="px-4 py-3 rounded-lg border border-pink-500/40 bg-pink-950/50 min-w-[180px] shadow-md hover:border-pink-400 transition-all">
-      <Handle type="target" position={Position.Left} className="!bg-pink-500 !w-2 !h-2" />
+    <div className="group px-4 py-3 rounded-lg border border-pink-500/40 bg-pink-950/50 min-w-[180px] shadow-md hover:border-pink-400 transition-all">
+      <Handle type="target" position={Position.Left} className={`!bg-pink-500 ${handleBaseClass}`} />
       <div className="flex items-center gap-2 mb-1">
         <Server className="h-4 w-4 text-pink-400 shrink-0" />
         <span className="text-sm font-semibold text-pink-100">{d.label}</span>
@@ -273,8 +277,8 @@ type ProjectNodeData = {
 export const ProjectNode = memo(({ data }: NodeProps & { data: ProjectNodeData }) => {
   const d = data as ProjectNodeData
   return (
-    <div className="px-5 py-4 rounded-xl border-2 border-blue-500/60 bg-blue-950/60 min-w-[220px] shadow-xl">
-      <Handle type="source" position={Position.Right} className="!bg-blue-500 !w-2.5 !h-2.5" />
+    <div className="group px-5 py-4 rounded-xl border-2 border-blue-500/60 bg-blue-950/60 min-w-[220px] shadow-xl">
+      <Handle type="source" position={Position.Right} className={`!bg-blue-500 ${handleBaseClass}`} />
       <div className="text-base font-bold text-blue-100 mb-1">{d.label}</div>
       <div className="text-[11px] text-zinc-400">
         {d.syncedAt

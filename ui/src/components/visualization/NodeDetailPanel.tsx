@@ -25,6 +25,13 @@ import {
   assignAgentSkills,
   bindAgentMcpServers,
   bindAgentA2aAgents,
+  quickCreateAgent,
+  createSkill,
+  createMcpServer,
+  createA2aAgent,
+  deleteSkill,
+  deleteMcpServer,
+  deleteA2aAgent,
 } from '@/api/client'
 
 type NodeType = 'agent' | 'skill' | 'mcp' | 'a2a' | 'provider'
@@ -34,10 +41,12 @@ interface BaseProps {
   nodeType: NodeType
   data: ProjectGraphData
   projectId?: number
+  createMode?: 'agent' | 'skill' | 'mcp' | 'a2a' | null
   onClose: () => void
   onAgentUpdate?: (agentId: number, updates: { custom_instructions?: string }) => void
   onRefresh?: () => void
   onNodeDeleted?: (nodeId: string) => void
+  onCreateComplete?: () => void
 }
 
 // ─── Select component ─────────────────────────────────────────────
@@ -1014,15 +1023,68 @@ function AgentDetail({
   )
 }
 
-// ─── Skill detail ─────────────────────────────────────────────────
-function SkillDetail({ skill }: { skill: ProjectGraphData['skills'][0] }) {
+// ─── Skill detail (#353 — with delete) ────────────────────────────
+function SkillDetail({
+  skill,
+  onNodeDeleted,
+}: {
+  skill: ProjectGraphData['skills'][0]
+  onNodeDeleted?: (nodeId: string) => void
+}) {
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  const handleDelete = useCallback(async () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
+    setDeleting(true)
+    try {
+      await deleteSkill(skill.id)
+      onNodeDeleted?.(`skill-${skill.id}`)
+    } catch {
+      setDeleting(false)
+      setConfirmDelete(false)
+    }
+  }, [confirmDelete, skill.id, onNodeDeleted])
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Sparkles className="h-5 w-5 text-emerald-400" />
-        <div>
-          <h4 className="text-sm font-semibold text-emerald-100">{skill.name}</h4>
-          <p className="text-[11px] text-zinc-500">{skill.slug}</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-emerald-400" />
+          <div>
+            <h4 className="text-sm font-semibold text-emerald-100">{skill.name}</h4>
+            <p className="text-[11px] text-zinc-500">{skill.slug}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          {confirmDelete ? (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-2 py-1 text-[10px] font-medium bg-red-700 hover:bg-red-600 text-white rounded transition-colors disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Confirm'}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-2 py-1 text-[10px] font-medium bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleDelete}
+              className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
+              title="Delete skill"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -1063,14 +1125,67 @@ function SkillDetail({ skill }: { skill: ProjectGraphData['skills'][0] }) {
   )
 }
 
-// ─── MCP detail ───────────────────────────────────────────────────
-function McpDetail({ server }: { server: ProjectGraphData['mcp_servers'][0] }) {
+// ─── MCP detail (#353 — with delete) ──────────────────────────────
+function McpDetail({
+  server,
+  onNodeDeleted,
+}: {
+  server: ProjectGraphData['mcp_servers'][0]
+  onNodeDeleted?: (nodeId: string) => void
+}) {
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  const handleDelete = useCallback(async () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
+    setDeleting(true)
+    try {
+      await deleteMcpServer(server.id)
+      onNodeDeleted?.(`mcp-${server.id}`)
+    } catch {
+      setDeleting(false)
+      setConfirmDelete(false)
+    }
+  }, [confirmDelete, server.id, onNodeDeleted])
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Server className="h-5 w-5 text-pink-400" />
-        <div>
-          <h4 className="text-sm font-semibold text-pink-100">{server.name}</h4>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Server className="h-5 w-5 text-pink-400" />
+          <div>
+            <h4 className="text-sm font-semibold text-pink-100">{server.name}</h4>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          {confirmDelete ? (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-2 py-1 text-[10px] font-medium bg-red-700 hover:bg-red-600 text-white rounded transition-colors disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Confirm'}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-2 py-1 text-[10px] font-medium bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleDelete}
+              className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
+              title="Delete MCP server"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -1081,14 +1196,67 @@ function McpDetail({ server }: { server: ProjectGraphData['mcp_servers'][0] }) {
   )
 }
 
-// ─── A2A agent detail ─────────────────────────────────────────────
-function A2ADetail({ agent }: { agent: ProjectGraphData['a2a_agents'][0] }) {
+// ─── A2A agent detail (#353 — with delete) ────────────────────────
+function A2ADetail({
+  agent,
+  onNodeDeleted,
+}: {
+  agent: ProjectGraphData['a2a_agents'][0]
+  onNodeDeleted?: (nodeId: string) => void
+}) {
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  const handleDelete = useCallback(async () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
+    setDeleting(true)
+    try {
+      await deleteA2aAgent(agent.id)
+      onNodeDeleted?.(`a2a-${agent.id}`)
+    } catch {
+      setDeleting(false)
+      setConfirmDelete(false)
+    }
+  }, [confirmDelete, agent.id, onNodeDeleted])
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Wifi className="h-5 w-5 text-cyan-400" />
-        <div>
-          <h4 className="text-sm font-semibold text-cyan-100">{agent.name}</h4>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Wifi className="h-5 w-5 text-cyan-400" />
+          <div>
+            <h4 className="text-sm font-semibold text-cyan-100">{agent.name}</h4>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          {confirmDelete ? (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-2 py-1 text-[10px] font-medium bg-red-700 hover:bg-red-600 text-white rounded transition-colors disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Confirm'}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-2 py-1 text-[10px] font-medium bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleDelete}
+              className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
+              title="Delete A2A agent"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -1145,16 +1313,299 @@ function InfoField({ label, value }: { label: string; value: string }) {
   )
 }
 
+// ─── #349 — Create agent form ────────────────────────────────────
+function CreateAgentForm({
+  projectId,
+  onCreated,
+  onCancel,
+}: {
+  projectId: number
+  onCreated: () => void
+  onCancel: () => void
+}) {
+  const [name, setName] = useState('')
+  const [role, setRole] = useState('')
+  const [model, setModel] = useState('claude-sonnet-4-6')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = useCallback(async () => {
+    if (!name.trim()) return
+    setSaving(true)
+    setError(null)
+    try {
+      await quickCreateAgent(projectId, {
+        name: name.trim(),
+        role: role.trim() || undefined,
+        model: model.trim() || undefined,
+      })
+      onCreated()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to create agent'
+      setError(msg)
+    } finally {
+      setSaving(false)
+    }
+  }, [projectId, name, role, model, onCreated])
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Bot className="h-5 w-5 text-violet-400" />
+        <h4 className="text-sm font-semibold text-violet-100">New Agent</h4>
+      </div>
+      <div className="space-y-3">
+        <FormInput label="Name *" value={name} onChange={setName} placeholder="e.g. Code Reviewer" />
+        <FormInput label="Role" value={role} onChange={setRole} placeholder="e.g. reviewer, planner" />
+        <FormInput label="Model" value={model} onChange={setModel} placeholder="e.g. claude-sonnet-4-6" />
+      </div>
+      {error && <p className="text-[11px] text-red-400">{error}</p>}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleSubmit}
+          disabled={saving || !name.trim()}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-700 hover:bg-violet-600 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+          {saving ? 'Creating...' : 'Create Agent'}
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-md transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── #352 — Create skill form ────────────────────────────────────
+function CreateSkillForm({
+  projectId,
+  onCreated,
+  onCancel,
+}: {
+  projectId: number
+  onCreated: () => void
+  onCancel: () => void
+}) {
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [model, setModel] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = useCallback(async () => {
+    if (!name.trim()) return
+    setSaving(true)
+    setError(null)
+    try {
+      await createSkill(projectId, {
+        name: name.trim(),
+        description: description.trim() || null,
+        model: model.trim() || null,
+        body: '',
+      } as Parameters<typeof createSkill>[1])
+      onCreated()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to create skill'
+      setError(msg)
+    } finally {
+      setSaving(false)
+    }
+  }, [projectId, name, description, model, onCreated])
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Sparkles className="h-5 w-5 text-emerald-400" />
+        <h4 className="text-sm font-semibold text-emerald-100">New Skill</h4>
+      </div>
+      <div className="space-y-3">
+        <FormInput label="Name *" value={name} onChange={setName} placeholder="e.g. Code Review Checklist" />
+        <FormTextarea label="Description" value={description} onChange={setDescription} rows={3} placeholder="What this skill does..." />
+        <FormInput label="Model" value={model} onChange={setModel} placeholder="e.g. claude-sonnet-4-6" />
+      </div>
+      {error && <p className="text-[11px] text-red-400">{error}</p>}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleSubmit}
+          disabled={saving || !name.trim()}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+          {saving ? 'Creating...' : 'Create Skill'}
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-md transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── #350 — Create MCP server form ──────────────────────────────
+function CreateMcpForm({
+  projectId,
+  onCreated,
+  onCancel,
+}: {
+  projectId: number
+  onCreated: () => void
+  onCancel: () => void
+}) {
+  const [name, setName] = useState('')
+  const [transport, setTransport] = useState('stdio')
+  const [command, setCommand] = useState('')
+  const [url, setUrl] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = useCallback(async () => {
+    if (!name.trim()) return
+    setSaving(true)
+    setError(null)
+    try {
+      await createMcpServer(projectId, {
+        name: name.trim(),
+        transport,
+        command: command.trim() || undefined,
+        url: url.trim() || undefined,
+      })
+      onCreated()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to create MCP server'
+      setError(msg)
+    } finally {
+      setSaving(false)
+    }
+  }, [projectId, name, transport, command, url, onCreated])
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Server className="h-5 w-5 text-pink-400" />
+        <h4 className="text-sm font-semibold text-pink-100">New MCP Server</h4>
+      </div>
+      <div className="space-y-3">
+        <FormInput label="Name *" value={name} onChange={setName} placeholder="e.g. filesystem-server" />
+        <FormSelect
+          label="Transport *"
+          value={transport}
+          onChange={setTransport}
+          options={[
+            { value: 'stdio', label: 'stdio' },
+            { value: 'sse', label: 'SSE' },
+          ]}
+        />
+        {transport === 'stdio' && (
+          <FormInput label="Command" value={command} onChange={setCommand} placeholder="e.g. npx @modelcontextprotocol/server-fs" />
+        )}
+        {transport === 'sse' && (
+          <FormInput label="URL" value={url} onChange={setUrl} placeholder="e.g. http://localhost:3001/sse" />
+        )}
+      </div>
+      {error && <p className="text-[11px] text-red-400">{error}</p>}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleSubmit}
+          disabled={saving || !name.trim()}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-pink-700 hover:bg-pink-600 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+          {saving ? 'Creating...' : 'Create MCP Server'}
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-md transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── #351 — Create A2A agent form ───────────────────────────────
+function CreateA2aForm({
+  projectId,
+  onCreated,
+  onCancel,
+}: {
+  projectId: number
+  onCreated: () => void
+  onCancel: () => void
+}) {
+  const [name, setName] = useState('')
+  const [url, setUrl] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = useCallback(async () => {
+    if (!name.trim() || !url.trim()) return
+    setSaving(true)
+    setError(null)
+    try {
+      await createA2aAgent(projectId, {
+        name: name.trim(),
+        url: url.trim(),
+      })
+      onCreated()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to create A2A agent'
+      setError(msg)
+    } finally {
+      setSaving(false)
+    }
+  }, [projectId, name, url, onCreated])
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Wifi className="h-5 w-5 text-cyan-400" />
+        <h4 className="text-sm font-semibold text-cyan-100">New A2A Agent</h4>
+      </div>
+      <div className="space-y-3">
+        <FormInput label="Name *" value={name} onChange={setName} placeholder="e.g. External Reviewer" />
+        <FormInput label="URL *" value={url} onChange={setUrl} placeholder="e.g. http://localhost:4000/.well-known/agent.json" />
+      </div>
+      {error && <p className="text-[11px] text-red-400">{error}</p>}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleSubmit}
+          disabled={saving || !name.trim() || !url.trim()}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+          {saving ? 'Creating...' : 'Create A2A Agent'}
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-md transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main Panel ───────────────────────────────────────────────────
 export default function NodeDetailPanel({
   nodeId,
   nodeType,
   data,
   projectId,
+  createMode,
   onClose,
   onAgentUpdate,
   onRefresh,
   onNodeDeleted,
+  onCreateComplete,
 }: BaseProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1164,6 +1615,73 @@ export default function NodeDetailPanel({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 
+  // ─── Create mode (#348-#352) ──────────────────────────────────
+  if (createMode && projectId) {
+    const headerLabel =
+      createMode === 'agent'
+        ? 'Create Agent'
+        : createMode === 'skill'
+          ? 'Create Skill'
+          : createMode === 'mcp'
+            ? 'Create MCP Server'
+            : 'Create A2A Agent'
+
+    let createContent: React.ReactNode = null
+
+    if (createMode === 'agent') {
+      createContent = (
+        <CreateAgentForm
+          projectId={projectId}
+          onCreated={() => onCreateComplete?.()}
+          onCancel={onClose}
+        />
+      )
+    } else if (createMode === 'skill') {
+      createContent = (
+        <CreateSkillForm
+          projectId={projectId}
+          onCreated={() => onCreateComplete?.()}
+          onCancel={onClose}
+        />
+      )
+    } else if (createMode === 'mcp') {
+      createContent = (
+        <CreateMcpForm
+          projectId={projectId}
+          onCreated={() => onCreateComplete?.()}
+          onCancel={onClose}
+        />
+      )
+    } else if (createMode === 'a2a') {
+      createContent = (
+        <CreateA2aForm
+          projectId={projectId}
+          onCreated={() => onCreateComplete?.()}
+          onCancel={onClose}
+        />
+      )
+    }
+
+    return (
+      <div
+        className="fixed top-0 right-0 h-full w-[480px] bg-zinc-900 border-l border-zinc-700 shadow-2xl z-50 overflow-y-auto transition-transform duration-200 animate-slide-in-right"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 sticky top-0 bg-zinc-900 z-10">
+          <h3 className="text-sm font-semibold text-zinc-200">{headerLabel}</h3>
+          <button
+            onClick={onClose}
+            className="p-1 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="p-4">{createContent}</div>
+      </div>
+    )
+  }
+
+  // ─── View/Edit mode (existing entity) ────────────────────────
   const entityId = parseInt(nodeId, 10)
 
   let content: React.ReactNode = null
@@ -1184,17 +1702,17 @@ export default function NodeDetailPanel({
   } else if (nodeType === 'skill') {
     const skill = data.skills.find((s) => s.id === entityId)
     if (skill) {
-      content = <SkillDetail skill={skill} />
+      content = <SkillDetail skill={skill} onNodeDeleted={onNodeDeleted} />
     }
   } else if (nodeType === 'mcp') {
     const server = data.mcp_servers.find((m) => m.id === entityId)
     if (server) {
-      content = <McpDetail server={server} />
+      content = <McpDetail server={server} onNodeDeleted={onNodeDeleted} />
     }
   } else if (nodeType === 'a2a') {
     const a2a = (data.a2a_agents ?? []).find((a) => a.id === entityId)
     if (a2a) {
-      content = <A2ADetail agent={a2a} />
+      content = <A2ADetail agent={a2a} onNodeDeleted={onNodeDeleted} />
     }
   } else if (nodeType === 'provider') {
     const provider = data.providers.find((p) => p.slug === nodeId)
@@ -1216,8 +1734,9 @@ export default function NodeDetailPanel({
     )
   }
 
-  // Preserve backward compat — onAgentUpdate kept in interface
+  // Preserve backward compat — onAgentUpdate, onCreateComplete kept in interface
   void onAgentUpdate
+  void onCreateComplete
 
   return (
     <div

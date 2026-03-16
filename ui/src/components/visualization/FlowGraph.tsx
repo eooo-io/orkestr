@@ -25,6 +25,7 @@ import {
   Bot,
   Sparkles,
   Server,
+  Wifi,
   GripVertical,
   LayoutDashboard,
   Maximize,
@@ -34,9 +35,10 @@ import {
   Locate,
   ChevronDown,
   ChevronRight,
+  Plus,
 } from 'lucide-react'
 import type { ProjectGraphData } from '@/types'
-import { assignAgentSkills } from '@/api/client'
+import { assignAgentSkills, bindAgentMcpServers, bindAgentA2aAgents } from '@/api/client'
 import { AgentNode, SkillNode, ProviderNode, McpNode, ProjectNode, LaneLabel } from './FlowNodes'
 import DelegationEdge, { type DelegationEdgeData } from './DelegationEdge'
 import EdgeConfigPanel, { type EdgeConfigData } from './EdgeConfigPanel'
@@ -480,28 +482,41 @@ interface PaletteSectionProps {
   icon: React.ReactNode
   items: Array<{ id: string; name: string; type: string }>
   onDragStart: (e: React.DragEvent, item: { id: string; name: string; type: string }) => void
+  onAdd?: () => void
   defaultOpen?: boolean
 }
 
-function PaletteSection({ title, icon, items, onDragStart, defaultOpen = true }: PaletteSectionProps) {
+function PaletteSection({ title, icon, items, onDragStart, onAdd, defaultOpen = true }: PaletteSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
-
-  if (items.length === 0) return null
 
   return (
     <div className="mb-2">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 w-full px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300 transition-colors"
-      >
-        {isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-        {icon}
-        <span>{title}</span>
-        <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500 font-normal">
-          {items.length}
-        </span>
-      </button>
-      {isOpen && (
+      <div className="flex items-center">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-1.5 flex-1 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300 transition-colors"
+        >
+          {isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+          {icon}
+          <span>{title}</span>
+          <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500 font-normal">
+            {items.length}
+          </span>
+        </button>
+        {onAdd && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onAdd()
+            }}
+            className="p-1 mr-1 text-zinc-500 hover:text-violet-400 hover:bg-zinc-800 rounded transition-colors"
+            title={`Create new ${title.toLowerCase().replace(/s$/, '')}`}
+          >
+            <Plus className="h-3 w-3" />
+          </button>
+        )}
+      </div>
+      {isOpen && items.length > 0 && (
         <div className="space-y-1 px-1 mt-1">
           {items.map((item) => (
             <div
@@ -592,6 +607,9 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
   const [selectedNodeInfo, setSelectedNodeInfo] = useState<{ id: string; type: string } | null>(null)
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
 
+  // ─── Create mode (#348) ─────────────────────────────────────────
+  const [createMode, setCreateMode] = useState<'agent' | 'skill' | 'mcp' | 'a2a' | null>(null)
+
   // Chain detection (#293)
   const chains = useMemo(() => detectDelegationChains(edges), [edges])
   const edgeStepNumbers = useMemo(() => getEdgeStepNumbers(chains), [chains])
@@ -674,6 +692,14 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
     [data.mcp_servers, canvasNodeIds],
   )
 
+  const paletteA2a = useMemo(
+    () =>
+      (data.a2a_agents ?? [])
+        .filter((a) => !canvasNodeIds.has(`a2a-${a.id}`))
+        .map((a) => ({ id: `a2a-${a.id}`, name: a.name, type: 'a2a' })),
+    [data.a2a_agents, canvasNodeIds],
+  )
+
   // Re-sync when data changes
   useEffect(() => {
     const g = buildGraph(data)
@@ -692,25 +718,111 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
     [],
   )
 
-  // Handle new edge connections (MCP -> Agent)
+  // ─── Helper: get node type from node ID (#360) ─────────────────────
+  const getNodeType = useCallback(
+    (nodeId: string): string => {
+      const node = nodes.find((n) => n.id === nodeId)
+      if (node?.type) return node.type
+      const prefix = nodeId.split('-')[0]
+      return prefix ? `${prefix}Node` : ''
+    },
+    [nodes],
+  )
+
+  // ─── Connection validation (#360) ──────────────────────────────────
+  const isValidConnection = useCallback(
+    (connection: Connection | Edge): boolean => {
+      const { source, target } = connection
+      if (!source || !target) return false
+
+      // Block self-loops
+      if (source === target) return false
+
+      // Block duplicate edges (same direction)
+      const isDuplicate = edges.some(
+        (e) => e.source === source && e.target === target,
+      )
+      if (isDuplicate) return false
+
+      const sourceType = getNodeType(source)
+      const targetType = getNodeType(target)
+
+      // Only agent nodes can be connection sources
+      if (sourceType === 'agentNode') {
+        // agent -> skill: VALID (#356)
+        if (targetType === 'skillNode') return true
+        // agent -> mcp or a2a (both use mcpNode type): VALID (#357, #358)
+        if (targetType === 'mcpNode') return true
+        // agent -> agent: VALID delegation (#359)
+        if (targetType === 'agentNode') return true
+        // agent -> provider: BLOCKED
+        return false
+      }
+
+      // All non-agent sources are BLOCKED: skill, mcp, a2a, provider
+      return false
+    },
+    [edges, getNodeType],
+  )
+
+  // ─── Handle new edge connections (#356-#359) ───────────────────────
   const onConnect: OnConnect = useCallback(
     (connection: Connection) => {
       const { source, target } = connection
       if (!source || !target) return
 
-      // Allow MCP -> Agent connection (uses_tool edge)
-      const isMcpToAgent =
-        (source.startsWith('mcp-') && target.startsWith('agent-')) ||
-        (source.startsWith('agent-') && target.startsWith('mcp-'))
+      const sourceIsAgent = source.startsWith('agent-')
+      const targetIsAgent = target.startsWith('agent-')
+      const targetIsSkill = target.startsWith('skill-')
+      const targetIsMcp = target.startsWith('mcp-')
+      const targetIsA2a = target.startsWith('a2a-')
 
-      if (isMcpToAgent) {
-        const mcpId = source.startsWith('mcp-') ? source : target
-        const agentId = source.startsWith('agent-') ? source : target
+      // Normalize: always agent as source
+      const agentNodeId = sourceIsAgent ? source : target
+      if (!agentNodeId.startsWith('agent-')) return
+
+      // ── #356: Agent -> Skill assignment ──────────────────────────
+      if (targetIsSkill || (!sourceIsAgent && source.startsWith('skill-'))) {
+        const skillNodeId = targetIsSkill ? target : source
+        const edgeId = `e-${agentNodeId}-${skillNodeId}`
+        if (edges.some((e) => e.id === edgeId)) return
 
         const newEdge: Edge = {
-          id: `e-agent-mcp-${agentId}-${mcpId}`,
-          source: agentId,
-          target: mcpId,
+          id: edgeId,
+          source: agentNodeId,
+          target: skillNodeId,
+          type: 'smoothstep',
+          animated: false,
+          style: { stroke: '#8b5cf6', strokeWidth: 1.5 },
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6', width: 14, height: 14 },
+        }
+
+        setEdges((eds) => addEdge(newEdge, eds))
+
+        if (projectId) {
+          const agentNumId = parseInt(agentNodeId.replace('agent-', ''))
+          const skillNumId = parseInt(skillNodeId.replace('skill-', ''))
+          const agent = data.agents.find((a) => a.id === agentNumId)
+          if (agent) {
+            const newSkillIds = [...new Set([...agent.skill_ids, skillNumId])]
+            assignAgentSkills(projectId, agentNumId, newSkillIds)
+              .then(() => onRefresh?.())
+              .catch(() => setEdges((eds) => eds.filter((e) => e.id !== newEdge.id)))
+          }
+        }
+        return
+      }
+
+      // ── #357: Agent -> MCP server binding ────────────────────────
+      if (targetIsMcp || (!sourceIsAgent && source.startsWith('mcp-'))) {
+        const mcpNodeId = targetIsMcp ? target : source
+        const edgeId = `e-agent-mcp-${agentNodeId}-${mcpNodeId}`
+        if (edges.some((e) => e.id === edgeId)) return
+
+        const newEdge: Edge = {
+          id: edgeId,
+          source: agentNodeId,
+          target: mcpNodeId,
           type: 'smoothstep',
           animated: false,
           style: { stroke: '#ec4899', strokeWidth: 1.5, strokeDasharray: '4 3' },
@@ -718,14 +830,77 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
         }
 
         setEdges((eds) => addEdge(newEdge, eds))
+
+        if (projectId) {
+          const agentNumId = parseInt(agentNodeId.replace('agent-', ''))
+          const mcpNumId = parseInt(mcpNodeId.replace('mcp-', ''))
+          const agent = data.agents.find((a) => a.id === agentNumId)
+          if (agent) {
+            const newMcpIds = [...new Set([...(agent.mcp_server_ids ?? []), mcpNumId])]
+            bindAgentMcpServers(projectId, agentNumId, newMcpIds)
+              .then(() => onRefresh?.())
+              .catch(() => setEdges((eds) => eds.filter((e) => e.id !== newEdge.id)))
+          }
+        }
         return
       }
 
-      // Allow Agent -> Agent delegation connections (#291)
-      const isAgentToAgent = source.startsWith('agent-') && target.startsWith('agent-') && source !== target
-      if (isAgentToAgent) {
+      // ── #358: Agent -> A2A delegation ────────────────────────────
+      if (targetIsA2a || (!sourceIsAgent && source.startsWith('a2a-'))) {
+        const a2aNodeId = targetIsA2a ? target : source
+        const edgeId = `e-delegation-${agentNodeId}-${a2aNodeId}`
+        if (edges.some((e) => e.id === edgeId)) return
+
+        const reverseExists = edges.some(
+          (e) => e.source === a2aNodeId && e.target === agentNodeId && e.type === 'delegation',
+        )
+
+        const newEdge: Edge = {
+          id: edgeId,
+          source: agentNodeId,
+          target: a2aNodeId,
+          type: 'delegation',
+          data: {
+            isDelegation: true,
+            label: 'delegates to',
+            isBidirectional: reverseExists,
+          } satisfies DelegationEdgeData,
+        }
+
+        setEdges((eds) => {
+          let updated = addEdge(newEdge, eds)
+          if (reverseExists) {
+            updated = updated.map((e) => {
+              if (e.source === a2aNodeId && e.target === agentNodeId && e.type === 'delegation') {
+                return { ...e, data: { ...(e.data as DelegationEdgeData), isBidirectional: true } }
+              }
+              return e
+            })
+          }
+          return updated
+        })
+
+        if (projectId) {
+          const agentNumId = parseInt(agentNodeId.replace('agent-', ''))
+          const a2aNumId = parseInt(a2aNodeId.replace('a2a-', ''))
+          const agent = data.agents.find((a) => a.id === agentNumId)
+          if (agent) {
+            const newA2aIds = [...new Set([...(agent.a2a_agent_ids ?? []), a2aNumId])]
+            bindAgentA2aAgents(projectId, agentNumId, newA2aIds)
+              .then(() => onRefresh?.())
+              .catch(() => setEdges((eds) => eds.filter((e) => e.id !== edgeId)))
+          }
+        }
+
+        // Open edge config panel after creation (#358)
+        setSelectedNodeInfo(null)
+        setSelectedEdgeId(edgeId)
+        return
+      }
+
+      // ── #359: Agent -> Agent delegation ──────────────────────────
+      if (sourceIsAgent && targetIsAgent && source !== target) {
         const existingEdgeId = `e-delegation-${source}-${target}`
-        // Don't duplicate
         if (edges.some((e) => e.id === existingEdgeId)) return
 
         const reverseExists = edges.some(
@@ -746,7 +921,6 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
 
         setEdges((eds) => {
           let updated = addEdge(newEdge, eds)
-          // If reverse exists, update it to be bidirectional
           if (reverseExists) {
             updated = updated.map((e) => {
               if (e.source === target && e.target === source && e.type === 'delegation') {
@@ -757,53 +931,21 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
           }
           return updated
         })
+
+        // Open edge config panel for trigger/handoff/return config (#359)
+        setSelectedNodeInfo(null)
+        setSelectedEdgeId(existingEdgeId)
         return
       }
-
-      // Allow Agent -> Skill connections
-      const isAgentToSkill =
-        (source.startsWith('agent-') && target.startsWith('skill-')) ||
-        (source.startsWith('skill-') && target.startsWith('agent-'))
-
-      if (isAgentToSkill) {
-        const agentNodeId = source.startsWith('agent-') ? source : target
-        const skillNodeId = source.startsWith('skill-') ? source : target
-
-        const newEdge: Edge = {
-          id: `e-${agentNodeId}-${skillNodeId}`,
-          source: agentNodeId,
-          target: skillNodeId,
-          type: 'smoothstep',
-          animated: false,
-          style: { stroke: '#8b5cf6', strokeWidth: 1.5 },
-          markerEnd: { type: MarkerType.ArrowClosed, color: '#8b5cf6', width: 14, height: 14 },
-        }
-
-        setEdges((eds) => addEdge(newEdge, eds))
-
-        // Persist: assign skill to agent via API
-        if (projectId) {
-          const agentNumId = parseInt(agentNodeId.replace('agent-', ''))
-          const skillNumId = parseInt(skillNodeId.replace('skill-', ''))
-          const agent = data.agents.find((a) => a.id === agentNumId)
-          if (agent) {
-            const newSkillIds = [...new Set([...agent.skill_ids, skillNumId])]
-            assignAgentSkills(projectId, agentNumId, newSkillIds).catch(() => {
-              // Revert edge on failure
-              setEdges((eds) => eds.filter((e) => e.id !== newEdge.id))
-            })
-          }
-        }
-      }
     },
-    [data.agents, projectId],
+    [data.agents, projectId, edges, getNodeType, onRefresh],
   )
 
-  // Handle edge click — open config panel for delegation edges (#292)
+  // Handle edge click — select edge for config panel or deletion (#292, #354)
   const handleEdgeClick = useCallback(
     (_: React.MouseEvent, edge: Edge) => {
-      if (edge.type !== 'delegation') return
       setSelectedNodeInfo(null) // close node panel
+      setCreateMode(null) // close create panel
       setSelectedEdgeId(edge.id)
     },
     [],
@@ -1106,10 +1248,13 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
   }, [])
 
   // Handle Escape key to exit fullscreen or close panels (#294)
+  // Handle Delete/Backspace to delete selected edge (#354)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (selectedEdgeId) {
+        if (createMode) {
+          setCreateMode(null)
+        } else if (selectedEdgeId) {
           setSelectedEdgeId(null)
         } else if (selectedNodeInfo) {
           setSelectedNodeInfo(null)
@@ -1117,10 +1262,68 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
           setIsFullscreen(false)
         }
       }
+
+      // #354 — Delete edge via Delete/Backspace key
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedEdgeId && !selectedNodeInfo && !createMode) {
+        // Don't delete if user is typing in an input
+        const target = e.target as HTMLElement
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return
+
+        e.preventDefault()
+        const edge = edges.find((ed) => ed.id === selectedEdgeId)
+        if (!edge) return
+
+        // Remove edge from local state
+        setEdges((eds) => eds.filter((ed) => ed.id !== selectedEdgeId))
+        setSelectedEdgeId(null)
+
+        // Persist: unassign depending on edge type
+        if (projectId && edge.source.startsWith('agent-') && edge.target.startsWith('skill-')) {
+          const agentNumId = parseInt(edge.source.replace('agent-', ''))
+          const skillNumId = parseInt(edge.target.replace('skill-', ''))
+          const agent = data.agents.find((a) => a.id === agentNumId)
+          if (agent) {
+            const newSkillIds = agent.skill_ids.filter((id) => id !== skillNumId)
+            assignAgentSkills(projectId, agentNumId, newSkillIds).catch(() => {
+              // Revert on failure — re-add edge
+              onRefresh?.()
+            })
+          }
+        }
+        // For agent↔MCP edges: unbind via API
+        if (projectId && edge.source.startsWith('agent-') && edge.target.startsWith('mcp-')) {
+          const agentNumId = parseInt(edge.source.replace('agent-', ''))
+          const mcpNumId = parseInt(edge.target.replace('mcp-', ''))
+          const agent = data.agents.find((a) => a.id === agentNumId)
+          if (agent) {
+            const newMcpIds = (agent.mcp_server_ids ?? []).filter((id) => id !== mcpNumId)
+            bindAgentMcpServers(projectId, agentNumId, newMcpIds).catch(() => onRefresh?.())
+          }
+        }
+        // For agent↔A2A edges: unbind via API
+        if (projectId && edge.source.startsWith('agent-') && edge.target.startsWith('a2a-')) {
+          const agentNumId = parseInt(edge.source.replace('agent-', ''))
+          const a2aNumId = parseInt(edge.target.replace('a2a-', ''))
+          const agent = data.agents.find((a) => a.id === agentNumId)
+          if (agent) {
+            const newA2aIds = (agent.a2a_agent_ids ?? []).filter((id) => id !== a2aNumId)
+            bindAgentA2aAgents(projectId, agentNumId, newA2aIds).catch(() => onRefresh?.())
+          }
+        }
+        // For delegation edges: remove from edge configs and refresh
+        if (edge.type === 'delegation') {
+          setEdgeConfigs((prev) => {
+            const next = new Map(prev)
+            next.delete(selectedEdgeId)
+            return next
+          })
+          onRefresh?.()
+        }
+      }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isFullscreen, selectedEdgeId, selectedNodeInfo])
+  }, [isFullscreen, selectedEdgeId, selectedNodeInfo, createMode, edges, data.agents, projectId, onRefresh])
 
   const containerStyle = isFullscreen
     ? {
@@ -1134,8 +1337,24 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
       }
     : { height: 'calc(100vh - 12rem)' }
 
-  // Determine if palette has items to show
-  const hasPaletteItems = paletteAgents.length > 0 || paletteSkills.length > 0 || paletteMcp.length > 0
+  // Determine if palette should show — always show when projectId is set (for + buttons)
+  const hasPaletteItems =
+    projectId != null || paletteAgents.length > 0 || paletteSkills.length > 0 || paletteMcp.length > 0 || paletteA2a.length > 0
+
+  // #348 — Create mode handlers
+  const handleOpenCreate = useCallback(
+    (mode: 'agent' | 'skill' | 'mcp' | 'a2a') => {
+      setSelectedNodeInfo(null)
+      setSelectedEdgeId(null)
+      setCreateMode(mode)
+    },
+    [],
+  )
+
+  const handleCreateComplete = useCallback(() => {
+    setCreateMode(null)
+    onRefresh?.()
+  }, [onRefresh])
 
   return (
     <div ref={containerRef} style={containerStyle} className="rounded-lg border border-zinc-800 overflow-hidden flex">
@@ -1152,18 +1371,28 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
               icon={<Bot className="h-3 w-3 text-violet-400" />}
               items={paletteAgents}
               onDragStart={handlePaletteDragStart}
+              onAdd={projectId ? () => handleOpenCreate('agent') : undefined}
             />
             <PaletteSection
               title="Skills"
               icon={<Sparkles className="h-3 w-3 text-emerald-400" />}
               items={paletteSkills}
               onDragStart={handlePaletteDragStart}
+              onAdd={projectId ? () => handleOpenCreate('skill') : undefined}
             />
             <PaletteSection
               title="MCP Servers"
               icon={<Server className="h-3 w-3 text-pink-400" />}
               items={paletteMcp}
               onDragStart={handlePaletteDragStart}
+              onAdd={projectId ? () => handleOpenCreate('mcp') : undefined}
+            />
+            <PaletteSection
+              title="A2A Agents"
+              icon={<Wifi className="h-3 w-3 text-cyan-400" />}
+              items={paletteA2a}
+              onDragStart={handlePaletteDragStart}
+              onAdd={projectId ? () => handleOpenCreate('a2a') : undefined}
             />
           </div>
         </div>
@@ -1194,6 +1423,7 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          isValidConnection={isValidConnection}
           onEdgeClick={handleEdgeClick}
           onNodeClick={handleNodeClick}
           onPaneClick={handlePaneClick}
@@ -1206,7 +1436,7 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
           defaultEdgeOptions={{ type: 'smoothstep' }}
           proOptions={{ hideAttribution: true }}
           colorMode="dark"
-          connectionLineStyle={{ stroke: '#8b5cf6', strokeWidth: 2 }}
+          connectionLineStyle={{ stroke: '#8b5cf6', strokeWidth: 2, strokeDasharray: '5 5' }}
           snapToGrid
           snapGrid={[20, 20]}
         >
@@ -1236,8 +1466,8 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
           </div>
         )}
 
-        {/* Edge config panel (#292) */}
-        {selectedEdge && selectedEdgeId && (
+        {/* Edge config panel — only for delegation edges (#292) */}
+        {selectedEdge && selectedEdgeId && selectedEdge.type === 'delegation' && (
           <EdgeConfigPanel
             edgeId={selectedEdgeId}
             sourceAgentName={getAgentNameFromNodeId(selectedEdge.source)}
@@ -1252,7 +1482,7 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
         )}
 
         {/* Node detail panel (#294) */}
-        {selectedNodeInfo && (
+        {selectedNodeInfo && !createMode && (
           <NodeDetailPanel
             nodeId={selectedNodeInfo.id}
             nodeType={selectedNodeInfo.type as 'agent' | 'skill' | 'mcp' | 'a2a' | 'provider'}
@@ -1266,6 +1496,21 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
               setSelectedNodeInfo(null)
               onRefresh?.()
             }}
+          />
+        )}
+
+        {/* Create entity panel (#348-#352) */}
+        {createMode && projectId && (
+          <NodeDetailPanel
+            nodeId=""
+            nodeType={createMode}
+            data={data}
+            projectId={projectId}
+            createMode={createMode}
+            onClose={() => setCreateMode(null)}
+            onRefresh={onRefresh}
+            onCreateComplete={handleCreateComplete}
+            onNodeDeleted={() => {}}
           />
         )}
       </div>

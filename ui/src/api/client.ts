@@ -1480,6 +1480,17 @@ export const updateA2aAgent = (id: number, data: Partial<A2aAgentDetail>) =>
 export const deleteA2aAgent = (id: number) =>
   api.delete(`/a2a-agents/${id}`)
 
+// --- Canvas Entity Creation (L.2 #348-#352) ---
+
+export const quickCreateAgent = (projectId: number, data: { name: string; role?: string; model?: string }) =>
+  api.post<ApiResponse<Agent>>(`/projects/${projectId}/agents/quick-create`, data).then((r) => r.data.data)
+
+export const createMcpServer = (projectId: number, data: { name: string; transport: string; command?: string; url?: string }) =>
+  api.post<{ mcp_server: McpServerDetail }>(`/projects/${projectId}/mcp-servers`, data).then((r) => r.data.mcp_server)
+
+export const createA2aAgent = (projectId: number, data: { name: string; url: string; description?: string }) =>
+  api.post<{ a2a_agent: A2aAgentDetail }>(`/projects/${projectId}/a2a-agents`, data).then((r) => r.data.a2a_agent)
+
 // --- Delegation Config (L.1 #347) ---
 
 export const saveDelegationConfigs = (projectId: number, configs: DelegationConfig[]) =>
