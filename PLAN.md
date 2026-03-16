@@ -68,6 +68,13 @@ Phase J — OpenRouter Integration  (COMPLETE)
 Phase K — QA & Documentation  (COMPLETE)
   K.1: Playwright setup, browser test suites, QA plan with manual checklist.
   K.2: 18 new docs pages, 5 expanded, sidebar restructured.
+
+Phase L — Canvas Composer  (IN PROGRESS)
+  L.1: Detail panel overhaul — full entity editors in the right flyout.
+  L.2: Canvas CRUD — create, delete, and connect entities directly on canvas.
+  L.3: Connection drawing — drag-to-connect edges between any compatible nodes.
+  L.4: Canvas UX polish — multi-select, undo/redo, context menus, keyboard shortcuts.
+  L.5: Backend & persistence — edge config storage, canvas-specific API, graph refresh.
 ```
 
 The existing Component Layer (skills, provider sync, MCP, A2A) remains the foundation. Each phase builds on the previous.
@@ -1034,6 +1041,127 @@ Previously tracked as F.1-F.3, these remain deferred:
 - Skill intelligence: #226 (A/B testing), #228 (similarity detection), #229 (dynamic activation)
 - Ecosystem: #233-#237 (marketplace), #238 (n8n/Temporal integration)
 - Collaboration: #218 (real-time editing), #221 (three-way merge), #222 (inline commenting)
+
+---
+
+## Phase L: Canvas Composer
+
+> **Motivation:** The canvas is currently a visualization tool with shallow editing. For public release, it must be the primary composition surface — where you build the entire agent orchestra. Create agents, assign skills, wire MCP servers, draw delegation chains, and configure every entity's settings, all without leaving the canvas.
+
+**Current state:** Phase I (#288-#297) built the canvas with drag-drop from palette, node positioning, auto-layout, minimap, and a read-only detail panel. But:
+- Detail panel only edits agent `custom_instructions` — all other fields are read-only
+- Cannot create new entities (agents, MCP, A2A) from the canvas — palette only shows existing ones
+- Cannot delete entities or edges from the canvas
+- Cannot draw connections by dragging between nodes
+- Edge configs (delegation trigger, handoff context) are local state only — not persisted
+- MCP and A2A detail panels are skeletal (name + transport, nothing editable)
+- Skill detail panel links out to the skill editor — no inline editing
+
+### L.1 — Detail Panel Overhaul
+
+Full-featured entity editors in the right flyout. Every field editable, every change persisted via API.
+
+| Issue | Title | Status |
+|---|---|---|
+| #418 | Agent detail panel: full editor with all loop fields (model, planning, autonomy, max iterations, timeout, persona) | TODO |
+| #419 | Agent detail panel: skill assignment manager (add/remove skills with search dropdown) | TODO |
+| #420 | Agent detail panel: MCP server binding (add/remove with dropdown, show connected tools) | TODO |
+| #421 | Agent detail panel: A2A agent binding (add/remove with dropdown) | TODO |
+| #422 | Agent detail panel: enable/disable toggle and delete button with confirmation | TODO |
+| #423 | Skill detail panel: inline frontmatter editor (model, tags, max_tokens, description) | TODO |
+| #424 | Skill detail panel: prompt body editor (Monaco Editor embedded in flyout) | TODO |
+| #425 | MCP server detail panel: full editor (name, transport, command/URL, args, env vars) | TODO |
+| #426 | A2A agent detail panel: full editor (name, URL, description, capabilities) | TODO |
+| #427 | Edge config panel: persist delegation config to backend (trigger, handoff, return behavior) | TODO |
+
+**Key changes:**
+- AgentDetail becomes a tabbed editor: Identity, Reasoning, Tools, Orchestration
+- SkillDetail embeds a mini Monaco editor for quick prompt edits
+- MCP/A2A detail panels become full CRUD forms
+- All panels call real API endpoints on save, then refresh the graph data
+- Panel width increases from 400px to 480px to fit forms
+
+### L.2 — Canvas Entity Creation & Deletion
+
+Create new entities directly from the canvas. No more switching to other pages just to add an agent or MCP server.
+
+| Issue | Title | Status |
+|---|---|---|
+| #428 | Canvas palette: "+" button on each section to create a new agent/MCP/A2A inline | TODO |
+| #429 | Create agent from canvas: opens flyout with empty agent form, saves via API, adds node | TODO |
+| #430 | Create MCP server from canvas: opens flyout with MCP form, saves via API, adds node | TODO |
+| #431 | Create A2A agent from canvas: opens flyout with A2A form, saves via API, adds node | TODO |
+| #432 | Create skill from canvas: opens flyout with skill name/description form, saves, adds node | TODO |
+| #433 | Delete node from canvas: right-click or detail panel delete with confirmation dialog | TODO |
+| #434 | Delete edge from canvas: click edge + delete key or right-click context menu | TODO |
+| #435 | Unassign skill from agent: remove edge and update API (without deleting the skill) | TODO |
+
+**Key behaviors:**
+- "+" button in palette header opens the detail flyout in "create" mode
+- Create forms are minimal (name + required fields) — full config happens in the detail panel after creation
+- Delete agent shows warning if it has assigned skills or delegation edges
+- Deleting an edge between agent↔skill calls `PUT /agents/{id}/skills` to unassign
+- Graph data refreshes after every create/delete operation
+
+### L.3 — Connection Drawing
+
+Drag-to-connect between nodes to create relationships. The canvas becomes the wiring surface.
+
+| Issue | Title | Status |
+|---|---|---|
+| #436 | Drag-to-connect: agent → skill creates skill assignment edge | TODO |
+| #437 | Drag-to-connect: agent → MCP server creates tool binding edge | TODO |
+| #438 | Drag-to-connect: agent → A2A agent creates delegation edge | TODO |
+| #439 | Drag-to-connect: agent → agent creates delegation edge | TODO |
+| #440 | Connection validation rules: prevent invalid edges (skill→skill, MCP→skill, duplicate edges) | TODO |
+| #441 | Connection handles: show connect anchors on node hover with type-appropriate colors | TODO |
+| #442 | Visual feedback during connection: dashed line preview with valid/invalid indicator | TODO |
+
+**Implementation:**
+- React Flow `onConnect` handler with source/target node type checking
+- Connection handles positioned on right edge (source) and left edge (target)
+- Handle colors match node type: violet (agent), green (skill), pink (MCP), cyan (A2A)
+- Invalid connections show red dashed preview and snap back
+- Valid connections immediately call the appropriate API and create the styled edge
+
+### L.4 — Canvas UX Polish
+
+Quality-of-life features that make the canvas feel like a real design tool.
+
+| Issue | Title | Status |
+|---|---|---|
+| #443 | Multi-select: shift+click and box selection for bulk move/delete | TODO |
+| #444 | Context menu: right-click on nodes, edges, and canvas background | TODO |
+| #445 | Keyboard shortcuts: Delete (remove), Cmd+Z (undo), Cmd+A (select all), Escape (deselect) | TODO |
+| #446 | Undo/redo: track canvas operations (create, delete, move, connect) with Cmd+Z / Cmd+Shift+Z | TODO |
+| #447 | Auto-save: debounced position persistence (500ms after last move) | TODO |
+| #448 | Empty state: helpful onboarding when canvas has no nodes (create first agent prompt) | TODO |
+| #449 | Node search/filter: filter visible nodes by type, name, or tag from toolbar | TODO |
+
+### L.5 — Backend & Persistence
+
+API changes needed to support canvas-driven composition.
+
+| Issue | Title | Status |
+|---|---|---|
+| #450 | Edge config model: migration + endpoints to persist delegation edge configs per project | TODO |
+| #451 | Canvas-aware graph endpoint: return edge configs and creation metadata with graph data | TODO |
+| #452 | Optimistic graph refresh: after canvas mutation, merge local changes before full refetch | TODO |
+| #453 | Agent quick-create API: minimal endpoint for canvas (name + model only, defaults for rest) | TODO |
+| #454 | Pest tests for canvas CRUD operations and edge config persistence | TODO |
+
+### Implementation Sequence
+
+```
+L.1 (detail panels) ──► L.2 (create/delete) ──► L.3 (connection drawing)
+                                                         │
+                              L.5 (backend) ◄────────────┘
+                                  │
+                                  ▼
+                              L.4 (UX polish)
+```
+
+**Priority order:** L.1 first (the detail panel is the foundation — every other feature opens it). L.2 next (can't compose without creating). L.3 follows (connections need working panels). L.5 runs alongside as backend support. L.4 last (polish after core works).
 
 ---
 
