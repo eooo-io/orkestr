@@ -1131,7 +1131,7 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId }: Props) {
         zIndex: 50,
         height: '100vh',
       }
-    : { height }
+    : { height: 'calc(100vh - 12rem)' }
 
   // Determine if palette has items to show
   const hasPaletteItems = paletteAgents.length > 0 || paletteSkills.length > 0 || paletteMcp.length > 0
