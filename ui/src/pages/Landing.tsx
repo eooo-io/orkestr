@@ -186,7 +186,7 @@ function useActiveSection(ids: string[]) {
 // Data
 // ---------------------------------------------------------------------------
 
-const SECTION_IDS = ['use-cases', 'features', 'how-it-works', 'architecture', 'pricing', 'faq']
+const SECTION_IDS = ['use-cases', 'features', 'how-it-works', 'architecture', 'get-started', 'faq']
 const INTEGRATIONS: { label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { label: 'Claude', icon: ClaudeIcon },
   { label: 'OpenAI', icon: OpenAIIcon },
@@ -227,7 +227,7 @@ const USE_CASES = [
     icon: Lock,
     persona: 'Head of Security',
     title: 'Fully air-gapped agent operations',
-    description: 'We run Llama and Mistral locally via Ollama — no data leaves our network. Orkestr orchestrates agents against our internal systems using local models only. Compliance never even had to review it.',
+    description: 'We run Llama and Mistral locally via Ollama — no data leaves our network. Agentis Studio orchestrates agents against our internal systems using local models only. Compliance never even had to review it.',
   },
   {
     icon: BarChart3,
@@ -313,120 +313,38 @@ const STATS = [
   { value: '100%', label: 'Your Infrastructure' },
 ]
 
-const TESTIMONIALS = [
-  {
-    quote: 'We needed agents that could access our internal systems. Every cloud tool required tunneling or API exposure. Orkestr runs on our infra — agents just connect to MCP servers on the local network.',
-    name: 'Sarah C.',
-    role: 'Staff Engineer',
-    company: 'SaaS Startup',
-  },
-  {
-    quote: 'The real value is that we own the whole stack. Our API keys, our data, our execution logs. We can see exactly what each agent costs and swap models without rewriting anything.',
-    name: 'Marcus R.',
-    role: 'Engineering Manager',
-    company: 'FinTech Company',
-  },
-  {
-    quote: 'Budget guardrails and approval gates were the unlock. We went from "too risky for production" to running agent teams on a schedule with full audit trails.',
-    name: 'Anya K.',
-    role: 'VP Engineering',
-    company: 'Enterprise SaaS',
-  },
-]
-
-const PRICING = [
-  {
-    name: 'Playground',
-    price: '$0',
-    period: 'forever',
-    description: 'Design agents and test them in the cloud sandbox',
-    features: [
-      'Agent designer & workflow builder',
-      'Sandbox execution (BYO keys)',
-      'Up to 3 projects',
-      'Community support',
-      'No data access (design only)',
-    ],
-    cta: 'Try the Playground',
-    href: '/register',
-    highlighted: false,
-  },
-  {
-    name: 'Self-Hosted',
-    price: '$49',
-    period: '/month',
-    description: 'Full Orkestr on your infrastructure',
-    features: [
-      'Unlimited projects & agents',
-      'Full execution engine',
-      'Local MCP server connections',
-      'Your API keys, your data',
-      'Cost tracking & audit logs',
-      'Docker Compose deployment',
-    ],
-    cta: 'Deploy Now',
-    href: '/register',
-    highlighted: true,
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    period: 'annual license',
-    description: 'For teams running agent fleets in production',
-    features: [
-      'Everything in Self-Hosted',
-      'Multi-team / org management',
-      'SSO / SAML',
-      'Priority support & SLA',
-      'Deployment assistance',
-      'Custom integrations',
-    ],
-    cta: 'Contact Us',
-    href: 'mailto:hello@eooo.ai',
-    highlighted: false,
-  },
-]
-
 const FAQ = [
   {
-    q: 'What is Orkestr?',
-    a: 'Orkestr is the agent orchestration platform from eooo.ai. Design AI agent teams, define their autonomy, and run them. The eooo name stands for Execute, Orchestrate, Observe, Optimize — the agent lifecycle loop. Orkestr lets you define agents as complete loop definitions, wire them into multi-agent workflows, connect real tools via MCP and A2A protocols, and run everything with built-in cost tracking and safety guardrails.',
-  },
-  {
-    q: 'How is this different from Lovable, Replit, or other AI app builders?',
-    a: 'Lovable and Replit use AI to generate application code — they build apps for you. Orkestr builds the AI agents themselves. You define how an agent thinks (goal, reasoning, tool use), wire agents into multi-step workflows, and run them with real tool calls. The output is not a web app — it is a running agent system with cost controls, execution traces, and safety guardrails. Orkestr is infrastructure for AI agents, not a code generator.',
+    q: 'What is Agentis Studio?',
+    a: 'Agentis Studio is an open-source agent orchestration platform. Design AI agent teams, define their autonomy, wire them into workflows, connect real tools via MCP and A2A protocols, and run everything with built-in cost tracking and safety guardrails. MIT licensed, self-hosted, fully yours.',
   },
   {
     q: 'How is this different from LangChain or CrewAI?',
-    a: 'LangChain and CrewAI are code frameworks — you write Python to define agents and chains. Orkestr is a visual design-and-runtime platform. You design agents and workflows in a UI, run them directly in the built-in execution engine, or export to LangGraph, CrewAI, or generic JSON for use in your own codebase. No framework lock-in.',
+    a: 'LangChain and CrewAI are code frameworks — you write Python to define agents and chains. Agentis Studio is a visual design-and-runtime platform. You design agents and workflows in a UI, run them directly in the built-in execution engine, or export to LangGraph, CrewAI, or generic JSON for use in your own codebase. No framework lock-in.',
   },
   {
     q: 'What are MCP and A2A?',
-    a: 'MCP (Model Context Protocol) lets agents call tools hosted on external servers — file systems, databases, APIs. A2A (Agent-to-Agent) lets agents delegate tasks to other agents over HTTP. Orkestr has built-in clients for both protocols.',
+    a: 'MCP (Model Context Protocol) lets agents call tools hosted on external servers — file systems, databases, APIs. A2A (Agent-to-Agent) lets agents delegate tasks to other agents over HTTP. Agentis Studio has built-in clients for both protocols.',
   },
   {
     q: 'Can agents actually execute tools, or is this just configuration?',
-    a: 'Both. The free playground lets you design agents and test in a sandbox. Self-hosted Orkestr runs the full execution engine — it connects to MCP tool servers on your network, dispatches real tool calls, tracks token usage and costs, and enforces budget guardrails. The key difference: self-hosted agents can reach your internal systems directly.',
-  },
-  {
-    q: 'Why is self-hosted the primary deployment model?',
-    a: 'Agents are only useful when they can access your data — your codebase, databases, internal APIs, file systems. Cloud-hosted agents can\'t reach those without tunneling or exposing internal endpoints. Self-hosted Orkestr runs on your network, so MCP tool servers connect locally. Your API keys, execution data, and agent definitions never leave your infrastructure.',
+    a: 'Both. The playground lets you design agents and test them. The execution engine connects to MCP tool servers on your network, dispatches real tool calls, tracks token usage and costs, and enforces budget guardrails. Agents can reach your internal systems directly.',
   },
   {
     q: 'What models are supported?',
-    a: 'Cloud providers: Anthropic (Claude Opus 4.6, Sonnet 4.6, Haiku 4.5), OpenAI (GPT-5.4, o3), Google (Gemini 3.1 Pro, Gemini 3 Flash), xAI (Grok). Or use OpenRouter for single-key access to 200+ models including Llama, Mistral, and more. Local inference: any model running via Ollama, vLLM, or any OpenAI-compatible API endpoint. Mix cloud and local models in the same project — the execution engine routes per agent.',
+    a: 'Cloud providers: Anthropic (Claude Opus 4.6, Sonnet 4.6, Haiku 4.5), OpenAI (GPT-5.4, o3), Google (Gemini 3.1 Pro, Gemini 3 Flash), xAI (Grok). Or use OpenRouter for single-key access to 200+ models including Llama, Mistral, and more. Local inference: any model running via Ollama, vLLM, or any OpenAI-compatible API endpoint. Mix cloud and local models in the same project.',
   },
   {
-    q: 'Can I run Orkestr completely air-gapped?',
-    a: 'Yes. Point all agents to local models via Ollama or any OpenAI-compatible inference server on your network. Connect MCP tool servers locally. No external API calls, no data leaving your infrastructure. This is a primary use case for regulated industries and security-conscious organizations.',
+    q: 'Can I run it completely air-gapped?',
+    a: 'Yes. Point all agents to local models via Ollama or any OpenAI-compatible inference server on your network. Connect MCP tool servers locally. No external API calls, no data leaving your infrastructure.',
   },
   {
     q: 'How do guardrails work?',
-    a: 'Every execution run enforces configurable budget limits (max tokens, max cost, max iterations), tool allowlists/blocklists with dangerous input detection, and output safety checks for PII and credential leakage. Guardrails are built into the execution loop, not bolted on. Because Orkestr runs on your infra, you have full control over what agents can and cannot access.',
+    a: 'Every execution run enforces configurable budget limits (max tokens, max cost, max iterations), tool allowlists/blocklists with dangerous input detection, and output safety checks for PII and credential leakage. Guardrails are built into the execution loop, not bolted on.',
   },
   {
-    q: 'Why build Orkestr, and why now?',
-    a: 'AI models are now capable enough to reason, use tools, and collaborate — but there is no good way to manage them as a team. Orkestr exists to close that gap. We believe the next step is building agent teams that operate as first-class members of your organization: each with a defined role, clear boundaries, and the right level of autonomy — from fully supervised to fully autonomous. The models are ready. The tooling to manage them at that level has not existed until now.',
+    q: 'Is this really free?',
+    a: 'Yes. MIT licensed, no paywalls, no license keys, no feature gates. Clone the repo, deploy with Docker Compose, and you have the full platform. Contributions welcome.',
   },
 ]
 
@@ -572,10 +490,10 @@ export function Landing() {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="eooo.ai" className="h-8 w-8 object-contain" />
+            <img src="/logo.png" alt="Agentis Studio" className="h-8 w-8 object-contain" />
             <div className="flex flex-col">
-              <span className="font-semibold text-foreground tracking-tight leading-none">Orkestr</span>
-              <span className="text-[10px] text-muted-foreground tracking-wide leading-none mt-0.5">by eooo.ai</span>
+              <span className="font-semibold text-foreground tracking-tight leading-none">Agentis Studio</span>
+              <span className="text-[10px] text-muted-foreground tracking-wide leading-none mt-0.5">open source</span>
             </div>
           </div>
 
@@ -590,15 +508,12 @@ export function Landing() {
             <button onClick={() => scrollTo('how-it-works')} className={navLinkClass('how-it-works')}>
               How It Works
             </button>
-            <button onClick={() => scrollTo('pricing')} className={navLinkClass('pricing')}>
-              Pricing
-            </button>
             <button onClick={() => scrollTo('faq')} className={navLinkClass('faq')}>
               FAQ
             </button>
-            <Link to="/compare" className="text-muted-foreground hover:text-foreground transition-colors">
-              Compare
-            </Link>
+            <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+              GitHub
+            </a>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -619,14 +534,9 @@ export function Landing() {
               {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
 
-            <Link to="/login" className="hidden md:block">
-              <Button variant="ghost" size="sm">
-                Sign In
-              </Button>
-            </Link>
-            <Link to="/register" className="hidden md:block">
-              <Button size="sm">Get Started</Button>
-            </Link>
+            <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer" className="hidden md:block">
+              <Button size="sm">GitHub</Button>
+            </a>
           </div>
         </div>
 
@@ -643,22 +553,16 @@ export function Landing() {
               <button onClick={() => scrollTo('how-it-works')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
                 How It Works
               </button>
-              <button onClick={() => scrollTo('pricing')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
-                Pricing
-              </button>
               <button onClick={() => scrollTo('faq')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
                 FAQ
               </button>
-              <Link to="/compare" onClick={() => setMobileMenuOpen(false)} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
-                Compare
-              </Link>
+              <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
+                GitHub
+              </a>
               <div className="border-t border-border mt-2 pt-2 flex gap-2">
-                <Link to="/login" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" size="sm" className="w-full">Sign In</Button>
-                </Link>
-                <Link to="/register" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
-                  <Button size="sm" className="w-full">Get Started</Button>
-                </Link>
+                <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                  <Button size="sm" className="w-full">GitHub</Button>
+                </a>
               </div>
             </nav>
           </div>
@@ -692,13 +596,15 @@ export function Landing() {
               and safety guardrails. Fully air-gappable.
             </p>
             <div className="flex flex-wrap gap-3 mt-8">
-              <Button size="lg" className="gap-2" onClick={() => scrollTo('pricing')}>
-                Deploy Self-Hosted
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Link to="/register">
+              <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer">
+                <Button size="lg" className="gap-2">
+                  View on GitHub
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </a>
+              <Link to="/login">
                 <Button variant="outline" size="lg">
-                  Try the Playground
+                  Try the Demo
                 </Button>
               </Link>
             </div>
@@ -777,7 +683,7 @@ export function Landing() {
           <FadeIn>
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                How people use Orkestr
+                How people use Agentis Studio
               </h2>
               <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
                 Real scenarios from teams running AI agents in production.
@@ -809,7 +715,7 @@ export function Landing() {
       </section>
 
       {/* ----------------------------------------------------------------- */}
-      {/* What eooo is NOT                                                  */}
+      {/* What Agentis Studio is NOT                                         */}
       {/* ----------------------------------------------------------------- */}
       <FadeIn>
         <section className="py-16 px-4 sm:px-6">
@@ -823,13 +729,13 @@ export function Landing() {
               <div className="bg-card border border-border p-5 elevation-1">
                 <p className="text-sm font-semibold text-foreground mb-1">Not a chatbot builder</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Orkestr is for autonomous and semi-autonomous agent work, not conversational UI. Agents run jobs, not chat sessions.
+                  Agentis Studio is for autonomous and semi-autonomous agent work, not conversational UI. Agents run jobs, not chat sessions.
                 </p>
               </div>
               <div className="bg-card border border-border p-5 elevation-1">
                 <p className="text-sm font-semibold text-foreground mb-1">Not an API wrapper</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Orkestr runs on your infrastructure. Your API keys, your local models, your data. It orchestrates — it does not proxy, mark up, or touch your inference billing.
+                  Agentis Studio runs on your infrastructure. Your API keys, your local models, your data. It orchestrates — it does not proxy, mark up, or touch your inference billing.
                 </p>
               </div>
               <div className="bg-card border border-border p-5 elevation-1">
@@ -1038,42 +944,6 @@ export function Landing() {
       </section>
 
       {/* ----------------------------------------------------------------- */}
-      {/* Social proof — testimonials                                       */}
-      {/* ----------------------------------------------------------------- */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <FadeIn>
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                From teams running agents on their own infra
-              </h2>
-              <p className="text-muted-foreground mt-3 text-lg">
-                What changes when agents can actually reach your systems.
-              </p>
-            </div>
-          </FadeIn>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {TESTIMONIALS.map((t) => (
-              <FadeIn key={t.name}>
-                <div className="bg-card border border-border p-6 elevation-1 h-full flex flex-col">
-                  <p className="text-sm text-foreground leading-relaxed flex-1">
-                    &ldquo;{t.quote}&rdquo;
-                  </p>
-                  <div className="mt-5 pt-4 border-t border-border">
-                    <p className="text-sm font-semibold text-foreground">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {t.role}, {t.company}
-                    </p>
-                  </div>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ----------------------------------------------------------------- */}
       {/* Architecture                                                      */}
       {/* ----------------------------------------------------------------- */}
       <section id="architecture" className="py-20 sm:py-28 px-4 sm:px-6 bg-muted/30">
@@ -1084,7 +954,7 @@ export function Landing() {
                 Three layers, one platform
               </h2>
               <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
-                Orkestr is built as a layered architecture. Each layer builds on the one below.
+                Agentis Studio is built as a layered architecture. Each layer builds on the one below.
               </p>
             </div>
           </FadeIn>
@@ -1162,7 +1032,7 @@ export function Landing() {
               </h2>
               <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
                 A cloud-hosted agent can&apos;t reach your codebase, your database, or your local models.
-                Orkestr deploys next to everything so agents can actually act on it — with zero external dependencies if you need it.
+                Agentis Studio deploys next to everything so agents can actually act on it — with zero external dependencies if you need it.
               </p>
             </div>
 
@@ -1218,77 +1088,82 @@ export function Landing() {
       </FadeIn>
 
       {/* ----------------------------------------------------------------- */}
-      {/* Pricing                                                           */}
+      {/* Get Started                                                       */}
       {/* ----------------------------------------------------------------- */}
-      <section id="pricing" className="py-20 sm:py-28 px-4 sm:px-6 bg-muted/30">
-        <div className="max-w-6xl mx-auto">
+      <section id="get-started" className="py-20 sm:py-28 px-4 sm:px-6 bg-muted/30">
+        <div className="max-w-4xl mx-auto">
           <FadeIn>
-            <div className="text-center mb-16">
+            <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                Design in the cloud. Deploy on your infra.
+                Free. Open source. Self-hosted.
               </h2>
               <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
-                The playground is free. The real product runs on your machines.
+                MIT licensed. No paywalls, no license keys, no feature gates. Deploy the full platform with one command.
               </p>
             </div>
           </FadeIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-            {PRICING.map((tier) => (
-              <FadeIn key={tier.name}>
-                <div
-                  className={`bg-card border p-6 flex flex-col h-full ${
-                    tier.highlighted
-                      ? 'border-primary elevation-3'
-                      : 'border-border elevation-1'
-                  }`}
-                >
-                  {tier.highlighted && (
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-primary mb-3">
-                      Most Popular
-                    </span>
-                  )}
-                  <h3 className="text-lg font-semibold text-foreground">{tier.name}</h3>
-                  <div className="mt-2 flex items-baseline gap-1">
-                    <span className="text-3xl font-bold text-foreground">{tier.price}</span>
-                    <span className="text-sm text-muted-foreground">{tier.period}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">{tier.description}</p>
-
-                  <ul className="mt-6 space-y-2.5 flex-1">
-                    {tier.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-sm text-foreground">
-                        <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mt-6">
-                    {tier.href?.startsWith('mailto:') ? (
-                      <a href={tier.href}>
-                        <Button
-                          variant={tier.highlighted ? 'default' : 'outline'}
-                          className="w-full"
-                        >
-                          {tier.cta}
-                        </Button>
-                      </a>
-                    ) : (
-                      <Link to={tier.href || '/register'}>
-                        <Button
-                          variant={tier.highlighted ? 'default' : 'outline'}
-                          className="w-full"
-                        >
-                          {tier.cta}
-                        </Button>
-                      </Link>
-                    )}
-                  </div>
+          <FadeIn>
+            <div className="bg-card border border-primary/30 elevation-3 p-8">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex gap-1.5">
+                  <div className="h-2.5 w-2.5 rounded-full bg-muted-foreground/20" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-muted-foreground/20" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-muted-foreground/20" />
                 </div>
-              </FadeIn>
-            ))}
-          </div>
+                <span className="text-xs text-muted-foreground font-mono ml-2">terminal</span>
+              </div>
+              <pre className="text-sm font-mono leading-relaxed overflow-x-auto">
+                <code>
+                  <span className="text-muted-foreground">$</span>{' '}
+                  <span className="text-foreground">git clone https://github.com/eooo-io/agentis-studio.git</span>{'\n'}
+                  <span className="text-muted-foreground">$</span>{' '}
+                  <span className="text-foreground">cd agentis-studio</span>{'\n'}
+                  <span className="text-muted-foreground">$</span>{' '}
+                  <span className="text-foreground">cp .env.example .env</span>{'\n'}
+                  <span className="text-muted-foreground">$</span>{' '}
+                  <span className="text-foreground">make build && make up && make migrate</span>{'\n'}
+                  <span className="text-muted-foreground">$</span>{' '}
+                  <span className="text-foreground">cd ui && npm install && npm run dev</span>{'\n\n'}
+                  <span className="text-primary"># Open http://localhost:5173 and start building agents</span>
+                </code>
+              </pre>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" className="gap-2">
+                    View on GitHub
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </FadeIn>
+
+          <FadeIn>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              <div className="bg-card border border-border p-5 elevation-1">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  MIT Licensed
+                </div>
+                <p className="text-xs text-muted-foreground">Use it, modify it, ship it. No restrictions.</p>
+              </div>
+              <div className="bg-card border border-border p-5 elevation-1">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  Docker Compose
+                </div>
+                <p className="text-xs text-muted-foreground">One command to deploy. Runs on any Linux/macOS server.</p>
+              </div>
+              <div className="bg-card border border-border p-5 elevation-1">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-2">
+                  <Check className="h-4 w-4 text-primary" />
+                  Fully Self-Hosted
+                </div>
+                <p className="text-xs text-muted-foreground">Your API keys, your data, your infrastructure. Nothing phones home.</p>
+              </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
@@ -1348,19 +1223,21 @@ export function Landing() {
             </div>
             <div className="relative">
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                Ready to deploy your first agent team?
+                Ready to build your first agent team?
               </h2>
               <p className="text-muted-foreground mt-3 max-w-lg mx-auto">
-                Design agents in the free playground. When you&apos;re ready, deploy on your own infrastructure with one command.
+                Clone the repo, deploy with Docker Compose, and start orchestrating agents in minutes. MIT licensed, free forever.
               </p>
               <div className="mt-8 flex flex-wrap gap-3 justify-center">
-                <Button size="lg" className="gap-2" onClick={() => scrollTo('pricing')}>
-                  View Deployment Options
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-                <Link to="/register">
+                <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" className="gap-2">
+                    Star on GitHub
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </a>
+                <Link to="/login">
                   <Button variant="outline" size="lg">
-                    Try the Playground
+                    Try the Demo
                   </Button>
                 </Link>
               </div>
@@ -1377,10 +1254,10 @@ export function Landing() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-3">
-                <img src="/logo.png" alt="eooo.ai" className="h-7 w-7 object-contain" />
+                <img src="/logo.png" alt="Agentis Studio" className="h-7 w-7 object-contain" />
                 <div className="flex flex-col">
-                  <span className="font-semibold text-sm leading-none">Orkestr</span>
-                  <span className="text-[9px] text-muted-foreground tracking-wide leading-none mt-0.5">by eooo.ai</span>
+                  <span className="font-semibold text-sm leading-none">Agentis Studio</span>
+                  <span className="text-[9px] text-muted-foreground tracking-wide leading-none mt-0.5">open source</span>
                 </div>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -1404,47 +1281,48 @@ export function Landing() {
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => scrollTo('pricing')} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
-                    Pricing
-                  </button>
-                </li>
-                <li>
                   <button onClick={() => scrollTo('faq')} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
                     FAQ
                   </button>
                 </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                Community
+              </h4>
+              <ul className="space-y-2 text-sm">
                 <li>
-                  <Link to="/compare" className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-primary">
-                    Compare
-                  </Link>
+                  <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                    GitHub
+                  </a>
+                </li>
+                <li>
+                  <a href="https://github.com/eooo-io/agentis-studio/issues" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                    Issues
+                  </a>
+                </li>
+                <li>
+                  <a href="https://github.com/eooo-io/agentis-studio/discussions" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                    Discussions
+                  </a>
                 </li>
               </ul>
             </div>
 
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                Company
+                License
               </h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>About</li>
-                <li>Blog</li>
-                <li>Careers</li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                Legal
-              </h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Privacy Policy</li>
-                <li>Terms of Service</li>
+                <li>MIT License</li>
               </ul>
             </div>
           </div>
 
           <div className="border-t border-border mt-10 pt-6 text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} eooo.ai. All rights reserved.
+            &copy; {new Date().getFullYear()} Agentis Studio contributors. MIT License.
           </div>
         </div>
       </footer>

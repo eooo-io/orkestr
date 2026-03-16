@@ -10,138 +10,145 @@
                     S  T  U  D  I  O
 ```
 
-**Universal AI skill/agent configuration manager for multi-provider development workflows.**
+**Open-source AI agent orchestration platform.**
+**Design, orchestrate, and execute AI agent teams on your own infrastructure.**
+
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 </div>
 
 <p align="center">
   <img src="https://img.shields.io/badge/PHP-8.4-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.4">
   <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 12">
-  <img src="https://img.shields.io/badge/Filament-3.x-FDAE4B?style=for-the-badge&logo=laravel&logoColor=white" alt="Filament 3">
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React">
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
   <img src="https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4">
-  <img src="https://img.shields.io/badge/shadcn%2Fui-latest-000000?style=for-the-badge&logo=shadcnui&logoColor=white" alt="shadcn/ui">
-  <img src="https://img.shields.io/badge/Monaco_Editor-latest-1E1E1E?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="Monaco Editor">
-  <img src="https://img.shields.io/badge/MariaDB-11.x-003545?style=for-the-badge&logo=mariadb&logoColor=white" alt="MariaDB 11">
   <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
-  <img src="https://img.shields.io/badge/Anthropic-Claude_API-D4A574?style=for-the-badge&logo=anthropic&logoColor=white" alt="Anthropic">
-  <img src="https://img.shields.io/badge/OpenAI-GPT--4o-412991?style=for-the-badge&logo=openai&logoColor=white" alt="OpenAI">
-  <img src="https://img.shields.io/badge/Google-Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Google Gemini">
-  <img src="https://img.shields.io/badge/Ollama-Local-000000?style=for-the-badge&logo=ollama&logoColor=white" alt="Ollama">
 </p>
 
 ---
 
-## What It Does
+## What is Agentis Studio?
 
-Define, edit, and organize reusable AI skills (prompts + config) in a **provider-agnostic format**, then sync them outward to the native config format of any supported AI coding assistant.
+Agentis Studio is a self-hosted platform for designing AI agents, wiring them into multi-agent workflows, and executing them with real tool calls — all from a visual UI. No Python framework required.
 
-**Core philosophy:** `.agentis/` is the single source of truth. All provider-specific files are derived outputs — never edited directly.
+It connects to any LLM provider (Anthropic, OpenAI, Gemini, Grok, OpenRouter, Ollama) and any tool server via MCP and A2A protocols. Your API keys, your data, your infrastructure.
 
-### Supported Providers
+### Core ideas
 
-| Provider | Output | Format |
-|---|---|---|
-| Claude | `.claude/CLAUDE.md` | All skills under H2 headings |
-| Cursor | `.cursor/rules/{slug}.mdc` | One MDC file per skill |
-| GitHub Copilot | `.github/copilot-instructions.md` | All skills concatenated |
-| Windsurf | `.windsurf/rules/{slug}.md` | One file per skill |
-| Cline | `.clinerules` | Single flat file |
-| OpenAI | `.openai/instructions.md` | All skills concatenated |
+- **Agent-first** — Agents are complete loop definitions: Goal → Perceive → Reason → Act → Observe
+- **Provider-agnostic** — Mix cloud and local models in the same project. Go fully air-gapped with Ollama
+- **Visual orchestration** — DAG workflow builder with conditional branching, parallel execution, and human-in-the-loop checkpoints
+- **Real execution** — Not just config. Agents run live with real MCP tool calls, cost tracking, and safety guardrails
+- **Skill system** — Reusable prompt+config units in a portable `.agentis/` format that syncs to Claude, Cursor, Copilot, Windsurf, Cline, and OpenAI
 
 ---
 
 ## Features
 
+### Agent Design & Execution
+- **Agent Builder** — Visual form-based agent configuration (identity, goals, reasoning, tools, autonomy)
+- **18 Pre-built Agents** — Semi-autonomous org archetypes with personas and specializations
+- **Execution Engine** — Run agent loops with real MCP tool calls, memory persistence, and execution traces
+- **Multi-turn Playground** — Interactive chat with any agent, any model, streaming responses
+
+### Orchestration
+- **Workflow Builder** — Drag-and-drop DAG editor with React Flow
+- **Step Types** — Start, end, agent, checkpoint, condition, parallel split/join
+- **Delegation Chains** — Agent-to-agent handoffs with shared context
+- **Export** — LangGraph YAML, CrewAI config, generic JSON
+
+### Multi-Model Support
+- **7 LLM Providers** — Anthropic, OpenAI, Gemini, Grok (xAI), OpenRouter (200+ models), custom OpenAI-compatible, Ollama
+- **Per-agent model assignment** — Route complex tasks to Claude, routine work to local Llama
+- **Fallback chains** — Automatic failover if a provider is down
+- **Air-gap mode** — Zero external network calls, all local inference
+
 ### Skill Management
-- **Monaco Editor** — Full-featured code editor with Markdown syntax highlighting for editing skill prompts
-- **YAML Frontmatter** — Skills stored as portable `.md` files with structured metadata (model, tags, tools, max_tokens)
-- **Version History** — Every save creates a snapshot; compare any two versions with Monaco Diff Editor and restore with one click
-- **Skill Dependencies** — `includes` system for composable prompts with recursive resolution and circular dependency detection
-- **Template Variables** — `{{variable}}` placeholders in skills with per-project values, resolved at compose/sync time
-- **Prompt Linting** — 8 rule-based checks (vague instructions, weak constraints, conflicting directives, missing output format, excessive length, role confusion, missing examples, redundancy)
-- **Duplicate & Move** — Clone skills within or across projects; bulk move multiple skills at once
-- **Token Estimation** — Live token count with model-specific context limit warnings (color-coded at 75%/90% thresholds)
-- **Git Auto-Commit** — Optionally commit skill file changes to the project's git repo automatically on every save
-
-### AI-Powered
-- **Skill Generation** — Describe what you want in natural language and Claude generates a complete skill with frontmatter, tags, and body
-- **Multi-Model Test Runner** — Stream test responses from Anthropic (Claude), OpenAI (GPT-4o, o3), Google Gemini, and local Ollama models
-- **Playground** — Multi-turn chat interface with project/skill/agent system prompt picker, per-turn stats (tokens, elapsed time), and abort support
-
-### Agent System
-- **9 Pre-built Agents** — Orchestrator, PM, Architect, QA, Design, Code Review, Infrastructure, CI/CD, Security
-- **Agent Compose** — Merge base instructions + custom per-project instructions + assigned skill bodies into a single composed output
-- **Per-Project Configuration** — Enable/disable agents, set custom instructions, and assign skills per project
-- **Token Budget Preview** — See composed agent output with token estimates before syncing
+- **Monaco Editor** — Full code editor with YAML frontmatter + Markdown
+- **Version History** — Every save creates a snapshot with diff viewer and one-click restore
+- **Skill Composition** — `includes` for recursive prompt composition with circular dependency detection
+- **Template Variables** — `{{variable}}` placeholders resolved at compose/sync time
+- **Prompt Linter** — 8 quality rules for prompt analysis
+- **AI Generation** — Describe what you want, get a complete skill
 
 ### Provider Sync
-- **6 Providers** — Claude, Cursor, GitHub Copilot, Windsurf, Cline, OpenAI
-- **Diff Preview** — Side-by-side Monaco diff showing exactly what will change before confirming a sync
-- **Dry-Run Mode** — Preview proposed file changes per provider without writing to disk
-- **Template Resolution** — Variables and includes are resolved before writing to provider files
+Sync skills to the native config format of 6 AI coding assistants:
 
-### Organization & Discovery
-- **Command Palette** — `Ctrl+K` / `Cmd+K` for instant fuzzy search across skills, projects, pages, and actions
-- **Tags** — Categorize skills with color-coded tags; filter and search by tag
-- **Cross-Project Search** — FULLTEXT search across all skills with tag, project, and model filters
-- **Bulk Operations** — Multi-select skills for batch tagging, agent assignment, moving, and deletion
+| Provider | Output | Format |
+|---|---|---|
+| Claude | `.claude/CLAUDE.md` | Skills under H2 headings |
+| Cursor | `.cursor/rules/{slug}.mdc` | One MDC file per skill |
+| Copilot | `.github/copilot-instructions.md` | Concatenated |
+| Windsurf | `.windsurf/rules/{slug}.md` | One file per skill |
+| Cline | `.clinerules` | Single flat file |
+| OpenAI | `.openai/instructions.md` | Concatenated |
 
-### Sharing & Collaboration
-- **Skill Library** — 25 pre-seeded skills across 6 categories (Laravel, PHP, TypeScript, FinTech, DevOps, Writing)
-- **Bundle Export/Import** — Export selected skills and agents as ZIP or JSON bundles; import with conflict resolution (skip/overwrite/rename)
-- **Skill Marketplace** — Self-hosted marketplace for publishing, discovering, and installing community skills with ratings and download tracking
+### Safety & Guardrails
+- **Budget limits** — Per-run, per-agent, and daily token/cost budgets
+- **Tool allowlists** — Control which MCP tools each agent can call
+- **Output guards** — PII detection, credential redaction, content filtering
+- **Approval gates** — Human-in-the-loop for sensitive tool calls
+- **Guardrail profiles** — Strict, moderate, permissive presets
 
-### Integrations
-- **Webhook System** — Configure outbound webhooks for skill/project events with HMAC-SHA256 signing and delivery logs
-- **GitHub Inbound Webhooks** — Receive push events to auto-scan projects for new or changed skills
-- **Filament Admin Panel** — Full admin UI for project registry, provider config, library management, tags, and settings
+### Organization & Collaboration
+- **Multi-tenant** — Organizations with role-based access (owner, admin, editor, viewer)
+- **Bundle export/import** — ZIP/JSON with conflict resolution
+- **Skill marketplace** — Community skill sharing with ratings
+- **Webhook system** — Outbound HMAC-signed webhooks + GitHub push receiver
+- **Command palette** — Cmd+K fuzzy search across everything
+
+### Observability
+- **Execution traces** — Full log of every step, tool call, and LLM response
+- **Execution replay** — Step-through with timeline scrubber
+- **Cost analytics** — Per-agent, per-run token usage and cost tracking
+- **Performance dashboard** — Success rates, latency, model comparison
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    React SPA (Vite)                      │
-│  Skills Editor · Playground · Search · Library · Market  │
-└──────────────────────┬──────────────────────────────────┘
-                       │ REST API + SSE
-┌──────────────────────┴──────────────────────────────────┐
-│                  Laravel 12 Backend                       │
-│  Controllers · Services · Jobs · LLM Providers           │
-├──────────────┬──────────────┬───────────────────────────┤
-│ Filament 3.x │ Provider Sync│  Multi-Model LLM Layer    │
-│ Admin Panel  │ (6 drivers)  │  Anthropic · OpenAI ·     │
-│              │              │  Gemini · Ollama           │
-└──────┬───────┴──────┬───────┴───────────┬───────────────┘
-       │              │                   │
-  MariaDB 11    .agentis/ files     External APIs
+┌─────────────────────────────────────────────────────────────┐
+│                     React SPA (Vite + TypeScript)            │
+│  Agent Builder · Workflow Builder · Playground · Canvas       │
+│  Skill Editor · Marketplace · Search · Settings              │
+└──────────────────────────┬──────────────────────────────────┘
+                           │ REST API + SSE
+┌──────────────────────────┴──────────────────────────────────┐
+│                    Laravel 12 Backend (PHP 8.4)               │
+│  Agent Execution Engine · Workflow Runner · MCP Client        │
+│  Provider Sync (6 drivers) · Guardrails · Memory · Audit     │
+├───────────────────┬──────────────┬──────────────────────────┤
+│  Multi-Model LLM  │  MCP + A2A   │  Orchestration Engine    │
+│  Anthropic·OpenAI │  Tool Calls  │  DAG Execution           │
+│  Gemini·Grok·     │  stdio / SSE │  Checkpoints             │
+│  OpenRouter·Ollama│              │  Delegation              │
+└────────┬──────────┴──────┬───────┴───────────┬──────────────┘
+         │                 │                   │
+    MariaDB 11       .agentis/ files      MCP Servers
 ```
-
-- **Filament Admin** — Project registry, provider config, global library, tags, settings
-- **React SPA** — Skill editing (Monaco), playground (multi-turn chat), version history (diff viewer), marketplace, cross-project search
 
 ---
 
 ## Quick Start
 
-### With Docker
+### With Docker (recommended)
 
 ```bash
+git clone https://github.com/eooo-io/agentis-studio.git
+cd agentis-studio
+
 cp .env.example .env
-# Edit .env — set PROJECTS_HOST_PATH to your local dev directory
+# Edit .env — add your API keys (ANTHROPIC_API_KEY, etc.)
 
 make build
 make up
 make migrate
 
-# Start the React SPA locally
+# Start the React SPA
 cd ui && npm install && npm run dev
 ```
-
-Docker runs PHP + MariaDB. The Vite dev server runs locally for faster HMR.
 
 ### Without Docker
 
@@ -150,13 +157,11 @@ composer install
 cp .env.example .env
 php artisan key:generate
 
-# Configure DB_HOST=127.0.0.1 and DB credentials in .env
-
+# Set DB_HOST=127.0.0.1 and DB credentials in .env
 php artisan migrate --seed
-cd ui && npm install && cd ..
 
-# Start everything (server, queue, pail, vite)
-composer dev
+cd ui && npm install && cd ..
+composer dev   # starts server, queue, pail, vite
 ```
 
 ### Access Points
@@ -165,13 +170,15 @@ composer dev
 |---|---|
 | React SPA | http://localhost:5173 |
 | Filament Admin | http://localhost:8000/admin |
-| Laravel API | http://localhost:8000/api |
+| API | http://localhost:8000/api |
+
+Default login: `admin@admin.com` / `password`
 
 ---
 
 ## Skill File Format
 
-Skills are stored as YAML frontmatter + Markdown body in `.agentis/skills/`:
+Skills live in `.agentis/skills/` as YAML frontmatter + Markdown:
 
 ```markdown
 ---
@@ -189,133 +196,26 @@ You are a precise document summarizer.
 Write in {{language}} with a {{tone}} tone.
 ```
 
-Required frontmatter fields: `id`, `name`. All others are optional.
+`.agentis/` is the single source of truth. All provider-specific files are derived outputs.
 
 ---
 
-## Project Structure
+## Tech Stack
 
-```
-agentis-studio/
-├── app/
-│   ├── Filament/           # Admin panel resources & pages
-│   ├── Http/Controllers/   # API controllers (consumed by React SPA)
-│   ├── Http/Resources/     # API Resources
-│   ├── Models/             # Eloquent models
-│   ├── Services/           # Business logic
-│   │   ├── AgentComposeService.php
-│   │   ├── AgentisManifestService.php
-│   │   ├── BundleExportService.php
-│   │   ├── BundleImportService.php
-│   │   ├── GitService.php
-│   │   ├── PromptLinter.php
-│   │   ├── ProviderSyncService.php
-│   │   ├── SkillCompositionService.php
-│   │   ├── SkillFileParser.php
-│   │   ├── TemplateResolver.php
-│   │   ├── WebhookDispatcher.php
-│   │   ├── LLM/            # Multi-model provider layer
-│   │   └── Providers/      # 6 provider sync drivers
-│   └── Jobs/               # ProjectScanJob
-├── database/migrations/    # Schema migrations
-├── routes/
-│   ├── api.php             # REST API for React SPA
-│   └── web.php             # Filament auto-registers here
-├── ui/                     # React + Vite + TypeScript SPA
-│   └── src/
-│       ├── pages/          # Projects, SkillEditor, Playground, Library, Marketplace, Search
-│       ├── components/     # layout/, skills/, library/, agents/, marketplace/
-│       ├── store/          # Zustand store
-│       ├── api/            # Axios client
-│       └── types/          # TypeScript types
-├── docker-compose.yml
-├── docker/                 # Dockerfile & PHP config
-└── Makefile
-```
-
----
-
-## API Endpoints
-
-All consumed by the React SPA. No auth middleware — single-user local application.
-
-<details>
-<summary>Full API reference</summary>
-
-```
-# Projects
-GET|POST       /api/projects
-GET|PUT|DELETE  /api/projects/{id}
-POST           /api/projects/{id}/scan
-POST           /api/projects/{id}/sync
-POST           /api/projects/{id}/sync/preview
-GET            /api/projects/{id}/git-log
-GET            /api/projects/{id}/git-diff
-
-# Skills
-GET|POST       /api/projects/{id}/skills
-GET|PUT|DELETE  /api/skills/{id}
-POST           /api/skills/{id}/duplicate
-GET            /api/skills/{id}/lint
-POST           /api/skills/generate
-
-# Versions
-GET            /api/skills/{id}/versions
-GET            /api/skills/{id}/versions/{v}
-POST           /api/skills/{id}/versions/{v}/restore
-
-# Agents
-GET            /api/agents
-GET            /api/projects/{id}/agents
-POST           /api/projects/{id}/agents/{agentId}/toggle
-PUT             /api/projects/{id}/agents/{agentId}/instructions
-POST           /api/projects/{id}/agents/{agentId}/skills
-GET            /api/projects/{id}/agents/{agentId}/compose
-GET            /api/projects/{id}/agents/compose-all
-
-# Testing & Playground
-POST           /api/skills/{id}/test          (SSE streaming)
-POST           /api/playground                 (SSE streaming)
-
-# Tags, Search, Library
-GET|POST       /api/tags
-DELETE         /api/tags/{id}
-GET            /api/search?q=&tags=&project_id=&model=
-GET            /api/library?category=&tags=&q=
-POST           /api/library/{id}/import
-
-# Marketplace
-GET            /api/marketplace
-POST           /api/marketplace/publish
-POST           /api/marketplace/{id}/install
-POST           /api/marketplace/{id}/vote
-
-# Bulk Operations
-POST           /api/skills/bulk-tag
-POST           /api/skills/bulk-assign
-POST           /api/skills/bulk-delete
-POST           /api/skills/bulk-move
-
-# Bundle Export/Import
-POST           /api/projects/{id}/export
-POST           /api/projects/{id}/import-bundle
-
-# Template Variables
-GET|PUT        /api/projects/{id}/skills/{skillId}/variables
-
-# Webhooks
-GET|POST       /api/projects/{id}/webhooks
-PUT|DELETE     /api/webhooks/{id}
-GET            /api/webhooks/{id}/deliveries
-POST           /api/webhooks/{id}/test
-POST           /api/webhooks/inbound/github
-
-# Settings & Models
-GET            /api/settings
-GET            /api/models
-```
-
-</details>
+| Layer | Technology |
+|---|---|
+| Runtime | PHP 8.4 |
+| Framework | Laravel 12.x |
+| Admin UI | Filament 3.x + Livewire 4.x |
+| Frontend SPA | React 19 + Vite + TypeScript |
+| Styling | Tailwind CSS v4 + shadcn/ui |
+| Code Editor | Monaco Editor |
+| Canvas | React Flow (@xyflow/react) |
+| State Management | Zustand |
+| Database | MariaDB 11.x |
+| LLM Providers | Anthropic, OpenAI, Gemini, Grok, OpenRouter, Ollama |
+| Container | Docker + Docker Compose |
+| Testing | Pest PHP + Playwright |
 
 ---
 
@@ -342,23 +242,40 @@ cd ui && npx tsc --noEmit
 
 ---
 
-## Tech Stack
+## Project Structure
 
-| Layer | Technology |
-|---|---|
-| Runtime | PHP 8.4 |
-| Framework | Laravel 12.x |
-| Admin UI | Filament 3.x + Livewire 4.x |
-| Frontend SPA | React 19 + Vite + TypeScript |
-| Styling | Tailwind CSS v4 + shadcn/ui |
-| Code Editor | Monaco Editor |
-| State Management | Zustand |
-| Database | MariaDB 11.x |
-| LLM Providers | Anthropic, OpenAI, Google Gemini, Ollama |
-| Container | Docker + Docker Compose |
+```
+agentis-studio/
+├── app/
+│   ├── Http/Controllers/   # API controllers (consumed by React SPA)
+│   ├── Models/             # Eloquent models
+│   ├── Services/           # Business logic
+│   │   ├── Execution/      # Agent & workflow execution engine
+│   │   ├── LLM/            # Multi-model provider layer (7 providers)
+│   │   ├── Providers/      # 6 provider sync drivers
+│   │   └── Mcp/            # MCP protocol client
+│   └── Jobs/
+├── database/migrations/    # 59 migrations
+├── routes/api.php          # REST API
+├── ui/                     # React + Vite + TypeScript SPA
+│   └── src/
+│       ├── pages/          # 30+ pages
+│       ├── components/     # Reusable UI components
+│       ├── store/          # Zustand store
+│       └── api/            # Axios client
+├── docs/                   # VitePress documentation site
+├── docker-compose.yml
+└── Makefile
+```
+
+---
+
+## Contributing
+
+Contributions are welcome. Please open an issue first to discuss what you'd like to change.
 
 ---
 
 ## License
 
-MIT
+[MIT](LICENSE)

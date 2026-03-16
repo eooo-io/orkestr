@@ -22,9 +22,7 @@ use App\Http\Controllers\RepositoryController;
 use App\Http\Controllers\OpenClawConfigController;
 use App\Http\Controllers\McpServerController;
 use App\Http\Controllers\A2aAgentController;
-use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ImportController;
-use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\VisualizationController;
 use App\Http\Controllers\CustomEndpointController;
 use App\Http\Controllers\ModelHealthController;
@@ -45,7 +43,6 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ContentPolicyController;
 use App\Http\Controllers\ActivityFeedController;
 use App\Http\Controllers\SsoProviderController;
-use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\SetupWizardController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\ContentReviewController;
@@ -71,9 +68,7 @@ use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
-Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 Route::post('/webhooks/github/{project}', [InboundWebhookController::class, 'github']);
-Route::get('/billing/plans', [BillingController::class, 'plans']);
 Route::post('/webhooks/schedule/{token}', [ScheduleController::class, 'webhookTrigger']);
 
 // OpenAPI spec & docs (public)
@@ -340,22 +335,6 @@ Route::middleware('auth:web')->group(function () {
     // Models
     Route::get('/models', [ModelController::class, 'index']);
 
-    // Billing & Subscriptions
-    Route::get('/billing/status', [BillingController::class, 'status']);
-    Route::post('/billing/subscribe', [BillingController::class, 'subscribe'])->middleware('org-role:owner');
-    Route::post('/billing/change-plan', [BillingController::class, 'changePlan'])->middleware('org-role:owner');
-    Route::post('/billing/cancel', [BillingController::class, 'cancel'])->middleware('org-role:owner');
-    Route::post('/billing/resume', [BillingController::class, 'resume']);
-    Route::post('/billing/setup-intent', [BillingController::class, 'setupIntent']);
-    Route::put('/billing/payment-method', [BillingController::class, 'updatePaymentMethod']);
-    Route::get('/billing/invoices', [BillingController::class, 'invoices']);
-    Route::get('/billing/usage', [BillingController::class, 'usage']);
-
-    // Stripe Connect (Marketplace Sellers)
-    Route::post('/billing/connect', [BillingController::class, 'connectSetup']);
-    Route::get('/billing/connect/status', [BillingController::class, 'connectStatus']);
-    Route::get('/billing/earnings', [BillingController::class, 'earnings']);
-
     // Performance Dashboard
     Route::get('/performance/overview', [PerformanceDashboardController::class, 'overview']);
     Route::get('/performance/agents', [PerformanceDashboardController::class, 'agents']);
@@ -373,10 +352,6 @@ Route::middleware('auth:web')->group(function () {
     // Settings
     Route::get('/settings', SettingsController::class);
     Route::put('/settings', [SettingsController::class, 'update'])->middleware('org-role:admin');
-
-    // License
-    Route::get('/license/status', [LicenseController::class, 'status']);
-    Route::post('/license/activate', [LicenseController::class, 'activate']);
 
     // Setup Wizard
     Route::get('/setup/status', [SetupWizardController::class, 'status']);

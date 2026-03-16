@@ -190,7 +190,6 @@ Required frontmatter fields: `id`, `name`. All others are optional.
 - **Session-based auth** using Laravel's `auth:web` guard — cookies, not tokens
 - **Multi-auth:** email/password, GitHub OAuth, Apple Sign In
 - **Multi-tenant:** Organizations with role-based access (owner, admin, editor, viewer, member)
-- **Plan-based gates:** free, pro, teams — enforced via `CheckPlanFeature`, `CheckPlanLimit`, `CheckUsageBudget` middleware
 - **Filament admin** protected with Filament's `Authenticate` middleware
 - **API routes** protected with `auth:web` middleware (session cookies shared with SPA)
 - **Organization resolution:** `ResolveOrganization` middleware resolves via `X-Organization-Id` header or user's `current_organization_id`
@@ -214,9 +213,7 @@ POST /auth/apple/callback  # Apple Sign In callback (form_post)
 
 ```
 GET  /api/health                        # Health check
-POST /api/stripe/webhook                # Stripe webhooks
 POST /api/webhooks/github/{projectId}   # Inbound GitHub push
-GET  /api/billing/plans                 # Plan listing
 ```
 
 ## API Endpoints
@@ -335,22 +332,6 @@ POST           /api/projects/{id}/import
 GET            /api/models
 GET|PUT        /api/settings
 
-# Billing & Subscriptions
-GET            /api/billing/status
-POST           /api/billing/subscribe
-POST           /api/billing/change-plan
-POST           /api/billing/cancel
-POST           /api/billing/resume
-POST           /api/billing/setup-intent
-PUT            /api/billing/payment-method
-GET            /api/billing/invoices
-GET            /api/billing/usage
-
-# Stripe Connect (Marketplace Sellers)
-POST           /api/billing/connect
-GET            /api/billing/connect/status
-GET            /api/billing/earnings
-
 # Custom Endpoints (E.4)
 GET|POST       /api/custom-endpoints
 GET|PUT|DELETE /api/custom-endpoints/{id}
@@ -459,10 +440,6 @@ GET            /api/reports/audit
 # GitHub Org Import (E.6)
 POST           /api/import/github/discover
 POST           /api/import/github/import
-
-# License (E.2)
-GET            /api/license/status
-POST           /api/license/activate
 
 # Setup Wizard (E.2)
 GET            /api/setup/status
