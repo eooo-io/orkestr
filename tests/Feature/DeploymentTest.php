@@ -116,27 +116,7 @@ test('LicenseKey hasFeature checks features array', function () {
     expect($license->hasFeature('nonexistent'))->toBeFalse();
 });
 
-test('license status API returns no license when none exists', function () {
-    $response = $this->getJson('/api/license/status');
-
-    $response->assertOk()
-        ->assertJsonPath('licensed', false);
-});
-
-test('license activate API works with valid key', function () {
-    $service = new LicenseService;
-    $license = $service->generate('self_hosted');
-
-    // Bind current organization so the controller can find it
-    app()->instance('current_organization', $this->org);
-
-    $response = $this->postJson('/api/license/activate', [
-        'key' => $license->key,
-    ]);
-
-    $response->assertOk()
-        ->assertJsonPath('license.tier', 'self_hosted');
-});
+// License API tests removed — routes stripped in open-source pivot
 
 // ─── #246: Setup Wizard ──────────────────────────────────────────
 
