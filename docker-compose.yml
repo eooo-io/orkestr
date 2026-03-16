@@ -11,6 +11,7 @@ services:
       - projects:/projects
     depends_on:
       - mariadb
+      - redis
     command: >
       sh -c "php artisan serve --host=0.0.0.0 --port=8000 --env=docker"
     networks:
@@ -30,8 +31,41 @@ services:
     networks:
       - agentis
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - agentis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  queue-worker:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    command: >
+      sh -c "php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600"
+    volumes:
+      - .:/var/www/app
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+      - projects:/projects
+    depends_on:
+      - php
+      - mariadb
+      - redis
+    networks:
+      - agentis
+    restart: unless-stopped
+
 volumes:
   mariadb_data:
+  redis_data:
   projects:
     driver: local
     driver_opts:

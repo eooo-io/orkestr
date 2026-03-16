@@ -1304,6 +1304,33 @@ export interface ModelRecommendation {
   local_available: boolean
 }
 
+// --- Agent Tasks (M.4 #391-#396) ---
+
+export interface AgentTask {
+  id: number
+  project_id: number
+  agent_id: number | null
+  parent_task_id: number | null
+  title: string
+  description: string | null
+  priority: 'low' | 'medium' | 'high' | 'critical'
+  status: 'pending' | 'assigned' | 'running' | 'completed' | 'failed' | 'cancelled'
+  input_data: Record<string, unknown> | null
+  output_data: Record<string, unknown> | null
+  execution_id: number | null
+  created_at: string
+  started_at: string | null
+  completed_at: string | null
+  agent?: {
+    id: number
+    name: string
+    slug: string
+    icon: string | null
+    persona: AgentPersona | null
+  } | null
+  child_tasks?: AgentTask[]
+}
+
 // --- Canvas Layout ---
 
 export interface CanvasLayout {

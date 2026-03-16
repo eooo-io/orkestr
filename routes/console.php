@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('schedules:process')->everyMinute()->withoutOverlapping();
+Schedule::command('orkestr:run-schedules')->everyMinute()->withoutOverlapping();

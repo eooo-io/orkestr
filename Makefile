@@ -24,3 +24,15 @@ logs:
 
 tinker:
 	docker compose exec php php artisan tinker
+
+worker:
+	docker compose exec php php artisan queue:work redis --sleep=3 --tries=3
+
+queue-restart:
+	docker compose exec php php artisan queue:restart
+
+queue-failed:
+	docker compose exec php php artisan queue:failed
+
+queue-retry:
+	docker compose exec php php artisan queue:retry all

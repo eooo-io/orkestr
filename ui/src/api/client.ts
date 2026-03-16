@@ -94,6 +94,7 @@ import type {
   McpServerDetail,
   A2aAgentDetail,
   DelegationConfig,
+  AgentTask,
 } from '@/types'
 
 const api = axios.create({
@@ -1495,5 +1496,25 @@ export const createA2aAgent = (projectId: number, data: { name: string; url: str
 
 export const saveDelegationConfigs = (projectId: number, configs: DelegationConfig[]) =>
   api.put(`/projects/${projectId}/delegation-configs`, { configs }).then((r) => r.data)
+
+// --- Agent Tasks (M.4 #391-#396) ---
+
+export const fetchProjectTasks = (projectId: number, params?: { status?: string; agent_id?: number; priority?: string }) =>
+  api.get<ApiResponse<AgentTask[]>>(`/projects/${projectId}/tasks`, { params }).then((r) => r.data.data)
+
+export const createProjectTask = (projectId: number, data: { title: string; description?: string; priority?: string; agent_id?: number | null }) =>
+  api.post<ApiResponse<AgentTask>>(`/projects/${projectId}/tasks`, data).then((r) => r.data.data)
+
+export const updateTask = (taskId: number, data: Partial<AgentTask>) =>
+  api.put<ApiResponse<AgentTask>>(`/tasks/${taskId}`, data).then((r) => r.data.data)
+
+export const assignTask = (taskId: number, agentId: number) =>
+  api.post<ApiResponse<AgentTask>>(`/tasks/${taskId}/assign`, { agent_id: agentId }).then((r) => r.data.data)
+
+export const runTask = (taskId: number) =>
+  api.post<ApiResponse<AgentTask>>(`/tasks/${taskId}/run`).then((r) => r.data.data)
+
+export const deleteTask = (taskId: number) =>
+  api.delete(`/tasks/${taskId}`)
 
 export default api

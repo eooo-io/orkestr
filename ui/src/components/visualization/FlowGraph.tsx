@@ -46,9 +46,15 @@ import {
   Unplug,
   Pencil,
   MousePointerSquareDashed,
+  ListTodo,
+  Play,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  Loader2,
 } from 'lucide-react'
-import type { ProjectGraphData } from '@/types'
-import { assignAgentSkills, bindAgentMcpServers, bindAgentA2aAgents, saveCanvasLayout } from '@/api/client'
+import type { ProjectGraphData, AgentTask } from '@/types'
+import { assignAgentSkills, bindAgentMcpServers, bindAgentA2aAgents, saveCanvasLayout, fetchProjectTasks, createProjectTask, runTask, deleteTask } from '@/api/client'
 import { AgentNode, SkillNode, ProviderNode, McpNode, ProjectNode, LaneLabel } from './FlowNodes'
 import DelegationEdge, { type DelegationEdgeData } from './DelegationEdge'
 import EdgeConfigPanel, { type EdgeConfigData } from './EdgeConfigPanel'
@@ -539,6 +545,186 @@ function PaletteSection({ title, icon, items, onDragStart, onAdd, defaultOpen = 
               <span className="truncate">{item.name}</span>
             </div>
           ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Task Queue sidebar section (#394) ─────────────────────────────
+const PRIORITY_COLORS: Record<string, string> = {
+  critical: 'bg-red-500/20 text-red-400 border-red-500/40',
+  high: 'bg-orange-500/20 text-orange-400 border-orange-500/40',
+  medium: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40',
+  low: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/40',
+}
+
+const STATUS_ICONS: Record<string, React.ReactNode> = {
+  pending: <Clock className="h-3 w-3 text-zinc-500" />,
+  assigned: <AlertCircle className="h-3 w-3 text-blue-400" />,
+  running: <Loader2 className="h-3 w-3 text-violet-400 animate-spin" />,
+  completed: <CheckCircle2 className="h-3 w-3 text-emerald-400" />,
+  failed: <X className="h-3 w-3 text-red-400" />,
+  cancelled: <X className="h-3 w-3 text-zinc-500" />,
+}
+
+interface TaskQueueSectionProps {
+  projectId: number
+  agents: Array<{ id: number; name: string; slug: string; icon: string | null; persona?: { avatar?: string; name?: string } | null }>
+  onSelectTask?: (task: AgentTask) => void
+}
+
+function TaskQueueSection({ projectId, agents, onSelectTask }: TaskQueueSectionProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [tasks, setTasks] = useState<AgentTask[]>([])
+  const [showForm, setShowForm] = useState(false)
+  const [formTitle, setFormTitle] = useState('')
+  const [formDesc, setFormDesc] = useState('')
+  const [formPriority, setFormPriority] = useState<string>('medium')
+  const [formAgentId, setFormAgentId] = useState<number | null>(null)
+  const [creating, setCreating] = useState(false)
+
+  const loadTasks = useCallback(() => {
+    fetchProjectTasks(projectId).then(setTasks).catch(() => {})
+  }, [projectId])
+
+  useEffect(() => {
+    if (isOpen) loadTasks()
+  }, [isOpen, loadTasks])
+
+  const handleCreate = async () => {
+    if (!formTitle.trim()) return
+    setCreating(true)
+    try {
+      await createProjectTask(projectId, {
+        title: formTitle.trim(),
+        description: formDesc.trim() || undefined,
+        priority: formPriority,
+        agent_id: formAgentId,
+      })
+      setFormTitle('')
+      setFormDesc('')
+      setFormPriority('medium')
+      setFormAgentId(null)
+      setShowForm(false)
+      loadTasks()
+    } catch {
+      // silently handle
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  return (
+    <div className="mb-2 border-t border-zinc-800 pt-2 mt-2">
+      <div className="flex items-center">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-1.5 flex-1 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-300 transition-colors"
+        >
+          {isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+          <ListTodo className="h-3 w-3 text-amber-400" />
+          <span>Tasks</span>
+          <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500 font-normal">
+            {tasks.length}
+          </span>
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsOpen(true)
+            setShowForm(true)
+          }}
+          className="p-1 mr-1 text-zinc-500 hover:text-amber-400 hover:bg-zinc-800 rounded transition-colors"
+          title="Create new task"
+        >
+          <Plus className="h-3 w-3" />
+        </button>
+      </div>
+
+      {isOpen && (
+        <div className="px-1 mt-1 space-y-1">
+          {/* New Task Form */}
+          {showForm && (
+            <div className="p-2 rounded-md border border-amber-700/40 bg-zinc-900/80 space-y-1.5">
+              <input
+                type="text"
+                placeholder="Task title..."
+                value={formTitle}
+                onChange={(e) => setFormTitle(e.target.value)}
+                className="w-full px-2 py-1 text-[11px] bg-zinc-800 border border-zinc-700 rounded text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50"
+                autoFocus
+              />
+              <textarea
+                placeholder="Description (optional)..."
+                value={formDesc}
+                onChange={(e) => setFormDesc(e.target.value)}
+                className="w-full px-2 py-1 text-[11px] bg-zinc-800 border border-zinc-700 rounded text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 resize-none"
+                rows={2}
+              />
+              <div className="flex gap-1.5">
+                <select
+                  value={formPriority}
+                  onChange={(e) => setFormPriority(e.target.value)}
+                  className="flex-1 px-1.5 py-1 text-[10px] bg-zinc-800 border border-zinc-700 rounded text-zinc-300 focus:outline-none"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
+                </select>
+                <select
+                  value={formAgentId ?? ''}
+                  onChange={(e) => setFormAgentId(e.target.value ? Number(e.target.value) : null)}
+                  className="flex-1 px-1.5 py-1 text-[10px] bg-zinc-800 border border-zinc-700 rounded text-zinc-300 focus:outline-none"
+                >
+                  <option value="">Auto-route</option>
+                  {agents.map((a) => (
+                    <option key={a.id} value={a.id}>{a.persona?.name || a.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-1 justify-end">
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="px-2 py-0.5 text-[10px] text-zinc-400 hover:text-zinc-300 rounded"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreate}
+                  disabled={creating || !formTitle.trim()}
+                  className="px-2 py-0.5 text-[10px] bg-amber-600 hover:bg-amber-500 text-white rounded disabled:opacity-50"
+                >
+                  {creating ? 'Creating...' : 'Create'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Task List */}
+          {tasks.map((task) => (
+            <div
+              key={task.id}
+              onClick={() => onSelectTask?.(task)}
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded-md border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800/70 hover:border-zinc-700 cursor-pointer transition-all text-[11px] group"
+            >
+              {STATUS_ICONS[task.status] || STATUS_ICONS.pending}
+              <span className="truncate flex-1 text-zinc-300">{task.title}</span>
+              <span className={`text-[9px] px-1 py-0.5 rounded border ${PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.medium}`}>
+                {task.priority[0].toUpperCase()}
+              </span>
+              {task.agent?.persona?.avatar ? (
+                <span className="text-[11px]" title={task.agent.persona.name || task.agent.name}>{task.agent.persona.avatar}</span>
+              ) : task.agent ? (
+                <span className="text-[9px] text-zinc-500 truncate max-w-[40px]" title={task.agent.name}>{task.agent.name}</span>
+              ) : null}
+            </div>
+          ))}
+
+          {tasks.length === 0 && !showForm && (
+            <p className="text-[10px] text-zinc-600 px-2 py-1">No tasks yet</p>
+          )}
         </div>
       )}
     </div>
@@ -1936,6 +2122,27 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
               onDragStart={handlePaletteDragStart}
               onAdd={projectId ? () => handleOpenCreate('a2a') : undefined}
             />
+
+            {/* Task Queue (#394) */}
+            {projectId && (
+              <TaskQueueSection
+                projectId={projectId}
+                agents={data.agents.filter((a) => a.is_enabled).map((a) => ({
+                  id: a.id,
+                  name: a.name,
+                  slug: a.slug,
+                  icon: a.icon,
+                  persona: (data as unknown as { agents: Array<{ persona?: { avatar?: string; name?: string } | null }> }).agents.find((da) => da === a)
+                    ? { avatar: undefined, name: undefined }
+                    : null,
+                }))}
+                onSelectTask={(task) => {
+                  if (task.agent_id) {
+                    setSelectedNodeInfo({ id: String(task.agent_id), type: 'agent' })
+                  }
+                }}
+              />
+            )}
           </div>
         </div>
       )}

@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Listeners\ExecutionCompletedListener;
 use App\Models\AgentSchedule;
 use App\Services\Execution\AgentExecutionService;
 use Illuminate\Bus\Queueable;
@@ -56,7 +57,10 @@ class RunScheduledAgentJob implements ShouldQueue
         );
 
         // Link the execution run to this schedule
-        $run->update(['schedule_id' => $schedule->id]);
+        $run->update([
+            'schedule_id' => $schedule->id,
+            'trigger_type' => $this->triggerSource,
+        ]);
 
         // Record success
         $schedule->recordSuccess();
@@ -65,6 +69,9 @@ class RunScheduledAgentJob implements ShouldQueue
         if ($schedule->trigger_type === 'cron') {
             $schedule->update(['next_run_at' => $schedule->computeNextRun()]);
         }
+
+        // Send execution notifications
+        ExecutionCompletedListener::handle($run);
 
         Log::info("Schedule {$schedule->id} executed successfully", [
             'run_id' => $run->id,

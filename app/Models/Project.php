@@ -139,4 +139,9 @@ class Project extends Model
     {
         return $this->hasMany(AgentSchedule::class);
     }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(AgentTask::class);
+    }
 }

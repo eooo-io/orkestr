@@ -15,6 +15,7 @@ class ExecutionRun extends Model
         'agent_id',
         'workflow_run_id',
         'schedule_id',
+        'trigger_type',
         'status',
         'input',
         'output',

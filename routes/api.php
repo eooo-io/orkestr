@@ -65,12 +65,19 @@ use App\Http\Controllers\ModelPullController;
 use App\Http\Controllers\ModelRecommendationController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\DelegationConfigController;
+use App\Http\Controllers\AgentTaskController;
+use App\Http\Controllers\ExecutionStreamController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
 Route::post('/webhooks/github/{project}', [InboundWebhookController::class, 'github']);
+Route::post('/webhooks/inbound/{project}', [InboundWebhookController::class, 'generic']);
 Route::post('/webhooks/schedule/{token}', [ScheduleController::class, 'webhookTrigger']);
+
+// A2A Execution (public for A2A protocol, rate-limited)
+Route::post('/a2a/{agentSlug}/execute', [App\Http\Controllers\A2aExecutionController::class, 'execute'])
+    ->middleware('throttle:60,1');
 
 // OpenAPI spec & docs (public)
 Route::get('/openapi.json', [OpenApiController::class, 'spec']);
@@ -280,6 +287,11 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/runs/{run}/steps/{step}/approve', [ExecutionController::class, 'approveStep']);
     Route::post('/runs/{run}/steps/{step}/reject', [ExecutionController::class, 'rejectStep']);
     Route::post('/runs/{run}/resume', [ExecutionController::class, 'resume']);
+
+    // Async Agent Execution (queue-based with SSE streaming)
+    Route::post('/projects/{project}/agents/{agent}/run', [ExecutionStreamController::class, 'run']);
+    Route::get('/executions/{executionId}/stream', [ExecutionStreamController::class, 'stream']);
+    Route::post('/executions/{executionId}/cancel', [ExecutionStreamController::class, 'cancel']);
 
     // Agent Budget
     Route::get('/agents/{agent}/budget-status', [AgentBudgetController::class, 'status']);
@@ -509,4 +521,12 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/executions/{executionReplay}', [ExecutionReplayController::class, 'show']);
     Route::get('/executions/{executionReplay}/steps', [ExecutionReplayController::class, 'steps']);
     Route::get('/executions/{executionReplay}/diff/{otherReplay}', [ExecutionReplayController::class, 'diff']);
+
+    // Agent Tasks (#391-#396)
+    Route::get('/projects/{project}/tasks', [AgentTaskController::class, 'index']);
+    Route::post('/projects/{project}/tasks', [AgentTaskController::class, 'store'])->middleware('org-role:editor');
+    Route::put('/tasks/{task}', [AgentTaskController::class, 'update'])->middleware('org-role:editor');
+    Route::post('/tasks/{task}/assign', [AgentTaskController::class, 'assign'])->middleware('org-role:editor');
+    Route::post('/tasks/{task}/run', [AgentTaskController::class, 'run'])->middleware('org-role:editor');
+    Route::delete('/tasks/{task}', [AgentTaskController::class, 'destroy'])->middleware('org-role:editor');
 });

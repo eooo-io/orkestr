@@ -63,6 +63,10 @@ class Agent extends Model
         'blocked_tools',
         'data_access_scope',
 
+        // Notifications
+        'notify_on_success',
+        'notify_on_failure',
+
         // Meta
         'is_template',
         'created_by',
@@ -77,6 +81,8 @@ class Agent extends Model
             'temperature' => 'decimal:2',
             'can_delegate' => 'boolean',
             'is_template' => 'boolean',
+            'notify_on_success' => 'boolean',
+            'notify_on_failure' => 'boolean',
 
             // JSON columns
             'success_criteria' => 'array',
@@ -177,6 +183,11 @@ class Agent extends Model
     public function executionRuns(): HasMany
     {
         return $this->hasMany(ExecutionRun::class);
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(AgentTask::class);
     }
 
     // --- Scopes ---
