@@ -36,9 +36,19 @@ import {
   ChevronDown,
   ChevronRight,
   Plus,
+  Check,
+  Search,
+  X,
+  Undo2,
+  Redo2,
+  Trash2,
+  Settings2,
+  Unplug,
+  Pencil,
+  MousePointerSquareDashed,
 } from 'lucide-react'
 import type { ProjectGraphData } from '@/types'
-import { assignAgentSkills, bindAgentMcpServers, bindAgentA2aAgents } from '@/api/client'
+import { assignAgentSkills, bindAgentMcpServers, bindAgentA2aAgents, saveCanvasLayout } from '@/api/client'
 import { AgentNode, SkillNode, ProviderNode, McpNode, ProjectNode, LaneLabel } from './FlowNodes'
 import DelegationEdge, { type DelegationEdgeData } from './DelegationEdge'
 import EdgeConfigPanel, { type EdgeConfigData } from './EdgeConfigPanel'
@@ -543,15 +553,108 @@ interface ToolbarProps {
   onZoomOut: () => void
   isFullscreen: boolean
   onToggleFullscreen: () => void
+  onUndo?: () => void
+  onRedo?: () => void
+  canUndo?: boolean
+  canRedo?: boolean
+  savedIndicator?: boolean
+  // #369 — Node search & filter
+  filterSearch: string
+  onFilterSearchChange: (v: string) => void
+  filterTypes: Set<string>
+  onToggleFilterType: (t: string) => void
+  onClearFilters: () => void
+  hasActiveFilter: boolean
 }
 
-function CanvasToolbar({ onAutoLayout, onFitView, onZoomIn, onZoomOut, isFullscreen, onToggleFullscreen }: ToolbarProps) {
+const FILTER_TYPE_BUTTONS: Array<{ key: string; label: string; color: string }> = [
+  { key: 'agent', label: 'A', color: 'text-violet-400 border-violet-500/60 bg-violet-500/10' },
+  { key: 'skill', label: 'S', color: 'text-emerald-400 border-emerald-500/60 bg-emerald-500/10' },
+  { key: 'mcp', label: 'M', color: 'text-pink-400 border-pink-500/60 bg-pink-500/10' },
+  { key: 'a2a', label: 'T', color: 'text-cyan-400 border-cyan-500/60 bg-cyan-500/10' },
+]
+
+function CanvasToolbar({
+  onAutoLayout,
+  onFitView,
+  onZoomIn,
+  onZoomOut,
+  isFullscreen,
+  onToggleFullscreen,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
+  savedIndicator,
+  filterSearch,
+  onFilterSearchChange,
+  filterTypes,
+  onToggleFilterType,
+  onClearFilters,
+  hasActiveFilter,
+}: ToolbarProps) {
   return (
     <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-zinc-900/90 border border-zinc-700 rounded-lg px-1 py-1 shadow-lg backdrop-blur-sm">
+      {/* #369 — Node search */}
+      <div className="relative flex items-center">
+        <Search className="absolute left-2 h-3 w-3 text-zinc-500 pointer-events-none" />
+        <input
+          type="text"
+          value={filterSearch}
+          onChange={(e) => onFilterSearchChange(e.target.value)}
+          placeholder="Filter nodes..."
+          className="w-[140px] pl-6 pr-6 py-1 text-[11px] bg-zinc-800/80 border border-zinc-700 rounded text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-violet-500/50"
+        />
+        {hasActiveFilter && (
+          <button
+            onClick={onClearFilters}
+            className="absolute right-1 p-0.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+            title="Clear filters"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        )}
+      </div>
+      {/* #369 — Type filter toggles */}
+      <div className="flex items-center gap-0.5 ml-0.5">
+        {FILTER_TYPE_BUTTONS.map((ft) => (
+          <button
+            key={ft.key}
+            onClick={() => onToggleFilterType(ft.key)}
+            className={`w-5 h-5 flex items-center justify-center text-[10px] font-bold rounded border transition-all ${
+              filterTypes.has(ft.key)
+                ? ft.color
+                : 'text-zinc-600 border-zinc-700 bg-zinc-800/40 opacity-50'
+            }`}
+            title={`Toggle ${ft.key} nodes`}
+          >
+            {ft.label}
+          </button>
+        ))}
+      </div>
+      <div className="w-px h-4 bg-zinc-700" />
+      {/* #366 — Undo/Redo */}
+      <button
+        onClick={onUndo}
+        disabled={!canUndo}
+        className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        title="Undo (Cmd+Z)"
+      >
+        <Undo2 className="h-3.5 w-3.5" />
+      </button>
+      <button
+        onClick={onRedo}
+        disabled={!canRedo}
+        className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        title="Redo (Cmd+Shift+Z)"
+      >
+        <Redo2 className="h-3.5 w-3.5" />
+      </button>
+      <div className="w-px h-4 bg-zinc-700" />
       <button
         onClick={onAutoLayout}
         className="flex items-center gap-1.5 px-2 py-1 text-[11px] text-zinc-300 hover:text-white hover:bg-zinc-800 rounded transition-colors"
-        title="Auto Layout"
+        title="Auto Layout (L)"
       >
         <LayoutDashboard className="h-3.5 w-3.5" />
         <span>Auto Layout</span>
@@ -560,21 +663,21 @@ function CanvasToolbar({ onAutoLayout, onFitView, onZoomIn, onZoomOut, isFullscr
       <button
         onClick={onZoomIn}
         className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors"
-        title="Zoom In"
+        title="Zoom In (+)"
       >
         <ZoomIn className="h-3.5 w-3.5" />
       </button>
       <button
         onClick={onZoomOut}
         className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors"
-        title="Zoom Out"
+        title="Zoom Out (-)"
       >
         <ZoomOut className="h-3.5 w-3.5" />
       </button>
       <button
         onClick={onFitView}
         className="p-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors"
-        title="Fit to View"
+        title="Fit to View (F)"
       >
         <Locate className="h-3.5 w-3.5" />
       </button>
@@ -586,8 +689,118 @@ function CanvasToolbar({ onAutoLayout, onFitView, onZoomIn, onZoomOut, isFullscr
       >
         {isFullscreen ? <Minimize className="h-3.5 w-3.5" /> : <Maximize className="h-3.5 w-3.5" />}
       </button>
+      {/* #367 — Saved indicator */}
+      {savedIndicator && (
+        <div className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-emerald-400 animate-fade-in">
+          <Check className="h-3 w-3" />
+          <span>Saved</span>
+        </div>
+      )}
     </div>
   )
+}
+
+// ─── Context Menu (#364) ─────────────────────────────────────────
+interface ContextMenuState {
+  x: number
+  y: number
+  type: 'node' | 'edge' | 'canvas'
+  id?: string
+  nodeType?: string
+}
+
+interface ContextMenuProps {
+  menu: ContextMenuState
+  onClose: () => void
+  onEditNode?: () => void
+  onDeleteNode?: () => void
+  onConfigureEdge?: () => void
+  onRemoveEdge?: () => void
+  onCreateAgent?: () => void
+  onCreateSkill?: () => void
+  onCreateMcp?: () => void
+  onCreateA2a?: () => void
+  onAutoLayout?: () => void
+  onFitView?: () => void
+}
+
+function CanvasContextMenu({
+  menu,
+  onClose,
+  onEditNode,
+  onDeleteNode,
+  onConfigureEdge,
+  onRemoveEdge,
+  onCreateAgent,
+  onCreateSkill,
+  onCreateMcp,
+  onCreateA2a,
+  onAutoLayout,
+  onFitView,
+}: ContextMenuProps) {
+  useEffect(() => {
+    const handleClick = () => onClose()
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('click', handleClick)
+    window.addEventListener('keydown', handleKey)
+    return () => {
+      window.removeEventListener('click', handleClick)
+      window.removeEventListener('keydown', handleKey)
+    }
+  }, [onClose])
+
+  const items: Array<{ label: string; icon: React.ReactNode; onClick?: () => void; danger?: boolean }> = []
+
+  if (menu.type === 'node') {
+    items.push({ label: 'Edit', icon: <Pencil className="h-3.5 w-3.5" />, onClick: onEditNode })
+    items.push({ label: 'Delete', icon: <Trash2 className="h-3.5 w-3.5" />, onClick: onDeleteNode, danger: true })
+  } else if (menu.type === 'edge') {
+    items.push({ label: 'Configure', icon: <Settings2 className="h-3.5 w-3.5" />, onClick: onConfigureEdge })
+    items.push({ label: 'Remove Connection', icon: <Unplug className="h-3.5 w-3.5" />, onClick: onRemoveEdge, danger: true })
+  } else if (menu.type === 'canvas') {
+    items.push({ label: 'Create Agent', icon: <Bot className="h-3.5 w-3.5" />, onClick: onCreateAgent })
+    items.push({ label: 'Create Skill', icon: <Sparkles className="h-3.5 w-3.5" />, onClick: onCreateSkill })
+    items.push({ label: 'Create MCP Server', icon: <Server className="h-3.5 w-3.5" />, onClick: onCreateMcp })
+    items.push({ label: 'Create A2A Agent', icon: <Wifi className="h-3.5 w-3.5" />, onClick: onCreateA2a })
+    items.push({ label: 'Auto Layout', icon: <LayoutDashboard className="h-3.5 w-3.5" />, onClick: onAutoLayout })
+    items.push({ label: 'Fit to View', icon: <Locate className="h-3.5 w-3.5" />, onClick: onFitView })
+  }
+
+  return (
+    <div
+      className="absolute z-50 min-w-[160px] bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl py-1"
+      style={{ left: menu.x, top: menu.y }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {items.map((item, i) => (
+        <button
+          key={i}
+          onClick={(e) => {
+            e.stopPropagation()
+            item.onClick?.()
+            onClose()
+          }}
+          className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm transition-colors ${
+            item.danger
+              ? 'text-red-400 hover:bg-red-500/10 hover:text-red-300'
+              : 'text-zinc-300 hover:bg-zinc-700 hover:text-white'
+          }`}
+        >
+          {item.icon}
+          <span>{item.label}</span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// ─── Undo/Redo types (#366) ─────────────────────────────────────
+interface UndoOperation {
+  type: string
+  undo: () => void
+  redo: () => void
 }
 
 // ─── Main interactive graph component ──────────────────────────────
@@ -609,6 +822,28 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
 
   // ─── Create mode (#348) ─────────────────────────────────────────
   const [createMode, setCreateMode] = useState<'agent' | 'skill' | 'mcp' | 'a2a' | null>(null)
+
+  // ─── Context menu (#364) ──────────────────────────────────────
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
+
+  // ─── Undo/Redo (#366) ────────────────────────────────────────
+  const undoStackRef = useRef<UndoOperation[]>([])
+  const redoStackRef = useRef<UndoOperation[]>([])
+  const [undoRedoVersion, setUndoRedoVersion] = useState(0)
+
+  // ─── Auto-save (#367) ────────────────────────────────────────
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [savedIndicator, setSavedIndicator] = useState(false)
+  const savedIndicatorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isBulkOperationRef = useRef(false)
+
+  // ─── Node filter (#369) ──────────────────────────────────────
+  const [filterSearch, setFilterSearch] = useState('')
+  const [filterTypes, setFilterTypes] = useState<Set<string>>(new Set(['agent', 'skill', 'mcp', 'a2a']))
+
+  // ─── Position tracking for undo (#366) ───────────────────────
+  const positionBatchRef = useRef<Map<string, { before: { x: number; y: number }; after: { x: number; y: number } }> | null>(null)
+  const positionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Chain detection (#293)
   const chains = useMemo(() => detectDelegationChains(edges), [edges])
@@ -653,18 +888,101 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
     })
   }, [edges, highlightedElements, edgeStepNumbers])
 
-  // Apply highlighting class to nodes in chain
+  // Apply highlighting class to nodes in chain + filter opacity (#369)
   const processedNodes = useMemo(() => {
-    if (!hoveredNodeId || highlightedElements.nodeIds.size === 0) return nodes
+    const searchLower = filterSearch.toLowerCase()
+    const isFiltering = filterSearch.length > 0 || filterTypes.size < 4
+
     return nodes.map((node) => {
-      const isInChain = highlightedElements.nodeIds.has(node.id)
-      if (!isInChain) return node
-      return {
-        ...node,
-        className: 'ring-2 ring-cyan-400/60 ring-offset-1 ring-offset-zinc-900 rounded-lg',
+      let updated = { ...node }
+
+      // Chain highlighting
+      if (hoveredNodeId && highlightedElements.nodeIds.size > 0) {
+        if (highlightedElements.nodeIds.has(node.id)) {
+          updated = { ...updated, className: 'ring-2 ring-cyan-400/60 ring-offset-1 ring-offset-zinc-900 rounded-lg' }
+        }
       }
+
+      // #369 — Filter opacity
+      if (isFiltering && node.type !== 'laneLabel') {
+        const nodePrefix = node.id.split('-')[0] ?? ''
+        const typeMap: Record<string, string> = { agent: 'agent', skill: 'skill', mcp: 'mcp', a2a: 'a2a', provider: 'mcp' }
+        const filterKey = typeMap[nodePrefix]
+        const typeMatch = filterKey ? filterTypes.has(filterKey) : true
+        const nameMatch = filterSearch.length === 0 || (node.data.label as string)?.toLowerCase().includes(searchLower)
+        if (!typeMatch || !nameMatch) {
+          updated = { ...updated, style: { ...updated.style, opacity: 0.1 } }
+        } else {
+          updated = { ...updated, style: { ...updated.style, opacity: 1 } }
+        }
+      }
+
+      return updated
     })
-  }, [nodes, hoveredNodeId, highlightedElements])
+  }, [nodes, hoveredNodeId, highlightedElements, filterSearch, filterTypes])
+
+  // ─── Undo/Redo helpers (#366) ──────────────────────────────────
+  const pushUndo = useCallback((op: UndoOperation) => {
+    undoStackRef.current.push(op)
+    if (undoStackRef.current.length > 50) undoStackRef.current.shift()
+    redoStackRef.current = []
+    setUndoRedoVersion((v) => v + 1)
+  }, [])
+
+  const handleUndo = useCallback(() => {
+    const op = undoStackRef.current.pop()
+    if (!op) return
+    op.undo()
+    redoStackRef.current.push(op)
+    setUndoRedoVersion((v) => v + 1)
+  }, [])
+
+  const handleRedo = useCallback(() => {
+    const op = redoStackRef.current.pop()
+    if (!op) return
+    op.redo()
+    undoStackRef.current.push(op)
+    setUndoRedoVersion((v) => v + 1)
+  }, [])
+
+  // ─── Auto-save helper (#367) ─────────────────────────────────
+  const triggerAutoSave = useCallback(() => {
+    if (!projectId) return
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current)
+    autoSaveTimerRef.current = setTimeout(() => {
+      setNodes((currentNodes) => {
+        const layout: Record<string, { x: number; y: number }> = {}
+        for (const n of currentNodes) {
+          if (n.type !== 'laneLabel') {
+            layout[n.id] = { x: n.position.x, y: n.position.y }
+          }
+        }
+        saveCanvasLayout(projectId, layout).then(() => {
+          setSavedIndicator(true)
+          if (savedIndicatorTimerRef.current) clearTimeout(savedIndicatorTimerRef.current)
+          savedIndicatorTimerRef.current = setTimeout(() => setSavedIndicator(false), 2000)
+        }).catch(() => { /* silent */ })
+        return currentNodes
+      })
+    }, 500)
+  }, [projectId])
+
+  // ─── Node filter helpers (#369) ──────────────────────────────
+  const handleToggleFilterType = useCallback((type: string) => {
+    setFilterTypes((prev) => {
+      const next = new Set(prev)
+      if (next.has(type)) next.delete(type)
+      else next.add(type)
+      return next
+    })
+  }, [])
+
+  const handleClearFilters = useCallback(() => {
+    setFilterSearch('')
+    setFilterTypes(new Set(['agent', 'skill', 'mcp', 'a2a']))
+  }, [])
+
+  const hasActiveFilter = filterSearch.length > 0 || filterTypes.size < 4
 
   // Track which items are on canvas vs palette
   const canvasNodeIds = useMemo(() => new Set(nodes.map((n) => n.id)), [nodes])
@@ -707,10 +1025,89 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
     setEdges(g.edges)
   }, [data])
 
-  // Handle node changes (drag, select, etc.)
+  // Handle node changes (drag, select, etc.) + position undo (#366) + auto-save (#367)
   const onNodesChange: OnNodesChange = useCallback(
-    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-    [],
+    (changes) => {
+      // Track position changes for undo (#366) and auto-save (#367)
+      const positionChanges = changes.filter(
+        (c) => c.type === 'position' && c.position && !c.dragging,
+      )
+      if (positionChanges.length > 0 && !isBulkOperationRef.current) {
+        triggerAutoSave()
+      }
+
+      // Start tracking positions for undo when drag starts
+      const dragStarts = changes.filter(
+        (c) => c.type === 'position' && c.dragging === true,
+      )
+      if (dragStarts.length > 0 && !positionBatchRef.current) {
+        positionBatchRef.current = new Map()
+        setNodes((nds) => {
+          for (const change of dragStarts) {
+            if (change.type === 'position') {
+              const node = nds.find((n) => n.id === change.id)
+              if (node && positionBatchRef.current) {
+                positionBatchRef.current.set(node.id, {
+                  before: { ...node.position },
+                  after: { ...node.position },
+                })
+              }
+            }
+          }
+          return nds
+        })
+      }
+
+      // Track "after" positions during drag
+      const dragMoves = changes.filter(
+        (c) => c.type === 'position' && c.dragging === true && c.position,
+      )
+      for (const change of dragMoves) {
+        if (change.type === 'position' && change.position && positionBatchRef.current) {
+          const entry = positionBatchRef.current.get(change.id)
+          if (entry) entry.after = { ...change.position }
+        }
+      }
+
+      // Commit position undo when drag ends
+      const dragEnds = changes.filter(
+        (c) => c.type === 'position' && c.dragging === false,
+      )
+      if (dragEnds.length > 0 && positionBatchRef.current) {
+        const batch = new Map(positionBatchRef.current)
+        positionBatchRef.current = null
+        // Capture final positions
+        for (const change of dragEnds) {
+          if (change.type === 'position' && change.position) {
+            const entry = batch.get(change.id)
+            if (entry) entry.after = { ...change.position }
+          }
+        }
+        pushUndo({
+          type: 'position',
+          undo: () => {
+            setNodes((nds) =>
+              nds.map((n) => {
+                const entry = batch.get(n.id)
+                return entry ? { ...n, position: entry.before } : n
+              }),
+            )
+          },
+          redo: () => {
+            setNodes((nds) =>
+              nds.map((n) => {
+                const entry = batch.get(n.id)
+                return entry ? { ...n, position: entry.after } : n
+              }),
+            )
+          },
+        })
+        triggerAutoSave()
+      }
+
+      setNodes((nds) => applyNodeChanges(changes, nds))
+    },
+    [pushUndo, triggerAutoSave],
   )
 
   const onEdgesChange: OnEdgesChange = useCallback(
@@ -973,6 +1370,7 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
   const handlePaneClick = useCallback(() => {
     setSelectedEdgeId(null)
     setSelectedNodeInfo(null)
+    setContextMenu(null)
   }, [])
 
   // Chain hover highlighting (#293)
@@ -1233,26 +1631,190 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
     }
   }, [dropTargetNodeId])
 
+  // ─── Context menu handlers (#364) ────────────────────────────
+  const handleNodeContextMenu = useCallback(
+    (e: React.MouseEvent, node: Node) => {
+      e.preventDefault()
+      const [type] = node.id.split('-')
+      if (type === 'lane') return
+      const bounds = reactFlowWrapper.current?.getBoundingClientRect()
+      setContextMenu({
+        x: e.clientX - (bounds?.left ?? 0),
+        y: e.clientY - (bounds?.top ?? 0),
+        type: 'node',
+        id: node.id,
+        nodeType: type,
+      })
+    },
+    [],
+  )
+
+  const handleEdgeContextMenu = useCallback(
+    (e: React.MouseEvent, edge: Edge) => {
+      e.preventDefault()
+      const bounds = reactFlowWrapper.current?.getBoundingClientRect()
+      setContextMenu({
+        x: e.clientX - (bounds?.left ?? 0),
+        y: e.clientY - (bounds?.top ?? 0),
+        type: 'edge',
+        id: edge.id,
+        nodeType: edge.type,
+      })
+    },
+    [],
+  )
+
+  const handlePaneContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      const bounds = reactFlowWrapper.current?.getBoundingClientRect()
+      setContextMenu({
+        x: e.clientX - (bounds?.left ?? 0),
+        y: e.clientY - (bounds?.top ?? 0),
+        type: 'canvas',
+      })
+    },
+    [],
+  )
+
   // ─── Auto Layout ───────────────────────────────────────────────
   const handleAutoLayout = useCallback(() => {
+    isBulkOperationRef.current = true
     setNodes((nds) => {
       const updated = autoLayout(nds, edges)
-      setTimeout(() => fitView({ padding: 0.15 }), 50)
+      setTimeout(() => {
+        fitView({ padding: 0.15 })
+        isBulkOperationRef.current = false
+        triggerAutoSave()
+      }, 50)
       return updated
     })
-  }, [edges, fitView])
+  }, [edges, fitView, triggerAutoSave])
 
   // ─── Fullscreen ────────────────────────────────────────────────
   const toggleFullscreen = useCallback(() => {
     setIsFullscreen((prev) => !prev)
   }, [])
 
+  // ─── Delete edge helper (reused by keydown + context menu) ─────
+  const deleteEdge = useCallback(
+    (edgeId: string) => {
+      const edge = edges.find((ed) => ed.id === edgeId)
+      if (!edge) return
+
+      setEdges((eds) => eds.filter((ed) => ed.id !== edgeId))
+      setSelectedEdgeId(null)
+
+      // Push to undo stack (#366)
+      pushUndo({
+        type: 'edge-delete',
+        undo: () => setEdges((eds) => [...eds, edge]),
+        redo: () => setEdges((eds) => eds.filter((ed) => ed.id !== edgeId)),
+      })
+
+      // Persist: unassign depending on edge type
+      if (projectId && edge.source.startsWith('agent-') && edge.target.startsWith('skill-')) {
+        const agentNumId = parseInt(edge.source.replace('agent-', ''))
+        const skillNumId = parseInt(edge.target.replace('skill-', ''))
+        const agent = data.agents.find((a) => a.id === agentNumId)
+        if (agent) {
+          const newSkillIds = agent.skill_ids.filter((id) => id !== skillNumId)
+          assignAgentSkills(projectId, agentNumId, newSkillIds).catch(() => onRefresh?.())
+        }
+      }
+      if (projectId && edge.source.startsWith('agent-') && edge.target.startsWith('mcp-')) {
+        const agentNumId = parseInt(edge.source.replace('agent-', ''))
+        const mcpNumId = parseInt(edge.target.replace('mcp-', ''))
+        const agent = data.agents.find((a) => a.id === agentNumId)
+        if (agent) {
+          const newMcpIds = (agent.mcp_server_ids ?? []).filter((id) => id !== mcpNumId)
+          bindAgentMcpServers(projectId, agentNumId, newMcpIds).catch(() => onRefresh?.())
+        }
+      }
+      if (projectId && edge.source.startsWith('agent-') && edge.target.startsWith('a2a-')) {
+        const agentNumId = parseInt(edge.source.replace('agent-', ''))
+        const a2aNumId = parseInt(edge.target.replace('a2a-', ''))
+        const agent = data.agents.find((a) => a.id === agentNumId)
+        if (agent) {
+          const newA2aIds = (agent.a2a_agent_ids ?? []).filter((id) => id !== a2aNumId)
+          bindAgentA2aAgents(projectId, agentNumId, newA2aIds).catch(() => onRefresh?.())
+        }
+      }
+      if (edge.type === 'delegation') {
+        setEdgeConfigs((prev) => {
+          const next = new Map(prev)
+          next.delete(edgeId)
+          return next
+        })
+        onRefresh?.()
+      }
+    },
+    [edges, projectId, data.agents, onRefresh, pushUndo],
+  )
+
+  // ─── Delete selected nodes helper (#363) ─────────────────────
+  const deleteSelectedNodes = useCallback(() => {
+    setNodes((currentNodes) => {
+      const selected = currentNodes.filter((n) => n.selected && n.type !== 'laneLabel')
+      if (selected.length === 0) return currentNodes
+
+      if (selected.length > 1 && !window.confirm(`Delete ${selected.length} selected nodes?`)) {
+        return currentNodes
+      }
+
+      const deletedIds = new Set(selected.map((n) => n.id))
+      const remainingNodes = currentNodes.filter((n) => !deletedIds.has(n.id))
+
+      // Push undo for each node
+      pushUndo({
+        type: 'nodes-delete',
+        undo: () => {
+          setNodes((nds) => [...nds, ...selected])
+          setEdges((eds) => {
+            const removedEdges = edges.filter(
+              (e) => deletedIds.has(e.source) || deletedIds.has(e.target),
+            )
+            return [...eds, ...removedEdges]
+          })
+        },
+        redo: () => {
+          setNodes((nds) => nds.filter((n) => !deletedIds.has(n.id)))
+          setEdges((eds) => eds.filter((e) => !deletedIds.has(e.source) && !deletedIds.has(e.target)))
+        },
+      })
+
+      // Remove connected edges
+      setEdges((eds) => eds.filter((e) => !deletedIds.has(e.source) && !deletedIds.has(e.target)))
+
+      return remainingNodes
+    })
+  }, [edges, pushUndo])
+
   // Handle Escape key to exit fullscreen or close panels (#294)
-  // Handle Delete/Backspace to delete selected edge (#354)
+  // Handle Delete/Backspace to delete selected edge (#354) + selected nodes (#363)
+  // Handle keyboard shortcuts (#365) + undo/redo (#366)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't fire shortcuts when typing in inputs (#365)
+      const target = e.target as HTMLElement
+      const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable
+
+      // #366 — Undo/Redo (works even when typing? No, only on canvas)
+      if (!isTyping && (e.metaKey || e.ctrlKey) && e.key === 'z') {
+        e.preventDefault()
+        if (e.shiftKey) {
+          handleRedo()
+        } else {
+          handleUndo()
+        }
+        return
+      }
+
       if (e.key === 'Escape') {
-        if (createMode) {
+        // #363 — Escape clears selection
+        if (contextMenu) {
+          setContextMenu(null)
+        } else if (createMode) {
           setCreateMode(null)
         } else if (selectedEdgeId) {
           setSelectedEdgeId(null)
@@ -1260,70 +1822,50 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
           setSelectedNodeInfo(null)
         } else if (isFullscreen) {
           setIsFullscreen(false)
+        } else {
+          // Deselect all nodes (#363)
+          setNodes((nds) => nds.map((n) => (n.selected ? { ...n, selected: false } : n)))
         }
+        return
       }
 
-      // #354 — Delete edge via Delete/Backspace key
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedEdgeId && !selectedNodeInfo && !createMode) {
-        // Don't delete if user is typing in an input
-        const target = e.target as HTMLElement
-        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return
+      if (isTyping) return
 
+      // #365 — Keyboard shortcuts
+      if (e.key === 'l' || e.key === 'L') {
+        handleAutoLayout()
+        return
+      }
+      if (e.key === 'f' || e.key === 'F') {
+        fitView({ padding: 0.15 })
+        return
+      }
+      if (e.key === '+' || e.key === '=') {
+        zoomIn()
+        return
+      }
+      if (e.key === '-') {
+        zoomOut()
+        return
+      }
+
+      // #354 + #363 — Delete edge or selected nodes via Delete/Backspace key
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        // Delete selected edge
+        if (selectedEdgeId && !selectedNodeInfo && !createMode) {
+          e.preventDefault()
+          deleteEdge(selectedEdgeId)
+          return
+        }
+
+        // #363 — Delete all selected nodes
         e.preventDefault()
-        const edge = edges.find((ed) => ed.id === selectedEdgeId)
-        if (!edge) return
-
-        // Remove edge from local state
-        setEdges((eds) => eds.filter((ed) => ed.id !== selectedEdgeId))
-        setSelectedEdgeId(null)
-
-        // Persist: unassign depending on edge type
-        if (projectId && edge.source.startsWith('agent-') && edge.target.startsWith('skill-')) {
-          const agentNumId = parseInt(edge.source.replace('agent-', ''))
-          const skillNumId = parseInt(edge.target.replace('skill-', ''))
-          const agent = data.agents.find((a) => a.id === agentNumId)
-          if (agent) {
-            const newSkillIds = agent.skill_ids.filter((id) => id !== skillNumId)
-            assignAgentSkills(projectId, agentNumId, newSkillIds).catch(() => {
-              // Revert on failure — re-add edge
-              onRefresh?.()
-            })
-          }
-        }
-        // For agent↔MCP edges: unbind via API
-        if (projectId && edge.source.startsWith('agent-') && edge.target.startsWith('mcp-')) {
-          const agentNumId = parseInt(edge.source.replace('agent-', ''))
-          const mcpNumId = parseInt(edge.target.replace('mcp-', ''))
-          const agent = data.agents.find((a) => a.id === agentNumId)
-          if (agent) {
-            const newMcpIds = (agent.mcp_server_ids ?? []).filter((id) => id !== mcpNumId)
-            bindAgentMcpServers(projectId, agentNumId, newMcpIds).catch(() => onRefresh?.())
-          }
-        }
-        // For agent↔A2A edges: unbind via API
-        if (projectId && edge.source.startsWith('agent-') && edge.target.startsWith('a2a-')) {
-          const agentNumId = parseInt(edge.source.replace('agent-', ''))
-          const a2aNumId = parseInt(edge.target.replace('a2a-', ''))
-          const agent = data.agents.find((a) => a.id === agentNumId)
-          if (agent) {
-            const newA2aIds = (agent.a2a_agent_ids ?? []).filter((id) => id !== a2aNumId)
-            bindAgentA2aAgents(projectId, agentNumId, newA2aIds).catch(() => onRefresh?.())
-          }
-        }
-        // For delegation edges: remove from edge configs and refresh
-        if (edge.type === 'delegation') {
-          setEdgeConfigs((prev) => {
-            const next = new Map(prev)
-            next.delete(selectedEdgeId)
-            return next
-          })
-          onRefresh?.()
-        }
+        deleteSelectedNodes()
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isFullscreen, selectedEdgeId, selectedNodeInfo, createMode, edges, data.agents, projectId, onRefresh])
+  }, [isFullscreen, selectedEdgeId, selectedNodeInfo, createMode, contextMenu, deleteEdge, deleteSelectedNodes, handleAutoLayout, handleUndo, handleRedo, fitView, zoomIn, zoomOut])
 
   const containerStyle = isFullscreen
     ? {
@@ -1413,6 +1955,17 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
           onZoomOut={() => zoomOut()}
           isFullscreen={isFullscreen}
           onToggleFullscreen={toggleFullscreen}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={undoStackRef.current.length > 0}
+          canRedo={redoStackRef.current.length > 0}
+          savedIndicator={savedIndicator}
+          filterSearch={filterSearch}
+          onFilterSearchChange={setFilterSearch}
+          filterTypes={filterTypes}
+          onToggleFilterType={handleToggleFilterType}
+          onClearFilters={handleClearFilters}
+          hasActiveFilter={hasActiveFilter}
         />
 
         <ReactFlow
@@ -1429,6 +1982,9 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
           onPaneClick={handlePaneClick}
           onNodeMouseEnter={handleNodeMouseEnter}
           onNodeMouseLeave={handleNodeMouseLeave}
+          onNodeContextMenu={handleNodeContextMenu}
+          onEdgeContextMenu={handleEdgeContextMenu}
+          onPaneContextMenu={handlePaneContextMenu}
           onInit={() => setTimeout(() => fitView({ padding: 0.15 }), 50)}
           fitView
           minZoom={0.2}
@@ -1439,6 +1995,8 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
           connectionLineStyle={{ stroke: '#8b5cf6', strokeWidth: 2, strokeDasharray: '5 5' }}
           snapToGrid
           snapGrid={[20, 20]}
+          selectionOnDrag
+          multiSelectionKeyCode="Shift"
         >
           <Background gap={20} size={1} color="#27272a" />
           <Controls
@@ -1458,6 +2016,76 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
             className="!bg-zinc-900 !border-zinc-700"
           />
         </ReactFlow>
+
+        {/* #363 — Selected node highlight + #367 saved animation */}
+        <style>{`
+          .react-flow__node.selected { box-shadow: 0 0 0 2px #8b5cf6; border-radius: 0.5rem; }
+          @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+          .animate-fade-in { animation: fade-in 0.2s ease-in; }
+        `}</style>
+
+        {/* #368 — Empty canvas onboarding */}
+        {nodes.filter((n) => n.type !== 'laneLabel').length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+            <div className="flex flex-col items-center gap-4 p-8 border-2 border-dashed border-zinc-700 rounded-xl max-w-sm pointer-events-auto">
+              <MousePointerSquareDashed className="h-10 w-10 text-zinc-600" />
+              <h3 className="text-lg font-semibold text-zinc-300">Start building your agent team</h3>
+              <p className="text-sm text-zinc-500 text-center">
+                Add agents, connect skills and tools, and draw delegation chains
+              </p>
+              {projectId && (
+                <button
+                  onClick={() => handleOpenCreate('agent')}
+                  className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  <Bot className="h-4 w-4" />
+                  Create your first agent
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* #364 — Context menu */}
+        {contextMenu && (
+          <CanvasContextMenu
+            menu={contextMenu}
+            onClose={() => setContextMenu(null)}
+            onEditNode={() => {
+              if (contextMenu.id) {
+                const entityId = contextMenu.id.replace(/^[^-]+-/, '')
+                setSelectedNodeInfo({ id: entityId, type: contextMenu.nodeType ?? '' })
+              }
+            }}
+            onDeleteNode={() => {
+              if (contextMenu.id) {
+                const node = nodes.find((n) => n.id === contextMenu.id)
+                if (node) {
+                  if (!window.confirm(`Delete ${(node.data.label as string) || contextMenu.id}?`)) return
+                  setNodes((nds) => nds.filter((n) => n.id !== contextMenu.id))
+                  setEdges((eds) => eds.filter((e) => e.source !== contextMenu.id && e.target !== contextMenu.id))
+                  setSelectedNodeInfo(null)
+                  onRefresh?.()
+                }
+              }
+            }}
+            onConfigureEdge={() => {
+              if (contextMenu.id) {
+                setSelectedNodeInfo(null)
+                setSelectedEdgeId(contextMenu.id)
+              }
+            }}
+            onRemoveEdge={() => {
+              if (contextMenu.id) deleteEdge(contextMenu.id)
+            }}
+            onCreateAgent={() => handleOpenCreate('agent')}
+            onCreateSkill={() => handleOpenCreate('skill')}
+            onCreateMcp={() => handleOpenCreate('mcp')}
+            onCreateA2a={() => handleOpenCreate('a2a')}
+            onAutoLayout={handleAutoLayout}
+            onFitView={() => fitView({ padding: 0.15 })}
+          />
+        )}
 
         {/* Chain tooltip (#293) */}
         {chainTooltip && hoveredNodeId && (

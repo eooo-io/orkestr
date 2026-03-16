@@ -69,7 +69,7 @@ Phase K — QA & Documentation  (COMPLETE)
   K.1: Playwright setup, browser test suites, QA plan with manual checklist.
   K.2: 18 new docs pages, 5 expanded, sidebar restructured.
 
-Phase L — Canvas Composer  (IN PROGRESS)
+Phase L — Canvas Composer  (COMPLETE)
   L.1: Detail panel overhaul — full entity editors in the right flyout.
   L.2: Canvas CRUD — create, delete, and connect entities directly on canvas.
   L.3: Connection drawing — drag-to-connect edges between any compatible nodes.
@@ -1063,16 +1063,16 @@ Full-featured entity editors in the right flyout. Every field editable, every ch
 
 | Issue | Title | Status |
 |---|---|---|
-| #338 | Agent detail panel: full editor with all loop fields | PENDING |
-| #339 | Agent detail panel: skill assignment manager | PENDING |
-| #340 | Agent detail panel: MCP server binding | PENDING |
-| #341 | Agent detail panel: A2A agent binding | PENDING |
-| #342 | Agent detail panel: enable/disable toggle and delete | PENDING |
-| #343 | Skill detail panel: inline frontmatter editor | PENDING |
-| #344 | Skill detail panel: embedded Monaco prompt editor | PENDING |
-| #345 | MCP server detail panel: full editor | PENDING |
-| #346 | A2A agent detail panel: full editor | PENDING |
-| #347 | Edge config panel: persist delegation config to backend | PENDING |
+| #338 | Agent detail panel: full editor with all loop fields | DONE |
+| #339 | Agent detail panel: skill assignment manager | DONE |
+| #340 | Agent detail panel: MCP server binding | DONE |
+| #341 | Agent detail panel: A2A agent binding | DONE |
+| #342 | Agent detail panel: enable/disable toggle and delete | DONE |
+| #343 | Skill detail panel: inline frontmatter editor | DONE |
+| #344 | Skill detail panel: embedded Monaco prompt editor | DONE |
+| #345 | MCP server detail panel: full editor | DONE |
+| #346 | A2A agent detail panel: full editor | DONE |
+| #347 | Edge config panel: persist delegation config to backend | DONE |
 
 **Key changes:**
 - AgentDetail becomes a tabbed editor: Identity, Reasoning, Tools, Orchestration
@@ -1087,14 +1087,14 @@ Create new entities directly from the canvas. No more switching to other pages j
 
 | Issue | Title | Status |
 |---|---|---|
-| #348 | Canvas palette: + button to create new entities | PENDING |
-| #349 | Create agent from canvas flyout | PENDING |
-| #350 | Create MCP server from canvas flyout | PENDING |
-| #351 | Create A2A agent from canvas flyout | PENDING |
-| #352 | Create skill from canvas flyout | PENDING |
-| #353 | Delete node from canvas with confirmation | PENDING |
-| #354 | Delete edge from canvas | PENDING |
-| #355 | Unassign skill from agent via canvas | PENDING |
+| #348 | Canvas palette: + button to create new entities | DONE |
+| #349 | Create agent from canvas flyout | DONE |
+| #350 | Create MCP server from canvas flyout | DONE |
+| #351 | Create A2A agent from canvas flyout | DONE |
+| #352 | Create skill from canvas flyout | DONE |
+| #353 | Delete node from canvas with confirmation | DONE |
+| #354 | Delete edge from canvas | DONE |
+| #355 | Unassign skill from agent via canvas | DONE |
 
 **Key behaviors:**
 - "+" button in palette header opens the detail flyout in "create" mode
@@ -1109,13 +1109,13 @@ Drag-to-connect between nodes to create relationships. The canvas becomes the wi
 
 | Issue | Title | Status |
 |---|---|---|
-| #356 | Drag-to-connect: agent → skill assignment | PENDING |
-| #357 | Drag-to-connect: agent → MCP server binding | PENDING |
-| #358 | Drag-to-connect: agent → A2A delegation | PENDING |
-| #359 | Drag-to-connect: agent → agent delegation | PENDING |
-| #360 | Connection validation rules | PENDING |
-| #361 | Connection handles on nodes | PENDING |
-| #362 | Visual feedback during connection drag | PENDING |
+| #356 | Drag-to-connect: agent → skill assignment | DONE |
+| #357 | Drag-to-connect: agent → MCP server binding | DONE |
+| #358 | Drag-to-connect: agent → A2A delegation | DONE |
+| #359 | Drag-to-connect: agent → agent delegation | DONE |
+| #360 | Connection validation rules | DONE |
+| #361 | Connection handles on nodes | DONE |
+| #362 | Visual feedback during connection drag | DONE |
 
 **Implementation:**
 - React Flow `onConnect` handler with source/target node type checking
@@ -1130,13 +1130,13 @@ Quality-of-life features that make the canvas feel like a real design tool.
 
 | Issue | Title | Status |
 |---|---|---|
-| #363 | Multi-select: shift+click and box selection | PENDING |
-| #364 | Context menu: right-click on nodes, edges, and canvas | PENDING |
-| #365 | Keyboard shortcuts for canvas | PENDING |
-| #366 | Undo/redo for canvas operations | PENDING |
-| #367 | Auto-save canvas positions (debounced) | PENDING |
-| #368 | Empty canvas onboarding state | PENDING |
-| #369 | Node search and filter in toolbar | PENDING |
+| #363 | Multi-select: shift+click and box selection | DONE |
+| #364 | Context menu: right-click on nodes, edges, and canvas | DONE |
+| #365 | Keyboard shortcuts for canvas | DONE |
+| #366 | Undo/redo for canvas operations | DONE |
+| #367 | Auto-save canvas positions (debounced) | DONE |
+| #368 | Empty canvas onboarding state | DONE |
+| #369 | Node search and filter in toolbar | DONE |
 
 ### L.5 — Backend & Persistence
 
@@ -1144,11 +1144,11 @@ API changes needed to support canvas-driven composition.
 
 | Issue | Title | Status |
 |---|---|---|
-| #370 | Edge config model and API endpoints | PENDING |
-| #371 | Include edge configs in graph endpoint response | PENDING |
-| #372 | Optimistic graph refresh after canvas mutations | PENDING |
-| #373 | Agent quick-create API endpoint | PENDING |
-| #374 | Pest tests for canvas CRUD and edge config persistence | PENDING |
+| #370 | Edge config model and API endpoints | DONE |
+| #371 | Include edge configs in graph endpoint response | DONE |
+| #372 | Optimistic graph refresh after canvas mutations | DONE |
+| #373 | Agent quick-create API endpoint | DONE |
+| #374 | Pest tests for canvas CRUD and edge config persistence | DONE |
 
 ### Implementation Sequence
 
