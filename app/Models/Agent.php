@@ -62,10 +62,17 @@ class Agent extends Model
         'allowed_tools',
         'blocked_tools',
         'data_access_scope',
+        'document_access',
+        'knowledge_access',
 
         // Notifications
         'notify_on_success',
         'notify_on_failure',
+
+        // Memory
+        'memory_enabled',
+        'auto_remember',
+        'memory_recall_limit',
 
         // Meta
         'is_template',
@@ -81,6 +88,9 @@ class Agent extends Model
             'temperature' => 'decimal:2',
             'can_delegate' => 'boolean',
             'is_template' => 'boolean',
+            'memory_enabled' => 'boolean',
+            'auto_remember' => 'boolean',
+            'memory_recall_limit' => 'integer',
             'notify_on_success' => 'boolean',
             'notify_on_failure' => 'boolean',
 
@@ -100,6 +110,8 @@ class Agent extends Model
             'allowed_tools' => 'array',
             'blocked_tools' => 'array',
             'data_access_scope' => 'array',
+            'document_access' => 'boolean',
+            'knowledge_access' => 'boolean',
             'persona' => 'array',
         ];
     }

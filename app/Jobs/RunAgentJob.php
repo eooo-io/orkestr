@@ -16,6 +16,8 @@ use App\Services\Execution\Guards\ApprovalGuard;
 use App\Services\Execution\Guards\DataAccessGuard;
 use App\Services\Execution\Guards\OutputGuard;
 use App\Services\Execution\Guards\ToolGuard;
+use App\Services\Mcp\MemoryMcpServer;
+use App\Services\Memory\AgentMemoryService;
 use App\Services\Execution\ToolCallResult;
 use App\Services\Execution\ToolDispatcher;
 use App\Services\LLM\CostOptimizedRouter;
@@ -141,11 +143,36 @@ class RunAgentJob implements ShouldQueue
         $toolGuard = new ToolGuard;
         $toolGuard->configure($this->config);
         $toolGuard->configureForAgent($agent);
-        $toolDefinitions = $toolGuard->filterTools($dispatcher->getToolDefinitions());
+        $allToolDefs = $dispatcher->getToolDefinitions();
+
+        // Inject memory MCP tools if memory_enabled
+        if ($agent->memory_enabled) {
+            $allToolDefs = array_merge($allToolDefs, MemoryMcpServer::toolDefinitions());
+        }
+
+        $toolDefinitions = $toolGuard->filterTools($allToolDefs);
 
         // Build system prompt
         $composed = $composeService->composeStructured($project, $agent);
         $systemPrompt = $composed['system_prompt'] ?? '';
+
+        // Inject relevant memories into context if memory_enabled
+        if ($agent->memory_enabled) {
+            $memoryService = app(AgentMemoryService::class);
+            $userMessage = $this->input['message'] ?? $this->input['goal'] ?? json_encode($this->input);
+            $recallLimit = $agent->memory_recall_limit ?? 5;
+            $memories = $memoryService->recall($agent->id, $project->id, $userMessage, $recallLimit);
+
+            if ($memories->isNotEmpty()) {
+                $memoryBlock = "\n\n## Relevant Context (from memory)\n\n";
+                foreach ($memories as $memory) {
+                    $key = $memory->key ?? 'note';
+                    $content = is_array($memory->content) ? ($memory->content['value'] ?? json_encode($memory->content)) : $memory->content;
+                    $memoryBlock .= "- **{$key}**: {$content}\n";
+                }
+                $systemPrompt .= $memoryBlock;
+            }
+        }
 
         // Build initial messages
         $messages = [];
@@ -305,7 +332,50 @@ class RunAgentJob implements ShouldQueue
 
                 $this->publishEvent($run, 'status', ['status' => 'completed']);
 
+                // Auto-remember: extract REMEMBER: lines from output
+                if ($agent->auto_remember && $agent->memory_enabled) {
+                    $this->extractAndStoreMemories($agent->id, $project->id, $textContent);
+                }
+
                 return;
+            }
+
+            // Handle memory tool calls from the agent
+            if ($agent->memory_enabled) {
+                $memoryToolCalls = collect($toolUseCalls)->filter(fn ($tc) => str_starts_with($tc['name'], 'memory_'));
+                if ($memoryToolCalls->isNotEmpty()) {
+                    $memoryService = app(AgentMemoryService::class);
+                    $memoryResults = [];
+                    $remainingToolCalls = [];
+
+                    foreach ($toolUseCalls as $toolCall) {
+                        if (str_starts_with($toolCall['name'], 'memory_')) {
+                            $result = $this->executeMemoryTool($memoryService, $toolCall, $agent->id, $project->id);
+                            $memoryResults[] = [
+                                'type' => 'tool_result',
+                                'tool_use_id' => $toolCall['id'],
+                                'content' => $result,
+                                'is_error' => false,
+                            ];
+                        } else {
+                            $remainingToolCalls[] = $toolCall;
+                        }
+                    }
+
+                    // If ALL calls were memory tools, feed results back and continue loop
+                    if (empty($remainingToolCalls) && ! empty($memoryResults)) {
+                        $messages[] = ['role' => 'assistant', 'content' => $llmResponse['content']];
+                        $messages[] = ['role' => 'user', 'content' => $memoryResults];
+
+                        continue;
+                    }
+
+                    // Mixed: handle memory tools, let remaining go through normal ACT
+                    if (! empty($memoryResults)) {
+                        // We'll inject memory results alongside normal tool results below
+                        $toolUseCalls = $remainingToolCalls;
+                    }
+                }
             }
 
             // --- ACT ---
@@ -485,6 +555,91 @@ class RunAgentJob implements ShouldQueue
         } catch (\Throwable $e) {
             // Redis not available — log but don't fail the execution
             Log::debug("Failed to publish execution event: {$e->getMessage()}");
+        }
+    }
+
+    /**
+     * Execute a memory tool call and return the result text.
+     */
+    private function executeMemoryTool(AgentMemoryService $memoryService, array $toolCall, int $agentId, int $projectId): string
+    {
+        $input = $toolCall['input'] ?? [];
+
+        return match ($toolCall['name']) {
+            'memory_remember' => $this->handleMemoryRemember($memoryService, $agentId, $projectId, $input),
+            'memory_recall' => $this->handleMemoryRecall($memoryService, $agentId, $projectId, $input),
+            'memory_forget' => $this->handleMemoryForget($memoryService, $agentId, $projectId, $input),
+            default => "Unknown memory tool: {$toolCall['name']}",
+        };
+    }
+
+    private function handleMemoryRemember(AgentMemoryService $memoryService, int $agentId, int $projectId, array $input): string
+    {
+        $key = $input['key'] ?? 'auto_' . time();
+        $content = $input['content'] ?? '';
+        $memoryService->remember($agentId, $projectId, $key, $content);
+
+        return "Stored memory with key '{$key}'.";
+    }
+
+    private function handleMemoryRecall(AgentMemoryService $memoryService, int $agentId, int $projectId, array $input): string
+    {
+        $query = $input['query'] ?? '';
+        $limit = $input['limit'] ?? 5;
+        $memories = $memoryService->recall($agentId, $projectId, $query, $limit);
+
+        if ($memories->isEmpty()) {
+            return 'No relevant memories found.';
+        }
+
+        $lines = [];
+        foreach ($memories as $memory) {
+            $key = $memory->key ?? 'note';
+            $content = is_array($memory->content) ? ($memory->content['value'] ?? json_encode($memory->content)) : $memory->content;
+            $lines[] = "- {$key}: {$content}";
+        }
+
+        return implode("\n", $lines);
+    }
+
+    private function handleMemoryForget(AgentMemoryService $memoryService, int $agentId, int $projectId, array $input): string
+    {
+        $key = $input['key'] ?? '';
+        $deleted = $memoryService->forget($agentId, $projectId, $key);
+
+        return $deleted ? "Forgot memory with key '{$key}'." : "No memory found with key '{$key}'.";
+    }
+
+    /**
+     * Extract REMEMBER: lines from agent output and store as memories.
+     */
+    private function extractAndStoreMemories(int $agentId, int $projectId, string $text): void
+    {
+        try {
+            $memoryService = app(AgentMemoryService::class);
+            $lines = explode("\n", $text);
+            $count = 0;
+
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (preg_match('/^REMEMBER:\s*(.+)$/i', $line, $matches)) {
+                    $fact = trim($matches[1]);
+                    if (mb_strlen($fact) >= 3) {
+                        $key = 'auto_' . md5($fact);
+                        $memoryService->remember($agentId, $projectId, $key, $fact, [
+                            'source' => 'auto_remember',
+                            'extracted_at' => now()->toIso8601String(),
+                        ]);
+                        $count++;
+                    }
+                }
+            }
+
+            if ($count > 0) {
+                Log::info("Auto-remembered {$count} facts for agent {$agentId}");
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Failed to auto-remember: {$e->getMessage()}");
         }
     }
 

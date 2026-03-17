@@ -151,6 +151,11 @@ export interface Agent {
   // Actions
   custom_tools: Record<string, unknown>[] | null
 
+  // Memory
+  memory_enabled?: boolean
+  auto_remember?: boolean
+  memory_recall_limit?: number
+
   // Meta
   is_template: boolean
   created_by: number | null
@@ -158,6 +163,25 @@ export interface Agent {
 
   created_at: string
   updated_at: string
+}
+
+export interface AgentMemoryEntry {
+  id: number
+  uuid: string
+  agent_id: number
+  project_id: number
+  type: string
+  key: string | null
+  content: Record<string, unknown>
+  embedding: number[] | null
+  metadata: Record<string, unknown> | null
+  expires_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface AgentMemoryRecallResult {
+  data: AgentMemoryEntry[]
 }
 
 export interface ProjectAgent extends Agent {
@@ -1384,6 +1408,27 @@ export interface A2aAgentDetail {
   skills: string[] | null
   enabled: boolean
   approval_status: string | null
+  created_at: string
+  updated_at: string
+}
+
+// --- N.3: Document Storage ---
+
+export interface AgentDocument {
+  path: string
+  size: number
+  last_modified: number
+}
+
+// --- N.4: Knowledge Base ---
+
+export interface AgentKnowledgeEntry {
+  id: number
+  agent_id: number
+  project_id: number
+  namespace: string
+  key: string
+  value: Record<string, unknown>
   created_at: string
   updated_at: string
 }

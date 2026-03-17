@@ -98,6 +98,18 @@ return [
             'sslmode' => env('DB_SSLMODE', 'prefer'),
         ],
 
+        'knowledge' => [
+            'driver' => 'pgsql',
+            'host' => env('KNOWLEDGE_DB_HOST', '127.0.0.1'),
+            'port' => env('KNOWLEDGE_DB_PORT', '5432'),
+            'database' => env('KNOWLEDGE_DB_DATABASE', 'agentis_knowledge'),
+            'username' => env('KNOWLEDGE_DB_USERNAME', 'agentis'),
+            'password' => env('KNOWLEDGE_DB_PASSWORD', 'agentis'),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'schema' => 'public',
+        ],
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DB_URL'),

@@ -95,6 +95,10 @@ import type {
   A2aAgentDetail,
   DelegationConfig,
   AgentTask,
+  AgentDocument,
+  AgentKnowledgeEntry,
+  AgentMemoryEntry,
+  AgentMemoryRecallResult,
 } from '@/types'
 
 const api = axios.create({
@@ -1528,5 +1532,62 @@ export const runTask = (taskId: number) =>
 
 export const deleteTask = (taskId: number) =>
   api.delete(`/tasks/${taskId}`)
+
+// --- Documents (N.3 #409) ---
+
+export const fetchDocuments = (projectId: number, prefix?: string) =>
+  api.get<ApiResponse<AgentDocument[]>>(`/projects/${projectId}/documents`, { params: { prefix } }).then((r) => r.data.data)
+
+export const uploadDocument = (projectId: number, data: { path: string; content: string; agent_id?: number }) =>
+  api.post<ApiResponse<{ path: string; size: number }>>(`/projects/${projectId}/documents`, data).then((r) => r.data.data)
+
+export const uploadDocumentFile = (projectId: number, file: File, path?: string) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  if (path) formData.append('path', path)
+  return api.post<ApiResponse<{ path: string; size: number }>>(`/projects/${projectId}/documents`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }).then((r) => r.data.data)
+}
+
+export const downloadDocument = (projectId: number, path: string) =>
+  api.get(`/projects/${projectId}/documents/download`, { params: { path }, responseType: 'blob' }).then((r) => r.data as Blob)
+
+export const deleteDocument = (projectId: number, path: string, agentId?: number) =>
+  api.delete(`/projects/${projectId}/documents`, { params: { path, agent_id: agentId } })
+
+// --- Knowledge (N.4 #413) ---
+
+export const fetchKnowledge = (projectId: number, agentId: number, namespace?: string) =>
+  api.get<ApiResponse<AgentKnowledgeEntry[]>>(`/projects/${projectId}/agents/${agentId}/knowledge`, { params: { namespace } }).then((r) => r.data.data)
+
+export const storeKnowledge = (projectId: number, agentId: number, data: { namespace: string; key: string; value: unknown }) =>
+  api.post<ApiResponse<AgentKnowledgeEntry>>(`/projects/${projectId}/agents/${agentId}/knowledge`, data).then((r) => r.data.data)
+
+export const searchKnowledge = (projectId: number, agentId: number, query: string) =>
+  api.get<ApiResponse<AgentKnowledgeEntry[]>>(`/projects/${projectId}/agents/${agentId}/knowledge/search`, { params: { q: query } }).then((r) => r.data.data)
+
+export const deleteKnowledge = (id: number) =>
+  api.delete(`/agent-knowledge/${id}`)
+
+// --- Agent Long-Term Memory (N.2 #402-#407) ---
+
+export const fetchAgentMemories = (projectId: number, agentId: number, perPage = 20, page = 1) =>
+  api.get<{ data: AgentMemoryEntry[]; meta: { current_page: number; last_page: number; per_page: number; total: number } }>(
+    `/projects/${projectId}/agents/${agentId}/memories`,
+    { params: { per_page: perPage, page } },
+  ).then((r) => r.data)
+
+export const createAgentMemory = (projectId: number, agentId: number, data: { key: string; content: string; metadata?: Record<string, unknown> }) =>
+  api.post<{ data: AgentMemoryEntry }>(`/projects/${projectId}/agents/${agentId}/memories`, data).then((r) => r.data.data)
+
+export const recallAgentMemories = (projectId: number, agentId: number, query: string, limit = 5) =>
+  api.get<AgentMemoryRecallResult>(`/projects/${projectId}/agents/${agentId}/memories/recall`, { params: { q: query, limit } }).then((r) => r.data.data)
+
+export const updateAgentMemory = (id: number, content: string) =>
+  api.put<{ data: AgentMemoryEntry }>(`/agent-memories/${id}`, { content }).then((r) => r.data.data)
+
+export const deleteAgentMemory = (id: number) =>
+  api.delete(`/agent-memories/${id}`)
 
 export default api

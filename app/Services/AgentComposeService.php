@@ -161,6 +161,16 @@ class AgentComposeService
                 'mcp_servers' => $mcpServers->values(),
                 'a2a_agents' => $a2aAgents->values(),
                 'custom_tools' => $customTools,
+                'memory_tools' => $agent->memory_enabled
+                    ? \App\Services\Mcp\MemoryMcpServer::toolDefinitions()
+                    : [],
+            ],
+
+            // Memory config
+            'memory' => [
+                'enabled' => (bool) $agent->memory_enabled,
+                'auto_remember' => (bool) $agent->auto_remember,
+                'recall_limit' => $agent->memory_recall_limit ?? 5,
             ],
 
             // Skills (resolved)

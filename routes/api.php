@@ -66,7 +66,9 @@ use App\Http\Controllers\ModelRecommendationController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\DelegationConfigController;
 use App\Http\Controllers\AgentTaskController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExecutionStreamController;
+use App\Http\Controllers\KnowledgeController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -274,8 +276,10 @@ Route::middleware('auth:web')->group(function () {
     // Agent Memory
     Route::get('/projects/{project}/agents/{agent}/memories', [AgentMemoryController::class, 'index']);
     Route::post('/projects/{project}/agents/{agent}/memories', [AgentMemoryController::class, 'store']);
+    Route::get('/projects/{project}/agents/{agent}/memories/recall', [AgentMemoryController::class, 'recall']);
     Route::delete('/projects/{project}/agents/{agent}/memories', [AgentMemoryController::class, 'clear']);
-    Route::delete('/memories/{agentMemory}', [AgentMemoryController::class, 'destroy']);
+    Route::put('/agent-memories/{id}', [AgentMemoryController::class, 'update']);
+    Route::delete('/agent-memories/{agentMemory}', [AgentMemoryController::class, 'destroy']);
     Route::get('/projects/{project}/agents/{agent}/conversations', [AgentMemoryController::class, 'conversations']);
 
     // Agent Execution
@@ -529,4 +533,16 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/tasks/{task}/assign', [AgentTaskController::class, 'assign'])->middleware('org-role:editor');
     Route::post('/tasks/{task}/run', [AgentTaskController::class, 'run'])->middleware('org-role:editor');
     Route::delete('/tasks/{task}', [AgentTaskController::class, 'destroy'])->middleware('org-role:editor');
+
+    // Documents (N.3 #409)
+    Route::get('/projects/{project}/documents', [DocumentController::class, 'index']);
+    Route::post('/projects/{project}/documents', [DocumentController::class, 'store'])->middleware('org-role:editor');
+    Route::get('/projects/{project}/documents/download', [DocumentController::class, 'download']);
+    Route::delete('/projects/{project}/documents', [DocumentController::class, 'destroy'])->middleware('org-role:editor');
+
+    // Knowledge (N.4 #413)
+    Route::get('/projects/{project}/agents/{agent}/knowledge', [KnowledgeController::class, 'index']);
+    Route::post('/projects/{project}/agents/{agent}/knowledge', [KnowledgeController::class, 'store'])->middleware('org-role:editor');
+    Route::get('/projects/{project}/agents/{agent}/knowledge/search', [KnowledgeController::class, 'search']);
+    Route::delete('/agent-knowledge/{id}', [KnowledgeController::class, 'destroy'])->middleware('org-role:editor');
 });

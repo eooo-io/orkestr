@@ -23,6 +23,9 @@ class HealthCheckService
             'cache' => $this->checkCache(),
             'queue' => $this->checkQueue(),
             'storage' => $this->checkStorage(),
+            'knowledge_db' => $this->checkKnowledgeDb(),
+            'pgvector' => $this->checkPgvector(),
+            'minio' => $this->checkMinio(),
             'anthropic' => $this->checkProvider('anthropic'),
             'openai' => $this->checkProvider('openai'),
             'ollama' => $this->checkOllama(),
@@ -83,6 +86,71 @@ class HealthCheckService
             ];
         } catch (\Exception $e) {
             return ['status' => 'unhealthy', 'message' => 'Storage error: '.$e->getMessage(), 'latency_ms' => null];
+        }
+    }
+
+    public function checkKnowledgeDb(): array
+    {
+        $config = config('database.connections.knowledge');
+
+        if (empty($config) || empty($config['host'])) {
+            return ['status' => 'not_configured', 'message' => 'Knowledge DB not configured', 'latency_ms' => null];
+        }
+
+        try {
+            $start = microtime(true);
+            DB::connection('knowledge')->select('SELECT 1');
+            $latency = (int) ((microtime(true) - $start) * 1000);
+
+            return ['status' => 'healthy', 'message' => 'Knowledge DB (PostgreSQL) connected', 'latency_ms' => $latency];
+        } catch (\Exception $e) {
+            return ['status' => 'unhealthy', 'message' => 'Knowledge DB unreachable: '.$e->getMessage(), 'latency_ms' => null];
+        }
+    }
+
+    public function checkPgvector(): array
+    {
+        $config = config('database.connections.knowledge');
+
+        if (empty($config) || empty($config['host'])) {
+            return ['status' => 'not_configured', 'message' => 'Knowledge DB not configured', 'latency_ms' => null];
+        }
+
+        try {
+            $result = DB::connection('knowledge')->select(
+                "SELECT 1 FROM pg_extension WHERE extname = 'vector'"
+            );
+
+            if (count($result) > 0) {
+                return ['status' => 'healthy', 'message' => 'pgvector extension enabled', 'latency_ms' => null];
+            }
+
+            return ['status' => 'degraded', 'message' => 'pgvector extension not installed', 'latency_ms' => null];
+        } catch (\Exception $e) {
+            return ['status' => 'unhealthy', 'message' => 'Cannot check pgvector: '.$e->getMessage(), 'latency_ms' => null];
+        }
+    }
+
+    public function checkMinio(): array
+    {
+        $endpoint = config('filesystems.disks.minio.endpoint');
+
+        if (empty($endpoint)) {
+            return ['status' => 'not_configured', 'message' => 'MinIO not configured', 'latency_ms' => null];
+        }
+
+        try {
+            $start = microtime(true);
+            $response = Http::timeout(5)->get("{$endpoint}/minio/health/live");
+            $latency = (int) ((microtime(true) - $start) * 1000);
+
+            if ($response->successful()) {
+                return ['status' => 'healthy', 'message' => 'MinIO reachable', 'latency_ms' => $latency];
+            }
+
+            return ['status' => 'degraded', 'message' => 'MinIO responded with '.$response->status(), 'latency_ms' => $latency];
+        } catch (\Exception $e) {
+            return ['status' => 'unreachable', 'message' => 'Cannot reach MinIO: '.$e->getMessage(), 'latency_ms' => null];
         }
     }
 

@@ -45,6 +45,45 @@ services:
       timeout: 5s
       retries: 3
 
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: agentis_knowledge
+      POSTGRES_USER: agentis
+      POSTGRES_PASSWORD: ${KNOWLEDGE_DB_PASSWORD:-agentis}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentis"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agentis
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-agentis}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-agentis123}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agentis
+    restart: unless-stopped
+
   queue-worker:
     build:
       context: ./docker/php
@@ -66,6 +105,8 @@ services:
 volumes:
   mariadb_data:
   redis_data:
+  postgres_data:
+  minio_data:
   projects:
     driver: local
     driver_opts:
