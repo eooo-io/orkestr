@@ -15,6 +15,10 @@ import {
   Clock,
   GripHorizontal,
   ChevronUp,
+  Brain,
+  Save,
+  FileText,
+  Upload,
 } from 'lucide-react'
 import { cancelExecution } from '@/api/client'
 import type { ExecutionRun } from '@/types'
@@ -22,7 +26,7 @@ import type { ExecutionRun } from '@/types'
 /* ─── Types ─────────────────────────────────────────────────── */
 
 export interface ExecutionStreamStep {
-  type: 'message' | 'tool_call' | 'tool_result' | 'delegation' | 'error' | 'status' | 'complete'
+  type: 'message' | 'tool_call' | 'tool_result' | 'delegation' | 'error' | 'status' | 'complete' | 'memory_recall' | 'memory_store' | 'document_read' | 'document_write'
   content: string
   agent_name?: string
   agent_id?: number
@@ -82,6 +86,11 @@ const STEP_ICONS: Record<string, React.ReactNode> = {
   error: <AlertCircle className="h-3.5 w-3.5 text-red-400" />,
   status: <Bot className="h-3.5 w-3.5 text-zinc-400" />,
   complete: <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />,
+  // #420 — Memory & document operation icons
+  memory_recall: <Brain className="h-3.5 w-3.5 text-purple-400" />,
+  memory_store: <Save className="h-3.5 w-3.5 text-purple-400" />,
+  document_read: <FileText className="h-3.5 w-3.5 text-orange-400" />,
+  document_write: <Upload className="h-3.5 w-3.5 text-orange-400" />,
 }
 
 const STATUS_BADGES: Record<string, { color: string; icon: React.ReactNode }> = {

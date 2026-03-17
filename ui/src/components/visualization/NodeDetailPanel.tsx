@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
   X,
@@ -15,8 +15,14 @@ import {
   Check,
   ToggleLeft,
   ToggleRight,
+  Brain,
+  FileText,
+  Download,
+  Upload,
+  Database,
+  Pencil,
 } from 'lucide-react'
-import type { ProjectGraphData } from '@/types'
+import type { ProjectGraphData, AgentMemoryEntry, AgentDocument } from '@/types'
 import {
   fetchAgent,
   updateAgent,
@@ -32,6 +38,15 @@ import {
   deleteSkill,
   deleteMcpServer,
   deleteA2aAgent,
+  fetchAgentMemories,
+  createAgentMemory,
+  recallAgentMemories,
+  updateAgentMemory,
+  deleteAgentMemory,
+  fetchDocuments,
+  uploadDocumentFile,
+  downloadDocument,
+  deleteDocument,
 } from '@/api/client'
 
 type NodeType = 'agent' | 'skill' | 'mcp' | 'a2a' | 'provider'
@@ -280,6 +295,12 @@ interface AgentFormState {
   daily_budget_limit_usd: string
   base_instructions: string
   system_prompt: string
+  // #419 — memory & data settings
+  memory_enabled: string
+  auto_remember: string
+  memory_recall_limit: string
+  document_access: string
+  knowledge_access: string
 }
 
 // ─── Agent detail (full editor) — #338-#342 ───────────────────────
@@ -296,7 +317,7 @@ function AgentDetail({
   onRefresh?: () => void
   onNodeDeleted?: (nodeId: string) => void
 }) {
-  const [tab, setTab] = useState<'identity' | 'reasoning' | 'autonomy'>('identity')
+  const [tab, setTab] = useState<'identity' | 'reasoning' | 'autonomy' | 'memory' | 'documents' | 'data'>('identity')
   const [form, setForm] = useState<AgentFormState>({
     name: agent.name ?? '',
     role: agent.role ?? '',
@@ -319,6 +340,11 @@ function AgentDetail({
     daily_budget_limit_usd: '',
     base_instructions: '',
     system_prompt: '',
+    memory_enabled: 'false',
+    auto_remember: 'false',
+    memory_recall_limit: '5',
+    document_access: 'false',
+    knowledge_access: 'false',
   })
   const [savedForm, setSavedForm] = useState<AgentFormState>(form)
   const [loading, setLoading] = useState(true)
@@ -360,6 +386,11 @@ function AgentDetail({
           daily_budget_limit_usd: full.daily_budget_limit_usd?.toString() ?? '',
           base_instructions: full.base_instructions ?? '',
           system_prompt: full.system_prompt ?? '',
+          memory_enabled: full.memory_enabled ? 'true' : 'false',
+          auto_remember: full.auto_remember ? 'true' : 'false',
+          memory_recall_limit: full.memory_recall_limit?.toString() ?? '5',
+          document_access: full.document_access ? 'true' : 'false',
+          knowledge_access: full.knowledge_access ? 'true' : 'false',
         }
         setForm(newForm)
         setSavedForm(newForm)
@@ -411,6 +442,11 @@ function AgentDetail({
           : null,
         base_instructions: form.base_instructions,
         system_prompt: form.system_prompt || null,
+        memory_enabled: form.memory_enabled === 'true',
+        auto_remember: form.auto_remember === 'true',
+        memory_recall_limit: form.memory_recall_limit ? parseInt(form.memory_recall_limit) : 5,
+        document_access: form.document_access === 'true',
+        knowledge_access: form.knowledge_access === 'true',
       })
       setSavedForm(form)
       setSaveSuccess(true)
@@ -653,6 +689,15 @@ function AgentDetail({
         <TabButton active={tab === 'autonomy'} onClick={() => setTab('autonomy')}>
           Autonomy
         </TabButton>
+        <TabButton active={tab === 'memory'} onClick={() => setTab('memory')}>
+          Memory
+        </TabButton>
+        <TabButton active={tab === 'documents'} onClick={() => setTab('documents')}>
+          Docs
+        </TabButton>
+        <TabButton active={tab === 'data'} onClick={() => setTab('data')}>
+          Data
+        </TabButton>
       </div>
 
       {/* Identity tab */}
@@ -849,6 +894,29 @@ function AgentDetail({
         </div>
       )}
 
+      {/* #416 — Memory tab */}
+      {tab === 'memory' && projectId && (
+        <AgentMemoryTab projectId={projectId} agentId={agent.id} />
+      )}
+
+      {/* #417 — Documents tab */}
+      {tab === 'documents' && projectId && (
+        <AgentDocumentsTab projectId={projectId} agentId={agent.id} agentSlug={agent.slug} />
+      )}
+
+      {/* #419 — Data settings tab */}
+      {tab === 'data' && (
+        <AgentDataSettingsTab
+          agentId={agent.id}
+          memoryEnabled={form.memory_enabled}
+          autoRemember={form.auto_remember}
+          memoryRecallLimit={form.memory_recall_limit}
+          documentAccess={form.document_access}
+          knowledgeAccess={form.knowledge_access}
+          onUpdate={(field, value) => updateField(field as keyof AgentFormState, value)}
+        />
+      )}
+
       {/* Save / Cancel buttons */}
       <div className="flex items-center gap-2">
         <button
@@ -1018,6 +1086,434 @@ function AgentDetail({
             placeholder="Search A2A agents..."
           />
         )}
+      </div>
+    </div>
+  )
+}
+
+// ─── #416 — Agent Memory Tab ──────────────────────────────────────
+function AgentMemoryTab({ projectId, agentId }: { projectId: number; agentId: number }) {
+  const [memories, setMemories] = useState<AgentMemoryEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [totalCount, setTotalCount] = useState(0)
+  const [recallQuery, setRecallQuery] = useState('')
+  const [recallResults, setRecallResults] = useState<AgentMemoryEntry[] | null>(null)
+  const [recalling, setRecalling] = useState(false)
+  const [newKey, setNewKey] = useState('')
+  const [newContent, setNewContent] = useState('')
+  const [adding, setAdding] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editContent, setEditContent] = useState('')
+
+  const loadMemories = useCallback(async () => {
+    setLoading(true)
+    try {
+      const result = await fetchAgentMemories(projectId, agentId, 50)
+      setMemories(result.data ?? [])
+      setTotalCount(result.meta?.total ?? result.data?.length ?? 0)
+    } catch {
+      setMemories([])
+    } finally {
+      setLoading(false)
+    }
+  }, [projectId, agentId])
+
+  useEffect(() => { loadMemories() }, [loadMemories])
+
+  const handleRecall = useCallback(async () => {
+    if (!recallQuery.trim()) return
+    setRecalling(true)
+    try {
+      const results = await recallAgentMemories(projectId, agentId, recallQuery.trim())
+      setRecallResults(results)
+    } catch {
+      setRecallResults([])
+    } finally {
+      setRecalling(false)
+    }
+  }, [projectId, agentId, recallQuery])
+
+  const handleAdd = useCallback(async () => {
+    if (!newKey.trim() || !newContent.trim()) return
+    setAdding(true)
+    try {
+      await createAgentMemory(projectId, agentId, { key: newKey.trim(), content: newContent.trim() })
+      setNewKey('')
+      setNewContent('')
+      await loadMemories()
+    } catch { /* handled */ }
+    finally { setAdding(false) }
+  }, [projectId, agentId, newKey, newContent, loadMemories])
+
+  const handleEdit = useCallback(async (id: number) => {
+    if (!editContent.trim()) return
+    try {
+      await updateAgentMemory(id, editContent.trim())
+      setEditingId(null)
+      setEditContent('')
+      await loadMemories()
+    } catch { /* handled */ }
+  }, [editContent, loadMemories])
+
+  const handleDelete = useCallback(async (id: number) => {
+    try {
+      await deleteAgentMemory(id)
+      await loadMemories()
+    } catch { /* handled */ }
+  }, [loadMemories])
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-zinc-500 py-4">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Loading memories...
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Recall search */}
+      <div>
+        <label className="block text-[10px] font-medium text-zinc-500 mb-1">Recall Search</label>
+        <div className="flex gap-1.5">
+          <input
+            type="text"
+            value={recallQuery}
+            onChange={(e) => setRecallQuery(e.target.value)}
+            placeholder="Search memories..."
+            className="flex-1 px-2 py-1.5 text-xs bg-zinc-800 border border-zinc-700 rounded-md text-zinc-200 placeholder-zinc-500 focus:border-violet-600 focus:ring-1 focus:ring-violet-600"
+            onKeyDown={(e) => { if (e.key === 'Enter') handleRecall() }}
+          />
+          <button
+            onClick={handleRecall}
+            disabled={recalling || !recallQuery.trim()}
+            className="px-2 py-1.5 bg-purple-700 hover:bg-purple-600 text-white text-xs rounded-md transition-colors disabled:opacity-50"
+          >
+            {recalling ? <Loader2 className="h-3 w-3 animate-spin" /> : <Search className="h-3 w-3" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Recall results */}
+      {recallResults && (
+        <div className="border border-purple-800/40 rounded-md p-2 bg-purple-900/10">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-medium text-purple-300">Recall Results ({recallResults.length})</span>
+            <button onClick={() => setRecallResults(null)} className="text-zinc-500 hover:text-zinc-300">
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+          {recallResults.length === 0 && <p className="text-[11px] text-zinc-600 italic">No matching memories</p>}
+          {recallResults.map((m) => (
+            <div key={m.id} className="px-2 py-1 bg-zinc-800/60 rounded text-xs mb-1">
+              <span className="font-semibold text-purple-300">{m.key ?? 'untitled'}</span>
+              <p className="text-zinc-400 text-[11px] truncate">{typeof m.content === 'string' ? m.content : JSON.stringify(m.content)}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Memory list */}
+      <div>
+        <label className="text-xs font-medium text-zinc-400">
+          Stored Memories ({totalCount})
+        </label>
+        <div className="space-y-1 max-h-48 overflow-y-auto mt-1">
+          {memories.length === 0 && <p className="text-[11px] text-zinc-600 italic">No memories stored</p>}
+          {memories.map((m) => (
+            <div key={m.id} className="px-2 py-1.5 bg-zinc-800/60 rounded text-xs group">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-purple-300">{m.key ?? 'untitled'}</span>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => { setEditingId(m.id); setEditContent(typeof m.content === 'string' ? m.content : JSON.stringify(m.content)) }}
+                    className="text-zinc-500 hover:text-zinc-300"
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                  <button onClick={() => handleDelete(m.id)} className="text-zinc-500 hover:text-red-400">
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+              {editingId === m.id ? (
+                <div className="mt-1 space-y-1">
+                  <textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    rows={2}
+                    className="w-full px-2 py-1 text-xs bg-zinc-900 border border-zinc-700 rounded text-zinc-200 resize-none"
+                  />
+                  <div className="flex gap-1">
+                    <button onClick={() => handleEdit(m.id)} className="px-2 py-0.5 text-[10px] bg-purple-700 text-white rounded">Save</button>
+                    <button onClick={() => setEditingId(null)} className="px-2 py-0.5 text-[10px] bg-zinc-700 text-zinc-300 rounded">Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-zinc-400 text-[11px] truncate mt-0.5">
+                  {typeof m.content === 'string' ? m.content : JSON.stringify(m.content)}
+                </p>
+              )}
+              <p className="text-[10px] text-zinc-600 mt-0.5">{new Date(m.created_at).toLocaleDateString()}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Add memory */}
+      <div className="border-t border-zinc-800 pt-2 space-y-2">
+        <label className="text-[10px] font-medium text-zinc-500">Add Memory</label>
+        <input
+          type="text"
+          value={newKey}
+          onChange={(e) => setNewKey(e.target.value)}
+          placeholder="Key (e.g. user_preference)"
+          className="w-full px-2 py-1.5 text-xs bg-zinc-800 border border-zinc-700 rounded-md text-zinc-200 placeholder-zinc-500"
+        />
+        <textarea
+          value={newContent}
+          onChange={(e) => setNewContent(e.target.value)}
+          placeholder="Content..."
+          rows={2}
+          className="w-full px-2 py-1.5 text-xs bg-zinc-800 border border-zinc-700 rounded-md text-zinc-200 placeholder-zinc-500 resize-none"
+        />
+        <button
+          onClick={handleAdd}
+          disabled={adding || !newKey.trim() || !newContent.trim()}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-700 hover:bg-purple-600 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+        >
+          {adding ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+          Save Memory
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── #417 — Agent Documents Tab ───────────────────────────────────
+function AgentDocumentsTab({ projectId, agentId, agentSlug }: { projectId: number; agentId: number; agentSlug: string }) {
+  const [documents, setDocuments] = useState<AgentDocument[]>([])
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const prefix = `agents/${agentSlug}/projects/${projectId}`
+
+  const loadDocs = useCallback(async () => {
+    setLoading(true)
+    try {
+      const docs = await fetchDocuments(projectId, prefix)
+      setDocuments(docs ?? [])
+    } catch {
+      setDocuments([])
+    } finally {
+      setLoading(false)
+    }
+  }, [projectId, prefix])
+
+  useEffect(() => { loadDocs() }, [loadDocs])
+
+  const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      await uploadDocumentFile(projectId, file, `${prefix}/${file.name}`)
+      await loadDocs()
+    } catch { /* handled */ }
+    finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }, [projectId, prefix, loadDocs])
+
+  const handleDownload = useCallback(async (path: string) => {
+    try {
+      const blob = await downloadDocument(projectId, path)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = path.split('/').pop() || 'download'
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch { /* handled */ }
+  }, [projectId])
+
+  const handleDelete = useCallback(async (path: string) => {
+    try {
+      await deleteDocument(projectId, path, agentId)
+      await loadDocs()
+    } catch { /* handled */ }
+  }, [projectId, agentId, loadDocs])
+
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-zinc-500 py-4">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Loading documents...
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-medium text-zinc-400">
+          Documents ({documents.length})
+        </label>
+        <div>
+          <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="flex items-center gap-1 px-2 py-1 text-[11px] bg-orange-700 hover:bg-orange-600 text-white rounded-md transition-colors disabled:opacity-50"
+          >
+            {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+            Upload
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-1 max-h-60 overflow-y-auto">
+        {documents.length === 0 && <p className="text-[11px] text-zinc-600 italic">No documents uploaded</p>}
+        {documents.map((doc) => {
+          const fileName = doc.path.split('/').pop() || doc.path
+          return (
+            <div key={doc.path} className="flex items-center justify-between px-2 py-1.5 bg-zinc-800/60 rounded text-xs group">
+              <div className="flex items-center gap-2 truncate">
+                <FileText className="h-3 w-3 text-orange-400 shrink-0" />
+                <span className="text-orange-300 truncate">{fileName}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-zinc-500">{formatSize(doc.size)}</span>
+                <button onClick={() => handleDownload(doc.path)} className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-blue-400 transition-all">
+                  <Download className="h-3 w-3" />
+                </button>
+                <button onClick={() => handleDelete(doc.path)} className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition-all">
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── #419 — Agent Data Settings Tab ───────────────────────────────
+function AgentDataSettingsTab({
+  agentId,
+  memoryEnabled,
+  autoRemember,
+  memoryRecallLimit,
+  documentAccess,
+  knowledgeAccess,
+  onUpdate,
+}: {
+  agentId: number
+  memoryEnabled: string
+  autoRemember: string
+  memoryRecallLimit: string
+  documentAccess: string
+  knowledgeAccess: string
+  onUpdate: (field: string, value: string) => void
+}) {
+  return (
+    <div className="space-y-3">
+      <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Memory & Storage</p>
+
+      {/* Memory enabled toggle */}
+      <div className="flex items-center justify-between px-2 py-1.5 bg-zinc-800/40 rounded">
+        <div>
+          <p className="text-xs text-zinc-300">Memory Enabled</p>
+          <p className="text-[10px] text-zinc-500">Inject recalled memories into agent context</p>
+        </div>
+        <button
+          onClick={() => onUpdate('memory_enabled', memoryEnabled === 'true' ? 'false' : 'true')}
+          className="p-0.5"
+        >
+          {memoryEnabled === 'true' ? (
+            <ToggleRight className="h-5 w-5 text-purple-400" />
+          ) : (
+            <ToggleLeft className="h-5 w-5 text-zinc-500" />
+          )}
+        </button>
+      </div>
+
+      {/* Auto-remember toggle */}
+      <div className="flex items-center justify-between px-2 py-1.5 bg-zinc-800/40 rounded">
+        <div>
+          <p className="text-xs text-zinc-300">Auto-Remember</p>
+          <p className="text-[10px] text-zinc-500">Automatically store facts after execution</p>
+        </div>
+        <button
+          onClick={() => onUpdate('auto_remember', autoRemember === 'true' ? 'false' : 'true')}
+          className="p-0.5"
+        >
+          {autoRemember === 'true' ? (
+            <ToggleRight className="h-5 w-5 text-purple-400" />
+          ) : (
+            <ToggleLeft className="h-5 w-5 text-zinc-500" />
+          )}
+        </button>
+      </div>
+
+      {/* Recall limit */}
+      <div>
+        <label className="block text-[10px] font-medium text-zinc-500 mb-1">Memory Recall Limit</label>
+        <input
+          type="number"
+          value={memoryRecallLimit}
+          onChange={(e) => onUpdate('memory_recall_limit', e.target.value)}
+          min={1}
+          max={50}
+          className="w-full px-2 py-1.5 text-xs bg-zinc-800 border border-zinc-700 rounded-md text-zinc-200 focus:border-violet-600 focus:ring-1 focus:ring-violet-600"
+        />
+        <p className="text-[10px] text-zinc-500 mt-0.5">How many memories to inject per execution (default: 5)</p>
+      </div>
+
+      {/* Document access toggle */}
+      <div className="flex items-center justify-between px-2 py-1.5 bg-zinc-800/40 rounded">
+        <div>
+          <p className="text-xs text-zinc-300">Document Access</p>
+          <p className="text-[10px] text-zinc-500">Can read/write documents in file store</p>
+        </div>
+        <button
+          onClick={() => onUpdate('document_access', documentAccess === 'true' ? 'false' : 'true')}
+          className="p-0.5"
+        >
+          {documentAccess === 'true' ? (
+            <ToggleRight className="h-5 w-5 text-orange-400" />
+          ) : (
+            <ToggleLeft className="h-5 w-5 text-zinc-500" />
+          )}
+        </button>
+      </div>
+
+      {/* Knowledge access toggle */}
+      <div className="flex items-center justify-between px-2 py-1.5 bg-zinc-800/40 rounded">
+        <div>
+          <p className="text-xs text-zinc-300">Knowledge Access</p>
+          <p className="text-[10px] text-zinc-500">Can read/write structured knowledge base</p>
+        </div>
+        <button
+          onClick={() => onUpdate('knowledge_access', knowledgeAccess === 'true' ? 'false' : 'true')}
+          className="p-0.5"
+        >
+          {knowledgeAccess === 'true' ? (
+            <ToggleRight className="h-5 w-5 text-cyan-400" />
+          ) : (
+            <ToggleLeft className="h-5 w-5 text-zinc-500" />
+          )}
+        </button>
       </div>
     </div>
   )

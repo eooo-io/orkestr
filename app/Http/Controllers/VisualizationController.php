@@ -75,6 +75,11 @@ class VisualizationController extends Controller
             ->get()
             ->groupBy('agent_id');
 
+        $agentDsBindings = \DB::table('agent_data_source')
+            ->where('project_id', $project->id)
+            ->get()
+            ->groupBy('agent_id');
+
         $agents = $projectAgents->map(fn ($pa) => [
             'id' => $pa->agent->id,
             'name' => $pa->agent->name,
@@ -99,6 +104,7 @@ class VisualizationController extends Controller
             'can_delegate' => $pa->agent->can_delegate,
             'has_loop_config' => $pa->agent->hasLoopConfig(),
             'parent_agent_id' => $pa->agent->parent_agent_id,
+            'data_source_ids' => ($agentDsBindings->get($pa->agent->id) ?? collect())->pluck('data_source_id')->values()->all(),
         ]);
 
         // Agent → skill edges
@@ -181,6 +187,18 @@ class VisualizationController extends Controller
             }
         }
 
+        // Data Sources (N.5 #423)
+        $dataSources = \App\Models\DataSource::where('project_id', $project->id)
+            ->get()
+            ->map(fn ($ds) => [
+                'id' => $ds->id,
+                'name' => $ds->name,
+                'type' => $ds->type,
+                'access_mode' => $ds->access_mode,
+                'enabled' => $ds->enabled,
+                'health_status' => $ds->health_status,
+            ]);
+
         // Delegation Configs (edge configs for canvas)
         $delegationConfigs = DelegationConfig::where('project_id', $project->id)
             ->get()
@@ -227,6 +245,7 @@ class VisualizationController extends Controller
                 'mcp_servers' => $mcpServers,
                 'a2a_agents' => $a2aAgents,
                 'sync_outputs' => $syncOutputs,
+                'data_sources' => $dataSources,
                 'delegation_configs' => $delegationConfigs,
                 'workflows' => $workflows,
             ],

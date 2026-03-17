@@ -66,6 +66,7 @@ use App\Http\Controllers\ModelRecommendationController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\DelegationConfigController;
 use App\Http\Controllers\AgentTaskController;
+use App\Http\Controllers\DataSourceController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExecutionStreamController;
 use App\Http\Controllers\KnowledgeController;
@@ -545,4 +546,12 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/projects/{project}/agents/{agent}/knowledge', [KnowledgeController::class, 'store'])->middleware('org-role:editor');
     Route::get('/projects/{project}/agents/{agent}/knowledge/search', [KnowledgeController::class, 'search']);
     Route::delete('/agent-knowledge/{id}', [KnowledgeController::class, 'destroy'])->middleware('org-role:editor');
+
+    // Data Sources (N.5 #422-#425)
+    Route::get('/projects/{project}/data-sources', [DataSourceController::class, 'index']);
+    Route::post('/projects/{project}/data-sources', [DataSourceController::class, 'store'])->middleware('org-role:editor');
+    Route::put('/data-sources/{dataSource}', [DataSourceController::class, 'update'])->middleware('org-role:editor');
+    Route::delete('/data-sources/{dataSource}', [DataSourceController::class, 'destroy'])->middleware('org-role:editor');
+    Route::post('/data-sources/{dataSource}/test', [DataSourceController::class, 'test']);
+    Route::put('/projects/{project}/agents/{agent}/data-sources', [DataSourceController::class, 'bindToAgent'])->middleware('org-role:editor');
 });

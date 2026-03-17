@@ -99,6 +99,8 @@ import type {
   AgentKnowledgeEntry,
   AgentMemoryEntry,
   AgentMemoryRecallResult,
+  DataSource,
+  DataSourceTestResult,
 } from '@/types'
 
 const api = axios.create({
@@ -1589,5 +1591,25 @@ export const updateAgentMemory = (id: number, content: string) =>
 
 export const deleteAgentMemory = (id: number) =>
   api.delete(`/agent-memories/${id}`)
+
+// --- Data Sources (N.5 #422-#425) ---
+
+export const fetchDataSources = (projectId: number) =>
+  api.get<ApiResponse<DataSource[]>>(`/projects/${projectId}/data-sources`).then((r) => r.data.data)
+
+export const createDataSource = (projectId: number, data: { name: string; type: string; connection_config?: Record<string, unknown>; access_mode?: string; enabled?: boolean }) =>
+  api.post<ApiResponse<DataSource>>(`/projects/${projectId}/data-sources`, data).then((r) => r.data.data)
+
+export const updateDataSource = (id: number, data: Partial<{ name: string; type: string; connection_config: Record<string, unknown>; access_mode: string; enabled: boolean }>) =>
+  api.put<ApiResponse<DataSource>>(`/data-sources/${id}`, data).then((r) => r.data.data)
+
+export const deleteDataSource = (id: number) =>
+  api.delete(`/data-sources/${id}`)
+
+export const testDataSource = (id: number) =>
+  api.post<ApiResponse<DataSourceTestResult>>(`/data-sources/${id}/test`).then((r) => r.data.data)
+
+export const bindAgentDataSources = (projectId: number, agentId: number, dataSourceIds: number[]) =>
+  api.put(`/projects/${projectId}/agents/${agentId}/data-sources`, { data_source_ids: dataSourceIds })
 
 export default api

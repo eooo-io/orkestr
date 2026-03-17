@@ -156,6 +156,10 @@ export interface Agent {
   auto_remember?: boolean
   memory_recall_limit?: number
 
+  // Data access
+  document_access?: boolean
+  knowledge_access?: boolean
+
   // Meta
   is_template: boolean
   created_by: number | null
@@ -552,6 +556,7 @@ export interface ProjectGraphData {
     parent_agent_id: number | null
     persona?: AgentPersona | null
     display_name?: string | null
+    data_source_ids?: number[]
   }>
   agent_edges: Array<{
     source_type: string
@@ -573,6 +578,14 @@ export interface ProjectGraphData {
     id: number
     name: string
     url: string
+  }>
+  data_sources?: Array<{
+    id: number
+    name: string
+    type: string
+    access_mode: string
+    enabled: boolean
+    health_status: string | null
   }>
   sync_outputs: Record<string, string[]>
 }
@@ -1418,6 +1431,28 @@ export interface AgentDocument {
   path: string
   size: number
   last_modified: number
+}
+
+// --- N.5: Data Sources ---
+
+export interface DataSource {
+  id: number
+  project_id: number
+  name: string
+  type: 'postgres' | 'mysql' | 'minio' | 's3' | 'filesystem' | 'redis'
+  connection_config: Record<string, unknown>
+  access_mode: 'read_only' | 'read_write'
+  enabled: boolean
+  health_status: string | null
+  last_health_check: string | null
+  agents_count: number
+  created_at: string
+  updated_at: string
+}
+
+export interface DataSourceTestResult {
+  status: string
+  message: string
 }
 
 // --- N.4: Knowledge Base ---

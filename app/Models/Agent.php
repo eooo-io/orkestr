@@ -202,6 +202,13 @@ class Agent extends Model
         return $this->hasMany(AgentTask::class);
     }
 
+    public function dataSources(): BelongsToMany
+    {
+        return $this->belongsToMany(DataSource::class, 'agent_data_source')
+            ->withPivot('project_id', 'access_mode')
+            ->withTimestamps();
+    }
+
     // --- Scopes ---
 
     public function scopeTemplates($query)

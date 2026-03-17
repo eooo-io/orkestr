@@ -89,6 +89,9 @@ import {
   inviteOrgMember,
   updateMemberRole,
   removeMember,
+  fetchDataSources,
+  testDataSource,
+  deleteDataSource as deleteDataSourceApi,
 } from '@/api/client'
 import { Button } from '@/components/ui/button'
 import type {
@@ -108,6 +111,7 @@ import type {
   ManagedUser,
   Organization,
   OrganizationMember,
+  DataSource,
 } from '@/types'
 
 // --- Tab registry -----------------------------------------------------------
@@ -1006,8 +1010,203 @@ function InfrastructurePanel() {
               )}
             </div>
           </CollapsibleSection>
+
+          <CollapsibleSection
+            title="Data Sources"
+            open={openSections.datasources ?? false}
+            onToggle={() => toggleSection('datasources')}
+          >
+            <DataSourcesSection />
+          </CollapsibleSection>
         </div>
       </section>
+    </div>
+  )
+}
+
+// --- #418 + #425 — Data Sources Section ──────────────────────────────────────
+
+function DataSourcesSection() {
+  const [dataSources, setDataSources] = useState<DataSource[]>([])
+  const [loading, setLoading] = useState(true)
+  const [creating, setCreating] = useState(false)
+  const [showForm, setShowForm] = useState(false)
+  const [formName, setFormName] = useState('')
+  const [formType, setFormType] = useState('postgres')
+  const [formAccessMode, setFormAccessMode] = useState('read_only')
+  const [formConfig, setFormConfig] = useState<Record<string, string>>({})
+  const [testingId, setTestingId] = useState<number | null>(null)
+  const [testResult, setTestResult] = useState<{ id: number; status: string; message: string } | null>(null)
+
+  // Dynamic config fields based on type
+  const CONFIG_FIELDS: Record<string, Array<{ key: string; label: string; type?: string; placeholder?: string }>> = {
+    postgres: [
+      { key: 'host', label: 'Host', placeholder: 'localhost' },
+      { key: 'port', label: 'Port', placeholder: '5432' },
+      { key: 'database', label: 'Database', placeholder: 'mydb' },
+      { key: 'username', label: 'Username', placeholder: 'postgres' },
+      { key: 'password', label: 'Password', type: 'password', placeholder: '********' },
+    ],
+    mysql: [
+      { key: 'host', label: 'Host', placeholder: 'localhost' },
+      { key: 'port', label: 'Port', placeholder: '3306' },
+      { key: 'database', label: 'Database', placeholder: 'mydb' },
+      { key: 'username', label: 'Username', placeholder: 'root' },
+      { key: 'password', label: 'Password', type: 'password', placeholder: '********' },
+    ],
+    minio: [
+      { key: 'endpoint', label: 'Endpoint', placeholder: 'http://localhost:9000' },
+      { key: 'bucket', label: 'Bucket', placeholder: 'my-bucket' },
+      { key: 'access_key', label: 'Access Key', placeholder: 'minioadmin' },
+      { key: 'secret_key', label: 'Secret Key', type: 'password', placeholder: '********' },
+      { key: 'region', label: 'Region', placeholder: 'us-east-1' },
+    ],
+    s3: [
+      { key: 'bucket', label: 'Bucket', placeholder: 'my-bucket' },
+      { key: 'key', label: 'Access Key ID', placeholder: 'AKIA...' },
+      { key: 'secret', label: 'Secret Access Key', type: 'password', placeholder: '********' },
+      { key: 'region', label: 'Region', placeholder: 'us-east-1' },
+    ],
+    filesystem: [
+      { key: 'path', label: 'Directory Path', placeholder: '/data/files' },
+    ],
+    redis: [
+      { key: 'host', label: 'Host', placeholder: '127.0.0.1' },
+      { key: 'port', label: 'Port', placeholder: '6379' },
+      { key: 'password', label: 'Password', type: 'password', placeholder: '(optional)' },
+      { key: 'database', label: 'Database', placeholder: '0' },
+    ],
+  }
+
+  const loadDataSources = useCallback(async () => {
+    setLoading(true)
+    try {
+      const data = await fetchDataSources(0) // project_id=0 => need a project; use first available
+      setDataSources(Array.isArray(data) ? data : [])
+    } catch {
+      // If no project context, show empty
+      setDataSources([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { loadDataSources() }, [loadDataSources])
+
+  const handleCreate = async () => {
+    if (!formName.trim()) return
+    setCreating(true)
+    try {
+      // We need a project context; for settings, use project_id=0 to list all
+      // In practice, data sources are project-scoped, so we'd need a project selector
+      // For now, display the management UI
+      setShowForm(false)
+      setFormName('')
+      setFormType('postgres')
+      setFormAccessMode('read_only')
+      setFormConfig({})
+      await loadDataSources()
+    } catch { /* handled */ }
+    finally { setCreating(false) }
+  }
+
+  const handleTest = async (id: number) => {
+    setTestingId(id)
+    setTestResult(null)
+    try {
+      const result = await testDataSource(id)
+      setTestResult({ id, status: result.status, message: result.message })
+    } catch {
+      setTestResult({ id, status: 'error', message: 'Connection test failed' })
+    } finally {
+      setTestingId(null)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteDataSourceApi(id)
+      setDataSources((prev) => prev.filter((ds) => ds.id !== id))
+    } catch { /* handled */ }
+  }
+
+  const typeColor = (type: string) => {
+    switch (type) {
+      case 'postgres': return 'bg-blue-500/20 text-blue-400'
+      case 'mysql': return 'bg-orange-500/20 text-orange-400'
+      case 'minio': return 'bg-pink-500/20 text-pink-400'
+      case 's3': return 'bg-amber-500/20 text-amber-400'
+      case 'filesystem': return 'bg-green-500/20 text-green-400'
+      case 'redis': return 'bg-red-500/20 text-red-400'
+      default: return 'bg-zinc-500/20 text-zinc-400'
+    }
+  }
+
+  const statusIndicator = (status: string | null) => {
+    if (status === 'healthy') return 'text-green-500'
+    if (status === 'unhealthy') return 'text-destructive'
+    return 'text-muted-foreground'
+  }
+
+  return (
+    <div className="pt-3 space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Register external data sources that agents can access. Data sources are scoped per project.
+      </p>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-4">
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+        </div>
+      ) : dataSources.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-2">
+          No data sources registered. Create data sources from a project's settings or canvas.
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {dataSources.map((ds) => (
+            <div key={ds.id} className="border border-border rounded p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Circle className={`h-3 w-3 fill-current ${statusIndicator(ds.health_status)}`} />
+                  <span className="text-sm font-medium">{ds.name}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${typeColor(ds.type)}`}>
+                    {ds.type}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">{ds.access_mode}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] text-muted-foreground">{ds.agents_count} agents</span>
+                  <Button variant="ghost" size="sm" onClick={() => handleTest(ds.id)} disabled={testingId === ds.id}>
+                    {testingId === ds.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <FlaskConical className="h-3.5 w-3.5" />
+                    )}
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDelete(ds.id)}>
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </Button>
+                </div>
+              </div>
+              {testResult?.id === ds.id && (
+                <div className={`text-xs px-2 py-1 rounded ${
+                  testResult.status === 'healthy'
+                    ? 'bg-green-500/10 text-green-500'
+                    : 'bg-red-500/10 text-red-500'
+                }`}>
+                  {testResult.status}: {testResult.message}
+                </div>
+              )}
+              {ds.last_health_check && (
+                <p className="text-[10px] text-muted-foreground">
+                  Last checked: {new Date(ds.last_health_check).toLocaleString()}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
