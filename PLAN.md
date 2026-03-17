@@ -75,6 +75,12 @@ Phase L — Canvas Composer  (COMPLETE)
   L.3: Connection drawing — drag-to-connect edges between any compatible nodes.
   L.4: Canvas UX polish — multi-select, undo/redo, context menus, keyboard shortcuts.
   L.5: Backend & persistence — edge config storage, canvas-specific API, graph refresh.
+
+Phase M — Agent Runtime & Deployment  (COMPLETE)
+  M.1: Runtime infrastructure — queue workers, MCP pool, budget enforcement, execution job.
+  M.2: Canvas execution — run buttons, output drawer, status indicators, execution history.
+  M.3: Scheduled & triggered — cron scheduler, webhook triggers, A2A execution, notifications.
+  M.4: Agent task assignment — task model, orchestrator routing, canvas task queue, autonomous pickup.
 ```
 
 The existing Component Layer (skills, provider sync, MCP, A2A) remains the foundation. Each phase builds on the previous.

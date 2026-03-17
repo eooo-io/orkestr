@@ -526,6 +526,8 @@ export interface ProjectGraphData {
     can_delegate: boolean
     has_loop_config: boolean
     parent_agent_id: number | null
+    persona?: AgentPersona | null
+    display_name?: string | null
   }>
   agent_edges: Array<{
     source_type: string

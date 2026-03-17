@@ -52,13 +52,19 @@ import {
   CheckCircle2,
   Clock,
   Loader2,
+  History,
+  XCircle,
+  Square,
+  Send,
 } from 'lucide-react'
-import type { ProjectGraphData, AgentTask } from '@/types'
-import { assignAgentSkills, bindAgentMcpServers, bindAgentA2aAgents, saveCanvasLayout, fetchProjectTasks, createProjectTask, runTask, deleteTask } from '@/api/client'
+import type { ProjectGraphData, AgentTask, ExecutionRun } from '@/types'
+import { assignAgentSkills, bindAgentMcpServers, bindAgentA2aAgents, saveCanvasLayout, fetchProjectTasks, createProjectTask, runTask, deleteTask, runAgent, fetchExecutions } from '@/api/client'
 import { AgentNode, SkillNode, ProviderNode, McpNode, ProjectNode, LaneLabel } from './FlowNodes'
+import type { AgentNodeData } from './FlowNodes'
 import DelegationEdge, { type DelegationEdgeData } from './DelegationEdge'
 import EdgeConfigPanel, { type EdgeConfigData } from './EdgeConfigPanel'
 import NodeDetailPanel from './NodeDetailPanel'
+import ExecutionOutputDrawer, { type ExecutionDrawerState, type ExecutionStreamStep } from './ExecutionOutputDrawer'
 import {
   detectDelegationChains,
   findChainsForNode,
@@ -751,6 +757,10 @@ interface ToolbarProps {
   onToggleFilterType: (t: string) => void
   onClearFilters: () => void
   hasActiveFilter: boolean
+  // #383 — Run Workflow
+  hasWorkflow?: boolean
+  onRunWorkflow?: () => void
+  isExecuting?: boolean
 }
 
 const FILTER_TYPE_BUTTONS: Array<{ key: string; label: string; color: string }> = [
@@ -778,6 +788,9 @@ function CanvasToolbar({
   onToggleFilterType,
   onClearFilters,
   hasActiveFilter,
+  hasWorkflow,
+  onRunWorkflow,
+  isExecuting,
 }: ToolbarProps) {
   return (
     <div className="absolute top-3 right-3 z-10 flex items-center gap-1 bg-zinc-900/90 border border-zinc-700 rounded-lg px-1 py-1 shadow-lg backdrop-blur-sm">
@@ -836,6 +849,25 @@ function CanvasToolbar({
       >
         <Redo2 className="h-3.5 w-3.5" />
       </button>
+      {/* #383 — Run Workflow */}
+      {hasWorkflow && (
+        <>
+          <div className="w-px h-4 bg-zinc-700" />
+          <button
+            onClick={onRunWorkflow}
+            disabled={isExecuting}
+            className="flex items-center gap-1.5 px-2 py-1 text-[11px] text-emerald-300 hover:text-emerald-200 hover:bg-emerald-800/30 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Run Workflow"
+          >
+            {isExecuting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Play className="h-3.5 w-3.5" />
+            )}
+            <span>{isExecuting ? 'Running...' : 'Run Workflow'}</span>
+          </button>
+        </>
+      )}
       <div className="w-px h-4 bg-zinc-700" />
       <button
         onClick={onAutoLayout}
@@ -989,6 +1021,36 @@ interface UndoOperation {
   redo: () => void
 }
 
+// ─── Execution helpers (#384) ─────────────────────────────────────
+function formatMs(ms: number): string {
+  if (ms < 1000) return `${ms}ms`
+  const secs = Math.floor(ms / 1000)
+  if (secs < 60) return `${secs}s`
+  return `${Math.floor(secs / 60)}m ${secs % 60}s`
+}
+
+function formatMicrocents(mc: number): string {
+  const dollars = mc / 100_000_000
+  if (dollars < 0.001) return `$${(mc / 100_0000).toFixed(4)}`
+  return `$${dollars.toFixed(4)}`
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  if (diff < 60_000) return 'just now'
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)} min ago`
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`
+  return `${Math.floor(diff / 86_400_000)}d ago`
+}
+
+const EXEC_STATUS_COLORS: Record<string, string> = {
+  completed: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
+  failed: 'bg-red-500/20 text-red-400 border-red-500/40',
+  running: 'bg-blue-500/20 text-blue-400 border-blue-500/40',
+  cancelled: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/40',
+  pending: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40',
+}
+
 // ─── Main interactive graph component ──────────────────────────────
 function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh }: Props) {
   const initialGraph = useMemo(() => buildGraph(data), [data])
@@ -1026,6 +1088,17 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
   // ─── Node filter (#369) ──────────────────────────────────────
   const [filterSearch, setFilterSearch] = useState('')
   const [filterTypes, setFilterTypes] = useState<Set<string>>(new Set(['agent', 'skill', 'mcp', 'a2a']))
+
+  // ─── Execution state (#381-#385) ──────────────────────────────
+  const [executionDrawer, setExecutionDrawer] = useState<ExecutionDrawerState | null>(null)
+  const [replayExecution, setReplayExecution] = useState<ExecutionRun | null>(null)
+  const [executionStatuses, setExecutionStatuses] = useState<Map<number, { status: 'idle' | 'running' | 'completed' | 'failed' | 'waiting'; cost?: string; duration?: string }>>(new Map())
+  const [runInputModal, setRunInputModal] = useState<{ agentId: number; agentName: string } | null>(null)
+  const [runInputText, setRunInputText] = useState('')
+  const [isRunning, setIsRunning] = useState(false)
+  const [sidebarTab, setSidebarTab] = useState<'palette' | 'tasks' | 'executions'>('palette')
+  const [recentExecutions, setRecentExecutions] = useState<ExecutionRun[]>([])
+  const runInputRef = useRef<HTMLTextAreaElement>(null)
 
   // ─── Position tracking for undo (#366) ───────────────────────
   const positionBatchRef = useRef<Map<string, { before: { x: number; y: number }; after: { x: number; y: number } }> | null>(null)
@@ -1074,13 +1147,30 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
     })
   }, [edges, highlightedElements, edgeStepNumbers])
 
-  // Apply highlighting class to nodes in chain + filter opacity (#369)
+  // Apply highlighting class to nodes in chain + filter opacity (#369) + execution status (#384) + run button (#381)
   const processedNodes = useMemo(() => {
     const searchLower = filterSearch.toLowerCase()
     const isFiltering = filterSearch.length > 0 || filterTypes.size < 4
 
     return nodes.map((node) => {
       let updated = { ...node }
+
+      // #381 + #384 — Inject onRun callback + execution status for agent nodes
+      if (node.type === 'agentNode') {
+        const agentId = parseInt(node.id.replace('agent-', ''), 10)
+        const execInfo = executionStatuses.get(agentId)
+        updated = {
+          ...updated,
+          data: {
+            ...updated.data,
+            onRun: handleRunAgent,
+            agentId,
+            executionStatus: execInfo?.status ?? 'idle',
+            lastRunCost: execInfo?.cost ?? null,
+            lastRunDuration: execInfo?.duration ?? null,
+          } as AgentNodeData,
+        }
+      }
 
       // Chain highlighting
       if (hoveredNodeId && highlightedElements.nodeIds.size > 0) {
@@ -1105,7 +1195,7 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
 
       return updated
     })
-  }, [nodes, hoveredNodeId, highlightedElements, filterSearch, filterTypes])
+  }, [nodes, hoveredNodeId, highlightedElements, filterSearch, filterTypes, executionStatuses, handleRunAgent])
 
   // ─── Undo/Redo helpers (#366) ──────────────────────────────────
   const pushUndo = useCallback((op: UndoOperation) => {
@@ -1169,6 +1259,132 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
   }, [])
 
   const hasActiveFilter = filterSearch.length > 0 || filterTypes.size < 4
+
+  // ─── #381 — Run agent handler ─────────────────────────────────
+  const handleRunAgent = useCallback((agentId: number) => {
+    const agent = data.agents.find((a) => a.id === agentId)
+    if (!agent) return
+    setRunInputModal({ agentId, agentName: (agent as { display_name?: string }).display_name || agent.name })
+    setRunInputText('')
+    setTimeout(() => runInputRef.current?.focus(), 100)
+  }, [data.agents])
+
+  const handleSubmitRun = useCallback(async () => {
+    if (!runInputModal || !projectId || !runInputText.trim()) return
+    setIsRunning(true)
+    try {
+      const result = await runAgent(projectId, runInputModal.agentId, runInputText.trim())
+      setExecutionStatuses((prev) => {
+        const next = new Map(prev)
+        next.set(runInputModal.agentId, { status: 'running' })
+        return next
+      })
+      setExecutionDrawer({
+        executionId: result.execution_id,
+        streamUrl: result.stream_url,
+        agentName: runInputModal.agentName,
+        agentAvatar: data.agents.find((a) => a.id === runInputModal.agentId)?.icon ?? undefined,
+        agentId: runInputModal.agentId,
+      })
+      setRunInputModal(null)
+      setRunInputText('')
+    } catch {
+      // error handled silently
+    } finally {
+      setIsRunning(false)
+    }
+  }, [runInputModal, projectId, runInputText, data.agents])
+
+  // #384 — Handle execution status changes from drawer
+  const handleExecutionStatusChange = useCallback((agentId: number, status: 'running' | 'completed' | 'failed' | 'idle') => {
+    setExecutionStatuses((prev) => {
+      const next = new Map(prev)
+      if (status === 'idle') {
+        next.delete(agentId)
+      } else {
+        next.set(agentId, { status, ...(prev.get(agentId) ?? {}) })
+      }
+      return next
+    })
+  }, [])
+
+  // #384 — Handle SSE step events for node status
+  const handleStepEvent = useCallback((step: ExecutionStreamStep) => {
+    if (step.agent_id) {
+      const statusMap: Record<string, 'running' | 'waiting'> = {
+        message: 'running',
+        tool_call: 'running',
+        delegation: 'waiting',
+      }
+      const newStatus = statusMap[step.type]
+      if (newStatus) {
+        setExecutionStatuses((prev) => {
+          const next = new Map(prev)
+          next.set(step.agent_id!, { status: newStatus })
+          return next
+        })
+      }
+    }
+    if (step.type === 'complete' && step.duration_ms !== undefined) {
+      // Update with cost/duration info
+      if (executionDrawer?.agentId) {
+        setExecutionStatuses((prev) => {
+          const next = new Map(prev)
+          const existing = prev.get(executionDrawer.agentId) ?? { status: 'completed' as const }
+          next.set(executionDrawer.agentId, {
+            ...existing,
+            status: 'completed',
+            duration: step.duration_ms ? formatMs(step.duration_ms) : undefined,
+            cost: step.cost_microcents ? formatMicrocents(step.cost_microcents) : undefined,
+          })
+          return next
+        })
+      }
+    }
+  }, [executionDrawer?.agentId])
+
+  // #383 — Run Workflow handler
+  const handleRunWorkflow = useCallback(() => {
+    if (!projectId) return
+    // Find the orchestrator (first parent agent or first enabled agent)
+    const orchestrator = data.agents.find((a) => a.is_enabled && a.role === 'orchestrator')
+      ?? data.agents.find((a) => a.is_enabled && a.can_delegate)
+      ?? data.agents.find((a) => a.is_enabled)
+    if (!orchestrator) return
+    handleRunAgent(orchestrator.id)
+  }, [projectId, data.agents, handleRunAgent])
+
+  const hasWorkflowData = data.agents.filter((a) => a.is_enabled).length > 1
+
+  // #385 — Load recent executions
+  const loadRecentExecutions = useCallback(() => {
+    if (!projectId) return
+    fetchExecutions({ project_id: projectId, page: 1 })
+      .then((result) => setRecentExecutions((result.data ?? []).slice(0, 20)))
+      .catch(() => {})
+  }, [projectId])
+
+  useEffect(() => {
+    if (sidebarTab === 'executions') {
+      loadRecentExecutions()
+    }
+  }, [sidebarTab, loadRecentExecutions])
+
+  // Close execution drawer
+  const handleCloseDrawer = useCallback(() => {
+    setExecutionDrawer(null)
+    setReplayExecution(null)
+    // Clear running statuses
+    setExecutionStatuses((prev) => {
+      const next = new Map(prev)
+      for (const [id, entry] of next) {
+        if (entry.status === 'running' || entry.status === 'waiting') {
+          next.delete(id)
+        }
+      }
+      return next
+    })
+  }, [])
 
   // Track which items are on canvas vs palette
   const canvasNodeIds = useMemo(() => new Set(nodes.map((n) => n.id)), [nodes])
@@ -2086,45 +2302,83 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
 
   return (
     <div ref={containerRef} style={containerStyle} className="rounded-lg border border-zinc-800 overflow-hidden flex">
-      {/* Left sidebar palette */}
+      {/* Left sidebar with tabs (#385) */}
       {hasPaletteItems && (
         <div className="w-[200px] border-r border-zinc-800 bg-zinc-950/80 flex flex-col shrink-0 overflow-hidden">
-          <div className="px-3 py-2 border-b border-zinc-800">
-            <h3 className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Palette</h3>
-            <p className="text-[10px] text-zinc-600 mt-0.5">Drag items onto the canvas</p>
+          {/* #385 — Tab buttons */}
+          <div className="flex border-b border-zinc-800 shrink-0">
+            <button
+              onClick={() => setSidebarTab('palette')}
+              className={`flex-1 flex items-center justify-center gap-1 px-2 py-2 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+                sidebarTab === 'palette'
+                  ? 'text-violet-400 border-b-2 border-violet-500 bg-zinc-900/50'
+                  : 'text-zinc-500 hover:text-zinc-400'
+              }`}
+            >
+              <GripVertical className="h-3 w-3" />
+              Palette
+            </button>
+            <button
+              onClick={() => setSidebarTab('tasks')}
+              className={`flex-1 flex items-center justify-center gap-1 px-2 py-2 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+                sidebarTab === 'tasks'
+                  ? 'text-amber-400 border-b-2 border-amber-500 bg-zinc-900/50'
+                  : 'text-zinc-500 hover:text-zinc-400'
+              }`}
+            >
+              <ListTodo className="h-3 w-3" />
+              Tasks
+            </button>
+            <button
+              onClick={() => setSidebarTab('executions')}
+              className={`flex-1 flex items-center justify-center gap-1 px-2 py-2 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+                sidebarTab === 'executions'
+                  ? 'text-blue-400 border-b-2 border-blue-500 bg-zinc-900/50'
+                  : 'text-zinc-500 hover:text-zinc-400'
+              }`}
+            >
+              <History className="h-3 w-3" />
+              Runs
+            </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-1.5">
-            <PaletteSection
-              title="Agents"
-              icon={<Bot className="h-3 w-3 text-violet-400" />}
-              items={paletteAgents}
-              onDragStart={handlePaletteDragStart}
-              onAdd={projectId ? () => handleOpenCreate('agent') : undefined}
-            />
-            <PaletteSection
-              title="Skills"
-              icon={<Sparkles className="h-3 w-3 text-emerald-400" />}
-              items={paletteSkills}
-              onDragStart={handlePaletteDragStart}
-              onAdd={projectId ? () => handleOpenCreate('skill') : undefined}
-            />
-            <PaletteSection
-              title="MCP Servers"
-              icon={<Server className="h-3 w-3 text-pink-400" />}
-              items={paletteMcp}
-              onDragStart={handlePaletteDragStart}
-              onAdd={projectId ? () => handleOpenCreate('mcp') : undefined}
-            />
-            <PaletteSection
-              title="A2A Agents"
-              icon={<Wifi className="h-3 w-3 text-cyan-400" />}
-              items={paletteA2a}
-              onDragStart={handlePaletteDragStart}
-              onAdd={projectId ? () => handleOpenCreate('a2a') : undefined}
-            />
 
-            {/* Task Queue (#394) */}
-            {projectId && (
+          <div className="flex-1 overflow-y-auto p-1.5">
+            {/* Palette tab */}
+            {sidebarTab === 'palette' && (
+              <>
+                <PaletteSection
+                  title="Agents"
+                  icon={<Bot className="h-3 w-3 text-violet-400" />}
+                  items={paletteAgents}
+                  onDragStart={handlePaletteDragStart}
+                  onAdd={projectId ? () => handleOpenCreate('agent') : undefined}
+                />
+                <PaletteSection
+                  title="Skills"
+                  icon={<Sparkles className="h-3 w-3 text-emerald-400" />}
+                  items={paletteSkills}
+                  onDragStart={handlePaletteDragStart}
+                  onAdd={projectId ? () => handleOpenCreate('skill') : undefined}
+                />
+                <PaletteSection
+                  title="MCP Servers"
+                  icon={<Server className="h-3 w-3 text-pink-400" />}
+                  items={paletteMcp}
+                  onDragStart={handlePaletteDragStart}
+                  onAdd={projectId ? () => handleOpenCreate('mcp') : undefined}
+                />
+                <PaletteSection
+                  title="A2A Agents"
+                  icon={<Wifi className="h-3 w-3 text-cyan-400" />}
+                  items={paletteA2a}
+                  onDragStart={handlePaletteDragStart}
+                  onAdd={projectId ? () => handleOpenCreate('a2a') : undefined}
+                />
+              </>
+            )}
+
+            {/* Tasks tab */}
+            {sidebarTab === 'tasks' && projectId && (
               <TaskQueueSection
                 projectId={projectId}
                 agents={data.agents.filter((a) => a.is_enabled).map((a) => ({
@@ -2132,9 +2386,7 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
                   name: a.name,
                   slug: a.slug,
                   icon: a.icon,
-                  persona: (data as unknown as { agents: Array<{ persona?: { avatar?: string; name?: string } | null }> }).agents.find((da) => da === a)
-                    ? { avatar: undefined, name: undefined }
-                    : null,
+                  persona: a.persona ?? null,
                 }))}
                 onSelectTask={(task) => {
                   if (task.agent_id) {
@@ -2142,6 +2394,48 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
                   }
                 }}
               />
+            )}
+            {sidebarTab === 'tasks' && !projectId && (
+              <p className="text-[10px] text-zinc-600 px-2 py-4 text-center">Save project to use tasks</p>
+            )}
+
+            {/* #385 — Executions tab */}
+            {sidebarTab === 'executions' && (
+              <div className="space-y-1">
+                {recentExecutions.length === 0 && (
+                  <p className="text-[10px] text-zinc-600 px-2 py-4 text-center">No executions yet</p>
+                )}
+                {recentExecutions.map((exec) => (
+                  <button
+                    key={exec.id}
+                    onClick={() => {
+                      setReplayExecution(exec)
+                      setExecutionDrawer(null)
+                    }}
+                    className="w-full flex items-start gap-1.5 px-2 py-1.5 rounded-md border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800/70 hover:border-zinc-700 cursor-pointer transition-all text-left"
+                  >
+                    {exec.agent?.icon ? (
+                      <span className="text-[11px] shrink-0 mt-0.5">{exec.agent.icon}</span>
+                    ) : (
+                      <Bot className="h-3 w-3 text-violet-400 shrink-0 mt-0.5" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1">
+                        <span className="text-[11px] text-zinc-300 truncate">{exec.agent?.name ?? exec.name}</span>
+                        <span className={`text-[9px] px-1 py-0.5 rounded border ${EXEC_STATUS_COLORS[exec.status] ?? EXEC_STATUS_COLORS.pending}`}>
+                          {exec.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[9px] text-zinc-600 mt-0.5">
+                        {exec.total_duration_ms > 0 && <span>{formatMs(exec.total_duration_ms)}</span>}
+                        {exec.total_tokens > 0 && <span>{exec.total_tokens.toLocaleString()} tok</span>}
+                        {exec.total_cost_microcents > 0 && <span>{formatMicrocents(exec.total_cost_microcents)}</span>}
+                        <span className="ml-auto">{timeAgo(exec.created_at)}</span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -2173,6 +2467,9 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
           onToggleFilterType={handleToggleFilterType}
           onClearFilters={handleClearFilters}
           hasActiveFilter={hasActiveFilter}
+          hasWorkflow={hasWorkflowData}
+          onRunWorkflow={handleRunWorkflow}
+          isExecuting={executionDrawer !== null}
         />
 
         <ReactFlow
@@ -2348,6 +2645,73 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
             onNodeDeleted={() => {}}
           />
         )}
+
+        {/* #381 — Run input modal (popover) */}
+        {runInputModal && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl p-4 w-[400px] max-w-[90%]">
+              <div className="flex items-center gap-2 mb-3">
+                <Play className="h-4 w-4 text-violet-400" />
+                <h3 className="text-sm font-semibold text-zinc-200">Run {runInputModal.agentName}</h3>
+                <button
+                  onClick={() => setRunInputModal(null)}
+                  className="ml-auto p-1 text-zinc-500 hover:text-zinc-300 rounded transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <label className="block text-[11px] text-zinc-400 mb-1.5">What should this agent do?</label>
+              <textarea
+                ref={runInputRef}
+                value={runInputText}
+                onChange={(e) => setRunInputText(e.target.value)}
+                placeholder="Describe the task for this agent..."
+                className="w-full px-3 py-2 text-sm bg-zinc-800 border border-zinc-700 rounded-md text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-violet-500/50 resize-none"
+                rows={3}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    handleSubmitRun()
+                  }
+                  if (e.key === 'Escape') {
+                    setRunInputModal(null)
+                  }
+                }}
+              />
+              <div className="flex items-center justify-between mt-3">
+                <span className="text-[10px] text-zinc-600">Cmd+Enter to send</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setRunInputModal(null)}
+                    className="px-3 py-1.5 text-[11px] text-zinc-400 hover:text-zinc-300 rounded transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSubmitRun}
+                    disabled={isRunning || !runInputText.trim()}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] bg-violet-600 hover:bg-violet-500 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isRunning ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Send className="h-3 w-3" />
+                    )}
+                    {isRunning ? 'Starting...' : 'Run'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* #382 — Execution output drawer */}
+        <ExecutionOutputDrawer
+          execution={executionDrawer}
+          replayExecution={replayExecution}
+          onClose={handleCloseDrawer}
+          onStatusChange={handleExecutionStatusChange}
+          onStepEvent={handleStepEvent}
+        />
       </div>
     </div>
   )

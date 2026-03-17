@@ -871,6 +871,18 @@ export const fetchExecutionStats = (projectId: number) =>
     .get<ExecutionStats>(`/projects/${projectId}/runs/stats`)
     .then((r) => r.data)
 
+// #381 — Run agent from canvas (returns execution_id + stream_url)
+export const runAgent = (projectId: number, agentId: number, input: string, triggerType?: string) =>
+  api
+    .post<{ execution_id: number; stream_url: string }>(`/projects/${projectId}/agents/${agentId}/run`, { input, trigger_type: triggerType })
+    .then((r) => r.data)
+
+// #382 — Cancel execution
+export const cancelExecution = (executionId: number) =>
+  api
+    .post(`/executions/${executionId}/cancel`)
+    .then((r) => r.data)
+
 // Provider Health
 export const fetchProviderHealth = () =>
   api

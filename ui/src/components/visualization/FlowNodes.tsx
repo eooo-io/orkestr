@@ -8,6 +8,11 @@ import {
   AlertTriangle,
   FileCode,
   Zap,
+  Play,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Loader2,
 } from 'lucide-react'
 
 /* ─── Shared handle styles ────────────────────────────────── */
@@ -15,7 +20,7 @@ import {
 const handleBaseClass = '!w-[10px] !h-[10px] !opacity-0 group-hover:!opacity-100 !transition-opacity !duration-150'
 
 /* ─── Agent Node ───────────────────────────────────────────── */
-type AgentNodeData = {
+export type AgentNodeData = {
   label: string
   role: string
   icon: string | null
@@ -35,22 +40,73 @@ type AgentNodeData = {
   a2aCount: number
   assignedSkills?: Array<{ id: number; name: string }>
   isDropTarget?: boolean
+  // #381 — Run callback
+  onRun?: (agentId: number) => void
+  agentId?: number
+  // #384 — Execution status indicators
+  executionStatus?: 'idle' | 'running' | 'completed' | 'failed' | 'waiting'
+  lastRunCost?: string | null
+  lastRunDuration?: string | null
+}
+
+/* #384 — Status border classes */
+const statusBorderClass: Record<string, string> = {
+  running: 'border-blue-500 animate-pulse',
+  completed: 'border-emerald-500',
+  failed: 'border-red-500',
+  waiting: 'border-yellow-500',
+}
+
+/* #384 — Status badge */
+function ExecutionStatusBadge({ status }: { status: string }) {
+  if (status === 'running') return <Loader2 className="h-3 w-3 text-blue-400 animate-spin" />
+  if (status === 'completed') return <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+  if (status === 'failed') return <XCircle className="h-3 w-3 text-red-400" />
+  if (status === 'waiting') return <Clock className="h-3 w-3 text-yellow-400" />
+  return null
 }
 
 export const AgentNode = memo(({ data }: NodeProps & { data: AgentNodeData }) => {
   const d = data as AgentNodeData
+  const execStatus = d.executionStatus ?? 'idle'
+  const statusBorder = statusBorderClass[execStatus] ?? ''
+
   return (
     <div
-      className={`group px-4 py-3 rounded-lg border-2 min-w-[220px] shadow-lg transition-all ${
-        d.isDropTarget
-          ? 'bg-violet-950/80 border-emerald-400 ring-2 ring-emerald-400/40'
-          : d.isEnabled
-            ? 'bg-violet-950/80 border-violet-500/60 hover:border-violet-400'
-            : 'bg-zinc-900/80 border-zinc-600/40 opacity-60'
+      className={`group px-4 py-3 rounded-lg border-2 min-w-[220px] shadow-lg transition-all relative ${
+        statusBorder
+          ? `bg-violet-950/80 ${statusBorder}`
+          : d.isDropTarget
+            ? 'bg-violet-950/80 border-emerald-400 ring-2 ring-emerald-400/40'
+            : d.isEnabled
+              ? 'bg-violet-950/80 border-violet-500/60 hover:border-violet-400'
+              : 'bg-zinc-900/80 border-zinc-600/40 opacity-60'
       }`}
     >
       <Handle type="target" position={Position.Left} className={`!bg-violet-500 ${handleBaseClass}`} />
       <Handle type="source" position={Position.Right} className={`!bg-violet-500 ${handleBaseClass}`} />
+
+      {/* #381 — Play button (hover-visible, top-right) */}
+      {d.isEnabled && d.onRun && d.agentId && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            d.onRun!(d.agentId!)
+          }}
+          className="absolute top-1.5 right-1.5 p-1 rounded bg-violet-600/80 hover:bg-violet-500 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10"
+          title="Run this agent"
+        >
+          <Play className="h-3 w-3" />
+        </button>
+      )}
+
+      {/* #384 — Status badge (top-right, replaces play button when running) */}
+      {execStatus !== 'idle' && (
+        <div className="absolute top-1.5 right-1.5 z-10">
+          <ExecutionStatusBadge status={execStatus} />
+        </div>
+      )}
+
       <div className="flex items-center gap-2 mb-1">
         {d.persona?.avatar ? (
           <span className="text-base shrink-0" title={d.persona.name}>{d.persona.avatar}</span>
@@ -118,6 +174,13 @@ export const AgentNode = memo(({ data }: NodeProps & { data: AgentNodeData }) =>
           {d.assignedSkills.length > 5 && (
             <span className="text-[9px] text-zinc-500">+{d.assignedSkills.length - 5}</span>
           )}
+        </div>
+      )}
+      {/* #384 — Last run info */}
+      {execStatus !== 'idle' && execStatus !== 'running' && execStatus !== 'waiting' && (d.lastRunCost || d.lastRunDuration) && (
+        <div className="flex items-center gap-2 mt-1.5 text-[9px] text-zinc-500">
+          {d.lastRunDuration && <span>{d.lastRunDuration}</span>}
+          {d.lastRunCost && <span>{d.lastRunCost}</span>}
         </div>
       )}
     </div>
