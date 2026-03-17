@@ -1147,6 +1147,15 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
     })
   }, [edges, highlightedElements, edgeStepNumbers])
 
+  // ─── #381 — Run agent handler (must be before processedNodes which references it) ───
+  const handleRunAgent = useCallback((agentId: number) => {
+    const agent = data.agents.find((a) => a.id === agentId)
+    if (!agent) return
+    setRunInputModal({ agentId, agentName: (agent as { display_name?: string }).display_name || agent.name })
+    setRunInputText('')
+    setTimeout(() => runInputRef.current?.focus(), 100)
+  }, [data.agents])
+
   // Apply highlighting class to nodes in chain + filter opacity (#369) + execution status (#384) + run button (#381)
   const processedNodes = useMemo(() => {
     const searchLower = filterSearch.toLowerCase()
@@ -1259,15 +1268,6 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
   }, [])
 
   const hasActiveFilter = filterSearch.length > 0 || filterTypes.size < 4
-
-  // ─── #381 — Run agent handler ─────────────────────────────────
-  const handleRunAgent = useCallback((agentId: number) => {
-    const agent = data.agents.find((a) => a.id === agentId)
-    if (!agent) return
-    setRunInputModal({ agentId, agentName: (agent as { display_name?: string }).display_name || agent.name })
-    setRunInputText('')
-    setTimeout(() => runInputRef.current?.focus(), 100)
-  }, [data.agents])
 
   const handleSubmitRun = useCallback(async () => {
     if (!runInputModal || !projectId || !runInputText.trim()) return
