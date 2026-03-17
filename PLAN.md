@@ -81,6 +81,13 @@ Phase M — Agent Runtime & Deployment  (COMPLETE)
   M.2: Canvas execution — run buttons, output drawer, status indicators, execution history.
   M.3: Scheduled & triggered — cron scheduler, webhook triggers, A2A execution, notifications.
   M.4: Agent task assignment — task model, orchestrator routing, canvas task queue, autonomous pickup.
+
+Phase N — Agent Memory & Data Sources  (PLANNED)
+  N.1: Docker infrastructure — PostgreSQL + pgvector + MinIO containers.
+  N.2: Agent long-term memory — embeddings, remember/recall/forget, auto-inject into context.
+  N.3: Document storage — MinIO MCP server for agent-accessible file storage.
+  N.4: Knowledge base — PostgreSQL MCP server for structured data per agent.
+  N.5: Memory integration & UI — canvas memory panel, data source settings, execution trace.
 ```
 
 The existing Component Layer (skills, provider sync, MCP, A2A) remains the foundation. Each phase builds on the previous.
