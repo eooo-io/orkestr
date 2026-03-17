@@ -26,6 +26,8 @@ import {
   Lock,
   Plug2,
   Share2,
+  Database,
+  HardDrive,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -275,8 +277,18 @@ const FEATURES = [
   },
   {
     icon: Brain,
-    title: 'Agent Memory',
-    description: 'Working memory and conversation history that persists across runs. Agents that remember context.',
+    title: 'Agent Memory & RAG',
+    description: 'Long-term memory with vector embeddings. Agents remember facts, recall relevant context via semantic search, and learn from past executions. Powered by pgvector.',
+  },
+  {
+    icon: Database,
+    title: 'Local Data Sources',
+    description: 'Connect agents to your databases, vector stores, and document storage. PostgreSQL, MinIO, mounted volumes — all running on your infrastructure. Agents read, write, and query through MCP.',
+  },
+  {
+    icon: HardDrive,
+    title: 'Agent Artifact Storage',
+    description: 'S3-compatible document storage via MinIO. Agents create reports, store analysis results, and share artifacts across executions. Docker volumes provide sandboxed, per-agent isolation.',
   },
   {
     icon: Eye,
@@ -337,6 +349,14 @@ const FAQ = [
   {
     q: 'Can I run it completely air-gapped?',
     a: 'Yes. Point all agents to local models via Ollama or any OpenAI-compatible inference server on your network. Connect MCP tool servers locally. No external API calls, no data leaving your infrastructure.',
+  },
+  {
+    q: 'How do agents access data?',
+    a: 'Agents connect to data sources through MCP tool servers. Register your PostgreSQL databases, MinIO/S3 storage, or filesystem volumes as data sources, then bind them to specific agents with read-only or read-write access. Each agent gets auto-generated MCP tools scoped to its bound sources. Docker volume mounts provide infrastructure-level sandboxing — agents literally cannot see data they are not bound to.',
+  },
+  {
+    q: 'Do agents have memory?',
+    a: 'Yes. Three layers: working memory within a single execution, episodic memory via execution traces (what happened last time), and long-term memory via vector embeddings in PostgreSQL with pgvector. Agents can store facts, recall relevant context via semantic search, and learn from past executions. Memory is scoped per agent and project.',
   },
   {
     q: 'How do guardrails work?',
@@ -1055,7 +1075,11 @@ export function Landing() {
                     </div>
                     <div className="flex gap-3">
                       <span className="text-primary font-mono text-xs mt-0.5 shrink-0">04</span>
-                      <p><span className="text-foreground font-medium">Run agents</span> — they execute with real tool calls against your real systems, with budget guardrails and full audit trails.</p>
+                      <p><span className="text-foreground font-medium">Bind data sources</span> — PostgreSQL databases, MinIO document storage, mounted volumes. Agents get scoped read/write access through auto-generated MCP tools. Docker volumes provide sandboxed isolation.</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-primary font-mono text-xs mt-0.5 shrink-0">05</span>
+                      <p><span className="text-foreground font-medium">Run agents</span> — they execute with real tool calls against your real systems, with budget guardrails, persistent memory, and full audit trails.</p>
                     </div>
                   </div>
                 </div>
@@ -1069,6 +1093,16 @@ export function Landing() {
                     <Cpu className="h-5 w-5 text-primary mb-2" />
                     <h4 className="text-sm font-semibold text-foreground">Your Models</h4>
                     <p className="text-xs text-muted-foreground mt-1">Cloud APIs or local inference</p>
+                  </div>
+                  <div className="bg-muted/50 border border-border p-4">
+                    <Database className="h-5 w-5 text-primary mb-2" />
+                    <h4 className="text-sm font-semibold text-foreground">Your Data</h4>
+                    <p className="text-xs text-muted-foreground mt-1">PostgreSQL, MinIO, mounted volumes</p>
+                  </div>
+                  <div className="bg-muted/50 border border-border p-4">
+                    <Brain className="h-5 w-5 text-primary mb-2" />
+                    <h4 className="text-sm font-semibold text-foreground">Agent Memory</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Vector RAG with pgvector</p>
                   </div>
                   <div className="bg-muted/50 border border-border p-4">
                     <Plug2 className="h-5 w-5 text-primary mb-2" />
