@@ -119,7 +119,6 @@ import type {
 
 type SettingsTab =
   | 'general'
-  | 'license'
   | 'agents'
   | 'library'
   | 'tags'
@@ -140,7 +139,6 @@ interface TabDef {
 
 const TABS: TabDef[] = [
   { id: 'general', label: 'General', icon: SettingsIcon, section: 'Settings' },
-  { id: 'license', label: 'License', icon: KeyRound, section: 'Settings' },
   { id: 'agents', label: 'Agents', icon: Brain, section: 'Administration' },
   { id: 'library', label: 'Library', icon: BookOpen, section: 'Administration' },
   { id: 'tags', label: 'Tags', icon: Tags, section: 'Administration' },
@@ -2862,7 +2860,7 @@ export function Settings() {
 
       <div className="flex-1 overflow-y-auto p-6 max-w-3xl">
         {activeTab === 'general' && <GeneralPanel />}
-        {activeTab === 'license' && <LicensePanel />}
+        {/* License panel removed — open source */}
         {activeTab === 'agents' && <AgentsPanel />}
         {activeTab === 'library' && <LibraryPanel />}
         {activeTab === 'tags' && <TagsPanel />}
