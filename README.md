@@ -96,25 +96,20 @@ It connects to any LLM provider (Anthropic, OpenAI, Gemini, Grok, OpenRouter, Ol
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     React SPA (Vite + TypeScript)            │
-│  Agent Builder · Workflow Builder · Playground · Canvas       │
-│  Skill Editor · Marketplace · Search · Settings              │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ REST API + SSE
-┌──────────────────────────┴──────────────────────────────────┐
-│                    Laravel 12 Backend (PHP 8.4)               │
-│  Agent Execution Engine · Workflow Runner · MCP Client        │
-│  Guardrails · Memory · Schedules · Audit                     │
-├───────────────────┬──────────────┬──────────────────────────┤
-│  Multi-Model LLM  │  MCP + A2A   │  Orchestration Engine    │
-│  Anthropic·OpenAI │  Tool Calls  │  DAG Execution           │
-│  Gemini·Grok·     │  stdio / SSE │  Checkpoints             │
-│  OpenRouter·Ollama│              │  Delegation              │
-└────────┬──────────┴──────┬───────┴───────────┬──────────────┘
-         │                 │                   │
-    MariaDB 11       .agentis/ files      MCP Servers
+```mermaid
+graph TB
+    SPA["React SPA (Vite + TypeScript)<br/>Agent Builder · Workflow Builder · Playground · Canvas"]
+    API["Laravel 12 Backend (PHP 8.4)<br/>Execution Engine · Workflow Runner · Guardrails · Memory"]
+
+    SPA -->|"REST API + SSE"| API
+
+    API --> LLM["Multi-Model LLM<br/>Anthropic · OpenAI · Gemini<br/>Grok · OpenRouter · Ollama"]
+    API --> Tools["MCP + A2A<br/>Tool Calls · Delegation<br/>stdio / SSE"]
+    API --> Orch["Orchestration Engine<br/>DAG Execution<br/>Checkpoints"]
+
+    LLM --> DB["MariaDB 11"]
+    Tools --> MCP["MCP Servers"]
+    Orch --> Files[".agentis/ files"]
 ```
 
 ---
