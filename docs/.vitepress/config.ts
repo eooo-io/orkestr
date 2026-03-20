@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   title: 'Orkestr by eooo.ai',
-  description: 'Self-hosted agent orchestration platform with multi-model support, guardrails, and provider sync.',
+  description: 'Self-hosted Agent OS — design, execute, and manage autonomous AI agents on your own infrastructure.',
   base: '/agentis-studio/',
 
   ignoreDeadLinks: [
@@ -17,7 +17,15 @@ export default defineConfig({
     logo: '/logo.svg',
 
     nav: [
+      { text: '101', link: '/101/' },
       { text: 'Guide', link: '/guide/getting-started' },
+      {
+        text: 'Learn',
+        items: [
+          { text: 'Deep Dives', link: '/deep-dive/' },
+          { text: 'Cookbook', link: '/cookbook/' },
+        ],
+      },
       { text: 'Reference', link: '/reference/skill-format' },
       {
         text: 'v1.0.0',
@@ -29,6 +37,52 @@ export default defineConfig({
     ],
 
     sidebar: {
+      '/101/': [
+        {
+          text: 'Orkestr 101',
+          link: '/101/',
+          items: [
+            { text: 'What is Orkestr?', link: '/101/what-is-orkestr' },
+            { text: 'The Three Layers', link: '/101/the-three-layers' },
+          ],
+        },
+        {
+          text: 'Foundations',
+          items: [
+            { text: 'What are Skills?', link: '/101/what-are-skills' },
+            { text: 'What are Agents?', link: '/101/what-are-agents' },
+            { text: 'The Agent Loop', link: '/101/the-agent-loop' },
+          ],
+        },
+        {
+          text: 'Tools & Communication',
+          items: [
+            { text: 'What are Tools & MCP?', link: '/101/what-are-tools' },
+            { text: 'What is A2A?', link: '/101/what-is-a2a' },
+            { text: 'What are Workflows?', link: '/101/what-are-workflows' },
+            { text: 'What is the Canvas?', link: '/101/what-is-the-canvas' },
+          ],
+        },
+        {
+          text: 'Runtime & Safety',
+          items: [
+            { text: 'What is Execution?', link: '/101/what-is-execution' },
+            { text: 'What is Agent Memory?', link: '/101/what-is-agent-memory' },
+            { text: 'What are Guardrails?', link: '/101/what-are-guardrails' },
+            { text: 'What are Schedules?', link: '/101/what-are-schedules' },
+          ],
+        },
+        {
+          text: 'Platform & Ecosystem',
+          items: [
+            { text: 'What are Projects?', link: '/101/what-are-projects' },
+            { text: 'What is Provider Sync?', link: '/101/what-is-provider-sync' },
+            { text: 'What is Multi-Model?', link: '/101/what-is-multi-model' },
+            { text: 'What is Air-Gap Mode?', link: '/101/what-is-air-gap' },
+            { text: 'What is the Marketplace?', link: '/101/what-is-the-marketplace' },
+          ],
+        },
+      ],
       '/guide/': [
         {
           text: 'Getting Started',
@@ -73,6 +127,9 @@ export default defineConfig({
             { text: 'Test Runner', link: '/guide/test-runner' },
             { text: 'Playground', link: '/guide/playground' },
             { text: 'Multi-Model Setup', link: '/guide/multi-model' },
+            { text: 'Execution', link: '/guide/execution' },
+            { text: 'Schedules', link: '/guide/schedules' },
+            { text: 'Connections', link: '/guide/connections' },
           ],
         },
         {
@@ -87,6 +144,7 @@ export default defineConfig({
             { text: 'Skills.sh Import', link: '/guide/skills-sh' },
             { text: 'Bundle Export/Import', link: '/guide/bundles' },
             { text: 'Webhooks', link: '/guide/webhooks' },
+            { text: 'Settings', link: '/guide/settings' },
           ],
         },
         {
@@ -94,6 +152,57 @@ export default defineConfig({
           items: [
             { text: 'Troubleshooting', link: '/guide/troubleshooting' },
             { text: 'User Guide', link: '/guide/user-guide' },
+          ],
+        },
+      ],
+      '/deep-dive/': [
+        {
+          text: 'Deep Dives',
+          link: '/deep-dive/',
+          items: [
+            { text: 'Agent Loop Architecture', link: '/deep-dive/agent-loop-architecture' },
+            { text: 'MCP Integration', link: '/deep-dive/mcp-integration' },
+            { text: 'A2A Protocol', link: '/deep-dive/a2a-protocol' },
+            { text: 'Workflow DAG Engine', link: '/deep-dive/workflow-engine' },
+            { text: 'Canvas Architecture', link: '/deep-dive/canvas-architecture' },
+            { text: 'Guardrail System', link: '/deep-dive/guardrail-system' },
+            { text: 'Multi-Model Routing', link: '/deep-dive/multi-model-routing' },
+            { text: 'Provider Sync Engine', link: '/deep-dive/provider-sync-engine' },
+            { text: 'Skill Composition', link: '/deep-dive/skill-composition' },
+            { text: 'Data Architecture', link: '/deep-dive/data-architecture' },
+          ],
+        },
+      ],
+      '/cookbook/': [
+        {
+          text: 'Cookbook',
+          link: '/cookbook/',
+          items: [
+            { text: 'Your First Agent Team', link: '/cookbook/first-agent-team' },
+            { text: 'Skills from Scratch', link: '/cookbook/skills-from-scratch' },
+          ],
+        },
+        {
+          text: 'Agent Patterns',
+          items: [
+            { text: 'Code Review Pipeline', link: '/cookbook/code-review-pipeline' },
+            { text: 'Scheduled Security Scanner', link: '/cookbook/scheduled-security-scanner' },
+            { text: 'Architecture Review', link: '/cookbook/architecture-review' },
+          ],
+        },
+        {
+          text: 'Infrastructure',
+          items: [
+            { text: 'Air-Gapped Local Setup', link: '/cookbook/air-gapped-setup' },
+            { text: 'MCP Tool Integration', link: '/cookbook/mcp-tool-integration' },
+            { text: 'Production Deployment', link: '/cookbook/production-deployment' },
+          ],
+        },
+        {
+          text: 'Enterprise',
+          items: [
+            { text: 'Enterprise Guardrails', link: '/cookbook/enterprise-guardrails' },
+            { text: 'CI/CD with GitHub Actions', link: '/cookbook/cicd-github-actions' },
           ],
         },
       ],
