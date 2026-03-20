@@ -1,17 +1,16 @@
 <div align="center">
 
 ```
- █████╗  ██████╗ ███████╗███╗   ██╗████████╗██╗███████╗
-██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝██║██╔════╝
-███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   ██║███████╗
-██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   ██║╚════██║
-██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ██║███████║
-╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝╚══════╝
-                    S  T  U  D  I  O
+ ██████╗ ██████╗ ██╗  ██╗███████╗███████╗████████╗██████╗
+██╔═══██╗██╔══██╗██║ ██╔╝██╔════╝██╔════╝╚══██╔══╝██╔══██╗
+██║   ██║██████╔╝█████╔╝ █████╗  ███████╗   ██║   ██████╔╝
+██║   ██║██╔══██╗██╔═██╗ ██╔══╝  ╚════██║   ██║   ██╔══██╗
+╚██████╔╝██║  ██║██║  ██╗███████╗███████║   ██║   ██║  ██║
+ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝
 ```
 
-**Open-source AI agent orchestration platform.**
-**Design, orchestrate, and execute AI agent teams on your own infrastructure.**
+**Provider-agnostic, deployment-flexible agent runtime.**
+**Compose, orchestrate, and operate multi-agent systems on your own infrastructure.**
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -28,11 +27,11 @@
 
 ---
 
-## What is Agentis Studio?
+## What is Orkestr?
 
-Agentis Studio is a self-hosted platform for designing AI agents, wiring them into multi-agent workflows, and executing them with real tool calls — all from a visual UI. No Python framework required.
+Orkestr is a self-hosted agent runtime for designing AI agents, wiring them into multi-agent workflows, and executing them with real tool calls — all from a visual UI. No Python framework required.
 
-It connects to any LLM provider (Anthropic, OpenAI, Gemini, Grok, OpenRouter, Ollama) and any tool server via MCP and A2A protocols. Your API keys, your data, your infrastructure.
+It connects to any LLM provider (Anthropic, OpenAI, Gemini, Grok, OpenRouter, Ollama) and any tool server via MCP and A2A protocols. Your models, your data, your infrastructure.
 
 ### Core ideas
 
@@ -40,7 +39,8 @@ It connects to any LLM provider (Anthropic, OpenAI, Gemini, Grok, OpenRouter, Ol
 - **Provider-agnostic** — Mix cloud and local models in the same project. Go fully air-gapped with Ollama
 - **Visual orchestration** — DAG workflow builder with conditional branching, parallel execution, and human-in-the-loop checkpoints
 - **Real execution** — Not just config. Agents run live with real MCP tool calls, cost tracking, and safety guardrails
-- **Skill system** — Reusable prompt+config units in a portable `.agentis/` format that syncs to Claude, Cursor, Copilot, Windsurf, Cline, and OpenAI
+- **Skill system** — Reusable prompt+config modules composed into agent instructions. Recursive includes, template variables, version history
+- **Sovereign by default** — Self-hosted, air-gap capable, no SaaS dependency. You control the security perimeter
 
 ---
 
@@ -55,13 +55,13 @@ It connects to any LLM provider (Anthropic, OpenAI, Gemini, Grok, OpenRouter, Ol
 ### Orchestration
 - **Workflow Builder** — Drag-and-drop DAG editor with React Flow
 - **Step Types** — Start, end, agent, checkpoint, condition, parallel split/join
-- **Delegation Chains** — Agent-to-agent handoffs with shared context
+- **Delegation Chains** — Agent-to-agent handoffs with shared context via A2A protocol
 - **Export** — LangGraph YAML, CrewAI config, generic JSON
 
 ### Multi-Model Support
 - **7 LLM Providers** — Anthropic, OpenAI, Gemini, Grok (xAI), OpenRouter (200+ models), custom OpenAI-compatible, Ollama
 - **Per-agent model assignment** — Route complex tasks to Claude, routine work to local Llama
-- **Fallback chains** — Automatic failover if a provider is down
+- **Fallback chains** — Automatic failover with health monitoring and cost-optimized routing
 - **Air-gap mode** — Zero external network calls, all local inference
 
 ### Skill Management
@@ -72,24 +72,12 @@ It connects to any LLM provider (Anthropic, OpenAI, Gemini, Grok, OpenRouter, Ol
 - **Prompt Linter** — 8 quality rules for prompt analysis
 - **AI Generation** — Describe what you want, get a complete skill
 
-### Provider Sync
-Sync skills to the native config format of 6 AI coding assistants:
-
-| Provider | Output | Format |
-|---|---|---|
-| Claude | `.claude/CLAUDE.md` | Skills under H2 headings |
-| Cursor | `.cursor/rules/{slug}.mdc` | One MDC file per skill |
-| Copilot | `.github/copilot-instructions.md` | Concatenated |
-| Windsurf | `.windsurf/rules/{slug}.md` | One file per skill |
-| Cline | `.clinerules` | Single flat file |
-| OpenAI | `.openai/instructions.md` | Concatenated |
-
 ### Safety & Guardrails
-- **Budget limits** — Per-run, per-agent, and daily token/cost budgets
+- **Budget limits** — Per-run, per-agent, and daily token/cost budgets with enforcement
 - **Tool allowlists** — Control which MCP tools each agent can call
 - **Output guards** — PII detection, credential redaction, content filtering
-- **Approval gates** — Human-in-the-loop for sensitive tool calls
-- **Guardrail profiles** — Strict, moderate, permissive presets
+- **Approval gates** — Human-in-the-loop for sensitive tool calls (supervised / semi-autonomous / autonomous)
+- **Guardrail profiles** — Strict, moderate, permissive presets cascading from org → project → agent
 
 ### Organization & Collaboration
 - **Multi-tenant** — Organizations with role-based access (owner, admin, editor, viewer)
@@ -100,7 +88,7 @@ Sync skills to the native config format of 6 AI coding assistants:
 
 ### Observability
 - **Execution traces** — Full log of every step, tool call, and LLM response
-- **Execution replay** — Step-through with timeline scrubber
+- **Execution replay** — Step-through with timeline scrubber and auto-advance
 - **Cost analytics** — Per-agent, per-run token usage and cost tracking
 - **Performance dashboard** — Success rates, latency, model comparison
 
@@ -108,25 +96,20 @@ Sync skills to the native config format of 6 AI coding assistants:
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     React SPA (Vite + TypeScript)            │
-│  Agent Builder · Workflow Builder · Playground · Canvas       │
-│  Skill Editor · Marketplace · Search · Settings              │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ REST API + SSE
-┌──────────────────────────┴──────────────────────────────────┐
-│                    Laravel 12 Backend (PHP 8.4)               │
-│  Agent Execution Engine · Workflow Runner · MCP Client        │
-│  Provider Sync (6 drivers) · Guardrails · Memory · Audit     │
-├───────────────────┬──────────────┬──────────────────────────┤
-│  Multi-Model LLM  │  MCP + A2A   │  Orchestration Engine    │
-│  Anthropic·OpenAI │  Tool Calls  │  DAG Execution           │
-│  Gemini·Grok·     │  stdio / SSE │  Checkpoints             │
-│  OpenRouter·Ollama│              │  Delegation              │
-└────────┬──────────┴──────┬───────┴───────────┬──────────────┘
-         │                 │                   │
-    MariaDB 11       .agentis/ files      MCP Servers
+```mermaid
+graph TB
+    SPA["React SPA (Vite + TypeScript)<br/>Agent Builder · Workflow Builder · Playground · Canvas"]
+    API["Laravel 12 Backend (PHP 8.4)<br/>Execution Engine · Workflow Runner · Guardrails · Memory"]
+
+    SPA -->|"REST API + SSE"| API
+
+    API --> LLM["Multi-Model LLM<br/>Anthropic · OpenAI · Gemini<br/>Grok · OpenRouter · Ollama"]
+    API --> Tools["MCP + A2A<br/>Tool Calls · Delegation<br/>stdio / SSE"]
+    API --> Orch["Orchestration Engine<br/>DAG Execution<br/>Checkpoints"]
+
+    LLM --> DB["MariaDB 11"]
+    Tools --> MCP["MCP Servers"]
+    Orch --> Files[".agentis/ files"]
 ```
 
 ---
@@ -171,32 +154,9 @@ composer dev   # starts server, queue, pail, vite
 | React SPA | http://localhost:5173 |
 | Filament Admin | http://localhost:8000/admin |
 | API | http://localhost:8000/api |
+| Documentation | http://localhost:5174 |
 
 Default login: `admin@admin.com` / `password`
-
----
-
-## Skill File Format
-
-Skills live in `.agentis/skills/` as YAML frontmatter + Markdown:
-
-```markdown
----
-id: summarize-doc
-name: Summarize Document
-description: Summarizes any document to key bullet points
-tags: [summarization, documents]
-model: claude-sonnet-4-6
-max_tokens: 1000
-includes: [base-instructions]
-template_variables: [language, tone]
----
-
-You are a precise document summarizer.
-Write in {{language}} with a {{tone}} tone.
-```
-
-`.agentis/` is the single source of truth. All provider-specific files are derived outputs.
 
 ---
 
@@ -238,6 +198,10 @@ composer test    # clears config + runs tests
 
 # Type checking
 cd ui && npx tsc --noEmit
+
+# Documentation
+cd docs && npm run dev    # VitePress dev server
+cd docs && npm run build  # Build static site
 ```
 
 ---
@@ -245,15 +209,16 @@ cd ui && npx tsc --noEmit
 ## Project Structure
 
 ```
-agentis-studio/
+orkestr/
 ├── app/
 │   ├── Http/Controllers/   # API controllers (consumed by React SPA)
 │   ├── Models/             # Eloquent models
 │   ├── Services/           # Business logic
 │   │   ├── Execution/      # Agent & workflow execution engine
 │   │   ├── LLM/            # Multi-model provider layer (7 providers)
-│   │   ├── Providers/      # 6 provider sync drivers
-│   │   └── Mcp/            # MCP protocol client
+│   │   ├── Guards/          # Budget, tool, approval, output guards
+│   │   ├── Mcp/            # MCP protocol client
+│   │   └── A2a/            # Agent-to-agent delegation
 │   └── Jobs/
 ├── database/migrations/    # 59 migrations
 ├── routes/api.php          # REST API
@@ -267,6 +232,18 @@ agentis-studio/
 ├── docker-compose.yml
 └── Makefile
 ```
+
+---
+
+## Documentation
+
+Full documentation available at the [Orkestr docs site](https://eooo-io.github.io/agentis-studio/):
+
+- **[101](https://eooo-io.github.io/agentis-studio/101/)** — What Orkestr is and how it works
+- **[Guide](https://eooo-io.github.io/agentis-studio/guide/getting-started)** — Setup, configuration, and usage
+- **[Deep Dives](https://eooo-io.github.io/agentis-studio/deep-dive/)** — Architecture internals and design philosophy
+- **[Cookbook](https://eooo-io.github.io/agentis-studio/cookbook/)** — Practical recipes and patterns
+- **[Reference](https://eooo-io.github.io/agentis-studio/reference/skill-format)** — API, formats, and settings
 
 ---
 
