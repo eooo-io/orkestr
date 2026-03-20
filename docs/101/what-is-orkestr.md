@@ -34,7 +34,7 @@ Orkestr does the same thing, but for AI agents:
 | Security & Permissions | Guardrails, Budgets, Approval Gates |
 | Process Monitor | Execution Dashboard, Trace Viewer |
 | Memory Management | Agent Memory (conversation + working memory) |
-| Device Drivers | Provider Drivers (Claude, Cursor, Copilot, etc.) |
+| Device Drivers | LLM Provider Drivers (Anthropic, OpenAI, Gemini, Ollama, etc.) |
 | Control Panel | Canvas + Settings |
 
 ## What Does It Actually Do?
@@ -76,7 +76,6 @@ Orkestr has a built-in runtime. You don't need an external framework — agents 
 - **Budgets** — Per-agent, per-run, and daily token/cost limits
 - **Schedules** — Run agents on cron schedules or trigger them via webhooks
 - **Observability** — Full execution traces, cost analytics, and replay
-- **Provider Sync** — Deliver your skills to any AI coding tool (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI)
 - **Air-Gap Mode** — Run 100% offline with local models, zero external network calls
 
 ## What Does "Self-Hosted" Mean?
@@ -131,7 +130,6 @@ Agent systems handle sensitive data — they read your code, your documents, you
 
 - **Not an AI model.** Orkestr doesn't contain a language model. It *connects to* models — Claude, GPT, Gemini, Grok, Ollama, vLLM, or 200+ via OpenRouter.
 - **Not a chatbot.** Agents are autonomous entities with goals and tools, not chat windows.
-- **Not just config sync.** Provider sync (delivering skills to Claude/Cursor/Copilot) is one feature. The core platform is an agent runtime and orchestration engine.
 - **Not a cloud service.** You run it. You own it. You control it.
 - **Not another agent framework.** Frameworks give you building blocks and wish you luck. Orkestr is a complete runtime — execution, orchestration, observability, governance — that operates agents in production.
 - **Not demo-ware.** The workflow engine runs DAGs with parallel execution, conditional routing, human checkpoints, and budget constraints. Not "invoke agent A, then agent B, hope for the best."
