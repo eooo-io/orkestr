@@ -160,6 +160,7 @@ export default defineConfig({
           text: 'Deep Dives',
           link: '/deep-dive/',
           items: [
+            { text: 'Design Philosophy', link: '/deep-dive/design-philosophy' },
             { text: 'Agent Loop Architecture', link: '/deep-dive/agent-loop-architecture' },
             { text: 'MCP Integration', link: '/deep-dive/mcp-integration' },
             { text: 'A2A Protocol', link: '/deep-dive/a2a-protocol' },

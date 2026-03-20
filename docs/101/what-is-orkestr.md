@@ -2,7 +2,21 @@
 
 ## The One-Sentence Answer
 
-Orkestr is a **self-hosted Agent Operating System** — a platform you run on your own infrastructure that lets you design, execute, and manage autonomous AI agents.
+Orkestr is a **provider-agnostic, deployment-flexible agent runtime** for composing, orchestrating, and operating multi-agent systems across cloud, hybrid, and fully air-gapped environments.
+
+## The Positioning
+
+Most agent platforms assume: their cloud, their models, their data handling, their uptime, their prices.
+
+Orkestr assumes the opposite. You choose the models. You choose the infrastructure. You control the data. You own the deployment. The runtime doesn't dictate the intelligence topology — you do.
+
+This makes Orkestr an **operating substrate for sovereign agent systems**:
+
+- **Sovereign models** — Any model from any provider, including your own hardware
+- **Sovereign infrastructure** — Self-hosted, your servers, your security perimeter
+- **Sovereign topology** — Agent teams and workflows shaped by your organization, not a platform's opinions
+- **Sovereign data** — Nothing leaves your infrastructure unless you configure it to
+- **Sovereign deployment** — Cloud, hybrid, or air-gapped without changing your agent definitions
 
 ## The Analogy: An Operating System
 
@@ -119,6 +133,8 @@ Agent systems handle sensitive data — they read your code, your documents, you
 - **Not a chatbot.** Agents are autonomous entities with goals and tools, not chat windows.
 - **Not just config sync.** Provider sync (delivering skills to Claude/Cursor/Copilot) is one feature. The core platform is an agent runtime and orchestration engine.
 - **Not a cloud service.** You run it. You own it. You control it.
+- **Not another agent framework.** Frameworks give you building blocks and wish you luck. Orkestr is a complete runtime — execution, orchestration, observability, governance — that operates agents in production.
+- **Not demo-ware.** The workflow engine runs DAGs with parallel execution, conditional routing, human checkpoints, and budget constraints. Not "invoke agent A, then agent B, hope for the best."
 
 ---
 

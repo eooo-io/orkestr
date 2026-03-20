@@ -10,6 +10,7 @@ Read [Orkestr 101](/101/) first if you're not familiar with the core concepts. T
 
 | Page | Topic | What You'll Learn |
 |---|---|---|
+| [Design Philosophy](./design-philosophy) | The architectural thesis | The irreducible kernel, five design principles, and sovereignty argument |
 | [Agent Loop Architecture](./agent-loop-architecture) | The execution engine | How the Goal → Perceive → Reason → Act → Observe loop is implemented |
 | [MCP Integration](./mcp-integration) | Tool connectivity | Transports, lifecycle management, tool discovery, and security |
 | [A2A Protocol](./a2a-protocol) | Agent-to-agent communication | Task delegation, agent cards, budget cascading, delegation chains |
