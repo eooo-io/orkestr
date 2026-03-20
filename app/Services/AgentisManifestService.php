@@ -14,6 +14,8 @@ class AgentisManifestService
     /**
      * Scan a project directory and return manifest + parsed skills.
      *
+     * Discovers both flat-file skills (slug.md) and folder-based skills (slug/skill.md).
+     *
      * @return array{manifest: array|null, skills: array}
      */
     public function scanProject(string $absolutePath): array
@@ -21,6 +23,7 @@ class AgentisManifestService
         $agentisDir = rtrim($absolutePath, '/') . '/.agentis';
         $manifest = null;
         $skills = [];
+        $seen = [];
 
         $manifestPath = $agentisDir . '/manifest.json';
         if (File::exists($manifestPath)) {
@@ -28,14 +31,37 @@ class AgentisManifestService
         }
 
         $skillsDir = $agentisDir . '/skills';
-        if (File::isDirectory($skillsDir)) {
-            $files = File::glob($skillsDir . '/*.md');
+        if (! File::isDirectory($skillsDir)) {
+            return ['manifest' => $manifest, 'skills' => $skills];
+        }
 
-            foreach ($files as $file) {
-                $parsed = $this->parser->parseFile($file);
-                $parsed['filename'] = basename($file, '.md');
-                $skills[] = $parsed;
+        // 1. Discover folder-based skills (slug/skill.md) — takes precedence
+        foreach (File::directories($skillsDir) as $dir) {
+            $skillMd = $dir . '/skill.md';
+            if (! File::exists($skillMd)) {
+                continue;
             }
+
+            $slug = basename($dir);
+            $parsed = $this->parser->parseFile($skillMd);
+            $parsed['filename'] = $slug;
+            $parsed['is_folder'] = true;
+            $skills[] = $parsed;
+            $seen[$slug] = true;
+        }
+
+        // 2. Discover flat-file skills (slug.md) — skip if folder version exists
+        foreach (File::glob($skillsDir . '/*.md') as $file) {
+            $slug = basename($file, '.md');
+            if (isset($seen[$slug])) {
+                continue;
+            }
+
+            $parsed = $this->parser->parseFile($file);
+            $parsed['filename'] = $slug;
+            $parsed['is_folder'] = false;
+            $parsed['assets'] = [];
+            $skills[] = $parsed;
         }
 
         return [
@@ -92,33 +118,95 @@ class AgentisManifestService
 
     /**
      * Write a skill file to the project's .agentis/skills/ directory.
+     *
+     * If the skill already has a folder structure (slug/skill.md), writes there.
+     * Otherwise writes as a flat file (slug.md).
+     * Use writeSkillFolder() to explicitly create/upgrade to folder format.
      */
     public function writeSkillFile(string $projectPath, array $frontmatter, string $body): void
     {
         $slug = $frontmatter['id'] ?? \Illuminate\Support\Str::slug($frontmatter['name'] ?? 'untitled');
-        $dir = rtrim($projectPath, '/') . '/.agentis/skills';
+        $skillsDir = rtrim($projectPath, '/') . '/.agentis/skills';
 
-        File::ensureDirectoryExists($dir);
-        File::put($dir . '/' . $slug . '.md', $this->parser->renderFile($frontmatter, $body));
+        File::ensureDirectoryExists($skillsDir);
+
+        // If a folder version already exists, write into the folder
+        if ($this->parser->isFolderSkill($skillsDir, $slug)) {
+            File::put($skillsDir . '/' . $slug . '/skill.md', $this->parser->renderFile($frontmatter, $body));
+        } else {
+            File::put($skillsDir . '/' . $slug . '.md', $this->parser->renderFile($frontmatter, $body));
+        }
     }
 
     /**
-     * Delete a skill file from the project's .agentis/skills/ directory.
+     * Ensure a skill exists as a folder structure (slug/skill.md).
+     * Migrates from flat file if needed.
+     */
+    public function ensureSkillFolder(string $projectPath, string $slug): string
+    {
+        $skillsDir = rtrim($projectPath, '/') . '/.agentis/skills';
+        $folderPath = $skillsDir . '/' . $slug;
+        $flatPath = $skillsDir . '/' . $slug . '.md';
+
+        File::ensureDirectoryExists($folderPath);
+
+        // Migrate flat file to folder if it exists
+        if (File::exists($flatPath) && ! File::exists($folderPath . '/skill.md')) {
+            File::move($flatPath, $folderPath . '/skill.md');
+        }
+
+        // Ensure asset subdirectories exist
+        foreach (SkillFileParser::ASSET_DIRS as $dir) {
+            File::ensureDirectoryExists($folderPath . '/' . $dir);
+        }
+
+        return $folderPath;
+    }
+
+    /**
+     * Delete a skill file or folder from the project's .agentis/skills/ directory.
      */
     public function deleteSkillFile(string $projectPath, string $slug): void
     {
-        $file = rtrim($projectPath, '/') . '/.agentis/skills/' . $slug . '.md';
+        $skillsDir = rtrim($projectPath, '/') . '/.agentis/skills';
 
-        if (File::exists($file)) {
-            File::delete($file);
+        // Delete folder version
+        $folderPath = $skillsDir . '/' . $slug;
+        if (File::isDirectory($folderPath)) {
+            File::deleteDirectory($folderPath);
+        }
+
+        // Delete flat file version
+        $flatPath = $skillsDir . '/' . $slug . '.md';
+        if (File::exists($flatPath)) {
+            File::delete($flatPath);
         }
     }
 
     /**
      * Check if a skill file exists in the project's .agentis/skills/ directory.
+     * Checks both flat-file and folder-based formats.
      */
     public function skillExists(string $projectPath, string $slug): bool
     {
-        return File::exists(rtrim($projectPath, '/') . '/.agentis/skills/' . $slug . '.md');
+        $skillsDir = rtrim($projectPath, '/') . '/.agentis/skills';
+
+        return File::exists($skillsDir . '/' . $slug . '.md')
+            || $this->parser->isFolderSkill($skillsDir, $slug);
+    }
+
+    /**
+     * Get the skill folder path for a given slug.
+     * Returns null if the skill is not in folder format.
+     */
+    public function getSkillFolderPath(string $projectPath, string $slug): ?string
+    {
+        $skillsDir = rtrim($projectPath, '/') . '/.agentis/skills';
+
+        if ($this->parser->isFolderSkill($skillsDir, $slug)) {
+            return $skillsDir . '/' . $slug;
+        }
+
+        return null;
     }
 }

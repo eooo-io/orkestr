@@ -20,6 +20,7 @@ import {
   fetchPullingModels,
   fetchModelRecommendations,
 } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import { Button } from '@/components/ui/button'
 import type {
   LocalModel,
@@ -47,6 +48,7 @@ const TASK_TYPES = [
 ]
 
 export function LocalModels() {
+  const confirm = useConfirm()
   const [models, setModels] = useState<LocalModel[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
@@ -192,7 +194,7 @@ export function LocalModels() {
   )
 
   const handleDelete = async (modelName: string) => {
-    if (!confirm(`Delete model "${modelName}"? This cannot be undone.`)) return
+    if (!(await confirm({ message: `Delete model "${modelName}"? This cannot be undone.`, title: 'Confirm Delete' }))) return
 
     setDeleting(modelName)
     try {

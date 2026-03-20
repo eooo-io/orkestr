@@ -150,7 +150,9 @@ class LibraryController extends Controller
             'updated_at' => $skill->updated_at->toIso8601String(),
         ];
 
-        $manifestService->writeSkillFile($project->resolved_path, $frontmatter, $skill->body ?? '');
+        if ($project->resolved_path) {
+            $manifestService->writeSkillFile($project->resolved_path, $frontmatter, $skill->body ?? '');
+        }
 
         return new SkillResource($skill->load('tags'));
     }

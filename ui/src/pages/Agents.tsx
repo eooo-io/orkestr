@@ -17,6 +17,7 @@ import {
   MoreVertical,
 } from 'lucide-react'
 import { fetchAgents, deleteAgent, duplicateAgent } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useAppStore } from '@/store/useAppStore'
 import type { Agent } from '@/types'
 
@@ -35,6 +36,7 @@ const ICONS: Record<string, React.ElementType> = {
 export function Agents() {
   const navigate = useNavigate()
   const { showToast } = useAppStore()
+  const confirm = useConfirm()
   const [agents, setAgents] = useState<Agent[]>([])
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState<number | null>(null)
@@ -60,7 +62,7 @@ export function Agents() {
   }
 
   const handleDelete = async (agent: Agent) => {
-    if (!confirm(`Delete "${agent.name}"? This cannot be undone.`)) return
+    if (!(await confirm({ message: `Delete "${agent.name}"? This cannot be undone.`, title: 'Confirm Delete' }))) return
     try {
       await deleteAgent(agent.id)
       showToast('Agent deleted', 'success')

@@ -6,6 +6,7 @@ use App\Models\Agent;
 use App\Models\Project;
 use App\Models\Skill;
 use App\Models\Workflow;
+use Illuminate\Support\Facades\File;
 use Symfony\Component\Yaml\Yaml;
 use ZipArchive;
 
@@ -13,6 +14,7 @@ class BundleExportService
 {
     public function __construct(
         protected SkillFileParser $parser,
+        protected AgentisManifestService $manifestService,
     ) {}
 
     /**
@@ -69,24 +71,43 @@ class BundleExportService
     {
         $frontmatter = $this->buildSkillFrontmatter($skill);
 
+        // Check if this skill has a folder with assets
+        $project = $skill->project;
+        $folderPath = $project
+            ? $this->manifestService->getSkillFolderPath($project->resolved_path, $skill->slug)
+            : null;
+        $hasAssets = $folderPath !== null;
+        $prefix = $hasAssets ? "skills/{$skill->slug}" : 'skills';
+
         match ($format) {
             'json' => $zip->addFromString(
-                "skills/{$skill->slug}.json",
+                $hasAssets ? "{$prefix}/skill.json" : "{$prefix}/{$skill->slug}.json",
                 json_encode(array_merge($frontmatter, ['body' => $skill->body ?? '']), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
             ),
             'yaml' => $zip->addFromString(
-                "skills/{$skill->slug}.yaml",
+                $hasAssets ? "{$prefix}/skill.yaml" : "{$prefix}/{$skill->slug}.yaml",
                 Yaml::dump(array_merge($frontmatter, ['body' => $skill->body ?? '']), 4, 2),
             ),
             'toon' => $zip->addFromString(
-                "skills/{$skill->slug}.toon",
+                $hasAssets ? "{$prefix}/skill.toon" : "{$prefix}/{$skill->slug}.toon",
                 $this->renderToon($frontmatter, $skill->body ?? ''),
             ),
             default => $zip->addFromString(
-                "skills/{$skill->slug}.md",
+                $hasAssets ? "{$prefix}/skill.md" : "{$prefix}/{$skill->slug}.md",
                 $this->parser->renderFile($frontmatter, $skill->body ?? ''),
             ),
         };
+
+        // Include folder assets in the ZIP
+        if ($folderPath) {
+            $assets = $this->parser->inventoryAssets($folderPath);
+            foreach ($assets as $asset) {
+                $fullPath = $folderPath . '/' . $asset['path'];
+                if (File::exists($fullPath)) {
+                    $zip->addFile($fullPath, "skills/{$skill->slug}/{$asset['path']}");
+                }
+            }
+        }
     }
 
     /**

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\File;
 class WindsurfDriver implements ProviderDriverInterface
 {
     use GeneratesMcpConfig;
+    use ResolvesSkillAssets;
 
     public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
@@ -26,7 +27,8 @@ class WindsurfDriver implements ProviderDriverInterface
                 $content .= "> Trigger: {$patterns}\n\n";
             }
 
-            $content .= "{$body}\n";
+            $assetContext = $this->buildAssetContext($skill);
+            $content .= $assetContext ? "{$body}\n\n{$assetContext}\n" : "{$body}\n";
             $files[$dir . '/' . $skill->slug . '.md'] = $content;
         }
 

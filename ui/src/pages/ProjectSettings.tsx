@@ -15,6 +15,7 @@ import {
   updateProject,
   deleteProject,
 } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useAppStore } from '@/store/useAppStore'
 import { RepositorySettings } from '@/components/repository/RepositorySettings'
 import { WebhookSettings } from '@/components/webhooks/WebhookSettings'
@@ -26,6 +27,7 @@ export function ProjectSettings() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { showToast, loadProjects } = useAppStore()
+  const confirm = useConfirm()
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -74,7 +76,7 @@ export function ProjectSettings() {
   }
 
   const handleDelete = async () => {
-    if (!confirm('Delete this project and all its skills? This cannot be undone.'))
+    if (!(await confirm({ message: 'Delete this project and all its skills? This cannot be undone.', title: 'Confirm Delete' })))
       return
 
     try {

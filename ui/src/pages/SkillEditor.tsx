@@ -20,7 +20,11 @@ import { SecurityPanel } from '@/components/skills/SecurityPanel'
 import { ReviewPanel } from '@/components/skills/ReviewPanel'
 import { RegressionTestPanel } from '@/components/skills/RegressionTestPanel'
 import { InheritancePanel } from '@/components/skills/InheritancePanel'
+import { AssetsPanel } from '@/components/skills/AssetsPanel'
+import { GotchaPanel } from '@/components/skills/GotchaPanel'
+import { EvalPanel } from '@/components/skills/EvalPanel'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
+import { useConfirm } from '@/hooks/useConfirm'
 import type { Skill, GeneratedSkill } from '@/types'
 
 export function SkillEditor() {
@@ -45,9 +49,10 @@ export function SkillEditor() {
   const [projectSkills, setProjectSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'test' | 'versions' | 'lint' | 'security' | 'review' | 'regression' | 'inherit'>('test')
+  const [activeTab, setActiveTab] = useState<'test' | 'versions' | 'lint' | 'gotchas' | 'evals' | 'assets' | 'security' | 'review' | 'regression' | 'inherit'>('test')
   const [showGenerate, setShowGenerate] = useState(false)
   const { isDirty, setDirty, showToast, loadProjects } = useAppStore()
+  const confirm = useConfirm()
   const initialBody = useRef<string>('')
 
   useEffect(() => {
@@ -167,7 +172,7 @@ export function SkillEditor() {
   }
 
   const handleDelete = async () => {
-    if (!id || !confirm('Delete this skill?')) return
+    if (!id || !(await confirm({ message: 'Delete this skill?', title: 'Confirm Delete' }))) return
     try {
       await deleteSkill(parseInt(id))
       showToast('Skill deleted')
@@ -240,19 +245,24 @@ export function SkillEditor() {
         </div>
 
         {/* Right: Tabs */}
-        <div className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l border-border flex flex-col bg-muted/20 min-h-[300px] lg:min-h-0">
-          <div className="flex border-b border-border overflow-x-auto">
-            {(['test', 'versions', 'lint', 'security', 'review', 'regression', 'inherit'] as const).map((tab) => (
+        <div className="w-full lg:w-[480px] border-t lg:border-t-0 lg:border-l border-border flex flex-col bg-muted/20 min-h-[300px] lg:min-h-0">
+          <div className="flex flex-wrap border-b border-border">
+            {(['test', 'versions', 'lint', 'gotchas', 'evals', 'assets', 'security', 'review', 'regression', 'inherit'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`shrink-0 px-3 py-2 text-xs font-medium transition-all duration-150 capitalize ${
+                className={`shrink-0 px-2.5 py-2 text-[11px] font-medium transition-all duration-150 capitalize ${
                   activeTab === tab
                     ? 'border-b-2 border-primary text-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {tab === 'regression' ? 'Tests' : tab}
+                {tab === 'assets' && skill.asset_count ? (
+                  <span className="ml-1 text-[10px] bg-primary/20 text-primary rounded-full px-1.5">
+                    {skill.asset_count}
+                  </span>
+                ) : null}
               </button>
             ))}
           </div>
@@ -272,6 +282,12 @@ export function SkillEditor() {
                 />
               ) : activeTab === 'lint' ? (
                 <LintPanel skillId={skill.id} />
+              ) : activeTab === 'gotchas' ? (
+                <GotchaPanel skillId={skill.id} />
+              ) : activeTab === 'evals' ? (
+                <EvalPanel skillId={skill.id} />
+              ) : activeTab === 'assets' ? (
+                <AssetsPanel skillId={skill.id} />
               ) : activeTab === 'security' ? (
                 <SecurityPanel skillId={skill.id} />
               ) : activeTab === 'review' ? (

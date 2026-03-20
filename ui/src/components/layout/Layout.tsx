@@ -2,9 +2,12 @@ import { useState } from 'react'
 import { Menu } from 'lucide-react'
 import { Sidebar } from './Sidebar'
 import { Toast } from './Toast'
+import { ConfirmModal } from './ConfirmModal'
+import { useConfirmStore } from '@/hooks/useConfirm'
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const confirmState = useConfirmStore()
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -43,6 +46,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <Toast />
+      <ConfirmModal
+        open={confirmState.open}
+        title={confirmState.title}
+        message={confirmState.message}
+        confirmLabel={confirmState.confirmLabel}
+        variant={confirmState.variant}
+        onConfirm={confirmState.handleConfirm}
+        onCancel={confirmState.handleCancel}
+      />
     </div>
   )
 }

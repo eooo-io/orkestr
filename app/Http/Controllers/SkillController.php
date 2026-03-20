@@ -32,11 +32,35 @@ class SkillController extends Controller
         return SkillResource::collection($skills);
     }
 
+    /**
+     * Lightweight skill index for agent runtime — name + summary only (~100 tokens each).
+     */
+    public function skillIndex(Project $project): JsonResponse
+    {
+        $skills = $project->skills()
+            ->select('id', 'slug', 'name', 'description', 'summary', 'model')
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($s) => [
+                'slug' => $s->slug,
+                'name' => $s->name,
+                'summary' => $s->summary ?? $s->description ?? '',
+                'model' => $s->model,
+            ]);
+
+        return response()->json([
+            'data' => $skills,
+            'count' => $skills->count(),
+            'token_estimate' => (int) ceil(mb_strlen($skills->toJson()) / 4),
+        ]);
+    }
+
     public function store(Request $request, Project $project): SkillResource
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
+            'summary' => 'nullable|string|max:500',
             'model' => 'nullable|string|max:100',
             'max_tokens' => 'nullable|integer|min:1',
             'tools' => 'nullable|array',
@@ -54,6 +78,8 @@ class SkillController extends Controller
             'template_variables.*.name' => 'required|string|max:100',
             'template_variables.*.description' => 'nullable|string|max:500',
             'template_variables.*.default' => 'nullable|string|max:10000',
+            'category_id' => 'nullable|integer|exists:skill_categories,id',
+            'skill_type' => 'nullable|string|in:capability_uplift,encoded_preference,hybrid',
         ]);
 
         $slug = Str::slug($validated['name']);
@@ -68,6 +94,7 @@ class SkillController extends Controller
             'slug' => $slug,
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
+            'summary' => $validated['summary'] ?? null,
             'model' => $validated['model'] ?? null,
             'max_tokens' => $validated['max_tokens'] ?? null,
             'tools' => $validated['tools'] ?? [],
@@ -75,6 +102,8 @@ class SkillController extends Controller
             'body' => $validated['body'] ?? '',
             'conditions' => $validated['conditions'] ?? null,
             'template_variables' => $validated['template_variables'] ?? null,
+            'category_id' => $validated['category_id'] ?? null,
+            'skill_type' => $validated['skill_type'] ?? null,
         ]);
 
         $this->syncTags($skill, $validated['tags'] ?? []);
@@ -95,6 +124,7 @@ class SkillController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string|max:1000',
+            'summary' => 'nullable|string|max:500',
             'model' => 'nullable|string|max:100',
             'max_tokens' => 'nullable|integer|min:1',
             'tools' => 'nullable|array',
@@ -112,6 +142,8 @@ class SkillController extends Controller
             'template_variables.*.name' => 'required|string|max:100',
             'template_variables.*.description' => 'nullable|string|max:500',
             'template_variables.*.default' => 'nullable|string|max:10000',
+            'category_id' => 'nullable|integer|exists:skill_categories,id',
+            'skill_type' => 'nullable|string|in:capability_uplift,encoded_preference,hybrid',
         ]);
 
         $skill->update(collect($validated)->except('tags')->toArray());
@@ -138,7 +170,9 @@ class SkillController extends Controller
     {
         $project = $skill->project;
         $skillData = ['id' => $skill->id, 'slug' => $skill->slug, 'name' => $skill->name];
-        $this->manifestService->deleteSkillFile($project->resolved_path, $skill->slug);
+        if ($project->resolved_path) {
+            $this->manifestService->deleteSkillFile($project->resolved_path, $skill->slug);
+        }
         $skill->delete();
 
         $this->webhookDispatcher->dispatch('skill.deleted', $project, $skillData);
@@ -164,12 +198,15 @@ class SkillController extends Controller
             'slug' => $slug,
             'name' => $newName,
             'description' => $skill->description,
+            'summary' => $skill->summary,
             'model' => $skill->model,
             'max_tokens' => $skill->max_tokens,
             'tools' => $skill->tools,
             'includes' => $skill->includes,
             'body' => $skill->body,
             'template_variables' => $skill->template_variables,
+            'category_id' => $skill->category_id,
+            'skill_type' => $skill->skill_type,
         ]);
 
         $newSkill->tags()->sync($skill->tags->pluck('id'));
@@ -223,10 +260,15 @@ class SkillController extends Controller
 
     protected function writeFile(Project $project, Skill $skill): void
     {
+        if (! $project->resolved_path) {
+            return;
+        }
+
         $frontmatter = [
             'id' => $skill->slug,
             'name' => $skill->name,
             'description' => $skill->description,
+            'summary' => $skill->summary,
             'tags' => $skill->tags->pluck('name')->values()->all(),
             'model' => $skill->model,
             'max_tokens' => $skill->max_tokens,
@@ -243,7 +285,12 @@ class SkillController extends Controller
         // Auto-commit if enabled
         if ($project->git_auto_commit) {
             try {
-                $relativePath = ".agentis/skills/{$skill->slug}.md";
+                // Folder skills use the directory path, flat skills use the .md file
+                $folderPath = $this->manifestService->getSkillFolderPath($project->resolved_path, $skill->slug);
+                $relativePath = $folderPath
+                    ? ".agentis/skills/{$skill->slug}/"
+                    : ".agentis/skills/{$skill->slug}.md";
+
                 $this->gitService->commit(
                     $project->resolved_path,
                     $relativePath,

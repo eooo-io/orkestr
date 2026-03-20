@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\File;
 class ClaudeDriver implements ProviderDriverInterface
 {
     use GeneratesMcpConfig;
+    use ResolvesSkillAssets;
 
     public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
@@ -23,7 +24,12 @@ class ClaudeDriver implements ProviderDriverInterface
                 $output .= "> **Applies to:** `{$patterns}`\n\n";
             }
 
-            $output .= "{$body}\n\n---\n\n";
+            $assetContext = $this->buildAssetContext($skill);
+            if ($assetContext) {
+                $output .= "{$body}\n\n{$assetContext}\n---\n\n";
+            } else {
+                $output .= "{$body}\n\n---\n\n";
+            }
         }
 
         if (! empty($composedAgents)) {

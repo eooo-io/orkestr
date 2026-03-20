@@ -22,10 +22,12 @@ import {
   Settings2,
   Clock,
   Users,
+  FileText,
 } from 'lucide-react'
-import { fetchProject, fetchSkills, syncProject, scanProject, createSkill } from '@/api/client'
+import { fetchProject, fetchSkills, syncProject, scanProject, createSkill, deleteSkill } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
 import { SkillCard } from '@/components/skills/SkillCard'
+import { ArtifactsTab } from '@/components/artifacts/ArtifactsTab'
 import { ImportLibraryModal } from '@/components/library/ImportLibraryModal'
 import { SkillsShImportModal } from '@/components/library/SkillsShImportModal'
 import { AgentsTab } from '@/components/agents/AgentsTab'
@@ -47,7 +49,7 @@ export function ProjectDetail() {
   const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [activeTab, setActiveTab] = useState<'canvas' | 'skills' | 'agents' | 'team' | 'connections' | 'schedules'>('canvas')
+  const [activeTab, setActiveTab] = useState<'canvas' | 'skills' | 'agents' | 'team' | 'artifacts' | 'connections' | 'schedules'>('canvas')
   const [showLibrary, setShowLibrary] = useState(false)
   const [showSkillsSh, setShowSkillsSh] = useState(false)
   const [showGenerate, setShowGenerate] = useState(false)
@@ -71,6 +73,18 @@ export function ProjectDetail() {
       })
       .finally(() => setLoading(false))
   }, [id, setActiveProjectId])
+
+  const handleDeleteSkill = async (skillId: number) => {
+    if (!project) return
+    try {
+      await deleteSkill(skillId)
+      setSkills((prev) => prev.filter((s) => s.id !== skillId))
+      showToast('Skill deleted')
+      loadProjects()
+    } catch {
+      showToast('Delete failed', 'error')
+    }
+  }
 
   const handleSync = async () => {
     if (!project) return
@@ -236,6 +250,7 @@ export function ProjectDetail() {
           { id: 'skills' as const, label: 'Skills', icon: Sparkles, badge: skills.length },
           { id: 'agents' as const, label: 'Agents', icon: Bot },
           { id: 'team' as const, label: 'Team', icon: Users },
+          { id: 'artifacts' as const, label: 'Artifacts', icon: FileText },
           { id: 'connections' as const, label: 'Connections', icon: Network },
           { id: 'schedules' as const, label: 'Schedules', icon: Clock },
         ]).map(({ id, label, icon: Icon, badge }) => (
@@ -344,6 +359,7 @@ export function ProjectDetail() {
                   selectable={selectMode}
                   selected={selectedSkillIds.has(skill.id)}
                   onToggleSelect={toggleSkillSelection}
+                  onDelete={handleDeleteSkill}
                 />
               ))}
             </div>
@@ -361,6 +377,12 @@ export function ProjectDetail() {
 
       {activeTab === 'team' && (
         <AgentTeamTab projectId={project.id} />
+      )}
+
+      {activeTab === 'artifacts' && (
+        <div className="bg-card elevation-1 rounded-lg overflow-hidden" style={{ height: 'calc(100vh - 220px)' }}>
+          <ArtifactsTab projectId={project.id} />
+        </div>
       )}
 
       {activeTab === 'connections' && (

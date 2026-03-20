@@ -476,11 +476,15 @@ class AgentController extends Controller
 
     /**
      * Compose the full output for a single project agent.
+     *
+     * Query param ?depth=index|full|deep controls progressive disclosure.
      */
-    public function compose(Project $project, Agent $agent): JsonResponse
+    public function compose(Request $request, Project $project, Agent $agent): JsonResponse
     {
+        $depth = $request->query('depth', 'full');
+
         return response()->json([
-            'data' => $this->composeService->compose($project, $agent),
+            'data' => $this->composeService->compose($project, $agent, $depth),
         ]);
     }
 
@@ -496,11 +500,15 @@ class AgentController extends Controller
 
     /**
      * Compose all enabled agents for a project.
+     *
+     * Query param ?depth=index|full|deep controls progressive disclosure.
      */
-    public function composeAll(Project $project): JsonResponse
+    public function composeAll(Request $request, Project $project): JsonResponse
     {
+        $depth = $request->query('depth', 'full');
+
         return response()->json([
-            'data' => $this->composeService->composeAll($project),
+            'data' => $this->composeService->composeAll($project, $depth),
         ]);
     }
 }

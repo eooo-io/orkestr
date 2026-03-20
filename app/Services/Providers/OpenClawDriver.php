@@ -9,6 +9,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class OpenClawDriver implements ProviderDriverInterface
 {
+    use ResolvesSkillAssets;
     public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
         $base = rtrim($project->resolved_path, '/') . '/.openclaw';
@@ -40,8 +41,11 @@ class OpenClawDriver implements ProviderDriverInterface
                 ], JSON_UNESCAPED_SLASHES);
             }
 
+            $assetContext = $this->buildAssetContext($skill);
+            $fullBody = $assetContext ? "{$body}\n\n{$assetContext}" : $body;
+
             $yaml = Yaml::dump($frontmatter, 2, 2);
-            $content = "---\n{$yaml}---\n\n{$body}\n";
+            $content = "---\n{$yaml}---\n\n{$fullBody}\n";
 
             $files[$base . '/skills/' . $skill->slug . '/SKILL.md'] = $content;
         }

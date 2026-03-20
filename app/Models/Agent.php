@@ -209,6 +209,31 @@ class Agent extends Model
             ->withTimestamps();
     }
 
+    public function identities(): HasMany
+    {
+        return $this->hasMany(AgentIdentity::class);
+    }
+
+    public function resourceQuotas(): HasMany
+    {
+        return $this->hasMany(AgentResourceQuota::class);
+    }
+
+    public function permissions(): HasMany
+    {
+        return $this->hasMany(AgentPermission::class);
+    }
+
+    public function versions(): HasMany
+    {
+        return $this->hasMany(AgentVersion::class);
+    }
+
+    public function healthChecks(): HasMany
+    {
+        return $this->hasMany(AgentHealthCheck::class);
+    }
+
     // --- Scopes ---
 
     public function scopeTemplates($query)

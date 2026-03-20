@@ -19,6 +19,7 @@ import {
   toggleSchedule,
   triggerSchedule,
 } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useAppStore } from '@/store/useAppStore'
 import { Button } from '@/components/ui/button'
 import { ScheduleFormModal } from './ScheduleFormModal'
@@ -74,6 +75,7 @@ interface Props {
 
 export function SchedulesTab({ projectId }: Props) {
   const { showToast } = useAppStore()
+  const confirm = useConfirm()
   const [schedules, setSchedules] = useState<AgentSchedule[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -131,7 +133,7 @@ export function SchedulesTab({ projectId }: Props) {
 
   const handleDelete = async (schedule: AgentSchedule) => {
     setOpenMenuId(null)
-    if (!confirm(`Delete schedule "${schedule.name}"?`)) return
+    if (!(await confirm({ message: `Delete schedule "${schedule.name}"?`, title: 'Confirm Delete' }))) return
     try {
       await deleteSchedule(schedule.id)
       showToast('Schedule deleted')

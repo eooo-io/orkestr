@@ -10,6 +10,7 @@ use Symfony\Component\Yaml\Yaml;
 class CursorDriver implements ProviderDriverInterface
 {
     use GeneratesMcpConfig;
+    use ResolvesSkillAssets;
 
     public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
@@ -33,8 +34,11 @@ class CursorDriver implements ProviderDriverInterface
                 $frontmatter['tags'] = $skill->tags->pluck('name')->values()->all();
             }
 
+            $assetContext = $this->buildAssetContext($skill);
+            $fullBody = $assetContext ? "{$body}\n\n{$assetContext}" : $body;
+
             $yaml = Yaml::dump($frontmatter, 2, 2);
-            $content = "---\n{$yaml}---\n\n{$body}\n";
+            $content = "---\n{$yaml}---\n\n{$fullBody}\n";
 
             $files[$dir . '/' . $skill->slug . '.mdc'] = $content;
         }

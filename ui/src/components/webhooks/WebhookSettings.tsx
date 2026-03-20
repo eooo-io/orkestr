@@ -20,6 +20,7 @@ import {
   fetchWebhookDeliveries,
   testWebhook,
 } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useAppStore } from '@/store/useAppStore'
 import { Button } from '@/components/ui/button'
 import type { Webhook, WebhookDelivery } from '@/types'
@@ -37,6 +38,7 @@ interface Props {
 
 export function WebhookSettings({ projectId }: Props) {
   const { showToast } = useAppStore()
+  const confirm = useConfirm()
   const [webhooks, setWebhooks] = useState<Webhook[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -114,7 +116,7 @@ export function WebhookSettings({ projectId }: Props) {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this webhook?')) return
+    if (!(await confirm({ message: 'Delete this webhook?', title: 'Confirm Delete' }))) return
     try {
       await deleteWebhook(id)
       showToast('Webhook deleted')

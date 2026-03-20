@@ -101,6 +101,16 @@ import type {
   AgentMemoryRecallResult,
   DataSource,
   DataSourceTestResult,
+  SkillGotcha,
+  SkillAsset,
+  SkillCategory,
+  SkillEvalSuite,
+  SkillEvalPrompt,
+  SkillEvalRun,
+  DescriptionScore,
+  Artifact,
+  AgentProcessInfo,
+  AgentProcessStatus,
 } from '@/types'
 
 const api = axios.create({
@@ -260,6 +270,205 @@ export const lintSkill = (skillId: number) =>
   api
     .get<ApiResponse<LintIssue[]>>(`/skills/${skillId}/lint`)
     .then((r) => r.data.data)
+
+// Eval Suites
+export const fetchEvalSuites = (skillId: number) =>
+  api
+    .get<ApiResponse<SkillEvalSuite[]>>(`/skills/${skillId}/eval-suites`)
+    .then((r) => r.data.data)
+
+export const createEvalSuite = (
+  skillId: number,
+  data: { name: string; description?: string },
+) =>
+  api
+    .post<ApiResponse<SkillEvalSuite>>(`/skills/${skillId}/eval-suites`, data)
+    .then((r) => r.data.data)
+
+export const fetchEvalSuite = (id: number) =>
+  api
+    .get<ApiResponse<SkillEvalSuite>>(`/eval-suites/${id}`)
+    .then((r) => r.data.data)
+
+export const deleteEvalSuite = (id: number) =>
+  api.delete(`/eval-suites/${id}`)
+
+export const createEvalPrompt = (
+  suiteId: number,
+  data: { prompt: string; expected_behavior?: string },
+) =>
+  api
+    .post<ApiResponse<SkillEvalPrompt>>(
+      `/eval-suites/${suiteId}/prompts`,
+      data,
+    )
+    .then((r) => r.data.data)
+
+export const deleteEvalPrompt = (id: number) =>
+  api.delete(`/eval-prompts/${id}`)
+
+export const runEval = (
+  suiteId: number,
+  data: { model: string; mode: string },
+) =>
+  api
+    .post<ApiResponse<SkillEvalRun>>(`/eval-suites/${suiteId}/run`, data)
+    .then((r) => r.data.data)
+
+export const fetchEvalRuns = (suiteId: number) =>
+  api
+    .get<ApiResponse<SkillEvalRun[]>>(`/eval-suites/${suiteId}/runs`)
+    .then((r) => r.data.data)
+
+export const scoreDescription = (skillId: number) =>
+  api
+    .get<ApiResponse<DescriptionScore>>(
+      `/skills/${skillId}/score-description`,
+    )
+    .then((r) => r.data.data)
+
+// Agent Processes (Daemon)
+export const fetchAgentFleet = () =>
+  api
+    .get<ApiResponse<AgentProcessInfo[]>>('/agent-processes')
+    .then((r) => r.data.data)
+
+export const fetchAgentProcessStatus = (projectId: number, agentId: number) =>
+  api
+    .get<AgentProcessStatus>(
+      `/projects/${projectId}/agents/${agentId}/process`,
+    )
+    .then((r) => r.data)
+
+export const startAgentProcess = (
+  projectId: number,
+  agentId: number,
+  options?: { restart_policy?: string; wake_conditions?: Record<string, unknown> },
+) =>
+  api.post(`/projects/${projectId}/agents/${agentId}/process/start`, options)
+
+export const stopAgentProcess = (projectId: number, agentId: number) =>
+  api.post(`/projects/${projectId}/agents/${agentId}/process/stop`)
+
+export const restartAgentProcess = (projectId: number, agentId: number) =>
+  api.post(`/projects/${projectId}/agents/${agentId}/process/restart`)
+
+// Artifacts
+export const fetchArtifacts = (
+  projectId: number,
+  params?: { type?: string; status?: string; agent_id?: number },
+) =>
+  api
+    .get<ApiResponse<Artifact[]>>(`/projects/${projectId}/artifacts`, {
+      params,
+    })
+    .then((r) => r.data.data)
+
+export const createArtifact = (
+  projectId: number,
+  data: Partial<Artifact>,
+) =>
+  api
+    .post<ApiResponse<Artifact>>(`/projects/${projectId}/artifacts`, data)
+    .then((r) => r.data.data)
+
+export const fetchArtifact = (id: number) =>
+  api.get<ApiResponse<Artifact>>(`/artifacts/${id}`).then((r) => r.data.data)
+
+export const updateArtifact = (id: number, data: Partial<Artifact>) =>
+  api
+    .put<ApiResponse<Artifact>>(`/artifacts/${id}`, data)
+    .then((r) => r.data.data)
+
+export const deleteArtifact = (id: number) =>
+  api.delete(`/artifacts/${id}`)
+
+export const fetchArtifactVersions = (id: number) =>
+  api
+    .get<ApiResponse<Artifact[]>>(`/artifacts/${id}/versions`)
+    .then((r) => r.data.data)
+
+export const approveArtifact = (id: number) =>
+  api
+    .post<ApiResponse<Artifact>>(`/artifacts/${id}/approve`)
+    .then((r) => r.data.data)
+
+export const rejectArtifact = (id: number) =>
+  api
+    .post<ApiResponse<Artifact>>(`/artifacts/${id}/reject`)
+    .then((r) => r.data.data)
+
+export const fetchExecutionArtifacts = (executionRunId: number) =>
+  api
+    .get<ApiResponse<Artifact[]>>(
+      `/executions/${executionRunId}/artifacts`,
+    )
+    .then((r) => r.data.data)
+
+// Skill Categories
+export const fetchSkillCategories = () =>
+  api
+    .get<ApiResponse<SkillCategory[]>>('/skill-categories')
+    .then((r) => r.data.data)
+
+// Skill Gotchas
+export const fetchGotchas = (skillId: number, activeOnly = false) =>
+  api
+    .get<ApiResponse<SkillGotcha[]>>(
+      `/skills/${skillId}/gotchas${activeOnly ? '?active_only=true' : ''}`,
+    )
+    .then((r) => r.data.data)
+
+export const createGotcha = (
+  skillId: number,
+  data: { title: string; description: string; severity?: string; source?: string; source_reference_id?: number },
+) =>
+  api
+    .post<ApiResponse<SkillGotcha>>(`/skills/${skillId}/gotchas`, data)
+    .then((r) => r.data.data)
+
+export const updateGotcha = (id: number, data: Partial<SkillGotcha>) =>
+  api
+    .put<ApiResponse<SkillGotcha>>(`/gotchas/${id}`, data)
+    .then((r) => r.data.data)
+
+export const deleteGotcha = (id: number) => api.delete(`/gotchas/${id}`)
+
+export const resolveGotcha = (id: number) =>
+  api
+    .post<ApiResponse<SkillGotcha>>(`/gotchas/${id}/resolve`)
+    .then((r) => r.data.data)
+
+export const reopenGotcha = (id: number) =>
+  api
+    .post<ApiResponse<SkillGotcha>>(`/gotchas/${id}/reopen`)
+    .then((r) => r.data.data)
+
+// Skill Assets
+export const fetchSkillAssets = (skillId: number) =>
+  api
+    .get<{ data: SkillAsset[]; is_folder: boolean }>(`/skills/${skillId}/assets`)
+    .then((r) => r.data)
+
+export const uploadSkillAssets = (
+  skillId: number,
+  files: File[],
+  directory: 'assets' | 'scripts' | 'data',
+) => {
+  const formData = new FormData()
+  files.forEach((f) => formData.append('files[]', f))
+  formData.append('directory', directory)
+  return api
+    .post<{ data: SkillAsset[]; message: string }>(
+      `/skills/${skillId}/assets`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    )
+    .then((r) => r.data)
+}
+
+export const deleteSkillAsset = (skillId: number, path: string) =>
+  api.delete(`/skills/${skillId}/assets/${path}`)
 
 // Versions
 export const fetchVersions = (skillId: number) =>

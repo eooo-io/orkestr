@@ -229,7 +229,7 @@ const USE_CASES = [
     icon: Lock,
     persona: 'Head of Security',
     title: 'Fully air-gapped agent operations',
-    description: 'We run Llama and Mistral locally via Ollama — no data leaves our network. Agentis Studio orchestrates agents against our internal systems using local models only. Compliance never even had to review it.',
+    description: 'We run Llama and Mistral locally via Ollama — no data leaves our network. Orkestr orchestrates agents against our internal systems using local models only. Compliance never even had to review it.',
   },
   {
     icon: BarChart3,
@@ -327,16 +327,16 @@ const STATS = [
 
 const FAQ = [
   {
-    q: 'What is Agentis Studio?',
-    a: 'Agentis Studio is an open-source agent orchestration platform. Design AI agent teams, define their autonomy, wire them into workflows, connect real tools via MCP and A2A protocols, and run everything with built-in cost tracking and safety guardrails. MIT licensed, self-hosted, fully yours.',
+    q: 'What is Orkestr?',
+    a: 'Orkestr is an open-source agent orchestration platform. Design AI agent teams, define their autonomy, wire them into workflows, connect real tools via MCP and A2A protocols, and run everything with built-in cost tracking and safety guardrails. MIT licensed, self-hosted, fully yours.',
   },
   {
     q: 'How is this different from LangChain or CrewAI?',
-    a: 'LangChain and CrewAI are code frameworks — you write Python to define agents and chains. Agentis Studio is a visual design-and-runtime platform. You design agents and workflows in a UI, run them directly in the built-in execution engine, or export to LangGraph, CrewAI, or generic JSON for use in your own codebase. No framework lock-in.',
+    a: 'LangChain and CrewAI are code frameworks — you write Python to define agents and chains. Orkestr is a visual design-and-runtime platform. You design agents and workflows in a UI, run them directly in the built-in execution engine, or export to LangGraph, CrewAI, or generic JSON for use in your own codebase. No framework lock-in.',
   },
   {
     q: 'What are MCP and A2A?',
-    a: 'MCP (Model Context Protocol) lets agents call tools hosted on external servers — file systems, databases, APIs. A2A (Agent-to-Agent) lets agents delegate tasks to other agents over HTTP. Agentis Studio has built-in clients for both protocols.',
+    a: 'MCP (Model Context Protocol) lets agents call tools hosted on external servers — file systems, databases, APIs. A2A (Agent-to-Agent) lets agents delegate tasks to other agents over HTTP. Orkestr has built-in clients for both protocols.',
   },
   {
     q: 'Can agents actually execute tools, or is this just configuration?',
@@ -510,9 +510,9 @@ export function Landing() {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Agentis Studio" className="h-8 w-8 object-contain" />
+            <img src="/logo.png" alt="Orkestr" className="h-8 w-8 object-contain" />
             <div className="flex flex-col">
-              <span className="font-semibold text-foreground tracking-tight leading-none">Agentis Studio</span>
+              <span className="font-semibold text-foreground tracking-tight leading-none">Orkestr</span>
               <span className="text-[10px] text-muted-foreground tracking-wide leading-none mt-0.5">open source</span>
             </div>
           </div>
@@ -703,7 +703,7 @@ export function Landing() {
           <FadeIn>
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                How people use Agentis Studio
+                How people use Orkestr
               </h2>
               <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
                 Real scenarios from teams running AI agents in production.
@@ -735,7 +735,7 @@ export function Landing() {
       </section>
 
       {/* ----------------------------------------------------------------- */}
-      {/* What Agentis Studio is NOT                                         */}
+      {/* What Orkestr is NOT                                         */}
       {/* ----------------------------------------------------------------- */}
       <FadeIn>
         <section className="py-16 px-4 sm:px-6">
@@ -749,13 +749,13 @@ export function Landing() {
               <div className="bg-card border border-border p-5 elevation-1">
                 <p className="text-sm font-semibold text-foreground mb-1">Not a chatbot builder</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Agentis Studio is for autonomous and semi-autonomous agent work, not conversational UI. Agents run jobs, not chat sessions.
+                  Orkestr is for autonomous and semi-autonomous agent work, not conversational UI. Agents run jobs, not chat sessions.
                 </p>
               </div>
               <div className="bg-card border border-border p-5 elevation-1">
                 <p className="text-sm font-semibold text-foreground mb-1">Not an API wrapper</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Agentis Studio runs on your infrastructure. Your API keys, your local models, your data. It orchestrates — it does not proxy, mark up, or touch your inference billing.
+                  Orkestr runs on your infrastructure. Your API keys, your local models, your data. It orchestrates — it does not proxy, mark up, or touch your inference billing.
                 </p>
               </div>
               <div className="bg-card border border-border p-5 elevation-1">
@@ -974,7 +974,7 @@ export function Landing() {
                 Three layers, one platform
               </h2>
               <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
-                Agentis Studio is built as a layered architecture. Each layer builds on the one below.
+                Orkestr is built as a layered architecture. Each layer builds on the one below.
               </p>
             </div>
           </FadeIn>
@@ -1052,7 +1052,7 @@ export function Landing() {
               </h2>
               <p className="text-muted-foreground mt-3 text-lg max-w-2xl mx-auto">
                 A cloud-hosted agent can&apos;t reach your codebase, your database, or your local models.
-                Agentis Studio deploys next to everything so agents can actually act on it — with zero external dependencies if you need it.
+                Orkestr deploys next to everything so agents can actually act on it — with zero external dependencies if you need it.
               </p>
             </div>
 
@@ -1288,9 +1288,9 @@ export function Landing() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-3">
-                <img src="/logo.png" alt="Agentis Studio" className="h-7 w-7 object-contain" />
+                <img src="/logo.png" alt="Orkestr" className="h-7 w-7 object-contain" />
                 <div className="flex flex-col">
-                  <span className="font-semibold text-sm leading-none">Agentis Studio</span>
+                  <span className="font-semibold text-sm leading-none">Orkestr</span>
                   <span className="text-[9px] text-muted-foreground tracking-wide leading-none mt-0.5">open source</span>
                 </div>
               </div>
@@ -1356,7 +1356,7 @@ export function Landing() {
           </div>
 
           <div className="border-t border-border mt-10 pt-6 text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} Agentis Studio contributors. MIT License.
+            &copy; {new Date().getFullYear()} Orkestr contributors. MIT License.
           </div>
         </div>
       </footer>

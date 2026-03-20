@@ -36,6 +36,8 @@ import { Reports } from '@/pages/Reports'
 import { GitHubImport } from '@/pages/GitHubImport'
 import { SetupWizard } from '@/pages/SetupWizard'
 import { ExecutionReplay } from '@/pages/ExecutionReplay'
+import { Artifacts } from '@/pages/Artifacts'
+import { RuntimeDashboard } from '@/pages/RuntimeDashboard'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -115,6 +117,8 @@ function AppContent() {
                   <Route path="/reports" element={<Reports />} />
                   <Route path="/github-import" element={<GitHubImport />} />
                   <Route path="/replay" element={<ExecutionReplay />} />
+                  <Route path="/projects/:id/artifacts" element={<Artifacts />} />
+                  <Route path="/runtime" element={<RuntimeDashboard />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/guide" element={<UserGuide />} />
                 </Routes>

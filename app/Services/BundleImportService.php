@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Project;
 use App\Models\Tag;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Symfony\Component\Yaml\Yaml;
 use ZipArchive;
@@ -113,7 +114,7 @@ class BundleImportService
      * @param  string  $conflictMode  'skip', 'overwrite', or 'rename'
      * @return array{imported: int, skipped: int, errors: string[]}
      */
-    public function import(Project $project, array $skills, array $agents, string $conflictMode = 'skip'): array
+    public function import(Project $project, array $skills, array $agents, string $conflictMode = 'skip', ?string $zipPath = null): array
     {
         $imported = 0;
         $skipped = 0;
@@ -124,6 +125,11 @@ class BundleImportService
                 $result = $this->importSkill($project, $skillData, $conflictMode);
                 if ($result) {
                     $imported++;
+
+                    // Extract assets from ZIP for folder skills
+                    if ($zipPath && ! empty($skillData['_asset_entries'])) {
+                        $this->extractSkillAssets($project, $skillData, $zipPath);
+                    }
                 } else {
                     $skipped++;
                 }
@@ -149,7 +155,39 @@ class BundleImportService
     }
 
     /**
+     * Extract skill asset files from a ZIP into the skill folder.
+     */
+    protected function extractSkillAssets(Project $project, array $skillData, string $zipPath): void
+    {
+        $slug = $skillData['slug'];
+        $folderPath = $this->manifestService->ensureSkillFolder($project->resolved_path, $slug);
+
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath) !== true) {
+            return;
+        }
+
+        foreach ($skillData['_asset_entries'] ?? [] as $entryName) {
+            // entryName: skills/slug/assets/foo.md → extract to folderPath/assets/foo.md
+            $zipSlug = $skillData['_zip_slug'] ?? $slug;
+            $relativePath = str_replace("skills/{$zipSlug}/", '', $entryName);
+            $targetPath = $folderPath . '/' . $relativePath;
+
+            File::ensureDirectoryExists(dirname($targetPath));
+
+            $content = $zip->getFromName($entryName);
+            if ($content !== false) {
+                File::put($targetPath, $content);
+            }
+        }
+
+        $zip->close();
+    }
+
+    /**
      * Extract full skill/agent data from a ZIP for import.
+     *
+     * Supports both flat skills (skills/slug.md) and folder skills (skills/slug/skill.md).
      */
     public function extractZip(string $path): array
     {
@@ -160,16 +198,54 @@ class BundleImportService
 
         $skills = [];
         $agents = [];
+        $seenSlugs = [];
+        $assetEntries = []; // slug => [zip entry names]
 
+        // First pass: find all skill.md (folder) and slug.md (flat) entries
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $name = $zip->getNameIndex($i);
-            if (str_starts_with($name, 'skills/') && str_ends_with($name, '.md')) {
+
+            // Folder skill: skills/slug/skill.md
+            if (preg_match('#^skills/([^/]+)/skill\.md$#', $name, $m)) {
+                $slug = $m[1];
                 $content = $zip->getFromIndex($i);
                 $parsed = $this->parser->parseContent($content);
                 $fm = $parsed['frontmatter'];
                 $skills[] = [
-                    'slug' => $fm['id'] ?? basename($name, '.md'),
-                    'name' => $fm['name'] ?? basename($name, '.md'),
+                    'slug' => $fm['id'] ?? $slug,
+                    'name' => $fm['name'] ?? $slug,
+                    'description' => $fm['description'] ?? null,
+                    'model' => $fm['model'] ?? null,
+                    'max_tokens' => $fm['max_tokens'] ?? null,
+                    'tools' => $fm['tools'] ?? [],
+                    'includes' => $fm['includes'] ?? [],
+                    'tags' => $fm['tags'] ?? [],
+                    'body' => $parsed['body'],
+                    '_has_assets' => true,
+                    '_zip_slug' => $slug,
+                ];
+                $seenSlugs[$slug] = true;
+                continue;
+            }
+
+            // Collect asset entries for folder skills
+            if (preg_match('#^skills/([^/]+)/(assets|scripts|data)/.+$#', $name, $m)) {
+                $assetEntries[$m[1]][] = $name;
+                continue;
+            }
+
+            // Flat skill: skills/slug.md
+            if (str_starts_with($name, 'skills/') && str_ends_with($name, '.md')) {
+                $slug = basename($name, '.md');
+                if (isset($seenSlugs[$slug])) {
+                    continue; // folder version takes precedence
+                }
+                $content = $zip->getFromIndex($i);
+                $parsed = $this->parser->parseContent($content);
+                $fm = $parsed['frontmatter'];
+                $skills[] = [
+                    'slug' => $fm['id'] ?? $slug,
+                    'name' => $fm['name'] ?? $slug,
                     'description' => $fm['description'] ?? null,
                     'model' => $fm['model'] ?? null,
                     'max_tokens' => $fm['max_tokens'] ?? null,
@@ -181,6 +257,14 @@ class BundleImportService
             }
         }
 
+        // Store asset entry mapping for import use
+        foreach ($skills as &$skill) {
+            if (! empty($skill['_has_assets']) && isset($assetEntries[$skill['_zip_slug']])) {
+                $skill['_asset_entries'] = $assetEntries[$skill['_zip_slug']];
+            }
+        }
+        unset($skill);
+
         $agentsYaml = $zip->getFromName('agents.yaml');
         if ($agentsYaml !== false) {
             $agents = Yaml::parse($agentsYaml) ?? [];
@@ -188,7 +272,7 @@ class BundleImportService
 
         $zip->close();
 
-        return ['skills' => $skills, 'agents' => $agents];
+        return ['skills' => $skills, 'agents' => $agents, '_zip_path' => $path];
     }
 
     protected function importSkill(Project $project, array $data, string $conflictMode): bool

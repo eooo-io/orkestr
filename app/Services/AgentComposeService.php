@@ -8,6 +8,7 @@ use App\Models\ProjectAgent;
 use App\Models\Skill;
 use App\Models\SkillVariable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class AgentComposeService
 {
@@ -19,9 +20,10 @@ class AgentComposeService
     /**
      * Compose the full markdown output for a single project agent.
      *
+     * @param  string  $depth  Compose depth: 'index', 'full', or 'deep'
      * @return array{content: string, token_estimate: int, agent: array, skill_count: int}
      */
-    public function compose(Project $project, Agent $agent): array
+    public function compose(Project $project, Agent $agent, string $depth = 'full'): array
     {
         $projectAgent = $project->projectAgents()
             ->where('agent_id', $agent->id)
@@ -30,7 +32,7 @@ class AgentComposeService
         $customInstructions = $projectAgent?->custom_instructions;
 
         $skills = $this->getAssignedSkills($project, $agent);
-        $content = $this->render($project, $agent, $customInstructions, $skills);
+        $content = $this->render($project, $agent, $customInstructions, $skills, $depth);
 
         return [
             'content' => $content,
@@ -200,9 +202,10 @@ class AgentComposeService
     /**
      * Compose all enabled agents for a project.
      *
+     * @param  string  $depth  Compose depth: 'index', 'full', or 'deep'
      * @return array<int, array{content: string, token_estimate: int, agent: array, skill_count: int}>
      */
-    public function composeAll(Project $project): array
+    public function composeAll(Project $project, string $depth = 'full'): array
     {
         $enabledAgentIds = $project->projectAgents()
             ->where('is_enabled', true)
@@ -216,7 +219,7 @@ class AgentComposeService
             ->orderBy('sort_order')
             ->get();
 
-        return $agents->map(fn (Agent $agent) => $this->compose($project, $agent))->values()->all();
+        return $agents->map(fn (Agent $agent) => $this->compose($project, $agent, $depth))->values()->all();
     }
 
     /**
@@ -257,9 +260,33 @@ class AgentComposeService
 
     /**
      * Resolve skill bodies with includes and template variables.
+     *
+     * @param  string  $depth  One of 'index', 'full', 'deep'
+     *   - index: name + summary only (~100 tokens per skill)
+     *   - full: name + summary + resolved body (default, backward-compatible)
+     *   - deep: full + inlined asset content from skill folders
      */
-    protected function resolveSkillBodies(Project $project, \Illuminate\Support\Collection $skills): array
+    protected function resolveSkillBodies(Project $project, \Illuminate\Support\Collection $skills, string $depth = 'full'): array
     {
+        // Index mode: minimal info only
+        if ($depth === 'index') {
+            return $skills->map(function (Skill $skill) {
+                $summary = $skill->summary ?? $skill->description ?? '';
+
+                return [
+                    'id' => $skill->id,
+                    'slug' => $skill->slug,
+                    'name' => $skill->name,
+                    'summary' => $summary,
+                    'description' => $skill->description,
+                    'model' => $skill->model,
+                    'tools' => $skill->tools,
+                    'body' => '',
+                    'token_estimate' => $this->estimateTokens("{$skill->name}\n{$summary}"),
+                ];
+            })->values()->all();
+        }
+
         $skillIds = $skills->pluck('id')->all();
         $allVariables = [];
 
@@ -272,7 +299,7 @@ class AgentComposeService
                 ->all();
         }
 
-        return $skills->map(function (Skill $skill) use ($allVariables) {
+        return $skills->map(function (Skill $skill) use ($project, $allVariables, $depth) {
             $resolvedBody = $this->compositionService->resolve($skill);
 
             $variables = $allVariables[$skill->id] ?? [];
@@ -286,10 +313,25 @@ class AgentComposeService
                 $resolvedBody = $this->templateResolver->resolve($resolvedBody, $variables);
             }
 
+            // Deep mode: append asset content
+            if ($depth === 'deep') {
+                $assetContent = $this->resolveAssetContent($project, $skill);
+                if ($assetContent) {
+                    $resolvedBody .= "\n\n" . $assetContent;
+                }
+            }
+
+            // Append active gotchas section
+            $gotchaSection = $this->buildGotchaSection($skill);
+            if ($gotchaSection) {
+                $resolvedBody .= "\n\n" . $gotchaSection;
+            }
+
             return [
                 'id' => $skill->id,
                 'slug' => $skill->slug,
                 'name' => $skill->name,
+                'summary' => $skill->summary,
                 'description' => $skill->description,
                 'model' => $skill->model,
                 'tools' => $skill->tools,
@@ -300,9 +342,73 @@ class AgentComposeService
     }
 
     /**
-     * Render the composed markdown output.
+     * Build a gotcha/known-issues section from active gotchas.
      */
-    protected function render(Project $project, Agent $agent, ?string $customInstructions, \Illuminate\Support\Collection $skills): string
+    protected function buildGotchaSection(Skill $skill): string
+    {
+        $gotchas = $skill->activeGotchas()->orderByRaw(
+            "CASE severity WHEN 'critical' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END"
+        )->get();
+
+        if ($gotchas->isEmpty()) {
+            return '';
+        }
+
+        $severityIcons = ['critical' => 'CRITICAL', 'warning' => 'WARNING', 'info' => 'NOTE'];
+        $lines = ["### Known Issues\n"];
+
+        foreach ($gotchas as $gotcha) {
+            $icon = $severityIcons[$gotcha->severity] ?? 'NOTE';
+            $lines[] = "- **[{$icon}]** {$gotcha->title}: {$gotcha->description}";
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Resolve text-based asset content for deep compose mode.
+     */
+    protected function resolveAssetContent(Project $project, Skill $skill): string
+    {
+        $manifestService = app(AgentisManifestService::class);
+        $folderPath = $manifestService->getSkillFolderPath($project->resolved_path, $skill->slug);
+
+        if (! $folderPath) {
+            return '';
+        }
+
+        $parser = app(SkillFileParser::class);
+        $assets = $parser->inventoryAssets($folderPath);
+
+        if (empty($assets)) {
+            return '';
+        }
+
+        $textExtensions = ['md', 'txt', 'json', 'yaml', 'yml', 'csv', 'xml', 'sh', 'py', 'js', 'ts', 'php', 'sql'];
+        $sections = ["### Skill Assets\n"];
+
+        foreach ($assets as $asset) {
+            $ext = strtolower($asset['type']);
+            if (! in_array($ext, $textExtensions) || $asset['size'] > 10240) {
+                continue;
+            }
+
+            $fullPath = $folderPath . '/' . $asset['path'];
+            if (File::exists($fullPath)) {
+                $content = File::get($fullPath);
+                $sections[] = "#### `{$asset['path']}`\n\n```{$ext}\n{$content}\n```\n";
+            }
+        }
+
+        return count($sections) > 1 ? implode("\n", $sections) : '';
+    }
+
+    /**
+     * Render the composed markdown output.
+     *
+     * @param  string  $depth  Compose depth: 'index', 'full', or 'deep'
+     */
+    protected function render(Project $project, Agent $agent, ?string $customInstructions, \Illuminate\Support\Collection $skills, string $depth = 'full'): string
     {
         $sections = [];
 
@@ -325,21 +431,29 @@ class AgentComposeService
         }
 
         // Resolved skill sections
-        $resolvedSkills = $this->resolveSkillBodies($project, $skills);
+        $resolvedSkills = $this->resolveSkillBodies($project, $skills, $depth);
 
         if (! empty($resolvedSkills)) {
-            $skillSections = ["## Assigned Skills"];
-
-            foreach ($resolvedSkills as $skill) {
-                $skillContent = "### {$skill['name']}";
-                if ($skill['description']) {
-                    $skillContent .= "\n\n> {$skill['description']}";
+            if ($depth === 'index') {
+                // Index mode: just list skill names and summaries
+                $skillSections = ["## Available Skills"];
+                foreach ($resolvedSkills as $skill) {
+                    $summary = $skill['summary'] ?? $skill['description'] ?? '';
+                    $skillSections[] = "- **{$skill['name']}**: {$summary}";
                 }
-                $skillContent .= "\n\n" . trim($skill['body']);
-                $skillSections[] = $skillContent;
+                $sections[] = implode("\n", $skillSections);
+            } else {
+                $skillSections = ["## Assigned Skills"];
+                foreach ($resolvedSkills as $skill) {
+                    $skillContent = "### {$skill['name']}";
+                    if ($skill['description']) {
+                        $skillContent .= "\n\n> {$skill['description']}";
+                    }
+                    $skillContent .= "\n\n" . trim($skill['body']);
+                    $skillSections[] = $skillContent;
+                }
+                $sections[] = implode("\n\n", $skillSections);
             }
-
-            $sections[] = implode("\n\n", $skillSections);
         }
 
         return implode("\n\n", $sections) . "\n";

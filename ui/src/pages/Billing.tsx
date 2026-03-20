@@ -11,10 +11,12 @@ import {
   setupStripeConnect,
   fetchEarnings,
 } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useAppStore } from '@/store/useAppStore'
 import type { BillingPlan, BillingStatus, UsageSummary } from '@/types'
 
 export function Billing() {
+  const confirm = useConfirm()
   const [plans, setPlans] = useState<BillingPlan[]>([])
   const [status, setStatus] = useState<BillingStatus | null>(null)
   const [usage, setUsage] = useState<UsageSummary | null>(null)
@@ -76,7 +78,7 @@ export function Billing() {
   }
 
   const handleCancel = async () => {
-    if (!confirm('Cancel your subscription? You\'ll retain access until the end of your billing period.')) return
+    if (!(await confirm({ message: 'Cancel your subscription? You\'ll retain access until the end of your billing period.', title: 'Confirm Cancellation' }))) return
     setActionLoading(true)
     try {
       await cancelSubscription()

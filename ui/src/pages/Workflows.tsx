@@ -12,6 +12,7 @@ import {
   Archive,
 } from 'lucide-react'
 import { fetchWorkflows, deleteWorkflow, duplicateWorkflow } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useAppStore } from '@/store/useAppStore'
 import type { Workflow } from '@/types'
 
@@ -31,6 +32,7 @@ export function Workflows() {
   const { id: projectId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { showToast } = useAppStore()
+  const confirm = useConfirm()
   const [workflows, setWorkflows] = useState<Workflow[]>([])
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState<number | null>(null)
@@ -61,7 +63,7 @@ export function Workflows() {
   }
 
   const handleDelete = async (workflow: Workflow) => {
-    if (!confirm(`Delete "${workflow.name}"? This cannot be undone.`)) return
+    if (!(await confirm({ message: `Delete "${workflow.name}"? This cannot be undone.`, title: 'Confirm Delete' }))) return
     try {
       await deleteWorkflow(pid, workflow.id)
       showToast('Workflow deleted', 'success')

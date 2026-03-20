@@ -94,6 +94,7 @@ import {
   deleteDataSource as deleteDataSourceApi,
 } from '@/api/client'
 import { Button } from '@/components/ui/button'
+import { useConfirm } from '@/hooks/useConfirm'
 import type {
   AirGapStatus,
   LicenseStatus,
@@ -1525,6 +1526,7 @@ function DiagnosticsPanel() {
 // --- Agents Panel ------------------------------------------------------------
 
 function AgentsPanel() {
+  const confirm = useConfirm()
   const [agents, setAgents] = useState<Agent[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -1583,7 +1585,7 @@ function AgentsPanel() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this agent?')) return
+    if (!(await confirm({ message: 'Delete this agent?', title: 'Confirm Delete' }))) return
     try { await deleteAgent(id); await load() } catch { /* */ }
   }
 
@@ -1671,6 +1673,7 @@ function AgentsPanel() {
 // --- Library Panel -----------------------------------------------------------
 
 function LibraryPanel() {
+  const confirm = useConfirm()
   const [skills, setSkills] = useState<LibrarySkill[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -1728,7 +1731,7 @@ function LibraryPanel() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this library skill?')) return
+    if (!(await confirm({ message: 'Delete this library skill?', title: 'Confirm Delete' }))) return
     try { await deleteLibrarySkill(id); await load() } catch { /* */ }
   }
 
@@ -1913,6 +1916,7 @@ function TagsPanel() {
 // --- Users Panel -------------------------------------------------------------
 
 function UsersPanel() {
+  const confirm = useConfirm()
   const [users, setUsers] = useState<ManagedUser[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -1965,7 +1969,7 @@ function UsersPanel() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this user?')) return
+    if (!(await confirm({ message: 'Delete this user?', title: 'Confirm Delete' }))) return
     try { await deleteManagedUser(id); await load() } catch { /* */ }
   }
 
@@ -2051,6 +2055,7 @@ function UsersPanel() {
 // --- Organizations Panel -----------------------------------------------------
 
 function OrganizationsPanel() {
+  const confirm = useConfirm()
   const [orgs, setOrgs] = useState<Organization[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null)
@@ -2124,7 +2129,7 @@ function OrganizationsPanel() {
   }
 
   const handleRemoveMember = async (userId: number) => {
-    if (!selectedOrg || !confirm('Remove this member?')) return
+    if (!selectedOrg || !(await confirm({ message: 'Remove this member?', title: 'Confirm Remove' }))) return
     try {
       await removeMember(selectedOrg.id, userId)
       await loadMembers()

@@ -22,6 +22,7 @@ import {
   fetchRepositoryStatus,
   fetchRepositoryFiles,
 } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useAppStore } from '@/store/useAppStore'
 import { Button } from '@/components/ui/button'
 import type { ProjectRepository, RepositoryStatus, RepositoryFile } from '@/types'
@@ -42,6 +43,7 @@ interface Props {
 
 export function RepositorySettings({ projectId }: Props) {
   const { showToast } = useAppStore()
+  const confirm = useConfirm()
   const [repositories, setRepositories] = useState<ProjectRepository[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -102,7 +104,7 @@ export function RepositorySettings({ projectId }: Props) {
   }
 
   const handleDisconnect = async (provider: string) => {
-    if (!confirm('Disconnect this repository? No files will be deleted.')) return
+    if (!(await confirm({ message: 'Disconnect this repository? No files will be deleted.', title: 'Confirm Disconnect' }))) return
     try {
       await disconnectRepository(projectId, provider)
       showToast('Repository disconnected')

@@ -57,6 +57,7 @@ import {
   Square,
   Send,
 } from 'lucide-react'
+import { useConfirm } from '@/hooks/useConfirm'
 import type { ProjectGraphData, AgentTask, ExecutionRun } from '@/types'
 import { assignAgentSkills, bindAgentMcpServers, bindAgentA2aAgents, saveCanvasLayout, fetchProjectTasks, createProjectTask, runTask, deleteTask, runAgent, fetchExecutions } from '@/api/client'
 import { AgentNode, SkillNode, ProviderNode, McpNode, ProjectNode, LaneLabel } from './FlowNodes'
@@ -1053,6 +1054,7 @@ const EXEC_STATUS_COLORS: Record<string, string> = {
 
 // ─── Main interactive graph component ──────────────────────────────
 function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh }: Props) {
+  const confirm = useConfirm()
   const initialGraph = useMemo(() => buildGraph(data), [data])
   const [nodes, setNodes] = useState<Node[]>(initialGraph.nodes)
   const [edges, setEdges] = useState<Edge[]>(initialGraph.edges)
@@ -2155,42 +2157,41 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
   )
 
   // ─── Delete selected nodes helper (#363) ─────────────────────
-  const deleteSelectedNodes = useCallback(() => {
-    setNodes((currentNodes) => {
-      const selected = currentNodes.filter((n) => n.selected && n.type !== 'laneLabel')
-      if (selected.length === 0) return currentNodes
+  const deleteSelectedNodes = useCallback(async () => {
+    const currentNodes = nodes
+    const selected = currentNodes.filter((n) => n.selected && n.type !== 'laneLabel')
+    if (selected.length === 0) return
 
-      if (selected.length > 1 && !window.confirm(`Delete ${selected.length} selected nodes?`)) {
-        return currentNodes
-      }
+    if (selected.length > 1 && !(await confirm({ message: `Delete ${selected.length} selected nodes?`, title: 'Confirm Delete' }))) {
+      return
+    }
 
-      const deletedIds = new Set(selected.map((n) => n.id))
-      const remainingNodes = currentNodes.filter((n) => !deletedIds.has(n.id))
+    const deletedIds = new Set(selected.map((n) => n.id))
+    const remainingNodes = currentNodes.filter((n) => !deletedIds.has(n.id))
 
-      // Push undo for each node
-      pushUndo({
-        type: 'nodes-delete',
-        undo: () => {
-          setNodes((nds) => [...nds, ...selected])
-          setEdges((eds) => {
-            const removedEdges = edges.filter(
-              (e) => deletedIds.has(e.source) || deletedIds.has(e.target),
-            )
-            return [...eds, ...removedEdges]
-          })
-        },
-        redo: () => {
-          setNodes((nds) => nds.filter((n) => !deletedIds.has(n.id)))
-          setEdges((eds) => eds.filter((e) => !deletedIds.has(e.source) && !deletedIds.has(e.target)))
-        },
-      })
-
-      // Remove connected edges
-      setEdges((eds) => eds.filter((e) => !deletedIds.has(e.source) && !deletedIds.has(e.target)))
-
-      return remainingNodes
+    // Push undo for each node
+    pushUndo({
+      type: 'nodes-delete',
+      undo: () => {
+        setNodes((nds) => [...nds, ...selected])
+        setEdges((eds) => {
+          const removedEdges = edges.filter(
+            (e) => deletedIds.has(e.source) || deletedIds.has(e.target),
+          )
+          return [...eds, ...removedEdges]
+        })
+      },
+      redo: () => {
+        setNodes((nds) => nds.filter((n) => !deletedIds.has(n.id)))
+        setEdges((eds) => eds.filter((e) => !deletedIds.has(e.source) && !deletedIds.has(e.target)))
+      },
     })
-  }, [edges, pushUndo])
+
+    // Remove connected edges
+    setEdges((eds) => eds.filter((e) => !deletedIds.has(e.source) && !deletedIds.has(e.target)))
+
+    setNodes(remainingNodes)
+  }, [nodes, edges, pushUndo, confirm])
 
   // Handle Escape key to exit fullscreen or close panels (#294)
   // Handle Delete/Backspace to delete selected edge (#354) + selected nodes (#363)
@@ -2561,11 +2562,11 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
                 setSelectedNodeInfo({ id: entityId, type: contextMenu.nodeType ?? '' })
               }
             }}
-            onDeleteNode={() => {
+            onDeleteNode={async () => {
               if (contextMenu.id) {
                 const node = nodes.find((n) => n.id === contextMenu.id)
                 if (node) {
-                  if (!window.confirm(`Delete ${(node.data.label as string) || contextMenu.id}?`)) return
+                  if (!(await confirm({ message: `Delete ${(node.data.label as string) || contextMenu.id}?`, title: 'Confirm Delete' }))) return
                   setNodes((nds) => nds.filter((n) => n.id !== contextMenu.id))
                   setEdges((eds) => eds.filter((e) => e.source !== contextMenu.id && e.target !== contextMenu.id))
                   setSelectedNodeInfo(null)

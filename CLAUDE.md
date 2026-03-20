@@ -52,6 +52,9 @@ agentis-studio/
 │   │   ├── SkillTestController.php
 │   │   ├── SkillVariableController.php
 │   │   ├── SkillsShController.php
+│   │   ├── EvalSuiteController.php
+│   │   ├── GotchaController.php
+│   │   ├── SkillAssetController.php
 │   │   ├── TagController.php
 │   │   ├── VersionController.php
 │   │   └── WebhookController.php
@@ -136,7 +139,7 @@ agentis-studio/
 
 ## Database Schema
 
-Tables: `projects`, `project_providers`, `skills`, `skill_versions`, `tags`, `skill_tag` (pivot), `library_skills`, `app_settings`, `agents`, `project_agent` (pivot), `agent_skill` (pivot), `marketplace_skills`, `webhooks`, `webhook_deliveries`, `skill_variables`, `workflows`, `workflow_steps`, `workflow_edges`, `workflow_versions`, `execution_runs`, `execution_steps`, `agent_memories`, `agent_schedules`, `organizations`, `organization_user` (pivot), `organization_invitations`, `sso_providers`, `content_policies`, `guardrail_policies`, `guardrail_profiles`, `guardrail_violations`, `custom_endpoints`, `api_tokens`, `skill_reviews`, `skill_analytics`, `skill_test_cases`, `notifications`, `licenses`, `backups`.
+Tables: `projects`, `project_providers`, `skills`, `skill_versions`, `tags`, `skill_tag` (pivot), `library_skills`, `app_settings`, `agents`, `project_agent` (pivot), `agent_skill` (pivot), `marketplace_skills`, `webhooks`, `webhook_deliveries`, `skill_variables`, `workflows`, `workflow_steps`, `workflow_edges`, `workflow_versions`, `execution_runs`, `execution_steps`, `agent_memories`, `agent_schedules`, `organizations`, `organization_user` (pivot), `organization_invitations`, `sso_providers`, `content_policies`, `guardrail_policies`, `guardrail_profiles`, `guardrail_violations`, `custom_endpoints`, `api_tokens`, `skill_reviews`, `skill_analytics`, `skill_test_cases`, `notifications`, `licenses`, `backups`, `skill_gotchas`, `skill_categories`, `skill_eval_suites`, `skill_eval_prompts`, `skill_eval_runs`.
 
 - `skills.tools` is a JSON column
 - `skills.includes` is a JSON column (skill slug references)
@@ -232,10 +235,38 @@ GET            /api/projects/{id}/git-diff
 
 # Skills
 GET|POST       /api/projects/{id}/skills
+GET            /api/projects/{id}/skill-index      # Lightweight index (name + summary)
 GET|PUT|DELETE  /api/skills/{id}
 POST           /api/skills/{id}/duplicate
 GET            /api/skills/{id}/lint
 POST           /api/skills/generate
+
+# Skill Assets (folder-based skills)
+GET            /api/skills/{id}/assets
+POST           /api/skills/{id}/assets
+GET            /api/skills/{id}/assets/{path}
+DELETE         /api/skills/{id}/assets/{path}
+
+# Skill Gotchas
+GET            /api/skills/{id}/gotchas
+POST           /api/skills/{id}/gotchas
+PUT            /api/gotchas/{id}
+DELETE         /api/gotchas/{id}
+POST           /api/gotchas/{id}/resolve
+POST           /api/gotchas/{id}/reopen
+
+# Skill Categories
+GET            /api/skill-categories
+
+# Eval Suites
+GET|POST       /api/skills/{id}/eval-suites
+GET|PUT|DELETE /api/eval-suites/{id}
+POST           /api/eval-suites/{id}/prompts
+PUT|DELETE     /api/eval-prompts/{id}
+POST           /api/eval-suites/{id}/run
+GET            /api/eval-suites/{id}/runs
+GET            /api/eval-runs/{id}
+GET            /api/skills/{id}/score-description
 
 # Bulk Operations
 POST           /api/skills/bulk-tag

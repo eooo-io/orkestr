@@ -36,6 +36,7 @@ import {
   restoreWorkflowVersion,
   exportWorkflow,
 } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useAppStore } from '@/store/useAppStore'
 import { workflowNodeTypes } from '@/components/workflows/WorkflowNodes'
 import { WorkflowPropertiesPanel } from '@/components/workflows/WorkflowPropertiesPanel'
@@ -60,6 +61,7 @@ export function WorkflowBuilder() {
   const { id: projectId, workflowId } = useParams<{ id: string; workflowId: string }>()
   const navigate = useNavigate()
   const { showToast } = useAppStore()
+  const confirm = useConfirm()
 
   const pid = Number(projectId)
   const wid = workflowId && workflowId !== 'new' ? Number(workflowId) : null
@@ -466,7 +468,7 @@ export function WorkflowBuilder() {
 
   const handleRestore = async (versionNumber: number) => {
     if (!wid) return
-    if (!confirm(`Restore version ${versionNumber}? Current state will be overwritten.`)) return
+    if (!(await confirm({ message: `Restore version ${versionNumber}? Current state will be overwritten.`, title: 'Confirm Restore' }))) return
     try {
       await restoreWorkflowVersion(pid, wid, versionNumber)
       showToast('Version restored', 'success')

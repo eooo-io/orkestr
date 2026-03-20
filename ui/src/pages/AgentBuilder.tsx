@@ -20,6 +20,7 @@ import {
   Eye,
 } from 'lucide-react'
 import { fetchAgent, createAgent, updateAgent, deleteAgent, exportAgent, fetchModels } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useAppStore } from '@/store/useAppStore'
 import type { Agent, ModelGroup } from '@/types'
 
@@ -101,6 +102,7 @@ export function AgentBuilder() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { showToast } = useAppStore()
+  const confirm = useConfirm()
   const isNew = !id
 
   const [agent, setAgent] = useState<Partial<Agent>>(EMPTY_AGENT)
@@ -169,7 +171,7 @@ export function AgentBuilder() {
 
   const handleDelete = async () => {
     if (!id) return
-    if (!confirm('Delete this agent? This cannot be undone.')) return
+    if (!(await confirm({ message: 'Delete this agent? This cannot be undone.', title: 'Confirm Delete' }))) return
     try {
       await deleteAgent(parseInt(id))
       showToast('Agent deleted', 'success')

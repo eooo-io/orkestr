@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { FileText, Tag, Coins, Check } from 'lucide-react'
+import { FileText, Tag, Coins, Check, Trash2 } from 'lucide-react'
+import { useConfirm } from '@/hooks/useConfirm'
 import type { Skill } from '@/types'
 
 function formatTokens(n: number): string {
@@ -12,13 +13,24 @@ interface SkillCardProps {
   selectable?: boolean
   selected?: boolean
   onToggleSelect?: (id: number) => void
+  onDelete?: (id: number) => void
 }
 
-export function SkillCard({ skill, selectable, selected, onToggleSelect }: SkillCardProps) {
+export function SkillCard({ skill, selectable, selected, onToggleSelect, onDelete }: SkillCardProps) {
+  const confirm = useConfirm()
+
   const handleCheckboxClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     onToggleSelect?.(skill.id)
+  }
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (await confirm({ message: `Delete "${skill.name}"?`, title: 'Confirm Delete' })) {
+      onDelete?.(skill.id)
+    }
   }
 
   const card = (
@@ -49,12 +61,23 @@ export function SkillCard({ skill, selectable, selected, onToggleSelect }: Skill
               <h3 className="font-medium text-sm group-hover:text-primary transition-all duration-150 truncate">
                 {skill.name}
               </h3>
-              {skill.token_estimate > 0 && (
-                <span className="text-[10px] px-1.5 py-0.5 bg-muted text-muted-foreground font-mono flex items-center gap-0.5 shrink-0">
-                  <Coins className="h-2.5 w-2.5" />
-                  {formatTokens(skill.token_estimate)}
-                </span>
-              )}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {skill.token_estimate > 0 && (
+                  <span className="text-[10px] px-1.5 py-0.5 bg-muted text-muted-foreground font-mono flex items-center gap-0.5">
+                    <Coins className="h-2.5 w-2.5" />
+                    {formatTokens(skill.token_estimate)}
+                  </span>
+                )}
+                {onDelete && (
+                  <button
+                    onClick={handleDelete}
+                    className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all duration-150"
+                    title="Delete skill"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
             {skill.description && (
               <p className="text-xs text-muted-foreground mt-1 line-clamp-2">

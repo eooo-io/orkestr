@@ -20,6 +20,7 @@ import {
   fetchModels,
   fetchSettings,
 } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useAppStore } from '@/store/useAppStore'
 import { Button } from '@/components/ui/button'
 import type { Project, ModelGroup } from '@/types'
@@ -87,6 +88,7 @@ export function ProjectForm() {
   const navigate = useNavigate()
   const isEdit = !!id
   const { showToast, loadProjects } = useAppStore()
+  const confirm = useConfirm()
 
   const [loading, setLoading] = useState(isEdit)
   const [saving, setSaving] = useState(false)
@@ -202,7 +204,7 @@ export function ProjectForm() {
   }
 
   const handleDelete = async () => {
-    if (!confirm('Delete this project and all its skills? This cannot be undone.'))
+    if (!(await confirm({ message: 'Delete this project and all its skills? This cannot be undone.', title: 'Confirm Delete' })))
       return
 
     try {

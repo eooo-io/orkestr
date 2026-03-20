@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\ArtifactController;
 use App\Http\Controllers\BundleController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\SkillsShController;
@@ -10,6 +11,9 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\BulkSkillController;
 use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\ModelController;
+use App\Http\Controllers\EvalSuiteController;
+use App\Http\Controllers\GotchaController;
+use App\Http\Controllers\SkillAssetController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SkillGenerateController;
 use App\Http\Controllers\SkillTestController;
@@ -70,6 +74,13 @@ use App\Http\Controllers\DataSourceController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExecutionStreamController;
 use App\Http\Controllers\KnowledgeController;
+use App\Http\Controllers\NotificationChannelController;
+use App\Http\Controllers\AgentProcessController;
+use App\Http\Controllers\ApprovalGateController;
+use App\Http\Controllers\EventBusController;
+use App\Http\Controllers\VaultController;
+use App\Http\Controllers\AgentIdentityController;
+use App\Http\Controllers\AgentLifecycleController;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes (no auth required) ────────────────────────
@@ -126,6 +137,7 @@ Route::middleware('auth:web')->group(function () {
 
     // Skills (nested under project for create/index)
     Route::get('/projects/{project}/skills', [SkillController::class, 'index']);
+    Route::get('/projects/{project}/skill-index', [SkillController::class, 'skillIndex']);
     Route::post('/projects/{project}/skills', [SkillController::class, 'store'])->middleware('org-role:editor');
 
     // Bulk Skill Operations (must be before /skills/{skill} routes)
@@ -140,6 +152,20 @@ Route::middleware('auth:web')->group(function () {
     Route::delete('/skills/{skill}', [SkillController::class, 'destroy'])->middleware('org-role:editor');
     Route::post('/skills/{skill}/duplicate', [SkillController::class, 'duplicate']);
     Route::get('/skills/{skill}/lint', [SkillController::class, 'lint']);
+
+    // Skill Assets (folder-based skills)
+    Route::get('/skills/{skill}/assets', [SkillAssetController::class, 'index']);
+    Route::post('/skills/{skill}/assets', [SkillAssetController::class, 'store'])->middleware('org-role:editor');
+    Route::get('/skills/{skill}/assets/{path}', [SkillAssetController::class, 'show'])->where('path', '.*');
+    Route::delete('/skills/{skill}/assets/{path}', [SkillAssetController::class, 'destroy'])->where('path', '.*')->middleware('org-role:editor');
+
+    // Skill Gotchas
+    Route::get('/skills/{skill}/gotchas', [GotchaController::class, 'index']);
+    Route::post('/skills/{skill}/gotchas', [GotchaController::class, 'store'])->middleware('org-role:editor');
+    Route::put('/gotchas/{skill_gotcha}', [GotchaController::class, 'update'])->middleware('org-role:editor');
+    Route::delete('/gotchas/{skill_gotcha}', [GotchaController::class, 'destroy'])->middleware('org-role:editor');
+    Route::post('/gotchas/{skill_gotcha}/resolve', [GotchaController::class, 'resolve'])->middleware('org-role:editor');
+    Route::post('/gotchas/{skill_gotcha}/reopen', [GotchaController::class, 'reopen'])->middleware('org-role:editor');
 
     // Skill Template Variables
     Route::get('/projects/{project}/skills/{skill}/variables', [SkillVariableController::class, 'index']);
@@ -156,6 +182,37 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/skills/{skill}/versions', [VersionController::class, 'index']);
     Route::get('/skills/{skill}/versions/{versionNumber}', [VersionController::class, 'show']);
     Route::post('/skills/{skill}/versions/{versionNumber}/restore', [VersionController::class, 'restore']);
+
+    // Artifacts
+    Route::get('/projects/{project}/artifacts', [ArtifactController::class, 'index']);
+    Route::post('/projects/{project}/artifacts', [ArtifactController::class, 'store'])->middleware('org-role:editor');
+    Route::get('/artifacts/{artifact}', [ArtifactController::class, 'show']);
+    Route::put('/artifacts/{artifact}', [ArtifactController::class, 'update'])->middleware('org-role:editor');
+    Route::delete('/artifacts/{artifact}', [ArtifactController::class, 'destroy'])->middleware('org-role:editor');
+    Route::get('/artifacts/{artifact}/versions', [ArtifactController::class, 'versions']);
+    Route::post('/artifacts/{artifact}/approve', [ArtifactController::class, 'approve'])->middleware('org-role:editor');
+    Route::post('/artifacts/{artifact}/reject', [ArtifactController::class, 'reject'])->middleware('org-role:editor');
+    Route::get('/artifacts/{artifact}/download', [ArtifactController::class, 'download']);
+    Route::get('/executions/{executionRun}/artifacts', [ArtifactController::class, 'forExecution']);
+
+    // Eval Suites
+    Route::get('/skills/{skill}/eval-suites', [EvalSuiteController::class, 'index']);
+    Route::post('/skills/{skill}/eval-suites', [EvalSuiteController::class, 'store'])->middleware('org-role:editor');
+    Route::get('/eval-suites/{eval_suite}', [EvalSuiteController::class, 'show']);
+    Route::put('/eval-suites/{eval_suite}', [EvalSuiteController::class, 'update'])->middleware('org-role:editor');
+    Route::delete('/eval-suites/{eval_suite}', [EvalSuiteController::class, 'destroy'])->middleware('org-role:editor');
+    Route::post('/eval-suites/{eval_suite}/prompts', [EvalSuiteController::class, 'storePrompt'])->middleware('org-role:editor');
+    Route::put('/eval-prompts/{eval_prompt}', [EvalSuiteController::class, 'updatePrompt'])->middleware('org-role:editor');
+    Route::delete('/eval-prompts/{eval_prompt}', [EvalSuiteController::class, 'destroyPrompt'])->middleware('org-role:editor');
+    Route::post('/eval-suites/{eval_suite}/run', [EvalSuiteController::class, 'run'])->middleware('org-role:editor');
+    Route::get('/eval-suites/{eval_suite}/runs', [EvalSuiteController::class, 'runs']);
+    Route::get('/eval-runs/{eval_run}', [EvalSuiteController::class, 'showRun']);
+    Route::get('/skills/{skill}/score-description', [EvalSuiteController::class, 'scoreDescription']);
+
+    // Skill Categories
+    Route::get('/skill-categories', function () {
+        return response()->json(['data' => \App\Models\SkillCategory::orderBy('sort_order')->get()]);
+    });
 
     // Tags
     Route::get('/tags', [TagController::class, 'index']);
@@ -554,4 +611,72 @@ Route::middleware('auth:web')->group(function () {
     Route::delete('/data-sources/{dataSource}', [DataSourceController::class, 'destroy'])->middleware('org-role:editor');
     Route::post('/data-sources/{dataSource}/test', [DataSourceController::class, 'test']);
     Route::put('/projects/{project}/agents/{agent}/data-sources', [DataSourceController::class, 'bindToAgent'])->middleware('org-role:editor');
+
+    // ─── Phase Q.1: Daemon Agent Processes ──────────────────────
+    Route::get('/agent-processes', [AgentProcessController::class, 'index']);
+    Route::get('/agent-processes/health-check', [AgentProcessController::class, 'healthCheck']);
+    Route::get('/projects/{project}/agents/{agent}/process', [AgentProcessController::class, 'status']);
+    Route::post('/projects/{project}/agents/{agent}/process/start', [AgentProcessController::class, 'start'])->middleware('org-role:editor');
+    Route::post('/projects/{project}/agents/{agent}/process/stop', [AgentProcessController::class, 'stop'])->middleware('org-role:editor');
+    Route::post('/projects/{project}/agents/{agent}/process/restart', [AgentProcessController::class, 'restart'])->middleware('org-role:editor');
+    Route::get('/projects/{project}/agents/{agent}/process/history', [AgentProcessController::class, 'history']);
+
+    // ─── Phase P.2: Notification Channels ────────────────────────
+    Route::get('/organizations/{organization}/notification-channels', [NotificationChannelController::class, 'index']);
+    Route::post('/organizations/{organization}/notification-channels', [NotificationChannelController::class, 'store'])->middleware('org-role:admin');
+    Route::put('/notification-channels/{notificationChannel}', [NotificationChannelController::class, 'update'])->middleware('org-role:admin');
+    Route::delete('/notification-channels/{notificationChannel}', [NotificationChannelController::class, 'destroy'])->middleware('org-role:admin');
+    Route::post('/notification-channels/{notificationChannel}/test', [NotificationChannelController::class, 'test']);
+    Route::get('/notification-channels/{notificationChannel}/deliveries', [NotificationChannelController::class, 'deliveries']);
+
+    // ─── Phase P.3: Approval Gates ──────────────────────────────
+    Route::get('/approval-gates', [ApprovalGateController::class, 'index']);
+    Route::get('/projects/{project}/approval-gates', [ApprovalGateController::class, 'projectIndex']);
+    Route::get('/approval-gates/{approvalGate}', [ApprovalGateController::class, 'show']);
+    Route::post('/approval-gates/{approvalGate}/approve', [ApprovalGateController::class, 'approve']);
+    Route::post('/approval-gates/{approvalGate}/reject', [ApprovalGateController::class, 'reject']);
+    Route::post('/approval-gates/{approvalGate}/extend', [ApprovalGateController::class, 'extend']);
+
+    // ─── Phase P.4: Event Bus ───────────────────────────────────
+    Route::get('/organizations/{organization}/event-topics', [EventBusController::class, 'topicIndex']);
+    Route::post('/organizations/{organization}/event-topics', [EventBusController::class, 'topicStore'])->middleware('org-role:admin');
+    Route::put('/event-topics/{eventTopic}', [EventBusController::class, 'topicUpdate'])->middleware('org-role:admin');
+    Route::delete('/event-topics/{eventTopic}', [EventBusController::class, 'topicDestroy'])->middleware('org-role:admin');
+    Route::get('/event-topics/{eventTopic}/events', [EventBusController::class, 'eventLog']);
+    Route::get('/event-topics/{eventTopic}/stream-info', [EventBusController::class, 'streamInfo']);
+    Route::post('/event-topics/{eventTopic}/publish', [EventBusController::class, 'publish'])->middleware('org-role:editor');
+    Route::get('/event-topics/{eventTopic}/subscriptions', [EventBusController::class, 'subscriptionIndex']);
+    Route::post('/event-topics/{eventTopic}/subscriptions', [EventBusController::class, 'subscriptionStore']);
+    Route::delete('/event-subscriptions/{eventSubscription}', [EventBusController::class, 'subscriptionDestroy']);
+
+    // ─── Phase Q.2: Credential Vault ─────────────────────────────
+    Route::get('/organizations/{organization}/vault', [VaultController::class, 'index']);
+    Route::post('/organizations/{organization}/vault', [VaultController::class, 'store'])->middleware('org-role:admin');
+    Route::get('/vault/{vaultSecret}', [VaultController::class, 'show']);
+    Route::put('/vault/{vaultSecret}', [VaultController::class, 'update'])->middleware('org-role:admin');
+    Route::delete('/vault/{vaultSecret}', [VaultController::class, 'destroy'])->middleware('org-role:admin');
+    Route::post('/vault/{vaultSecret}/rotate', [VaultController::class, 'rotate'])->middleware('org-role:admin');
+    Route::get('/vault/{vaultSecret}/grants', [VaultController::class, 'grants']);
+    Route::post('/vault/{vaultSecret}/grants', [VaultController::class, 'addGrant'])->middleware('org-role:admin');
+    Route::delete('/vault-grants/{vaultAccessGrant}', [VaultController::class, 'revokeGrant'])->middleware('org-role:admin');
+    Route::get('/vault/{vaultSecret}/audit', [VaultController::class, 'audit']);
+
+    // ─── Phase Q.3: Agent Identity ───────────────────────────────
+    Route::get('/agents/{agent}/identities', [AgentIdentityController::class, 'listIdentities']);
+    Route::post('/agents/{agent}/identities', [AgentIdentityController::class, 'createIdentity'])->middleware('org-role:editor');
+    Route::delete('/agent-identities/{agentIdentity}', [AgentIdentityController::class, 'deleteIdentity'])->middleware('org-role:editor');
+    Route::get('/projects/{project}/agents/{agent}/quota', [AgentIdentityController::class, 'getQuota']);
+    Route::put('/projects/{project}/agents/{agent}/quota', [AgentIdentityController::class, 'updateQuota'])->middleware('org-role:editor');
+    Route::get('/agents/{agent}/permissions', [AgentIdentityController::class, 'listPermissions']);
+    Route::post('/agents/{agent}/permissions', [AgentIdentityController::class, 'setPermission'])->middleware('org-role:editor');
+    Route::delete('/agent-permissions/{agentPermission}', [AgentIdentityController::class, 'deletePermission'])->middleware('org-role:editor');
+
+    // ─── Phase Q.4: Agent Lifecycle ──────────────────────────────
+    Route::get('/agents/{agent}/versions', [AgentLifecycleController::class, 'versions']);
+    Route::post('/agents/{agent}/versions', [AgentLifecycleController::class, 'createVersion'])->middleware('org-role:editor');
+    Route::get('/agent-versions/{agentVersion}', [AgentLifecycleController::class, 'showVersion']);
+    Route::post('/agent-versions/{agentVersion}/rollback', [AgentLifecycleController::class, 'rollback'])->middleware('org-role:editor');
+    Route::post('/projects/{project}/agents/{agent}/health-check', [AgentLifecycleController::class, 'healthChecks']);
+    Route::get('/projects/{project}/agents/{agent}/health-score', [AgentLifecycleController::class, 'healthScore']);
+    Route::post('/agents/{agent}/retire', [AgentLifecycleController::class, 'retire'])->middleware('org-role:admin');
 });

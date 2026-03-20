@@ -82,12 +82,47 @@ Phase M — Agent Runtime & Deployment  (COMPLETE)
   M.3: Scheduled & triggered — cron scheduler, webhook triggers, A2A execution, notifications.
   M.4: Agent task assignment — task model, orchestrator routing, canvas task queue, autonomous pickup.
 
-Phase N — Agent Memory & Data Sources  (PLANNED)
+Phase N — Agent Memory & Data Sources  (COMPLETE)
   N.1: Docker infrastructure — PostgreSQL + pgvector + MinIO containers.
   N.2: Agent long-term memory — embeddings, remember/recall/forget, auto-inject into context.
   N.3: Document storage — MinIO MCP server for agent-accessible file storage.
   N.4: Knowledge base — PostgreSQL MCP server for structured data per agent.
   N.5: Memory integration & UI — canvas memory panel, data source settings, execution trace.
+
+Phase O — Skill Architecture Evolution  (COMPLETE)
+  O.1: Folder-per-skill support — skill directories with assets, scripts, and reference data.
+  O.2: Progressive disclosure — tiered context loading (summary → body → assets) for compose/sync.
+  O.3: Gotcha sections & feedback loop — structured failure capture, test-runner integration.
+  O.4: Skill taxonomy & classification — first-class categories, capability uplift vs. encoded preference.
+  O.5: Eval suites & A/B testing — multi-prompt evals, with/without comparison, description quality scoring.
+
+Phase P — Agent Communication & Artifacts  (COMPLETE)
+  P.1: Artifact system — typed agent outputs (report, code, dataset, decision), versioning, preview, sharing.
+  P.2: Notification channels — Slack, Teams, email, webhook integrations for agent-to-human comms.
+  P.3: Approval gates — human-in-the-loop approval requests that block execution until resolved.
+  P.4: Event bus — pub/sub event system, agents publish/subscribe, external event ingestion.
+  P.5: Artifact UI — artifact browser, preview renderer, diff viewer, approval workflow.
+
+Phase Q — Agent Runtime & Identity  (COMPLETE)
+  Q.1: Daemon agents — long-running persistent processes with heartbeat, state management, wake-on-event.
+  Q.2: Credential vault — per-agent secret management, scoped access, rotation, audit trail.
+  Q.3: Agent identity — agent-scoped API tokens, RBAC per agent, network policies, resource quotas.
+  Q.4: Agent lifecycle — provisioning, health checks, scaling, graceful retirement, rollback.
+  Q.5: Runtime dashboard — real-time agent status, token burn rate, cost attribution, APM telemetry.
+
+Phase R — Intelligence & Extensibility  (PLANNED)
+  R.1: Natural language control plane — conversational agent/OS management via chat interface.
+  R.2: Plugin system — extension API, custom node types, custom tools, custom UI panels.
+  R.3: Agent templates marketplace — full agent configs (not just skills) installable from marketplace.
+  R.4: Cross-agent shared memory — shared memory pools, knowledge graphs, collective learning.
+  R.5: Smart task routing — agent capability matching, load balancing, SLA-aware scheduling.
+
+Phase S — Collaboration & Mobile  (PLANNED)
+  S.1: Real-time collaboration — cursor presence, live updates, collaborative debugging, comments/threads.
+  S.2: Mobile control plane — responsive PWA, push notifications, approve/reject, emergency kill switch.
+  S.3: Advanced observability — Grafana-level dashboards, custom metrics, alerting rules, cost forecasting.
+  S.4: Agent-to-agent negotiation — task bidding, capability advertisement, autonomous team formation.
+  S.5: Federation — multi-instance Orkestr clusters, cross-org agent delegation, federated identity.
 ```
 
 The existing Component Layer (skills, provider sync, MCP, A2A) remains the foundation. Each phase builds on the previous.

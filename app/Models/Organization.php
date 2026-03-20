@@ -94,6 +94,11 @@ class Organization extends Model
         return $this->hasMany(GuardrailViolation::class);
     }
 
+    public function vaultSecrets(): HasMany
+    {
+        return $this->hasMany(VaultSecret::class);
+    }
+
     public function isOnPlan(string $plan): bool
     {
         return $this->plan === $plan;

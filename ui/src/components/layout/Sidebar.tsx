@@ -18,6 +18,7 @@ import {
   FileCheck,
   BarChart3,
   History,
+  Cpu,
 } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { useTheme } from '@/hooks/useTheme'
@@ -60,6 +61,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       label: 'Operate',
       items: [
         { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { to: '/runtime', label: 'Runtime', icon: Cpu },
         { to: '/replay', label: 'Replay', icon: History },
         { to: '/performance', label: 'Performance', icon: TrendingUp },
         { to: '/analytics', label: 'Analytics', icon: BarChart3 },

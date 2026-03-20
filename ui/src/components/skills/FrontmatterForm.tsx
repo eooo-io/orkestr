@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Coins, Link2, Variable, Plus, Trash2, Filter } from 'lucide-react'
-import { estimateTokens } from '@/api/client'
+import { estimateTokens, fetchSkillCategories } from '@/api/client'
 import ConditionsEditor from '@/components/skills/ConditionsEditor'
-import type { Skill, TemplateVariable, SkillConditions } from '@/types'
+import type { Skill, SkillCategory, TemplateVariable, SkillConditions } from '@/types'
 
 const MODEL_CONTEXT_LIMITS: Record<string, number> = {
   'claude-opus-4-6': 200000,
@@ -35,10 +35,15 @@ const MODELS = [
 ]
 
 export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterFormProps) {
+  const [categories, setCategories] = useState<SkillCategory[]>([])
   const currentIncludes = (skill.includes as string[]) || []
   const availableSkills = (projectSkills || []).filter(
     (s) => s.slug !== skill.slug,
   )
+
+  useEffect(() => {
+    fetchSkillCategories().then(setCategories).catch(() => {})
+  }, [])
 
   const toggleInclude = (slug: string) => {
     const newIncludes = currentIncludes.includes(slug)
@@ -92,6 +97,61 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
           className="mt-1 w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
           placeholder="Brief description"
         />
+      </div>
+
+      <div>
+        <label className="text-xs font-medium text-muted-foreground">
+          Summary{' '}
+          <span className="text-muted-foreground/60 font-normal">
+            (tier-1 hint for progressive disclosure, max 500 chars)
+          </span>
+        </label>
+        <textarea
+          value={skill.summary || ''}
+          onChange={(e) => onChange('summary', e.target.value || null)}
+          maxLength={500}
+          rows={2}
+          className="mt-1 w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+          placeholder="Short summary for agent context index (~100 tokens)"
+        />
+        <div className="text-right text-[10px] text-muted-foreground/60 mt-0.5">
+          {(skill.summary || '').length}/500
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-medium text-muted-foreground">
+            Category
+          </label>
+          <select
+            value={skill.category_id ?? ''}
+            onChange={(e) => onChange('category_id', e.target.value ? parseInt(e.target.value) : null)}
+            className="mt-1 w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="">None</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground">
+            Skill Type
+          </label>
+          <select
+            value={skill.skill_type ?? ''}
+            onChange={(e) => onChange('skill_type', e.target.value || null)}
+            className="mt-1 w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="">None</option>
+            <option value="capability_uplift">Capability Uplift</option>
+            <option value="encoded_preference">Encoded Preference</option>
+            <option value="hybrid">Hybrid</option>
+          </select>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

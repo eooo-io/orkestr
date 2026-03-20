@@ -23,6 +23,7 @@ import {
   fetchGuardrailViolations,
   dismissGuardrailViolation,
 } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import type {
   GuardrailPolicy,
   GuardrailProfile,
@@ -44,6 +45,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 // ─── Policies Tab ─────────────────────────────────────────────
 
 function PoliciesTab() {
+  const confirm = useConfirm()
   const [policies, setPolicies] = useState<GuardrailPolicy[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -117,7 +119,7 @@ function PoliciesTab() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this policy?')) return
+    if (!(await confirm({ message: 'Delete this policy?', title: 'Confirm Delete' }))) return
     try {
       await deleteGuardrailPolicy(id)
       await load()
@@ -256,6 +258,7 @@ function PoliciesTab() {
 // ─── Profiles Tab ─────────────────────────────────────────────
 
 function ProfilesTab() {
+  const confirm = useConfirm()
   const [profiles, setProfiles] = useState<GuardrailProfile[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -292,7 +295,7 @@ function ProfilesTab() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this profile?')) return
+    if (!(await confirm({ message: 'Delete this profile?', title: 'Confirm Delete' }))) return
     try {
       await deleteGuardrailProfile(id)
       await load()

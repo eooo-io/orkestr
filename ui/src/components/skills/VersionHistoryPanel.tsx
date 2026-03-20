@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { History, RotateCcw, GitCompare } from 'lucide-react'
 import { DiffEditor } from '@monaco-editor/react'
 import { fetchVersions, restoreVersion } from '@/api/client'
+import { useConfirm } from '@/hooks/useConfirm'
 import { Button } from '@/components/ui/button'
 import type { SkillVersion } from '@/types'
 
@@ -14,6 +15,7 @@ export function VersionHistoryPanel({
   skillId,
   onRestore,
 }: VersionHistoryPanelProps) {
+  const confirm = useConfirm()
   const [versions, setVersions] = useState<SkillVersion[]>([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<number[]>([])
@@ -40,7 +42,7 @@ export function VersionHistoryPanel({
   }
 
   const handleRestore = async (versionNumber: number) => {
-    if (!confirm(`Restore to version ${versionNumber}? This creates a new version.`))
+    if (!(await confirm({ message: `Restore to version ${versionNumber}? This creates a new version.`, title: 'Confirm Restore' })))
       return
 
     setRestoring(true)

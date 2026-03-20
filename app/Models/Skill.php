@@ -16,6 +16,7 @@ class Skill extends Model
         'slug',
         'name',
         'description',
+        'summary',
         'model',
         'max_tokens',
         'tools',
@@ -23,6 +24,8 @@ class Skill extends Model
         'body',
         'conditions',
         'template_variables',
+        'category_id',
+        'skill_type',
         'owner_id',
         'codeowners',
         'extends_skill_id',
@@ -57,6 +60,11 @@ class Skill extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(SkillCategory::class, 'category_id');
     }
 
     public function versions(): HasMany
@@ -108,5 +116,20 @@ class Skill extends Model
     public function analytics(): HasMany
     {
         return $this->hasMany(SkillAnalytic::class);
+    }
+
+    public function gotchas(): HasMany
+    {
+        return $this->hasMany(SkillGotcha::class);
+    }
+
+    public function evalSuites(): HasMany
+    {
+        return $this->hasMany(SkillEvalSuite::class);
+    }
+
+    public function activeGotchas(): HasMany
+    {
+        return $this->hasMany(SkillGotcha::class)->whereNull('resolved_at');
     }
 }

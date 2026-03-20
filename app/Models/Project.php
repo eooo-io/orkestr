@@ -144,4 +144,9 @@ class Project extends Model
     {
         return $this->hasMany(AgentTask::class);
     }
+
+    public function artifacts(): HasMany
+    {
+        return $this->hasMany(Artifact::class);
+    }
 }

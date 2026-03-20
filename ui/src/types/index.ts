@@ -28,6 +28,144 @@ export interface SkillVariableValue {
   value: string | null
 }
 
+export interface AgentProcessInfo {
+  id: number
+  uuid: string
+  agent: { id: number; name: string; slug: string; icon: string | null }
+  project: { id: number; name: string }
+  status: 'starting' | 'running' | 'idle' | 'stopping' | 'stopped' | 'crashed'
+  healthy: boolean
+  started_at: string | null
+  last_heartbeat_at: string | null
+  restart_count: number
+  uptime_seconds: number
+  total_input_tokens: number
+  total_output_tokens: number
+  iterations_completed: number
+  error_count: number
+  avg_response_ms: number
+}
+
+export interface AgentProcessStatus {
+  data: {
+    id: number
+    uuid: string
+    status: string
+    healthy: boolean
+    started_at: string | null
+    last_heartbeat_at: string | null
+    stopped_at: string | null
+    restart_count: number
+    restart_policy: string
+    state: Record<string, unknown> | null
+    stop_reason: string | null
+    uptime_seconds: number
+  } | null
+  running: boolean
+}
+
+export interface Artifact {
+  id: number
+  uuid: string
+  project_id: number
+  agent_id: number | null
+  execution_run_id: number | null
+  type: 'report' | 'code' | 'dataset' | 'decision' | 'document' | 'image' | 'other'
+  title: string
+  description: string | null
+  content: string | null
+  metadata: Record<string, unknown> | null
+  format: 'markdown' | 'json' | 'csv' | 'html' | 'pdf' | 'plain' | 'binary'
+  file_path: string | null
+  file_size: number | null
+  mime_type: string | null
+  status: 'draft' | 'pending_review' | 'approved' | 'rejected' | 'published'
+  version_number: number
+  parent_artifact_id: number | null
+  reviewed_by: number | null
+  reviewed_at: string | null
+  agent?: { id: number; name: string; slug: string; icon: string | null }
+  created_at: string
+  updated_at: string
+}
+
+export interface SkillEvalSuite {
+  id: number
+  skill_id: number
+  name: string
+  description: string | null
+  prompts_count?: number
+  runs_count?: number
+  prompts?: SkillEvalPrompt[]
+  runs?: SkillEvalRun[]
+  created_at: string
+  updated_at: string
+}
+
+export interface SkillEvalPrompt {
+  id: number
+  eval_suite_id: number
+  prompt: string
+  expected_behavior: string | null
+  grading_criteria: Record<string, unknown> | null
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface SkillEvalRun {
+  id: number
+  eval_suite_id: number
+  model: string
+  mode: 'with_skill' | 'without_skill' | 'ab_test'
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  overall_score: number | null
+  results: unknown[] | null
+  started_at: string | null
+  completed_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface DescriptionScore {
+  score: number
+  issues: string[]
+  name: string
+  description: string
+  summary: string
+}
+
+export interface SkillCategory {
+  id: number
+  slug: string
+  name: string
+  description: string | null
+  icon: string | null
+  color: string | null
+  sort_order: number
+}
+
+export interface SkillGotcha {
+  id: number
+  skill_id: number
+  title: string
+  description: string
+  severity: 'critical' | 'warning' | 'info'
+  source: 'manual' | 'test_failure' | 'execution' | 'review'
+  source_reference_id: number | null
+  resolved_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SkillAsset {
+  path: string
+  name: string
+  directory: string
+  size: number
+  type: string
+}
+
 export interface Skill {
   id: number
   uuid: string
@@ -35,6 +173,7 @@ export interface Skill {
   slug: string
   name: string
   description: string | null
+  summary: string | null
   model: string | null
   max_tokens: number | null
   tools: string[]
@@ -45,6 +184,12 @@ export interface Skill {
   resolved_body: string
   tags: string[]
   token_estimate: number
+  category_id: number | null
+  category: { slug: string; name: string; icon: string | null; color: string | null } | null
+  skill_type: 'capability_uplift' | 'encoded_preference' | 'hybrid' | null
+  is_folder: boolean
+  assets: SkillAsset[]
+  asset_count: number
   project?: Project
   created_at: string
   updated_at: string

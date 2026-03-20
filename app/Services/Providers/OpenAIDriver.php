@@ -8,13 +8,17 @@ use Illuminate\Support\Facades\File;
 
 class OpenAIDriver implements ProviderDriverInterface
 {
+    use ResolvesSkillAssets;
+
     public function generate(Project $project, Collection $skills, array $composedAgents = [], array $resolvedBodies = []): array
     {
         $output = "# Instructions\n\n";
 
         foreach ($skills as $skill) {
             $body = $resolvedBodies[$skill->id] ?? $skill->body;
-            $output .= "## {$skill->name}\n\n{$body}\n\n---\n\n";
+            $assetContext = $this->buildAssetContext($skill);
+            $fullBody = $assetContext ? "{$body}\n\n{$assetContext}" : $body;
+            $output .= "## {$skill->name}\n\n{$fullBody}\n\n---\n\n";
         }
 
         if (! empty($composedAgents)) {
