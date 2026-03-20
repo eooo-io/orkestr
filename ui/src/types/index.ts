@@ -1612,3 +1612,195 @@ export interface AgentKnowledgeEntry {
   created_at: string
   updated_at: string
 }
+
+// --- R.1: Control Plane ---
+
+export interface ControlPlaneSession {
+  id: number
+  uuid: string
+  user_id: number
+  organization_id: number | null
+  title: string | null
+  context: Record<string, unknown>
+  messages: ControlPlaneMessage[]
+  created_at: string
+  updated_at: string
+}
+
+export interface ControlPlaneMessage {
+  id: number
+  session_id: number
+  role: 'user' | 'assistant' | 'system' | 'tool_result'
+  content: string
+  tool_calls: Array<{ name: string; input: Record<string, unknown>; result?: unknown }> | null
+  metadata: Record<string, unknown> | null
+  created_at: string
+}
+
+// --- R.2: Plugin System ---
+
+export interface Plugin {
+  id: number
+  uuid: string
+  organization_id: number
+  name: string
+  slug: string
+  description: string | null
+  version: string
+  author: string | null
+  type: 'tool' | 'node' | 'panel' | 'provider' | 'composite'
+  manifest: Record<string, unknown>
+  entry_point: string
+  config: Record<string, unknown> | null
+  enabled: boolean
+  installed_at: string
+  hooks: PluginHook[]
+  created_at: string
+  updated_at: string
+}
+
+export interface PluginHook {
+  id: number
+  plugin_id: number
+  hook_name: string
+  handler: string
+  priority: number
+  enabled: boolean
+}
+
+// --- R.3: Agent Templates Marketplace ---
+
+export interface MarketplaceAgent {
+  id: number
+  uuid: string
+  name: string
+  slug: string
+  description: string
+  category: string | null
+  tags: string[]
+  agent_config: Record<string, unknown>
+  skills_config: Array<Record<string, unknown>>
+  workflow_config: Record<string, unknown> | null
+  wiring_config: Record<string, unknown> | null
+  author: string
+  author_url: string | null
+  version: string
+  downloads: number
+  upvotes: number
+  downvotes: number
+  screenshots: string[] | null
+  readme: string | null
+  created_at: string
+  updated_at: string
+}
+
+// --- R.4: Shared Memory ---
+
+export interface SharedMemoryPool {
+  id: number
+  uuid: string
+  project_id: number
+  name: string
+  slug: string
+  description: string | null
+  access_policy: 'open' | 'explicit' | 'role_based'
+  retention_days: number | null
+  entry_count?: number
+  agent_count?: number
+  agents?: Array<{ id: number; name: string; access_mode: string }>
+  created_at: string
+  updated_at: string
+}
+
+export interface SharedMemoryEntry {
+  id: number
+  uuid: string
+  pool_id: number
+  contributed_by_agent_id: number | null
+  contributor?: { id: number; name: string }
+  key: string
+  content: Record<string, unknown>
+  tags: string[] | null
+  confidence: number
+  metadata: Record<string, unknown> | null
+  expires_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface KnowledgeGraphNode {
+  id: number
+  uuid: string
+  project_id: number
+  pool_id: number | null
+  entity_type: string
+  entity_name: string
+  properties: Record<string, unknown> | null
+  created_at: string
+}
+
+export interface KnowledgeGraphEdge {
+  id: number
+  source_node_id: number
+  target_node_id: number
+  relationship: string
+  properties: Record<string, unknown> | null
+  weight: number
+  created_at: string
+}
+
+export interface KnowledgeGraph {
+  nodes: KnowledgeGraphNode[]
+  edges: KnowledgeGraphEdge[]
+}
+
+// --- R.5: Smart Routing ---
+
+export interface AgentCapability {
+  id: number
+  agent_id: number
+  project_id: number
+  agent?: { id: number; name: string; slug: string }
+  capability: string
+  proficiency: number
+  avg_duration_ms: number
+  avg_cost_microcents: number
+  success_rate: number
+  task_count: number
+  last_used_at: string | null
+}
+
+export interface RoutingRule {
+  id: number
+  uuid: string
+  project_id: number
+  name: string
+  description: string | null
+  conditions: Record<string, unknown>
+  target_strategy: 'best_fit' | 'round_robin' | 'least_loaded' | 'cost_optimized' | 'fastest'
+  target_agents: number[] | null
+  sla_config: { max_wait_seconds?: number; max_cost?: number; priority_boost?: number } | null
+  priority: number
+  enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface RoutingDecision {
+  id: number
+  task_id: number | null
+  selected_agent_id: number | null
+  selected_agent?: { id: number; name: string }
+  strategy_used: string
+  candidates: Array<{ agent_id: number; agent_name: string; score: number; breakdown: Record<string, number> }>
+  reasoning: string | null
+  sla_met: boolean
+  created_at: string
+}
+
+export interface RoutingSimulationResult {
+  selected_agent: { id: number; name: string; score: number } | null
+  strategy: string
+  candidates: Array<{ agent_id: number; agent_name: string; score: number; breakdown: Record<string, number> }>
+  reasoning: string
+}

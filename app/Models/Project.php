@@ -149,4 +149,14 @@ class Project extends Model
     {
         return $this->hasMany(Artifact::class);
     }
+
+    public function sharedMemoryPools(): HasMany
+    {
+        return $this->hasMany(SharedMemoryPool::class);
+    }
+
+    public function knowledgeGraphNodes(): HasMany
+    {
+        return $this->hasMany(KnowledgeGraphNode::class);
+    }
 }

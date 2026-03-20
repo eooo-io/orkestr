@@ -38,6 +38,9 @@ import { SetupWizard } from '@/pages/SetupWizard'
 import { ExecutionReplay } from '@/pages/ExecutionReplay'
 import { Artifacts } from '@/pages/Artifacts'
 import { RuntimeDashboard } from '@/pages/RuntimeDashboard'
+import { ControlPlane } from '@/pages/ControlPlane'
+import { Plugins } from '@/pages/Plugins'
+import { SharedMemory } from '@/pages/SharedMemory'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -119,6 +122,9 @@ function AppContent() {
                   <Route path="/replay" element={<ExecutionReplay />} />
                   <Route path="/projects/:id/artifacts" element={<Artifacts />} />
                   <Route path="/runtime" element={<RuntimeDashboard />} />
+                  <Route path="/control" element={<ControlPlane />} />
+                  <Route path="/plugins" element={<Plugins />} />
+                  <Route path="/projects/:id/shared-memory" element={<SharedMemory />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/guide" element={<UserGuide />} />
                 </Routes>

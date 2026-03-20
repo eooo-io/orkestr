@@ -19,6 +19,9 @@ import {
   BarChart3,
   History,
   Cpu,
+  Terminal,
+  Puzzle,
+  Network,
 } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { useTheme } from '@/hooks/useTheme'
@@ -62,6 +65,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       items: [
         { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { to: '/runtime', label: 'Runtime', icon: Cpu },
+        { to: '/control', label: 'Command', icon: Terminal },
         { to: '/replay', label: 'Replay', icon: History },
         { to: '/performance', label: 'Performance', icon: TrendingUp },
         { to: '/analytics', label: 'Analytics', icon: BarChart3 },
@@ -78,6 +82,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     {
       label: 'Admin',
       items: [
+        { to: '/plugins', label: 'Plugins', icon: Puzzle },
         { to: '/settings', label: 'Settings', icon: Settings },
       ],
     },

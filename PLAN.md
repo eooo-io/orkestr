@@ -110,7 +110,7 @@ Phase Q — Agent Runtime & Identity  (COMPLETE)
   Q.4: Agent lifecycle — provisioning, health checks, scaling, graceful retirement, rollback.
   Q.5: Runtime dashboard — real-time agent status, token burn rate, cost attribution, APM telemetry.
 
-Phase R — Intelligence & Extensibility  (PLANNED)
+Phase R — Intelligence & Extensibility  (COMPLETE)
   R.1: Natural language control plane — conversational agent/OS management via chat interface.
   R.2: Plugin system — extension API, custom node types, custom tools, custom UI panels.
   R.3: Agent templates marketplace — full agent configs (not just skills) installable from marketplace.
@@ -181,6 +181,16 @@ Observe (result fed back into context)
 **Phase G COMPLETE** — Self-Hosted Differentiation / Tier 2 (17 issues across 5 milestones: G.1–G.5, #401–#417).
 
 **Phase H COMPLETE** — Settings Consolidation & Filament Migration (19 issues across 7 milestones: H.1–H.7, #269–#287).
+**Phase I COMPLETE** — Interactive Canvas Builder (10 issues, 1 milestone: I.1, #288–#297).
+**Phase J COMPLETE** — OpenRouter Integration (5 issues, 1 milestone: J.1, #298–#302).
+**Phase K COMPLETE** — QA & Documentation (30 issues, 2 milestones: K.1–K.2, #303–#332).
+**Phase L COMPLETE** — Canvas Composer (37 issues, 5 milestones: L.1–L.5, #338–#374).
+**Phase M COMPLETE** — Agent Runtime & Deployment (22 issues, 4 milestones: M.1–M.4, #375–#396).
+**Phase N COMPLETE** — Agent Memory & Data Sources (29 issues, 5 milestones: N.1–N.5, #397–#425).
+**Phase O COMPLETE** — Skill Architecture Evolution (35 issues, 5 milestones: O.1–O.5, #426–#460).
+**Phase P COMPLETE** — Agent Communication & Artifacts (17 issues, 5 milestones: P.1–P.5, #461–#477).
+**Phase Q COMPLETE** — Agent Runtime & Identity (15 issues, 5 milestones: Q.1–Q.5, #478–#492).
+**Phase R COMPLETE** — Intelligence & Extensibility (12 issues, 5 milestones: R.1–R.5, #493–#504).
 
 **Strategic pivot (2026-03-15):** Repositioned from SaaS to self-hosted infrastructure software. Cloud tier is a free playground/demo funnel. The product runs on customer infra with local models, local MCP, local data. Revenue model is commercial self-hosted license.
 

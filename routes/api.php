@@ -679,4 +679,61 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/projects/{project}/agents/{agent}/health-check', [AgentLifecycleController::class, 'healthChecks']);
     Route::get('/projects/{project}/agents/{agent}/health-score', [AgentLifecycleController::class, 'healthScore']);
     Route::post('/agents/{agent}/retire', [AgentLifecycleController::class, 'retire'])->middleware('org-role:admin');
+
+    // ─── Phase R.1: Control Plane ──────────────────────────────
+    Route::get('/control-plane/sessions', [\App\Http\Controllers\ControlPlaneController::class, 'index']);
+    Route::post('/control-plane/sessions', [\App\Http\Controllers\ControlPlaneController::class, 'store']);
+    Route::get('/control-plane/sessions/{controlPlaneSession}', [\App\Http\Controllers\ControlPlaneController::class, 'show']);
+    Route::delete('/control-plane/sessions/{controlPlaneSession}', [\App\Http\Controllers\ControlPlaneController::class, 'destroy']);
+    Route::post('/control-plane/sessions/{controlPlaneSession}/chat', [\App\Http\Controllers\ControlPlaneController::class, 'chat']);
+    Route::post('/control-plane/quick', [\App\Http\Controllers\ControlPlaneController::class, 'quick']);
+
+    // ─── Phase R.2: Plugins ──────────────────────────────
+    Route::get('/plugins', [\App\Http\Controllers\PluginController::class, 'index']);
+    Route::post('/plugins', [\App\Http\Controllers\PluginController::class, 'store'])->middleware('org-role:admin');
+    Route::get('/plugins/hooks', [\App\Http\Controllers\PluginController::class, 'hooks']);
+    Route::get('/plugins/available-tools', [\App\Http\Controllers\PluginController::class, 'availableTools']);
+    Route::get('/plugins/{plugin}', [\App\Http\Controllers\PluginController::class, 'show']);
+    Route::put('/plugins/{plugin}', [\App\Http\Controllers\PluginController::class, 'update'])->middleware('org-role:admin');
+    Route::post('/plugins/{plugin}/enable', [\App\Http\Controllers\PluginController::class, 'enable'])->middleware('org-role:admin');
+    Route::post('/plugins/{plugin}/disable', [\App\Http\Controllers\PluginController::class, 'disable'])->middleware('org-role:admin');
+    Route::delete('/plugins/{plugin}', [\App\Http\Controllers\PluginController::class, 'destroy'])->middleware('org-role:admin');
+
+    // ─── Phase R.3: Agent Templates Marketplace ──────────────────────────────
+    Route::get('/marketplace/agents', [\App\Http\Controllers\MarketplaceAgentController::class, 'index']);
+    Route::get('/marketplace/agents/{marketplaceAgent}', [\App\Http\Controllers\MarketplaceAgentController::class, 'show']);
+    Route::post('/marketplace/agents/publish', [\App\Http\Controllers\MarketplaceAgentController::class, 'publish'])->middleware('org-role:editor');
+    Route::post('/marketplace/agents/{marketplaceAgent}/install', [\App\Http\Controllers\MarketplaceAgentController::class, 'install']);
+    Route::post('/marketplace/agents/{marketplaceAgent}/vote', [\App\Http\Controllers\MarketplaceAgentController::class, 'vote']);
+    Route::get('/marketplace/agents/{marketplaceAgent}/preview', [\App\Http\Controllers\MarketplaceAgentController::class, 'preview']);
+
+    // ─── Phase R.4: Shared Memory ──────────────────────────────
+    Route::get('/projects/{project}/shared-pools', [\App\Http\Controllers\SharedMemoryController::class, 'index']);
+    Route::post('/projects/{project}/shared-pools', [\App\Http\Controllers\SharedMemoryController::class, 'store'])->middleware('org-role:editor');
+    Route::get('/shared-pools/{sharedMemoryPool}', [\App\Http\Controllers\SharedMemoryController::class, 'show']);
+    Route::put('/shared-pools/{sharedMemoryPool}', [\App\Http\Controllers\SharedMemoryController::class, 'update'])->middleware('org-role:editor');
+    Route::delete('/shared-pools/{sharedMemoryPool}', [\App\Http\Controllers\SharedMemoryController::class, 'destroy'])->middleware('org-role:admin');
+    Route::post('/shared-pools/{sharedMemoryPool}/agents', [\App\Http\Controllers\SharedMemoryController::class, 'addAgent'])->middleware('org-role:editor');
+    Route::delete('/shared-pools/{sharedMemoryPool}/agents/{agent}', [\App\Http\Controllers\SharedMemoryController::class, 'removeAgent'])->middleware('org-role:editor');
+    Route::get('/shared-pools/{sharedMemoryPool}/entries', [\App\Http\Controllers\SharedMemoryController::class, 'entries']);
+    Route::post('/shared-pools/{sharedMemoryPool}/entries', [\App\Http\Controllers\SharedMemoryController::class, 'storeEntry'])->middleware('org-role:editor');
+    Route::get('/shared-pools/{sharedMemoryPool}/recall', [\App\Http\Controllers\SharedMemoryController::class, 'recall']);
+    Route::get('/shared-pools/{sharedMemoryPool}/contributors', [\App\Http\Controllers\SharedMemoryController::class, 'contributors']);
+
+    Route::get('/projects/{project}/knowledge-graph', [\App\Http\Controllers\KnowledgeGraphController::class, 'show']);
+    Route::post('/projects/{project}/knowledge-graph/nodes', [\App\Http\Controllers\KnowledgeGraphController::class, 'storeNode'])->middleware('org-role:editor');
+    Route::post('/projects/{project}/knowledge-graph/edges', [\App\Http\Controllers\KnowledgeGraphController::class, 'storeEdge'])->middleware('org-role:editor');
+    Route::get('/projects/{project}/knowledge-graph/query', [\App\Http\Controllers\KnowledgeGraphController::class, 'query']);
+    Route::delete('/knowledge-graph-nodes/{knowledgeGraphNode}', [\App\Http\Controllers\KnowledgeGraphController::class, 'destroyNode'])->middleware('org-role:editor');
+
+    // ─── Phase R.5: Smart Routing ──────────────────────────────
+    Route::get('/projects/{project}/routing-rules', [\App\Http\Controllers\TaskRouterController::class, 'rules']);
+    Route::post('/projects/{project}/routing-rules', [\App\Http\Controllers\TaskRouterController::class, 'storeRule'])->middleware('org-role:editor');
+    Route::put('/routing-rules/{routingRule}', [\App\Http\Controllers\TaskRouterController::class, 'updateRule'])->middleware('org-role:editor');
+    Route::delete('/routing-rules/{routingRule}', [\App\Http\Controllers\TaskRouterController::class, 'destroyRule'])->middleware('org-role:admin');
+    Route::get('/projects/{project}/agent-capabilities', [\App\Http\Controllers\TaskRouterController::class, 'capabilities']);
+    Route::get('/agents/{agent}/capabilities', [\App\Http\Controllers\TaskRouterController::class, 'agentCapabilities']);
+    Route::post('/agents/{agent}/capabilities/infer', [\App\Http\Controllers\TaskRouterController::class, 'inferCapabilities'])->middleware('org-role:editor');
+    Route::get('/projects/{project}/routing-decisions', [\App\Http\Controllers\TaskRouterController::class, 'decisions']);
+    Route::post('/projects/{project}/routing-rules/simulate', [\App\Http\Controllers\TaskRouterController::class, 'simulate']);
 });

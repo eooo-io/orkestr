@@ -111,6 +111,18 @@ import type {
   Artifact,
   AgentProcessInfo,
   AgentProcessStatus,
+  ControlPlaneSession,
+  Plugin,
+  MarketplaceAgent,
+  SharedMemoryPool,
+  SharedMemoryEntry,
+  KnowledgeGraph,
+  KnowledgeGraphNode,
+  KnowledgeGraphEdge,
+  AgentCapability,
+  RoutingRule,
+  RoutingDecision,
+  RoutingSimulationResult,
 } from '@/types'
 
 const api = axios.create({
@@ -1820,5 +1832,152 @@ export const testDataSource = (id: number) =>
 
 export const bindAgentDataSources = (projectId: number, agentId: number, dataSourceIds: number[]) =>
   api.put(`/projects/${projectId}/agents/${agentId}/data-sources`, { data_source_ids: dataSourceIds })
+
+// ─── R.1: Control Plane ──────────────────────────────────
+
+export const fetchControlPlaneSessions = () =>
+  api.get<ApiResponse<ControlPlaneSession[]>>('/control-plane/sessions').then((r) => r.data.data)
+
+export const createControlPlaneSession = (data?: { title?: string }) =>
+  api.post<ApiResponse<ControlPlaneSession>>('/control-plane/sessions', data ?? {}).then((r) => r.data.data)
+
+export const fetchControlPlaneSession = (id: number) =>
+  api.get<ApiResponse<ControlPlaneSession>>(`/control-plane/sessions/${id}`).then((r) => r.data.data)
+
+export const deleteControlPlaneSession = (id: number) =>
+  api.delete(`/control-plane/sessions/${id}`)
+
+export const controlPlaneQuick = (message: string) =>
+  api.post<ApiResponse<{ response: string }>>('/control-plane/quick', { message }).then((r) => r.data.data)
+
+// Chat uses SSE streaming — use EventSource directly in the component
+
+// ─── R.2: Plugins ──────────────────────────────────
+
+export const fetchPlugins = (type?: string) =>
+  api.get<ApiResponse<Plugin[]>>('/plugins', { params: { type } }).then((r) => r.data.data)
+
+export const installPlugin = (manifest: Record<string, unknown>) =>
+  api.post<ApiResponse<Plugin>>('/plugins', { manifest }).then((r) => r.data.data)
+
+export const fetchPlugin = (id: number) =>
+  api.get<ApiResponse<Plugin>>(`/plugins/${id}`).then((r) => r.data.data)
+
+export const updatePluginConfig = (id: number, config: Record<string, unknown>) =>
+  api.put<ApiResponse<Plugin>>(`/plugins/${id}`, { config }).then((r) => r.data.data)
+
+export const enablePlugin = (id: number) =>
+  api.post<ApiResponse<Plugin>>(`/plugins/${id}/enable`).then((r) => r.data.data)
+
+export const disablePlugin = (id: number) =>
+  api.post<ApiResponse<Plugin>>(`/plugins/${id}/disable`).then((r) => r.data.data)
+
+export const uninstallPlugin = (id: number) =>
+  api.delete(`/plugins/${id}`)
+
+export const fetchPluginHookPoints = () =>
+  api.get<ApiResponse<string[]>>('/plugins/hooks').then((r) => r.data.data)
+
+export const fetchPluginTools = () =>
+  api.get<ApiResponse<Array<{ plugin: string; tools: Array<{ name: string; description: string }> }>>>('/plugins/available-tools').then((r) => r.data.data)
+
+// ─── R.3: Agent Templates Marketplace ──────────────────────────────────
+
+export const fetchMarketplaceAgents = (params?: { category?: string; q?: string; sort?: string }) =>
+  api.get<ApiResponse<MarketplaceAgent[]>>('/marketplace/agents', { params }).then((r) => r.data.data)
+
+export const fetchMarketplaceAgent = (id: number) =>
+  api.get<ApiResponse<MarketplaceAgent>>(`/marketplace/agents/${id}`).then((r) => r.data.data)
+
+export const publishMarketplaceAgent = (data: { agent_id: number; project_id: number; description: string; category?: string; tags?: string[]; readme?: string }) =>
+  api.post<ApiResponse<MarketplaceAgent>>('/marketplace/agents/publish', data).then((r) => r.data.data)
+
+export const installMarketplaceAgent = (id: number, projectId: number) =>
+  api.post<ApiResponse<{ agent_id: number }>>(`/marketplace/agents/${id}/install`, { project_id: projectId }).then((r) => r.data.data)
+
+export const voteMarketplaceAgent = (id: number, direction: 'up' | 'down') =>
+  api.post(`/marketplace/agents/${id}/vote`, { direction })
+
+export const previewMarketplaceAgent = (id: number) =>
+  api.get<ApiResponse<{ agent: Record<string, unknown>; skills: Array<{ name: string; description: string }>; tool_count: number }>>(`/marketplace/agents/${id}/preview`).then((r) => r.data.data)
+
+// ─── R.4: Shared Memory ──────────────────────────────────
+
+export const fetchSharedPools = (projectId: number) =>
+  api.get<ApiResponse<SharedMemoryPool[]>>(`/projects/${projectId}/shared-pools`).then((r) => r.data.data)
+
+export const createSharedPool = (projectId: number, data: { name: string; description?: string; access_policy?: string; retention_days?: number }) =>
+  api.post<ApiResponse<SharedMemoryPool>>(`/projects/${projectId}/shared-pools`, data).then((r) => r.data.data)
+
+export const fetchSharedPool = (id: number) =>
+  api.get<ApiResponse<SharedMemoryPool>>(`/shared-pools/${id}`).then((r) => r.data.data)
+
+export const updateSharedPool = (id: number, data: Partial<{ name: string; description: string; access_policy: string; retention_days: number }>) =>
+  api.put<ApiResponse<SharedMemoryPool>>(`/shared-pools/${id}`, data).then((r) => r.data.data)
+
+export const deleteSharedPool = (id: number) =>
+  api.delete(`/shared-pools/${id}`)
+
+export const addAgentToPool = (poolId: number, agentId: number, accessMode: string = 'write') =>
+  api.post(`/shared-pools/${poolId}/agents`, { agent_id: agentId, access_mode: accessMode })
+
+export const removeAgentFromPool = (poolId: number, agentId: number) =>
+  api.delete(`/shared-pools/${poolId}/agents/${agentId}`)
+
+export const fetchPoolEntries = (poolId: number, params?: { q?: string; page?: number }) =>
+  api.get<ApiResponse<SharedMemoryEntry[]>>(`/shared-pools/${poolId}/entries`, { params }).then((r) => r.data.data)
+
+export const createPoolEntry = (poolId: number, data: { key: string; content: Record<string, unknown>; tags?: string[]; confidence?: number }) =>
+  api.post<ApiResponse<SharedMemoryEntry>>(`/shared-pools/${poolId}/entries`, data).then((r) => r.data.data)
+
+export const recallFromPool = (poolId: number, query: string, limit: number = 10) =>
+  api.get<ApiResponse<SharedMemoryEntry[]>>(`/shared-pools/${poolId}/recall`, { params: { q: query, limit } }).then((r) => r.data.data)
+
+export const fetchPoolContributors = (poolId: number) =>
+  api.get<ApiResponse<Array<{ agent_id: number; agent_name: string; count: number; last_at: string }>>>(`/shared-pools/${poolId}/contributors`).then((r) => r.data.data)
+
+export const fetchKnowledgeGraph = (projectId: number) =>
+  api.get<ApiResponse<KnowledgeGraph>>(`/projects/${projectId}/knowledge-graph`).then((r) => r.data.data)
+
+export const createGraphNode = (projectId: number, data: { entity_type: string; entity_name: string; properties?: Record<string, unknown> }) =>
+  api.post<ApiResponse<KnowledgeGraphNode>>(`/projects/${projectId}/knowledge-graph/nodes`, data).then((r) => r.data.data)
+
+export const createGraphEdge = (projectId: number, data: { source_node_id: number; target_node_id: number; relationship: string; weight?: number }) =>
+  api.post<ApiResponse<KnowledgeGraphEdge>>(`/projects/${projectId}/knowledge-graph/edges`, data).then((r) => r.data.data)
+
+export const queryKnowledgeGraph = (projectId: number, params: { entity_name?: string; entity_type?: string; hops?: number }) =>
+  api.get<ApiResponse<KnowledgeGraph>>(`/projects/${projectId}/knowledge-graph/query`, { params }).then((r) => r.data.data)
+
+export const deleteGraphNode = (nodeId: number) =>
+  api.delete(`/knowledge-graph-nodes/${nodeId}`)
+
+// ─── R.5: Smart Routing ──────────────────────────────────
+
+export const fetchRoutingRules = (projectId: number) =>
+  api.get<ApiResponse<RoutingRule[]>>(`/projects/${projectId}/routing-rules`).then((r) => r.data.data)
+
+export const createRoutingRule = (projectId: number, data: Partial<RoutingRule>) =>
+  api.post<ApiResponse<RoutingRule>>(`/projects/${projectId}/routing-rules`, data).then((r) => r.data.data)
+
+export const updateRoutingRule = (id: number, data: Partial<RoutingRule>) =>
+  api.put<ApiResponse<RoutingRule>>(`/routing-rules/${id}`, data).then((r) => r.data.data)
+
+export const deleteRoutingRule = (id: number) =>
+  api.delete(`/routing-rules/${id}`)
+
+export const fetchProjectCapabilities = (projectId: number) =>
+  api.get<ApiResponse<AgentCapability[]>>(`/projects/${projectId}/agent-capabilities`).then((r) => r.data.data)
+
+export const fetchAgentCapabilities = (agentId: number) =>
+  api.get<ApiResponse<AgentCapability[]>>(`/agents/${agentId}/capabilities`).then((r) => r.data.data)
+
+export const inferAgentCapabilities = (agentId: number, projectId: number) =>
+  api.post<ApiResponse<AgentCapability[]>>(`/agents/${agentId}/capabilities/infer`, { project_id: projectId }).then((r) => r.data.data)
+
+export const fetchRoutingDecisions = (projectId: number, params?: { page?: number }) =>
+  api.get<ApiResponse<RoutingDecision[]>>(`/projects/${projectId}/routing-decisions`, { params }).then((r) => r.data.data)
+
+export const simulateRouting = (projectId: number, data: { description: string; task_type?: string; priority?: number }) =>
+  api.post<ApiResponse<RoutingSimulationResult>>(`/projects/${projectId}/routing-rules/simulate`, data).then((r) => r.data.data)
 
 export default api
