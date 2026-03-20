@@ -156,14 +156,13 @@ This is not concatenation. It's directed composition — the resolution order ma
 
 Each agent is composed from three layers:
 
-```
-Base Instructions (the agent role's persona — e.g., "You are a security auditor")
-    ↓
-+ Custom Instructions (project-specific additions — e.g., "Our stack uses Laravel + React")
-    ↓
-+ Assigned Skills (resolved skill bodies, includes expanded, templates substituted)
-    ↓
-= Final System Prompt (single deployable unit)
+```mermaid
+flowchart TD
+    BI["Base Instructions\n(agent role persona — e.g., 'You are a security auditor')"]
+    CI["+ Custom Instructions\n(project-specific — e.g., 'Our stack uses Laravel + React')"]
+    AS["+ Assigned Skills\n(resolved skill bodies, includes expanded, templates substituted)"]
+    FSP["= Final System Prompt\n(single deployable unit)"]
+    BI --> CI --> AS --> FSP
 ```
 
 The `AgentComposeService` performs this merge. The result is a complete prompt that can be inspected, diffed, and deployed — without needing to understand the composition pipeline to use it.
@@ -215,10 +214,11 @@ Real orchestration requires:
 
 Workflows in Orkestr are directed acyclic graphs. Steps can branch, run in parallel, rejoin, and branch again. The `WorkflowExecutionService` resolves the DAG, evaluates conditional edges at runtime, and manages the context bus that passes data between steps.
 
-```
-Start → [Security Scan] ──────────────────────→ [Report]
-                         ├→ [Code Review] ──────→ [Report]
-                         └→ [Architecture Review] → [Report]
+```mermaid
+flowchart LR
+    Start --> SecurityScan[Security Scan] --> Report
+    Start --> CodeReview[Code Review] --> Report
+    Start --> ArchReview[Architecture Review] --> Report[Report]
 ```
 
 Three agents running in parallel. Results joined at the report step. This is not sequential invocation with extra steps. It's concurrent execution with synchronization.
@@ -233,10 +233,11 @@ This isn't just a safety feature. It's an orchestration primitive. A deployment 
 
 Workflow edges can carry conditions evaluated against the context bus. The DAG isn't static — it adapts based on what agents produce:
 
-```
-[Analyze] → (severity == "critical") → [Emergency Fix]
-          → (severity == "low")      → [Backlog]
-          → (else)                   → [Standard Review]
+```mermaid
+flowchart LR
+    Analyze -->|"severity == critical"| EmergencyFix[Emergency Fix]
+    Analyze -->|"severity == low"| Backlog
+    Analyze -->|else| StandardReview[Standard Review]
 ```
 
 **A2A delegation for cross-boundary orchestration.**

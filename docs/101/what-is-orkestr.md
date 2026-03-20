@@ -88,34 +88,30 @@ Agent systems handle sensitive data — they read your code, your documents, you
 
 ## The Platform at a Glance
 
-```
-                        ┌──────────────────────┐
-                        │   Visual Canvas       │
-                        │   Design agent teams  │
-                        │   visually            │
-                        └──────────┬───────────┘
-                                   │
-                    ┌──────────────┼──────────────┐
-                    │              │              │
-              ┌─────▼─────┐ ┌─────▼─────┐ ┌─────▼─────┐
-              │  Agent A   │ │  Agent B   │ │  Agent C   │
-              │  Security  │ │  Architect │ │  QA        │
-              └─────┬─────┘ └─────┬─────┘ └─────┬─────┘
-                    │              │              │
-         ┌──────────┼──────────────┼──────────────┤
-         │          │              │              │
-    ┌────▼───┐ ┌───▼────┐ ┌──────▼──────┐ ┌────▼────┐
-    │ Skills │ │  MCP   │ │    A2A      │ │ Memory  │
-    │        │ │ Tools  │ │ Delegation  │ │         │
-    └────────┘ └────────┘ └─────────────┘ └─────────┘
-         │          │              │              │
-         └──────────┴──────────────┴──────────────┘
-                              │
-                    ┌─────────▼─────────┐
-                    │ Execution Engine   │
-                    │ Traces, costs,     │
-                    │ guardrails, replay │
-                    └───────────────────┘
+```mermaid
+flowchart TD
+    Canvas["Visual Canvas\nDesign agent teams visually"]
+    Canvas --> AgentA["Agent A\nSecurity"]
+    Canvas --> AgentB["Agent B\nArchitect"]
+    Canvas --> AgentC["Agent C\nQA"]
+
+    AgentA --> Skills["Skills"]
+    AgentA --> MCP["MCP Tools"]
+    AgentA --> A2A["A2A Delegation"]
+    AgentA --> Memory["Memory"]
+    AgentB --> Skills
+    AgentB --> MCP
+    AgentB --> A2A
+    AgentB --> Memory
+    AgentC --> Skills
+    AgentC --> MCP
+    AgentC --> A2A
+    AgentC --> Memory
+
+    Skills --> Engine["Execution Engine\nTraces, costs, guardrails, replay"]
+    MCP --> Engine
+    A2A --> Engine
+    Memory --> Engine
 ```
 
 ## Who Is It For?

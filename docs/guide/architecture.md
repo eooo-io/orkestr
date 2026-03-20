@@ -21,17 +21,21 @@ Everything else — the three layers, the UI, the marketplace, the analytics —
 
 ## Three-Layer Architecture
 
-```
-+-----------------------------------------------+
-|          Orchestration Layer                    |
-|   Workflows, Agent Teams, Goal Decomposition   |
-+-----------------------------------------------+
-|            Agent Layer                          |
-|   Agent Loop, Execution, Memory, Tools         |
-+-----------------------------------------------+
-|          Component Layer                        |
-|   Skills, Providers, Models, Templates         |
-+-----------------------------------------------+
+```mermaid
+block-beta
+    columns 1
+    block:orch["Orchestration Layer"]:1
+        columns 3
+        W["Workflows"] T["Agent Teams"] G["Goal Decomposition"]
+    end
+    block:agent["Agent Layer"]:1
+        columns 4
+        L["Agent Loop"] E["Execution"] M["Memory"] To["Tools"]
+    end
+    block:comp["Component Layer"]:1
+        columns 4
+        S["Skills"] P["LLM Providers"] Mo["Models"] Te["Templates"]
+    end
 ```
 
 ### Component Layer
@@ -65,34 +69,19 @@ Multi-agent coordination. Workflows chain agents together, decompose goals, and 
 
 Every agent execution follows the same cycle:
 
-```
-         +-------+
-         | Goal  |
-         +---+---+
-             |
-     +-------v--------+
-     |   Perceive      |  Read context, inputs, previous results
-     +-------+---------+
-             |
-     +-------v--------+
-     |   Reason        |  LLM call with system prompt + skills + context
-     +-------+---------+
-             |
-     +-------v--------+
-     |   Act           |  Execute tools, generate output
-     +-------+---------+
-             |
-     +-------v--------+
-     |   Observe       |  Evaluate results, update memory
-     +-------+---------+
-             |
-      Goal met? -----> Done
-             |
-             No
-             |
-     +-------v--------+
-     |   Loop          |  Back to Perceive with updated context
-     +--+--------------+
+```mermaid
+flowchart TD
+    Goal["Goal"] --> Perceive
+    Perceive["Perceive<br/><small>Read context, inputs, previous results</small>"]
+    Perceive --> Reason
+    Reason["Reason<br/><small>LLM call with system prompt + skills + context</small>"]
+    Reason --> Act
+    Act["Act<br/><small>Execute tools, generate output</small>"]
+    Act --> Observe
+    Observe["Observe<br/><small>Evaluate results, update memory</small>"]
+    Observe --> Check{Goal met?}
+    Check -->|Yes| Done["Done"]
+    Check -->|No| Perceive
 ```
 
 The loop continues until the goal is satisfied, a maximum iteration count is reached, or the agent determines it cannot make further progress.
@@ -123,18 +112,13 @@ Executes multi-agent workflows. Takes a workflow definition (nodes + edges), res
 
 Orkestr runs entirely on your infrastructure:
 
-```
-+------------------+     +------------------+     +------------------+
-|  Browser (SPA)   |---->|  Laravel API     |---->|  MariaDB         |
-|  React + Vite    |     |  PHP 8.4         |     |  11.x            |
-+------------------+     +--------+---------+     +------------------+
-                                  |
-                    +-------------+-------------+
-                    |             |              |
-              +-----v----+ +-----v----+  +------v-----+
-              | Anthropic | | OpenAI   |  | Ollama     |
-              | Gemini    | | Grok     |  | vLLM / TGI |
-              +-----------+ +----------+  +------------+
+```mermaid
+graph LR
+    Browser["Browser (SPA)<br/>React + Vite"] --> API["Laravel API<br/>PHP 8.4"]
+    API --> DB["MariaDB 11.x"]
+    API --> Cloud["Anthropic<br/>Gemini"]
+    API --> Cloud2["OpenAI<br/>Grok"]
+    API --> Local["Ollama<br/>vLLM / TGI"]
 ```
 
 - The React SPA communicates with the Laravel API via session-based authentication

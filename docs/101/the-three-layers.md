@@ -59,22 +59,15 @@ The ability to take skills and deliver them to AI coding tools (Claude, Cursor, 
 
 An agent is a **complete autonomous entity**. It's not just a prompt — it's a loop:
 
-```
-Goal: "Review this pull request for security issues"
-  │
-  ▼
-Perceive → Read the PR diff, check file types, recall past reviews
-  │
-  ▼
-Reason → Analyze code patterns, identify potential vulnerabilities
-  │
-  ▼
-Act → Comment on specific lines, request changes, approve
-  │
-  ▼
-Observe → Did I cover all files? Did I miss anything?
-  │
-  └──► If not done, loop back to Perceive
+```mermaid
+flowchart TD
+    Goal["Goal\nReview this pull request for security issues"]
+    Goal --> Perceive["Perceive\nRead the PR diff, check file types, recall past reviews"]
+    Perceive --> Reason["Reason\nAnalyze code patterns, identify potential vulnerabilities"]
+    Reason --> Act["Act\nComment on specific lines, request changes, approve"]
+    Act --> Observe["Observe\nDid I cover all files? Did I miss anything?"]
+    Observe -->|Not done| Perceive
+    Observe -->|Done| End["Complete"]
 ```
 
 Each agent in Orkestr has a full definition:
@@ -95,27 +88,14 @@ Orkestr ships with 9 pre-built agents (Orchestrator, PM, Architect, QA, Design, 
 
 Orchestration coordinates multiple agents working together. It uses **workflows** — directed acyclic graphs (DAGs) where each node is an agent or decision point.
 
-```
-┌─────────┐     ┌──────────┐     ┌──────────┐
-│  Start   │────►│ Architect │────►│    QA    │
-└─────────┘     │  Agent    │     │  Agent   │
-                └──────────┘     └────┬─────┘
-                                      │
-                            ┌─────────▼──────────┐
-                            │   Human Checkpoint  │
-                            │   "Approve design?" │
-                            └─────────┬──────────┘
-                                      │
-                          ┌───────────┼───────────┐
-                          │ Yes                    │ No
-                    ┌─────▼─────┐          ┌──────▼──────┐
-                    │  CI/CD    │          │  Architect  │
-                    │  Agent    │          │  (revise)   │
-                    └─────┬─────┘          └─────────────┘
-                          │
-                    ┌─────▼─────┐
-                    │    End    │
-                    └───────────┘
+```mermaid
+flowchart TD
+    Start(["Start"]) --> Architect["Architect Agent"]
+    Architect --> QA["QA Agent"]
+    QA --> Checkpoint{"Human Checkpoint\nApprove design?"}
+    Checkpoint -->|Yes| CICD["CI/CD Agent"]
+    Checkpoint -->|No| Revise["Architect\n(revise)"]
+    CICD --> End(["End"])
 ```
 
 Workflow features:
@@ -129,34 +109,13 @@ Workflow features:
 
 ## How the Layers Interact
 
-```
-You design agents on the Canvas (Orchestration Layer)
-    │
-    │  ← Agents are composed from Skills, MCP tools, and A2A connections
-    │     (Component Layer)
-    │
-    ▼
-You build a Workflow that chains agents together
-    │
-    │  ← Each workflow step runs an agent through its
-    │     Goal → Perceive → Reason → Act → Observe loop
-    │     (Agent Layer)
-    │
-    ▼
-You click "Execute" or set up a Schedule
-    │
-    │  ← The Execution Engine runs the workflow,
-    │     tracking every step, enforcing guardrails,
-    │     and recording traces
-    │
-    ▼
-Results appear in the Execution Dashboard
-    │
-    │  ← Full traces, token costs, tool call logs,
-    │     agent memory updates, and replay capability
-    │
-    ▼
-Skills are also synced to your AI coding tools via Provider Sync
+```mermaid
+flowchart TD
+    Design["Design agents on the Canvas\n(Orchestration Layer)"]
+    Design -->|"Agents composed from Skills,\nMCP tools, and A2A connections\n(Component Layer)"| Workflow["Build a Workflow that\nchains agents together"]
+    Workflow -->|"Each step runs an agent through\nGoal → Perceive → Reason → Act → Observe\n(Agent Layer)"| Execute["Click Execute or\nset up a Schedule"]
+    Execute -->|"Execution Engine runs the workflow,\ntracking steps, enforcing guardrails,\nrecording traces"| Results["Results appear in the\nExecution Dashboard"]
+    Results -->|"Full traces, token costs, tool call logs,\nagent memory updates, and replay"| Sync["Skills synced to AI coding tools\nvia Provider Sync"]
 ```
 
 ## Why Three Layers?

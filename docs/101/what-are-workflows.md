@@ -27,23 +27,15 @@ Workflows are defined as **DAGs** — Directed Acyclic Graphs. That sounds techn
 - **Acyclic** — No infinite loops (you can't send work backward in a circle)
 - **Graph** — A set of nodes connected by edges
 
-```
-┌─────────┐     ┌──────────┐     ┌──────────┐
-│  Start   │────►│ Agent A   │────►│ Agent B   │
-└─────────┘     └──────────┘     └────┬─────┘
-                                      │
-                            ┌─────────▼──────────┐
-                            │     Condition       │
-                            │  "Quality passed?"  │
-                            └──┬──────────────┬──┘
-                               │ Yes          │ No
-                         ┌─────▼─────┐  ┌─────▼─────┐
-                         │  Agent C   │  │  Agent D   │
-                         └─────┬─────┘  └─────┬─────┘
-                               │              │
-                         ┌─────▼──────────────▼─────┐
-                         │          End              │
-                         └───────────────────────────┘
+```mermaid
+flowchart TD
+    Start(["Start"]) --> AgentA["Agent A"]
+    AgentA --> AgentB["Agent B"]
+    AgentB --> Condition{"Condition\nQuality passed?"}
+    Condition -->|Yes| AgentC["Agent C"]
+    Condition -->|No| AgentD["Agent D"]
+    AgentC --> End(["End"])
+    AgentD --> End
 ```
 
 ## Node Types
@@ -68,15 +60,10 @@ Condition: "findings.severity == 'critical'"
 
 Pauses the workflow and waits for human approval. This is critical for high-stakes workflows:
 
-```
-┌──────────────┐     ┌────────────────┐     ┌──────────────┐
-│ Architect     │────►│  CHECKPOINT    │────►│  Deploy       │
-│ designs       │     │  "Approve      │     │  Agent        │
-│ migration     │     │   schema       │     │  executes     │
-└──────────────┘     │   changes?"    │     └──────────────┘
-                      └────────────────┘
-                      ↑ Human reviews
-                      ↑ and clicks Approve
+```mermaid
+flowchart LR
+    Architect["Architect\ndesigns migration"] --> Checkpoint{"CHECKPOINT\nApprove schema changes?\n\nHuman reviews\nand clicks Approve"}
+    Checkpoint --> Deploy["Deploy Agent\nexecutes"]
 ```
 
 The workflow stays paused until someone approves, rejects, or provides feedback.
@@ -85,16 +72,12 @@ The workflow stays paused until someone approves, rejects, or provides feedback.
 
 Forks the workflow into parallel branches:
 
-```
-                    ┌──────────────┐
-               ┌───►│ Security     │───┐
-               │    │ Agent        │   │
-┌─────────┐    │    └──────────────┘   │    ┌──────────┐
-│ Split    │───┤                       ├───►│  Join    │
-└─────────┘    │    ┌──────────────┐   │    └──────────┘
-               └───►│ Performance  │───┘
-                    │ Agent        │
-                    └──────────────┘
+```mermaid
+flowchart LR
+    Split(["Split"]) --> Security["Security Agent"]
+    Split --> Performance["Performance Agent"]
+    Security --> Join(["Join"])
+    Performance --> Join
 ```
 
 ### Parallel Join
@@ -155,32 +138,46 @@ The entire execution is visible in real-time on the workflow canvas — each nod
 
 ### PR Review Pipeline
 
-```
-Start → Read PR → Security Agent → Code Review Agent →
-  Checkpoint("Approve?") →
-    Yes → Merge Agent → End
-    No → Feedback Agent → End
+```mermaid
+flowchart TD
+    Start(["Start"]) --> ReadPR["Read PR"]
+    ReadPR --> Security["Security Agent"]
+    Security --> CodeReview["Code Review Agent"]
+    CodeReview --> Checkpoint{"Checkpoint\nApprove?"}
+    Checkpoint -->|Yes| Merge["Merge Agent"]
+    Checkpoint -->|No| Feedback["Feedback Agent"]
+    Merge --> End(["End"])
+    Feedback --> End
 ```
 
 ### Incident Response
 
-```
-Start → Alert Agent (perceive) → Triage Agent (classify severity) →
-  Condition:
-    Critical → Page On-Call + Incident Commander Agent
-    High     → Diagnostic Agent → Remediation Agent → Checkpoint
-    Low      → Log and monitor → End
+```mermaid
+flowchart TD
+    Start(["Start"]) --> Alert["Alert Agent\n(perceive)"]
+    Alert --> Triage["Triage Agent\n(classify severity)"]
+    Triage -->|Critical| Page["Page On-Call +\nIncident Commander Agent"]
+    Triage -->|High| Diagnostic["Diagnostic Agent"]
+    Diagnostic --> Remediation["Remediation Agent"]
+    Remediation --> Checkpoint{"Checkpoint"}
+    Triage -->|Low| Log["Log and monitor"]
+    Log --> End(["End"])
 ```
 
 ### Content Pipeline
 
-```
-Start → Research Agent → Outline Agent →
-  Checkpoint("Approve outline?") →
-    Approved → Writer Agent → Editor Agent →
-      Checkpoint("Publish?") →
-        Yes → Publisher Agent → End
-        No  → Writer Agent (revise) → Editor Agent
+```mermaid
+flowchart TD
+    Start(["Start"]) --> Research["Research Agent"]
+    Research --> Outline["Outline Agent"]
+    Outline --> Checkpoint1{"Checkpoint\nApprove outline?"}
+    Checkpoint1 -->|Approved| Writer["Writer Agent"]
+    Writer --> Editor["Editor Agent"]
+    Editor --> Checkpoint2{"Checkpoint\nPublish?"}
+    Checkpoint2 -->|Yes| Publisher["Publisher Agent"]
+    Publisher --> End(["End"])
+    Checkpoint2 -->|No| WriterRevise["Writer Agent\n(revise)"]
+    WriterRevise --> Editor
 ```
 
 ## Workflow Versions

@@ -4,23 +4,15 @@ This deep dive covers the provider sync system — how skills and composed agent
 
 ## Architecture
 
-```
-┌──────────────────────────────────────────────────┐
-│                ProviderSyncService                 │
-│                                                   │
-│  1. Resolve all skills (includes + templates)     │
-│  2. Compose all enabled agents                    │
-│  3. For each enabled provider:                    │
-│     └── Call provider driver to generate files    │
-│                                                   │
-│  ┌───────────┬───────────┬───────────┐           │
-│  │ Claude    │ Cursor    │ Copilot   │           │
-│  │ Driver    │ Driver    │ Driver    │           │
-│  ├───────────┼───────────┼───────────┤           │
-│  │ Windsurf  │ Cline     │ OpenAI    │           │
-│  │ Driver    │ Driver    │ Driver    │           │
-│  └───────────┴───────────┴───────────┘           │
-└──────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph ProviderSyncService
+        S1["1. Resolve all skills\n(includes + templates)"]
+        S2[2. Compose all enabled agents]
+        S3["3. For each enabled provider:\nCall provider driver to generate files"]
+        S1 --> S2 --> S3
+        S3 --> Claude[Claude Driver] & Cursor[Cursor Driver] & Copilot[Copilot Driver] & Windsurf[Windsurf Driver] & Cline[Cline Driver] & OpenAI[OpenAI Driver]
+    end
 ```
 
 ## Sync Pipeline

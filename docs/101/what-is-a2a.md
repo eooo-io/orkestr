@@ -10,14 +10,13 @@ In an office, people don't do everything themselves. A project manager writes th
 
 A2A works the same way for agents:
 
-```
-Orchestrator: "I need a security review and a performance review of this PR."
-    │
-    ├──► Security Agent: "Review PR #42 for OWASP Top 10 issues"
-    │    ← Result: "Found 2 vulnerabilities"
-    │
-    └──► Code Review Agent: "Review PR #42 for performance issues"
-         ← Result: "Found 1 N+1 query"
+```mermaid
+flowchart TD
+    Orch["Orchestrator\nI need a security review and\na performance review of this PR"]
+    Orch -->|"Review PR #42 for\nOWASP Top 10 issues"| Security["Security Agent"]
+    Security -->|"Result: Found 2 vulnerabilities"| Orch
+    Orch -->|"Review PR #42 for\nperformance issues"| CodeReview["Code Review Agent"]
+    CodeReview -->|"Result: Found 1 N+1 query"| Orch
 ```
 
 The Orchestrator didn't do the reviews itself — it delegated to specialists and collected the results.
@@ -142,27 +141,34 @@ MCP is for simple, deterministic tool calls. A2A is for complex, autonomous task
 
 One orchestrator delegates to specialists:
 
-```
-         Orchestrator
-        /     |      \
-   Security   QA    Architect
+```mermaid
+flowchart TD
+    Orch["Orchestrator"]
+    Orch --> Security["Security"]
+    Orch --> QA["QA"]
+    Orch --> Architect["Architect"]
 ```
 
 ### The Pipeline Pattern
 
 Each agent passes its output to the next:
 
-```
-Requirements → Design → Implementation → Review → Deploy
-   (PM)      (Architect)  (Coder)       (QA)    (CI/CD)
+```mermaid
+graph LR
+    PM["Requirements\n(PM)"] --> Architect["Design\n(Architect)"]
+    Architect --> Coder["Implementation\n(Coder)"]
+    Coder --> QA["Review\n(QA)"]
+    QA --> CICD["Deploy\n(CI/CD)"]
 ```
 
 ### The Peer Review Pattern
 
 Agents review each other's work:
 
-```
-Agent A produces work ──► Agent B reviews ──► Agent A revises
+```mermaid
+graph LR
+    A["Agent A\nproduces work"] --> B["Agent B\nreviews"]
+    B --> A2["Agent A\nrevises"]
 ```
 
 ## Key Takeaway

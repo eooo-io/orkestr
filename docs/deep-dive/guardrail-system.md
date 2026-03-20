@@ -4,31 +4,16 @@ This deep dive covers the multi-layer guardrail architecture — how Orkestr enf
 
 ## Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────┐
-│              Guardrail Resolution Pipeline            │
-│                                                      │
-│  Organization Policy                                 │
-│       │ (most permissive scope)                      │
-│       ▼                                              │
-│  Project Policy (can only tighten)                   │
-│       │                                              │
-│       ▼                                              │
-│  Agent Policy (can only tighten further)             │
-│       │                                              │
-│       ▼                                              │
-│  Resolved Policy (intersection of all three)         │
-│       │                                              │
-│       ▼                                              │
-│  ┌───────────┬───────────┬───────────┬────────────┐ │
-│  │ Budget    │ Tool      │ Approval  │ Output     │ │
-│  │ Guard     │ Guard     │ Guard     │ Guard      │ │
-│  └───────────┴───────────┴───────────┴────────────┘ │
-│  ┌───────────┐                                       │
-│  │ DataAccess│                                       │
-│  │ Guard     │                                       │
-│  └───────────┘                                       │
-└─────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Pipeline[Guardrail Resolution Pipeline]
+        OP["Organization Policy\n(most permissive scope)"]
+        PP["Project Policy\n(can only tighten)"]
+        AP["Agent Policy\n(can only tighten further)"]
+        RP["Resolved Policy\n(intersection of all three)"]
+        OP --> PP --> AP --> RP
+        RP --> BG[Budget Guard] & TG[Tool Guard] & AG[Approval Guard] & OG[Output Guard] & DAG[DataAccess Guard]
+    end
 ```
 
 ## Policy Cascading
