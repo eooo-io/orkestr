@@ -4,20 +4,14 @@ This deep dive covers how Orkestr connects to and manages MCP (Model Context Pro
 
 ## Architecture Overview
 
-```
-┌────────────────────────────────────────────────┐
-│                  Orkestr                        │
-│                                                 │
-│  AgentExecutionService                          │
-│       │                                         │
-│       ▼                                         │
-│  McpClientService                               │
-│       │                                         │
-│       ├──► McpStdioTransport ──► Process A      │
-│       ├──► McpStdioTransport ──► Process B      │
-│       └──► McpSseTransport  ──► HTTP Server C   │
-│                                                 │
-└────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Orkestr
+        AES[AgentExecutionService] --> MCS[McpClientService]
+        MCS --> Stdio1[McpStdioTransport] --> PA[Process A]
+        MCS --> Stdio2[McpStdioTransport] --> PB[Process B]
+        MCS --> SSE[McpSseTransport] --> HC[HTTP Server C]
+    end
 ```
 
 ## MCP Protocol Messages

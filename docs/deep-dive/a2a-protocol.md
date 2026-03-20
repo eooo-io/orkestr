@@ -4,36 +4,25 @@ This deep dive covers the Agent-to-Agent protocol implementation in Orkestr — 
 
 ## Architecture Overview
 
-```
-┌─────────────────────────────────────┐
-│          Orchestrator Agent          │
-│                                      │
-│  Reason: "I need a security review"  │
-│       │                              │
-│       ▼                              │
-│  Act: A2A delegate                   │
-│       │                              │
-└───────┼──────────────────────────────┘
-        │
-        ▼
-┌─────────────────────────────────────┐
-│      A2A Protocol Client             │
-│                                      │
-│  1. Discover agent card              │
-│  2. Send task                        │
-│  3. Monitor progress                 │
-│  4. Receive result                   │
-│                                      │
-└───────┼──────────────────────────────┘
-        │
-        ▼
-┌─────────────────────────────────────┐
-│     Target Agent (Internal/External) │
-│                                      │
-│  Receives task → runs full agent     │
-│  loop → returns result               │
-│                                      │
-└─────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph OA[Orchestrator Agent]
+        Reason["Reason: 'I need a security review'"]
+        Act[Act: A2A delegate]
+        Reason --> Act
+    end
+    Act --> A2AClient
+    subgraph A2AClient[A2A Protocol Client]
+        S1[1. Discover agent card]
+        S2[2. Send task]
+        S3[3. Monitor progress]
+        S4[4. Receive result]
+        S1 --> S2 --> S3 --> S4
+    end
+    A2AClient --> Target
+    subgraph Target[Target Agent - Internal/External]
+        TA["Receives task → runs full agent loop → returns result"]
+    end
 ```
 
 ## Agent Cards

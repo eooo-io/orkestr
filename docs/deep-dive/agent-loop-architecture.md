@@ -4,25 +4,16 @@ This deep dive covers the technical implementation of Orkestr's agent execution 
 
 ## System Overview
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                   AgentExecutionService                   │
-│                                                          │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐│
-│  │  Perceive │  │  Reason  │  │   Act    │  │ Observe ││
-│  │  Module   │  │  Module  │  │  Module  │  │ Module  ││
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬────┘│
-│       │              │              │              │     │
-│  ┌────▼──────────────▼──────────────▼──────────────▼───┐│
-│  │              Runtime Guards Pipeline                 ││
-│  │  BudgetGuard → ToolGuard → ApprovalGuard →          ││
-│  │  OutputGuard → DataAccessGuard                      ││
-│  └──────────────────────┬──────────────────────────────┘│
-│                         │                                │
-│  ┌──────────────────────▼──────────────────────────────┐│
-│  │              Execution Trace Recorder                ││
-│  └─────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph AgentExecutionService
+        P[Perceive Module] & R[Reason Module] & A[Act Module] & O[Observe Module]
+        P & R & A & O --> Guards
+        subgraph Guards[Runtime Guards Pipeline]
+            BG[BudgetGuard] --> TG[ToolGuard] --> AG[ApprovalGuard] --> OG[OutputGuard] --> DAG[DataAccessGuard]
+        end
+        Guards --> ETR[Execution Trace Recorder]
+    end
 ```
 
 ## The AgentExecutionService
@@ -186,10 +177,9 @@ Every step of every iteration is recorded in `execution_steps`. This provides:
 
 Guards run as a pipeline — each guard checks the current action and either passes, blocks, or pauses:
 
-```
-Action → BudgetGuard → ToolGuard → ApprovalGuard → OutputGuard → DataAccessGuard
-             │              │              │              │              │
-         Pass/Block     Pass/Block     Pass/Pause     Pass/Redact    Pass/Block
+```mermaid
+graph LR
+    Action --> BudgetGuard -->|Pass/Block| ToolGuard -->|Pass/Block| ApprovalGuard -->|Pass/Pause| OutputGuard -->|Pass/Redact| DataAccessGuard -->|Pass/Block| Done[✓]
 ```
 
 ### BudgetGuard

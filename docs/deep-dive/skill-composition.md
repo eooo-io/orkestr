@@ -4,23 +4,11 @@ This deep dive covers how skills are assembled from their parts — includes res
 
 ## Composition Pipeline
 
-```
-Raw Skill
-    │
-    ▼
-┌────────────────────────┐
-│ Includes Resolution    │  Recursive expansion of referenced skills
-│ (SkillCompositionService) │
-└──────────┬─────────────┘
-           │
-           ▼
-┌────────────────────────┐
-│ Template Resolution    │  {{variable}} substitution
-│ (TemplateResolver)     │
-└──────────┬─────────────┘
-           │
-           ▼
-Resolved Skill Body
+```mermaid
+flowchart TD
+    RS[Raw Skill] --> IR["Includes Resolution\n(SkillCompositionService)\nRecursive expansion of referenced skills"]
+    IR --> TR["Template Resolution\n(TemplateResolver)\n{{variable}} substitution"]
+    TR --> RSB[Resolved Skill Body]
 ```
 
 ## Includes System

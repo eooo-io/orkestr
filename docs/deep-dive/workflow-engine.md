@@ -4,25 +4,14 @@ This deep dive covers the workflow execution engine — the system that orchestr
 
 ## Architecture
 
-```
-┌──────────────────────────────────────────────────┐
-│               WorkflowExecutionRunner              │
-│                                                   │
-│  ┌─────────────┐  ┌───────────────┐              │
-│  │ DAG Resolver │  │ Step Executor │              │
-│  └──────┬──────┘  └───────┬───────┘              │
-│         │                  │                      │
-│         │  ┌───────────────▼───────────────┐      │
-│         │  │  WorkflowContextService       │      │
-│         │  │  (shared context bus)          │      │
-│         │  └───────────────────────────────┘      │
-│         │                                         │
-│         │  ┌───────────────────────────────┐      │
-│         └─►│  WorkflowConditionEvaluator   │      │
-│            │  (edge condition routing)      │      │
-│            └───────────────────────────────┘      │
-│                                                   │
-└──────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph WorkflowExecutionRunner
+        DAG[DAG Resolver]
+        SE[Step Executor]
+        SE --> WCS[WorkflowContextService\nshared context bus]
+        DAG --> WCE[WorkflowConditionEvaluator\nedge condition routing]
+    end
 ```
 
 ## Data Model
