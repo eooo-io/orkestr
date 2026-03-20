@@ -36,12 +36,11 @@ Everything else — the three layers, the UI, the marketplace, the analytics —
 
 ### Component Layer
 
-The foundation. Individual skills (prompt + config), provider sync drivers, model connections, and template resolution.
+The foundation. Individual skills (prompt + config), model connections, and template resolution.
 
 - **Skills** -- YAML frontmatter + Markdown body, stored in `.agentis/skills/`
-- **Provider Sync** -- 6 drivers (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI) that transform skills into provider-native config files
 - **LLM Providers** -- Multi-model access via `LLMProviderFactory`, routing by model prefix to Anthropic, OpenAI, Gemini, Grok, or Ollama
-- **Templates** -- `{{variable}}` substitution resolved at compose/sync time
+- **Templates** -- `{{variable}}` substitution resolved at compose time
 - **Includes** -- recursive skill composition with circular dependency detection (max depth 5)
 
 ### Agent Layer
@@ -119,19 +118,6 @@ Manages the agent loop -- receives a goal, runs the perceive-reason-act-observe 
 ### WorkflowRunner
 
 Executes multi-agent workflows. Takes a workflow definition (nodes + edges), resolves execution order, runs agents in sequence or parallel, manages data flow between steps, and handles errors/retries.
-
-### ProviderSyncService
-
-Orchestrates writing skills and composed agent instructions to provider-specific config files. Each provider has a driver implementing `ProviderDriverInterface`:
-
-| Provider | Output | Format |
-|---|---|---|
-| Claude | `.claude/CLAUDE.md` | All skills under H2 headings |
-| Cursor | `.cursor/rules/{slug}.mdc` | One MDC file per skill |
-| Copilot | `.github/copilot-instructions.md` | All skills concatenated |
-| Windsurf | `.windsurf/rules/{slug}.md` | One file per skill |
-| Cline | `.clinerules` | Single flat file |
-| OpenAI | `.openai/instructions.md` | All skills concatenated |
 
 ## Self-Hosted Deployment Model
 

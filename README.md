@@ -39,7 +39,7 @@ It connects to any LLM provider (Anthropic, OpenAI, Gemini, Grok, OpenRouter, Ol
 - **Provider-agnostic** — Mix cloud and local models in the same project. Go fully air-gapped with Ollama
 - **Visual orchestration** — DAG workflow builder with conditional branching, parallel execution, and human-in-the-loop checkpoints
 - **Real execution** — Not just config. Agents run live with real MCP tool calls, cost tracking, and safety guardrails
-- **Skill system** — Reusable prompt+config units in a portable `.agentis/` format that syncs to Claude, Cursor, Copilot, Windsurf, Cline, and OpenAI
+- **Skill system** — Reusable prompt+config modules composed into agent instructions. Recursive includes, template variables, version history
 - **Sovereign by default** — Self-hosted, air-gap capable, no SaaS dependency. You control the security perimeter
 
 ---
@@ -71,18 +71,6 @@ It connects to any LLM provider (Anthropic, OpenAI, Gemini, Grok, OpenRouter, Ol
 - **Template Variables** — `{{variable}}` placeholders resolved at compose/sync time
 - **Prompt Linter** — 8 quality rules for prompt analysis
 - **AI Generation** — Describe what you want, get a complete skill
-
-### Provider Sync
-Sync skills to the native config format of 6 AI coding assistants:
-
-| Provider | Output | Format |
-|---|---|---|
-| Claude | `.claude/CLAUDE.md` | Skills under H2 headings |
-| Cursor | `.cursor/rules/{slug}.mdc` | One MDC file per skill |
-| Copilot | `.github/copilot-instructions.md` | Concatenated |
-| Windsurf | `.windsurf/rules/{slug}.md` | One file per skill |
-| Cline | `.clinerules` | Single flat file |
-| OpenAI | `.openai/instructions.md` | Concatenated |
 
 ### Safety & Guardrails
 - **Budget limits** — Per-run, per-agent, and daily token/cost budgets with enforcement
@@ -118,7 +106,7 @@ Sync skills to the native config format of 6 AI coding assistants:
 ┌──────────────────────────┴──────────────────────────────────┐
 │                    Laravel 12 Backend (PHP 8.4)               │
 │  Agent Execution Engine · Workflow Runner · MCP Client        │
-│  Provider Sync (6 drivers) · Guardrails · Memory · Audit     │
+│  Guardrails · Memory · Schedules · Audit                     │
 ├───────────────────┬──────────────┬──────────────────────────┤
 │  Multi-Model LLM  │  MCP + A2A   │  Orchestration Engine    │
 │  Anthropic·OpenAI │  Tool Calls  │  DAG Execution           │
@@ -174,30 +162,6 @@ composer dev   # starts server, queue, pail, vite
 | Documentation | http://localhost:5174 |
 
 Default login: `admin@admin.com` / `password`
-
----
-
-## Skill File Format
-
-Skills live in `.agentis/skills/` as YAML frontmatter + Markdown:
-
-```markdown
----
-id: summarize-doc
-name: Summarize Document
-description: Summarizes any document to key bullet points
-tags: [summarization, documents]
-model: claude-sonnet-4-6
-max_tokens: 1000
-includes: [base-instructions]
-template_variables: [language, tone]
----
-
-You are a precise document summarizer.
-Write in {{language}} with a {{tone}} tone.
-```
-
-`.agentis/` is the single source of truth. All provider-specific files are derived outputs.
 
 ---
 
@@ -257,7 +221,7 @@ orkestr/
 │   ├── Services/           # Business logic
 │   │   ├── Execution/      # Agent & workflow execution engine
 │   │   ├── LLM/            # Multi-model provider layer (7 providers)
-│   │   ├── Providers/      # 6 provider sync drivers
+│   │   ├── Guards/          # Budget, tool, approval, output guards
 │   │   ├── Mcp/            # MCP protocol client
 │   │   └── A2a/            # Agent-to-agent delegation
 │   └── Jobs/

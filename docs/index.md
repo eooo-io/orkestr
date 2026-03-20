@@ -32,9 +32,9 @@ features:
   - title: Multi-Model & Air-Gap
     details: "Cloud (Claude, GPT, Gemini, Grok, OpenRouter) and local (Ollama, vLLM, TGI). Fallback chains, cost optimization, and full air-gap mode for zero external calls."
     icon: "\U0001F512"
-  - title: Provider Sync
-    details: "Write skills once, sync to Claude, Cursor, Copilot, Windsurf, Cline, and OpenAI config formats. Diff preview before writing. Git auto-commit on save."
-    icon: "\U0001F504"
+  - title: Agent Memory & Scheduling
+    details: "Persistent memory across sessions (conversation, working, long-term). Cron schedules, webhook triggers, and event-driven execution. Agents that remember and run autonomously."
+    icon: "\U0001F9E0"
 ---
 
 <div class="vp-doc" style="padding: 0 24px;">

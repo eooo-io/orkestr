@@ -105,19 +105,6 @@ Four methods. That's the contract. Everything specific to Anthropic's Messages A
 
 It doesn't pretend all models are identical. Tool calling semantics differ. Context windows differ. Pricing differs. The contract abstracts the **interaction pattern** (send messages, get responses, stream tokens), not the **capabilities**. Agent authors are expected to understand their model choices.
 
-The same contract pattern applies to provider sync:
-
-```php
-interface ProviderDriverInterface
-{
-    public function sync(Project $project, Collection $skills, array $composedAgents): void;
-    public function preview(Project $project, Collection $skills, array $composedAgents): array;
-    public function clean(Project $project): void;
-}
-```
-
-Three methods. Six implementations (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI). The canonical format (`.agentis/skills/*.md`) is the source of truth. Provider files are derived outputs — generated, never edited, fully disposable.
-
 ### 2. Deployment Elasticity Without Architectural Schizophrenia
 
 "Run anywhere" is an easy promise and a hard architecture.
