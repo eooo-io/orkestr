@@ -123,6 +123,23 @@ import type {
   RoutingRule,
   RoutingDecision,
   RoutingSimulationResult,
+  PresenceSession,
+  CollaborationComment,
+  DebugSession,
+  MobileOverview,
+  CustomMetric,
+  AlertRule,
+  AlertIncident,
+  DashboardLayout,
+  CostForecast,
+  MetricDataPoint,
+  TaskBid,
+  CapabilityAdvertisement,
+  TeamFormation,
+  NegotiationLog,
+  FederationPeer,
+  FederationDelegation,
+  FederatedIdentity,
 } from '@/types'
 
 const api = axios.create({
@@ -1979,5 +1996,171 @@ export const fetchRoutingDecisions = (projectId: number, params?: { page?: numbe
 
 export const simulateRouting = (projectId: number, data: { description: string; task_type?: string; priority?: number }) =>
   api.post<ApiResponse<RoutingSimulationResult>>(`/projects/${projectId}/routing-rules/simulate`, data).then((r) => r.data.data)
+
+// ─── S.1: Collaboration ──────────────────────────────────
+
+export const sendPresenceHeartbeat = (data: { resource_type: string; resource_id: number; cursor_position?: { line: number; column: number }; selection?: Record<string, unknown> }) =>
+  api.post<ApiResponse<PresenceSession>>('/collaboration/heartbeat', data).then((r) => r.data.data)
+
+export const fetchPresence = (type: string, id: number) =>
+  api.get<ApiResponse<PresenceSession[]>>(`/collaboration/presence/${type}/${id}`).then((r) => r.data.data)
+
+export const fetchComments = (type: string, id: number) =>
+  api.get<ApiResponse<CollaborationComment[]>>(`/collaboration/${type}/${id}/comments`).then((r) => r.data.data)
+
+export const createComment = (type: string, id: number, data: { body: string; line_number?: number; thread_id?: number }) =>
+  api.post<ApiResponse<CollaborationComment>>(`/collaboration/${type}/${id}/comments`, data).then((r) => r.data.data)
+
+export const resolveComment = (commentId: number) =>
+  api.post(`/collaboration/comments/${commentId}/resolve`)
+
+export const deleteComment = (commentId: number) =>
+  api.delete(`/collaboration/comments/${commentId}`)
+
+export const fetchDebugSessions = (projectId: number) =>
+  api.get<ApiResponse<DebugSession[]>>(`/projects/${projectId}/debug-sessions`).then((r) => r.data.data)
+
+export const createDebugSession = (projectId: number, data: { title: string; execution_run_id?: number }) =>
+  api.post<ApiResponse<DebugSession>>(`/projects/${projectId}/debug-sessions`, data).then((r) => r.data.data)
+
+export const joinDebugSession = (sessionId: number) =>
+  api.post(`/debug-sessions/${sessionId}/join`)
+
+export const endDebugSession = (sessionId: number) =>
+  api.post(`/debug-sessions/${sessionId}/end`)
+
+// ─── S.2: Mobile ──────────────────────────────────
+
+export const subscribePush = (data: { endpoint: string; p256dh_key: string; auth_key: string }) =>
+  api.post('/push/subscribe', data)
+
+export const unsubscribePush = (endpoint: string) =>
+  api.delete('/push/unsubscribe', { data: { endpoint } })
+
+export const emergencyKill = (projectId: number) =>
+  api.post<ApiResponse<{ killed_count: number }>>(`/projects/${projectId}/emergency-kill`).then((r) => r.data.data)
+
+export const fetchMobileOverview = () =>
+  api.get<ApiResponse<MobileOverview>>('/mobile/overview').then((r) => r.data.data)
+
+export const fetchMobilePendingApprovals = () =>
+  api.get<ApiResponse<Array<{ id: number; agent_name: string; action: string; project_name: string; created_at: string }>>>('/mobile/pending-approvals').then((r) => r.data.data)
+
+// ─── S.3: Observability ──────────────────────────────────
+
+export const fetchCustomMetrics = () =>
+  api.get<ApiResponse<CustomMetric[]>>('/observability/metrics').then((r) => r.data.data)
+
+export const createCustomMetric = (data: Partial<CustomMetric>) =>
+  api.post<ApiResponse<CustomMetric>>('/observability/metrics', data).then((r) => r.data.data)
+
+export const updateCustomMetric = (id: number, data: Partial<CustomMetric>) =>
+  api.put<ApiResponse<CustomMetric>>(`/observability/metrics/${id}`, data).then((r) => r.data.data)
+
+export const deleteCustomMetric = (id: number) =>
+  api.delete(`/observability/metrics/${id}`)
+
+export const evaluateMetric = (id: number, params?: { from?: string; to?: string }) =>
+  api.get<ApiResponse<MetricDataPoint[]>>(`/observability/metrics/${id}/evaluate`, { params }).then((r) => r.data.data)
+
+export const fetchAlertRules = () =>
+  api.get<ApiResponse<AlertRule[]>>('/observability/alert-rules').then((r) => r.data.data)
+
+export const createAlertRule = (data: Partial<AlertRule>) =>
+  api.post<ApiResponse<AlertRule>>('/observability/alert-rules', data).then((r) => r.data.data)
+
+export const updateAlertRule = (id: number, data: Partial<AlertRule>) =>
+  api.put<ApiResponse<AlertRule>>(`/observability/alert-rules/${id}`, data).then((r) => r.data.data)
+
+export const deleteAlertRule = (id: number) =>
+  api.delete(`/observability/alert-rules/${id}`)
+
+export const fetchAlertIncidents = (params?: { page?: number }) =>
+  api.get<ApiResponse<AlertIncident[]>>('/observability/incidents', { params }).then((r) => r.data.data)
+
+export const acknowledgeIncident = (id: number) =>
+  api.post(`/observability/incidents/${id}/acknowledge`)
+
+export const resolveIncident = (id: number) =>
+  api.post(`/observability/incidents/${id}/resolve`)
+
+export const fetchDashboardLayouts = () =>
+  api.get<ApiResponse<DashboardLayout[]>>('/observability/dashboards').then((r) => r.data.data)
+
+export const createDashboardLayout = (data: { name: string; layout: DashboardLayout['layout'] }) =>
+  api.post<ApiResponse<DashboardLayout>>('/observability/dashboards', data).then((r) => r.data.data)
+
+export const updateDashboardLayout = (id: number, data: Partial<{ name: string; layout: DashboardLayout['layout'] }>) =>
+  api.put<ApiResponse<DashboardLayout>>(`/observability/dashboards/${id}`, data).then((r) => r.data.data)
+
+export const deleteDashboardLayout = (id: number) =>
+  api.delete(`/observability/dashboards/${id}`)
+
+export const fetchCostForecast = () =>
+  api.get<ApiResponse<CostForecast>>('/observability/cost-forecast').then((r) => r.data.data)
+
+// ─── S.4: Negotiation ──────────────────────────────────
+
+export const openBidding = (taskId: number, projectId: number) =>
+  api.post<ApiResponse<TaskBid[]>>(`/tasks/${taskId}/open-bidding`, { project_id: projectId }).then((r) => r.data.data)
+
+export const fetchTaskBids = (taskId: number) =>
+  api.get<ApiResponse<TaskBid[]>>(`/tasks/${taskId}/bids`).then((r) => r.data.data)
+
+export const acceptBid = (bidId: number) =>
+  api.post(`/bids/${bidId}/accept`)
+
+export const fetchAdvertisements = (projectId: number) =>
+  api.get<ApiResponse<CapabilityAdvertisement[]>>(`/projects/${projectId}/advertisements`).then((r) => r.data.data)
+
+export const refreshAdvertisements = (projectId: number) =>
+  api.post<ApiResponse<{ count: number }>>(`/projects/${projectId}/advertisements/refresh`).then((r) => r.data.data)
+
+export const fetchTeamFormations = (projectId: number) =>
+  api.get<ApiResponse<TeamFormation[]>>(`/projects/${projectId}/team-formations`).then((r) => r.data.data)
+
+export const formTeam = (projectId: number, data: { name: string; objective: string; formation_strategy?: string }) =>
+  api.post<ApiResponse<TeamFormation>>(`/projects/${projectId}/team-formations`, data).then((r) => r.data.data)
+
+export const disbandTeam = (formationId: number) =>
+  api.post(`/team-formations/${formationId}/disband`)
+
+export const fetchNegotiationLog = (projectId: number, params?: { page?: number }) =>
+  api.get<ApiResponse<NegotiationLog[]>>(`/projects/${projectId}/negotiation-log`, { params }).then((r) => r.data.data)
+
+// ─── S.5: Federation ──────────────────────────────────
+
+export const fetchFederationPeers = () =>
+  api.get<ApiResponse<FederationPeer[]>>('/federation/peers').then((r) => r.data.data)
+
+export const registerFederationPeer = (data: { name: string; base_url: string; api_key: string }) =>
+  api.post<ApiResponse<FederationPeer>>('/federation/peers', data).then((r) => r.data.data)
+
+export const updateFederationPeer = (id: number, data: Partial<{ name: string; trust_level: string; status: string }>) =>
+  api.put<ApiResponse<FederationPeer>>(`/federation/peers/${id}`, data).then((r) => r.data.data)
+
+export const removeFederationPeer = (id: number) =>
+  api.delete(`/federation/peers/${id}`)
+
+export const federationHeartbeat = (id: number) =>
+  api.post<ApiResponse<{ success: boolean }>>(`/federation/peers/${id}/heartbeat`).then((r) => r.data.data)
+
+export const fetchPeerCapabilities = (id: number) =>
+  api.get<ApiResponse<Record<string, unknown>>>(`/federation/peers/${id}/capabilities`).then((r) => r.data.data)
+
+export const federationDelegate = (peerId: number, data: { agent_id: number; remote_agent_slug: string; input: Record<string, unknown> }) =>
+  api.post<ApiResponse<FederationDelegation>>(`/federation/peers/${peerId}/delegate`, data).then((r) => r.data.data)
+
+export const fetchFederationDelegations = () =>
+  api.get<ApiResponse<FederationDelegation[]>>('/federation/delegations').then((r) => r.data.data)
+
+export const fetchDelegationStatus = (id: number) =>
+  api.get<ApiResponse<FederationDelegation>>(`/federation/delegations/${id}`).then((r) => r.data.data)
+
+export const fetchFederatedIdentities = () =>
+  api.get<ApiResponse<FederatedIdentity[]>>('/federation/identities').then((r) => r.data.data)
+
+export const linkFederatedIdentity = (peerId: number, data: { remote_user_id: string; remote_email?: string }) =>
+  api.post<ApiResponse<FederatedIdentity>>(`/federation/peers/${peerId}/link-identity`, data).then((r) => r.data.data)
 
 export default api

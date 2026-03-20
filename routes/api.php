@@ -736,4 +736,74 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/agents/{agent}/capabilities/infer', [\App\Http\Controllers\TaskRouterController::class, 'inferCapabilities'])->middleware('org-role:editor');
     Route::get('/projects/{project}/routing-decisions', [\App\Http\Controllers\TaskRouterController::class, 'decisions']);
     Route::post('/projects/{project}/routing-rules/simulate', [\App\Http\Controllers\TaskRouterController::class, 'simulate']);
+
+    // ─── Phase S.1: Collaboration ──────────────────────────────
+    Route::post('/collaboration/heartbeat', [\App\Http\Controllers\CollaborationController::class, 'heartbeat']);
+    Route::get('/collaboration/presence/{type}/{id}', [\App\Http\Controllers\CollaborationController::class, 'presence']);
+    Route::get('/collaboration/{type}/{id}/comments', [\App\Http\Controllers\CollaborationController::class, 'comments']);
+    Route::post('/collaboration/{type}/{id}/comments', [\App\Http\Controllers\CollaborationController::class, 'storeComment']);
+    Route::post('/collaboration/comments/{collaborationComment}/resolve', [\App\Http\Controllers\CollaborationController::class, 'resolveComment']);
+    Route::delete('/collaboration/comments/{collaborationComment}', [\App\Http\Controllers\CollaborationController::class, 'deleteComment']);
+    Route::get('/projects/{project}/debug-sessions', [\App\Http\Controllers\CollaborationController::class, 'debugSessions']);
+    Route::post('/projects/{project}/debug-sessions', [\App\Http\Controllers\CollaborationController::class, 'createDebugSession'])->middleware('org-role:editor');
+    Route::post('/debug-sessions/{debugSession}/join', [\App\Http\Controllers\CollaborationController::class, 'joinDebugSession']);
+    Route::post('/debug-sessions/{debugSession}/end', [\App\Http\Controllers\CollaborationController::class, 'endDebugSession']);
+
+    // ─── Phase S.2: Mobile Control Plane ──────────────────────────────
+    Route::post('/push/subscribe', [\App\Http\Controllers\MobileController::class, 'subscribePush']);
+    Route::delete('/push/unsubscribe', [\App\Http\Controllers\MobileController::class, 'unsubscribePush']);
+    Route::post('/projects/{project}/emergency-kill', [\App\Http\Controllers\MobileController::class, 'emergencyKill'])->middleware('org-role:admin');
+    Route::get('/mobile/overview', [\App\Http\Controllers\MobileController::class, 'overview']);
+    Route::get('/mobile/pending-approvals', [\App\Http\Controllers\MobileController::class, 'pendingApprovals']);
+
+    // ─── Phase S.3: Observability ──────────────────────────────
+    Route::get('/observability/metrics', [\App\Http\Controllers\ObservabilityController::class, 'metrics']);
+    Route::post('/observability/metrics', [\App\Http\Controllers\ObservabilityController::class, 'storeMetric'])->middleware('org-role:editor');
+    Route::put('/observability/metrics/{customMetric}', [\App\Http\Controllers\ObservabilityController::class, 'updateMetric'])->middleware('org-role:editor');
+    Route::delete('/observability/metrics/{customMetric}', [\App\Http\Controllers\ObservabilityController::class, 'deleteMetric'])->middleware('org-role:admin');
+    Route::get('/observability/metrics/{customMetric}/evaluate', [\App\Http\Controllers\ObservabilityController::class, 'evaluateMetric']);
+    Route::get('/observability/alert-rules', [\App\Http\Controllers\ObservabilityController::class, 'alertRules']);
+    Route::post('/observability/alert-rules', [\App\Http\Controllers\ObservabilityController::class, 'storeAlertRule'])->middleware('org-role:editor');
+    Route::put('/observability/alert-rules/{alertRule}', [\App\Http\Controllers\ObservabilityController::class, 'updateAlertRule'])->middleware('org-role:editor');
+    Route::delete('/observability/alert-rules/{alertRule}', [\App\Http\Controllers\ObservabilityController::class, 'deleteAlertRule'])->middleware('org-role:admin');
+    Route::get('/observability/incidents', [\App\Http\Controllers\ObservabilityController::class, 'incidents']);
+    Route::post('/observability/incidents/{alertIncident}/acknowledge', [\App\Http\Controllers\ObservabilityController::class, 'acknowledgeIncident']);
+    Route::post('/observability/incidents/{alertIncident}/resolve', [\App\Http\Controllers\ObservabilityController::class, 'resolveIncident']);
+    Route::get('/observability/dashboards', [\App\Http\Controllers\ObservabilityController::class, 'dashboards']);
+    Route::post('/observability/dashboards', [\App\Http\Controllers\ObservabilityController::class, 'storeDashboard'])->middleware('org-role:editor');
+    Route::put('/observability/dashboards/{dashboardLayout}', [\App\Http\Controllers\ObservabilityController::class, 'updateDashboard'])->middleware('org-role:editor');
+    Route::delete('/observability/dashboards/{dashboardLayout}', [\App\Http\Controllers\ObservabilityController::class, 'deleteDashboard'])->middleware('org-role:admin');
+    Route::get('/observability/cost-forecast', [\App\Http\Controllers\ObservabilityController::class, 'costForecast']);
+
+    // ─── Phase S.4: Negotiation ──────────────────────────────
+    Route::post('/tasks/{agentTask}/open-bidding', [\App\Http\Controllers\NegotiationController::class, 'openBidding'])->middleware('org-role:editor');
+    Route::get('/tasks/{agentTask}/bids', [\App\Http\Controllers\NegotiationController::class, 'bids']);
+    Route::post('/bids/{taskBid}/accept', [\App\Http\Controllers\NegotiationController::class, 'acceptBid'])->middleware('org-role:editor');
+    Route::get('/projects/{project}/advertisements', [\App\Http\Controllers\NegotiationController::class, 'advertisements']);
+    Route::post('/projects/{project}/advertisements/refresh', [\App\Http\Controllers\NegotiationController::class, 'refreshAdvertisements'])->middleware('org-role:editor');
+    Route::get('/projects/{project}/team-formations', [\App\Http\Controllers\NegotiationController::class, 'teamFormations']);
+    Route::post('/projects/{project}/team-formations', [\App\Http\Controllers\NegotiationController::class, 'formTeam'])->middleware('org-role:editor');
+    Route::post('/team-formations/{teamFormation}/disband', [\App\Http\Controllers\NegotiationController::class, 'disbandTeam'])->middleware('org-role:editor');
+    Route::get('/projects/{project}/negotiation-log', [\App\Http\Controllers\NegotiationController::class, 'negotiationLog']);
+
+    // ─── Phase S.5: Federation (authenticated) ──────────────────────────────
+    Route::get('/federation/peers', [\App\Http\Controllers\FederationController::class, 'peers']);
+    Route::post('/federation/peers', [\App\Http\Controllers\FederationController::class, 'registerPeer'])->middleware('org-role:admin');
+    Route::put('/federation/peers/{federationPeer}', [\App\Http\Controllers\FederationController::class, 'updatePeer'])->middleware('org-role:admin');
+    Route::delete('/federation/peers/{federationPeer}', [\App\Http\Controllers\FederationController::class, 'removePeer'])->middleware('org-role:admin');
+    Route::post('/federation/peers/{federationPeer}/heartbeat', [\App\Http\Controllers\FederationController::class, 'peerHeartbeat']);
+    Route::get('/federation/peers/{federationPeer}/capabilities', [\App\Http\Controllers\FederationController::class, 'peerCapabilities']);
+    Route::post('/federation/peers/{federationPeer}/delegate', [\App\Http\Controllers\FederationController::class, 'delegate'])->middleware('org-role:editor');
+    Route::get('/federation/delegations', [\App\Http\Controllers\FederationController::class, 'delegations']);
+    Route::get('/federation/delegations/{federationDelegation}', [\App\Http\Controllers\FederationController::class, 'delegationStatus']);
+    Route::get('/federation/identities', [\App\Http\Controllers\FederationController::class, 'identities']);
+    Route::post('/federation/peers/{federationPeer}/link-identity', [\App\Http\Controllers\FederationController::class, 'linkIdentity']);
+});
+
+// ─── Phase S.5: Federation (public inbound, rate-limited) ──────────────────
+Route::middleware(['throttle:60,1'])->prefix('federation/inbound')->group(function () {
+    Route::post('/heartbeat', [\App\Http\Controllers\FederationInboundController::class, 'receiveHeartbeat']);
+    Route::get('/capabilities', [\App\Http\Controllers\FederationInboundController::class, 'capabilities']);
+    Route::post('/delegate', [\App\Http\Controllers\FederationInboundController::class, 'receiveDelegation']);
+    Route::post('/callback', [\App\Http\Controllers\FederationInboundController::class, 'delegationCallback']);
 });

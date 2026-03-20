@@ -1804,3 +1804,243 @@ export interface RoutingSimulationResult {
   candidates: Array<{ agent_id: number; agent_name: string; score: number; breakdown: Record<string, number> }>
   reasoning: string
 }
+
+// --- S.1: Collaboration ---
+
+export interface PresenceSession {
+  id: number
+  uuid: string
+  user_id: number
+  user?: { id: number; name: string; avatar: string | null }
+  resource_type: string
+  resource_id: number
+  cursor_position: { line: number; column: number } | null
+  selection: Record<string, unknown> | null
+  color: string
+  last_seen_at: string
+}
+
+export interface CollaborationComment {
+  id: number
+  uuid: string
+  user_id: number
+  user?: { id: number; name: string; avatar: string | null }
+  resource_type: string
+  resource_id: number
+  thread_id: number | null
+  line_number: number | null
+  body: string
+  resolved_at: string | null
+  resolved_by: number | null
+  replies?: CollaborationComment[]
+  created_at: string
+  updated_at: string
+}
+
+export interface DebugSession {
+  id: number
+  uuid: string
+  project_id: number
+  execution_run_id: number | null
+  created_by: number
+  creator?: { id: number; name: string }
+  title: string
+  status: 'active' | 'paused' | 'ended'
+  participants: number[]
+  breakpoints: Record<string, unknown> | null
+  created_at: string
+  ended_at: string | null
+}
+
+// --- S.2: Mobile ---
+
+export interface PushSubscription {
+  id: number
+  user_id: number
+  endpoint: string
+  user_agent: string | null
+  created_at: string
+}
+
+export interface MobileOverview {
+  active_agents: number
+  pending_approvals: number
+  recent_runs: Array<{ id: number; agent_name: string; status: string; created_at: string }>
+  fleet_health: { healthy: number; unhealthy: number }
+}
+
+// --- S.3: Observability ---
+
+export interface CustomMetric {
+  id: number
+  uuid: string
+  organization_id: number
+  name: string
+  slug: string
+  query_type: 'count_runs' | 'sum_tokens' | 'avg_cost' | 'avg_duration' | 'error_rate' | 'custom'
+  query_config: Record<string, unknown>
+  unit: string
+  created_at: string
+  updated_at: string
+}
+
+export interface AlertRule {
+  id: number
+  uuid: string
+  organization_id: number
+  name: string
+  metric_slug: string
+  condition: 'gt' | 'lt' | 'gte' | 'lte' | 'eq'
+  threshold: number
+  window_minutes: number
+  cooldown_minutes: number
+  notification_channel_id: number | null
+  severity: 'info' | 'warning' | 'critical'
+  enabled: boolean
+  last_triggered_at: string | null
+  incident_count?: number
+  created_at: string
+}
+
+export interface AlertIncident {
+  id: number
+  uuid: string
+  alert_rule_id: number
+  alert_rule?: AlertRule
+  metric_value: number
+  threshold_value: number
+  status: 'firing' | 'acknowledged' | 'resolved'
+  acknowledged_by: number | null
+  acknowledged_at: string | null
+  resolved_at: string | null
+  created_at: string
+}
+
+export interface DashboardLayout {
+  id: number
+  uuid: string
+  organization_id: number
+  user_id: number | null
+  name: string
+  layout: Array<{ metric_slug: string; chart_type: string; x: number; y: number; w: number; h: number }>
+  is_default: boolean
+  created_at: string
+}
+
+export interface CostForecast {
+  daily_costs: Array<{ date: string; cost: number }>
+  forecast_7d: number
+  forecast_30d: number
+  trend: 'increasing' | 'stable' | 'decreasing'
+  avg_daily: number
+}
+
+export interface MetricDataPoint {
+  timestamp: string
+  value: number
+}
+
+// --- S.4: Negotiation ---
+
+export interface TaskBid {
+  id: number
+  uuid: string
+  task_id: number | null
+  agent_id: number
+  agent?: { id: number; name: string; slug: string }
+  project_id: number
+  bid_score: number
+  estimated_duration_ms: number
+  estimated_cost_microcents: number
+  confidence: number
+  reasoning: string | null
+  status: 'pending' | 'accepted' | 'rejected' | 'expired' | 'withdrawn'
+  expires_at: string
+  created_at: string
+}
+
+export interface CapabilityAdvertisement {
+  id: number
+  agent_id: number
+  agent?: { id: number; name: string; slug: string; icon: string | null }
+  project_id: number
+  capabilities: Array<{ name: string; proficiency: number; cost_per_task: number }>
+  availability_status: 'available' | 'busy' | 'offline'
+  max_concurrent_tasks: number
+  current_load: number
+  advertised_at: string
+  expires_at: string
+}
+
+export interface TeamFormation {
+  id: number
+  uuid: string
+  project_id: number
+  name: string
+  objective: string
+  formation_strategy: 'capability_match' | 'cost_optimized' | 'speed_optimized'
+  agent_ids: number[]
+  agents?: Array<{ id: number; name: string }>
+  status: 'forming' | 'active' | 'disbanded'
+  performance_score: number | null
+  created_at: string
+  disbanded_at: string | null
+}
+
+export interface NegotiationLog {
+  id: number
+  task_id: number | null
+  team_formation_id: number | null
+  agent_id: number
+  agent?: { id: number; name: string }
+  action: string
+  details: Record<string, unknown> | null
+  created_at: string
+}
+
+// --- S.5: Federation ---
+
+export interface FederationPeer {
+  id: number
+  uuid: string
+  organization_id: number
+  name: string
+  base_url: string
+  status: 'pending' | 'active' | 'suspended' | 'revoked'
+  capabilities: Record<string, unknown> | null
+  last_heartbeat_at: string | null
+  last_sync_at: string | null
+  trust_level: 'untrusted' | 'basic' | 'verified' | 'full'
+  metadata: Record<string, unknown> | null
+  created_at: string
+}
+
+export interface FederationDelegation {
+  id: number
+  uuid: string
+  peer_id: number
+  peer?: { id: number; name: string; base_url: string }
+  local_agent_id: number | null
+  local_agent?: { id: number; name: string }
+  remote_agent_slug: string
+  direction: 'outbound' | 'inbound'
+  status: 'pending' | 'active' | 'completed' | 'failed'
+  input: Record<string, unknown> | null
+  output: Record<string, unknown> | null
+  cost_microcents: number
+  duration_ms: number
+  created_at: string
+  completed_at: string | null
+}
+
+export interface FederatedIdentity {
+  id: number
+  user_id: number
+  peer_id: number
+  peer?: { id: number; name: string }
+  remote_user_id: string
+  remote_email: string | null
+  remote_role: string | null
+  verified_at: string | null
+  created_at: string
+}

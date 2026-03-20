@@ -41,6 +41,9 @@ import { RuntimeDashboard } from '@/pages/RuntimeDashboard'
 import { ControlPlane } from '@/pages/ControlPlane'
 import { Plugins } from '@/pages/Plugins'
 import { SharedMemory } from '@/pages/SharedMemory'
+import { Observability } from '@/pages/Observability'
+import { MobileApprovals } from '@/pages/MobileApprovals'
+import { Federation } from '@/pages/Federation'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -125,6 +128,9 @@ function AppContent() {
                   <Route path="/control" element={<ControlPlane />} />
                   <Route path="/plugins" element={<Plugins />} />
                   <Route path="/projects/:id/shared-memory" element={<SharedMemory />} />
+                  <Route path="/observability" element={<Observability />} />
+                  <Route path="/mobile/approvals" element={<MobileApprovals />} />
+                  <Route path="/federation" element={<Federation />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/guide" element={<UserGuide />} />
                 </Routes>

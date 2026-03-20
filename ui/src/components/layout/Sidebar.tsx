@@ -22,6 +22,8 @@ import {
   Terminal,
   Puzzle,
   Network,
+  Eye,
+  Globe,
 } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { useTheme } from '@/hooks/useTheme'
@@ -69,6 +71,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         { to: '/replay', label: 'Replay', icon: History },
         { to: '/performance', label: 'Performance', icon: TrendingUp },
         { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+        { to: '/observability', label: 'Observability', icon: Eye },
       ],
     },
     {
@@ -83,6 +86,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       label: 'Admin',
       items: [
         { to: '/plugins', label: 'Plugins', icon: Puzzle },
+        { to: '/federation', label: 'Federation', icon: Globe },
         { to: '/settings', label: 'Settings', icon: Settings },
       ],
     },

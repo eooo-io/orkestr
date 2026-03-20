@@ -117,7 +117,7 @@ Phase R — Intelligence & Extensibility  (COMPLETE)
   R.4: Cross-agent shared memory — shared memory pools, knowledge graphs, collective learning.
   R.5: Smart task routing — agent capability matching, load balancing, SLA-aware scheduling.
 
-Phase S — Collaboration & Mobile  (PLANNED)
+Phase S — Collaboration & Mobile  (COMPLETE)
   S.1: Real-time collaboration — cursor presence, live updates, collaborative debugging, comments/threads.
   S.2: Mobile control plane — responsive PWA, push notifications, approve/reject, emergency kill switch.
   S.3: Advanced observability — Grafana-level dashboards, custom metrics, alerting rules, cost forecasting.
@@ -191,6 +191,7 @@ Observe (result fed back into context)
 **Phase P COMPLETE** — Agent Communication & Artifacts (17 issues, 5 milestones: P.1–P.5, #461–#477).
 **Phase Q COMPLETE** — Agent Runtime & Identity (15 issues, 5 milestones: Q.1–Q.5, #478–#492).
 **Phase R COMPLETE** — Intelligence & Extensibility (12 issues, 5 milestones: R.1–R.5, #493–#504).
+**Phase S COMPLETE** — Collaboration & Mobile (10 issues, 5 milestones: S.1–S.5, #505–#514).
 
 **Strategic pivot (2026-03-15):** Repositioned from SaaS to self-hosted infrastructure software. Cloud tier is a free playground/demo funnel. The product runs on customer infra with local models, local MCP, local data. Revenue model is commercial self-hosted license.
 
