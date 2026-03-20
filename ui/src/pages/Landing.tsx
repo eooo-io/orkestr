@@ -554,6 +554,9 @@ export function Landing() {
               {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
 
+            <Link to="/login" className="hidden md:block">
+              <Button variant="ghost" size="sm">Sign In</Button>
+            </Link>
             <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer" className="hidden md:block">
               <Button size="sm">GitHub</Button>
             </a>
@@ -580,6 +583,9 @@ export function Landing() {
                 GitHub
               </a>
               <div className="border-t border-border mt-2 pt-2 flex gap-2">
+                <Link to="/login" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" size="sm" className="w-full">Sign In</Button>
+                </Link>
                 <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
                   <Button size="sm" className="w-full">GitHub</Button>
                 </a>

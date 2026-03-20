@@ -64,7 +64,7 @@ function PoliciesTab() {
     setLoading(true)
     try {
       const data = await fetchGuardrailPolicies(ORG_ID)
-      setPolicies(data)
+      setPolicies(Array.isArray(data) ? data : [])
     } catch (err) {
       console.error('Failed to load policies', err)
     } finally {
@@ -270,7 +270,7 @@ function ProfilesTab() {
     setLoading(true)
     try {
       const data = await fetchGuardrailProfiles()
-      setProfiles(data)
+      setProfiles(Array.isArray(data) ? data : [])
     } catch (err) {
       console.error('Failed to load profiles', err)
     } finally {
@@ -410,7 +410,7 @@ function ViolationsTab() {
       if (severityFilter) params.severity = severityFilter
       if (guardTypeFilter) params.guard_type = guardTypeFilter
       const result = await fetchGuardrailViolations(ORG_ID, params)
-      setViolations(result.data)
+      setViolations(Array.isArray(result?.data) ? result.data : [])
       setLastPage(result.last_page)
       setTotal(result.total)
     } catch (err) {

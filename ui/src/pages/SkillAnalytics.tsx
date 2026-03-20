@@ -65,8 +65,19 @@ export function SkillAnalytics() {
   useEffect(() => {
     setLoading(true)
     Promise.all([
-      fetchTopSkills({ period }).then(setTopSkills).catch(() => setTopSkills([])),
-      fetchAnalyticsTrends({ period }).then(setTrends).catch(() => setTrends(null)),
+      fetchTopSkills({ period }).then((data) => setTopSkills(Array.isArray(data) ? data : [])).catch(() => setTopSkills([])),
+      fetchAnalyticsTrends({ period }).then((data) => {
+        if (data && typeof data.total_tests === 'number') {
+          setTrends({
+            total_tests: data.total_tests ?? 0,
+            pass_rate: data.pass_rate ?? 0,
+            avg_tokens: data.avg_tokens ?? 0,
+            avg_cost: data.avg_cost ?? 0,
+          })
+        } else {
+          setTrends(null)
+        }
+      }).catch(() => setTrends(null)),
     ]).finally(() => setLoading(false))
   }, [period])
 

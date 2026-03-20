@@ -48,8 +48,8 @@ export function Notifications() {
     setLoading(true)
     fetchNotifications()
       .then((res) => {
-        setNotifications(res.data)
-        setUnreadCount(res.unread_count)
+        setNotifications(Array.isArray(res?.data) ? res.data : [])
+        setUnreadCount(res?.unread_count ?? 0)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
