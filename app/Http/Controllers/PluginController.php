@@ -25,13 +25,9 @@ class PluginController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $org = app('current_organization');
+        $orgId = auth()->user()?->current_organization_id;
 
-        if (! $org) {
-            return response()->json(['message' => 'Organization not resolved'], 403);
-        }
-
-        $query = Plugin::where('organization_id', $org->id)
+        $query = Plugin::where('organization_id', $orgId)
             ->with('hooks')
             ->orderBy('name');
 
@@ -50,11 +46,7 @@ class PluginController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $org = app('current_organization');
-
-        if (! $org) {
-            return response()->json(['message' => 'Organization not resolved'], 403);
-        }
+        $orgId = auth()->user()?->current_organization_id;
 
         $validated = $request->validate([
             'manifest' => 'required|array',
@@ -80,7 +72,7 @@ class PluginController extends Controller
 
         // Check for duplicate slug
         $slug = \Illuminate\Support\Str::slug($validated['manifest']['name']);
-        $exists = Plugin::where('organization_id', $org->id)
+        $exists = Plugin::where('organization_id', $orgId)
             ->where('slug', $slug)
             ->exists();
 
@@ -91,7 +83,7 @@ class PluginController extends Controller
         }
 
         try {
-            $plugin = $this->manager->install($validated['manifest'], $org->id);
+            $plugin = $this->manager->install($validated['manifest'], $orgId);
 
             // Dispatch install hook
             $this->dispatcher->dispatch('on_plugin_install', [
@@ -203,13 +195,9 @@ class PluginController extends Controller
      */
     public function availableNodes(): JsonResponse
     {
-        $org = app('current_organization');
+        $orgId = auth()->user()?->current_organization_id;
 
-        if (! $org) {
-            return response()->json(['message' => 'Organization not resolved'], 403);
-        }
-
-        $nodes = $this->nodeRegistry->getCustomNodes($org->id);
+        $nodes = $this->nodeRegistry->getCustomNodes((int) $orgId);
 
         return response()->json(['data' => $nodes]);
     }
