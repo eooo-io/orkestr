@@ -1,235 +1,230 @@
 # Orkestr — Product Introduction
 
-> The control center for AI-assisted development.
+> Self-hosted Agent OS — design, execute, and manage autonomous AI agents on your own infrastructure.
 
 ---
 
-## The Problem
+## What Orkestr Is
 
-AI coding assistants are everywhere. Claude, Cursor, GitHub Copilot, Windsurf, Cline, OpenAI — each one powerful on its own, each one with its own configuration format, its own rules directory, its own way of understanding what you want.
+Orkestr is a self-hosted platform for building and operating AI agent systems. You design agents, give them tools and instructions, wire them into teams, and run them — all from your own infrastructure, with any combination of cloud and local models.
 
-This creates three problems that get worse the more you use AI in your workflow:
+It is built in three layers, each one building on the layer below:
 
-### 1. Fragmentation
+```
+┌─────────────────────────────────────────────┐
+│  Orchestration                              │
+│  Workflows, agent teams, goal decomposition │
+├─────────────────────────────────────────────┤
+│  Agents                                     │
+│  Autonomous loops, tools, memory, execution │
+├─────────────────────────────────────────────┤
+│  Components                                 │
+│  Skills, models, templates, provider sync   │
+└─────────────────────────────────────────────┘
+```
 
-Every AI assistant stores its instructions differently. Claude reads from `.claude/CLAUDE.md`. Cursor reads `.cursor/rules/`. Copilot reads `.github/copilot-instructions.md`. If you use more than one — or if different members of your team prefer different tools — you're maintaining the same instructions in multiple places, in multiple formats, with no guarantee they stay in sync.
-
-When instructions drift apart, the AI assistants start behaving inconsistently. The Claude user gets one style of code review. The Cursor user gets another. Nobody knows which version is current.
-
-### 2. No Reuse Across Projects
-
-You've written a great set of instructions for how your team handles error logging, or how API responses should be structured, or what your code review standards are. Now you start a new project. You copy-paste those instructions, maybe tweak them, and six months later you have fifteen slightly different versions of the same guidance scattered across your repositories.
-
-There's no library. No versioning. No way to update a skill once and have it propagate everywhere it's used.
-
-### 3. AI Configuration Is Invisible
-
-Most teams have no visibility into what instructions their AI assistants are actually following. There's no diff preview before syncing changes. No version history to roll back to. No way to search across projects for a specific instruction. No linting to catch vague or contradictory prompts. The configuration that shapes every line of AI-generated code lives in flat files that nobody reviews.
+You can use any single layer on its own. You can also use all three together. The platform scales with your ambition.
 
 ---
 
-## What Orkestr Does
+## Layer 1: Components — The Building Blocks
 
-Orkestr gives you a single place to write, organize, test, and distribute the instructions that guide your AI coding assistants.
+At the foundation, Orkestr gives you a structured way to manage the instructions and configuration that power AI systems.
 
-### Write Once, Sync Everywhere
+### Skills
 
-You define your AI instructions — we call them **skills** — in a simple, portable format: a Markdown file with a YAML header. One file per skill, stored in a `.agentis/` directory in your project.
+A **skill** is a reusable AI instruction — a Markdown file with YAML metadata. Skills are the atomic unit of knowledge in Orkestr.
 
 ```markdown
 ---
 name: API Response Format
-description: Standardize JSON API responses across the project
+description: Standardize JSON API responses
 tags: [api, standards]
 model: claude-sonnet-4-6
 ---
 
 All API endpoints must return responses in this structure:
-
 - Success: { "data": ..., "meta": { "timestamp": "...", "request_id": "..." } }
 - Error: { "error": { "code": "...", "message": "...", "details": [...] } }
-
-Never return raw strings or unstructured objects from API routes.
 ```
 
-When you sync, Orkestr translates that single skill into the native format of every AI assistant your team uses — Claude's Markdown, Cursor's MDC files, Copilot's instructions file, and so on. Seven providers supported, all from one source of truth.
+Skills are stored in `.agentis/skills/` — plain files you can version-control, share, and compose. They support includes (one skill embedding another), template variables (`{{language}}`), and dependency resolution.
 
-### A Real Editor, Not a Text File
+### Multi-Model Access
 
-Skills are edited in a full-featured code editor (Monaco, the same engine behind VS Code) with syntax highlighting, live token counting, and keyboard shortcuts. You get an editing experience that matches the importance of what you're writing — these instructions shape every piece of code your AI assistants produce.
+Orkestr routes to any model from any provider — Anthropic (Claude), OpenAI, Google Gemini, Grok (xAI), 200+ models via OpenRouter, and local models through Ollama, vLLM, or TGI. No vendor lock-in. Swap models by changing a config line.
 
-### Version Everything
+### Provider Sync
 
-Every time you save a skill, Orkestr takes a snapshot. You can view the full history of any skill, compare any two versions side by side in a diff viewer, and restore a previous version with one click. Optionally, skill changes can auto-commit to your project's git repository.
+Skills can be delivered to AI coding tools (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI) in each tool's native format. Write once in `.agentis/`, sync to seven providers. This is how Orkestr bridges the gap between your agent definitions and your everyday development workflow — one source of truth for all AI instructions.
 
-You'll never lose a good prompt to an accidental edit again.
+### Skill Tooling
 
-### Test Before You Ship
-
-The built-in test runner lets you try a skill against a real AI model before syncing it to your project. Send a message, see the streamed response, check that the AI follows your instructions. Supports multiple providers — Anthropic (Claude), OpenAI (GPT-4o), Google Gemini, and local models via Ollama — so you can verify behavior across the models your team actually uses.
-
-The Playground goes further: multi-turn conversations, custom system prompts, agent-composed instructions, per-message token counts, and the ability to stop generation mid-stream.
-
-### See What Changes Before It Changes
-
-Before writing a single file to your project, Orkestr shows you exactly what will change. The sync preview displays a side-by-side diff for every provider file that would be created, modified, or deleted. Review it, then confirm. No surprises.
+Skills are authored in a Monaco editor with syntax highlighting, live token counting, and keyboard shortcuts. Every save creates a version snapshot with full diff history. A built-in linter catches quality issues. A test runner lets you try skills against real models before deploying them.
 
 ---
 
-## Beyond Skills: Agents and Orchestration
+## Layer 2: Agents — Autonomous Entities
 
-Skills are the building blocks. But modern AI development is moving beyond single instructions toward something more structured: **agents**.
+Skills tell an AI *what to do*. Agents tell an AI *how to operate*. An agent is a complete autonomous entity with a goal, tools, memory, and a decision loop.
 
-### What Is an Agent?
+### The Agent Loop
 
-An agent is an AI that doesn't just respond to a single prompt — it pursues a goal through a cycle of thinking and acting. It perceives its situation, reasons about what to do, takes an action (like calling a tool or writing code), observes the result, and repeats until the job is done.
+Every agent in Orkestr follows the same cycle:
 
-Think of a skill as a single instruction card. An agent is a worker who carries a set of those cards, knows how to use specific tools, and can make decisions about what to do next.
+**Goal → Perceive → Reason → Act → Observe → (repeat or stop)**
 
-### Designing Agents
+The agent reads its context, thinks about what to do, takes an action (calling a tool, generating output, delegating to another agent), evaluates the result, and decides whether to continue or stop. This isn't a single prompt-response — it's an autonomous loop that runs until the job is done.
 
-Orkestr lets you design agents as complete definitions:
+### Agent Definition
 
-- **Identity** — Who is this agent? A code reviewer, a security auditor, a project manager?
-- **Goal** — What is it trying to accomplish? What does success look like?
-- **Perception** — What information does it have access to? What context does it consider?
-- **Reasoning** — Which model does it use? What skills guide its thinking?
-- **Actions** — What tools can it use? MCP servers for filesystem access, API calls, database queries. A2A protocol for talking to other agents.
-- **Observation** — How does it evaluate its own output? When does it stop?
+Each agent has a structured definition covering six dimensions:
 
-The Agent Builder provides a visual interface for configuring each of these dimensions, with dedicated editors for JSON schemas, prompt fields, and tool configurations.
+| Dimension | What It Defines | Example |
+|---|---|---|
+| **Identity** | Name, role, persona | "Security Auditor — methodical, thorough" |
+| **Goal** | Objective, success criteria, max iterations | "Find all OWASP Top 10 vulnerabilities" |
+| **Perception** | Input schema, memory sources, context | "Read PR diff + project security history" |
+| **Reasoning** | Model, skills, temperature, planning mode | "Use Claude Opus, apply security-checklist skill" |
+| **Actions** | MCP tools, A2A delegation, custom tools | "Can read files, query SAST database, delegate to QA" |
+| **Observation** | Eval criteria, output schema, loop condition | "Stop when all files reviewed and findings documented" |
 
-### Orchestration: Agents Working Together
+This is where skills become part of something larger. Skills are the instructions an agent carries; the agent definition determines *how* and *when* those instructions are applied.
 
-Real-world tasks often need more than one agent. A code change might need an architect to plan, a developer to implement, a reviewer to check quality, and a security auditor to scan for vulnerabilities.
+### Tools and Connections
 
-Orkestr's **workflow builder** lets you arrange agents into multi-step pipelines using a visual canvas:
+Agents interact with the real world through two protocols:
 
-- **Drag and connect** agents into directed workflows
-- **Conditional routing** — send work down different paths based on results
-- **Parallel execution** — run independent agents simultaneously
-- **Checkpoints** — pause the workflow for human review before proceeding
-- **Shared context** — agents pass information forward through a shared context bus
+- **MCP (Model Context Protocol)** — Connects agents to tools: file systems, databases, APIs, shell commands, knowledge bases. An agent without tools is just a text generator.
+- **A2A (Agent-to-Agent)** — Lets agents delegate tasks to other agents and receive results. This is how agent teams coordinate.
+
+### Memory
+
+Agents maintain persistent memory across sessions:
+
+- **Conversation memory** — What happened in the current interaction
+- **Working memory** — Task-relevant context that persists across turns
+- **Long-term memory** — Knowledge accumulated over time, available across sessions
+
+### Execution Engine
+
+Orkestr has a built-in runtime. Agents execute inside the platform with real tool calls, real model invocations, and full observability. Every step is traced: inputs, outputs, tool calls, token usage, cost breakdown, and elapsed time.
+
+---
+
+## Layer 3: Orchestration — Agents Working Together
+
+Real-world problems rarely need a single agent. A code change might need an architect to plan, a developer to implement, a reviewer to check quality, and a security auditor to scan for vulnerabilities.
+
+### Workflows
+
+The workflow builder lets you arrange agents into multi-step pipelines:
+
+- **Agent steps** — Run a specific agent with a specific goal
+- **Conditional routing** — Send work down different paths based on results
+- **Parallel execution** — Run independent agents simultaneously
+- **Checkpoints** — Pause for human review before proceeding
+- **Shared context** — A context bus that passes data between agents
+
+### Visual Canvas
+
+The canvas is a WYSIWYG composition surface where you drag agents, skills, MCP servers, and A2A connections onto a shared workspace. Draw delegation edges between agents. Edit configuration inline. Run workflows directly from the canvas.
+
+### Schedules and Triggers
+
+Agents and workflows can run on cron schedules, webhook triggers, or event-driven rules. Set up a security scanner that runs nightly, a code reviewer that triggers on every PR, or a compliance agent that monitors changes continuously.
 
 Workflows can be exported to popular orchestration formats (LangGraph, CrewAI) or run directly inside Orkestr.
 
-### Running Agents
+---
 
-Orkestr includes a lightweight execution engine that brings agent designs to life:
+## Safety and Governance
 
-- **Agent execution** — Run an agent with real tool calls, watch the think-act-observe loop unfold in real time
-- **Workflow execution** — Execute multi-agent workflows, with live status on each step of the pipeline
-- **Tool integration** — Agents connect to external tools through MCP (Model Context Protocol) servers and communicate with other agents via the A2A (Agent-to-Agent) protocol
-- **Memory** — Agents can store and retrieve information across conversations, building up working knowledge over time
-- **Full observability** — Every execution is traced: see each step, every tool call, token usage, cost breakdown, and elapsed time
+Agent systems need guardrails. Orkestr provides them at every layer:
+
+- **Prompt linting** — Catches quality issues in skills: vague instructions, contradictory directives, missing output format specifications
+- **Execution guardrails** — Budget limits (per-agent, per-run, daily), tool allowlists, output content scanning, approval gates
+- **Organization policies** — Cascading safety policies from organization → project → agent. What's blocked at the org level is blocked everywhere beneath it.
+- **Marketplace review** — AI-powered content analysis before skills are published, with transparency reports
+
+The philosophy: **warn loudly, block rarely, log everything.** Full freedom with full visibility.
 
 ---
 
-## Organization and Discovery
+## Platform Capabilities
 
-As your skill library grows, finding and managing instructions becomes its own challenge. Orkestr provides several tools to keep things organized:
+These features support all three layers:
 
-- **Tags** — Categorize skills with color-coded labels and filter by them across projects
-- **Command Palette** — Press `Ctrl+K` to instantly search across skills, projects, and pages
-- **Cross-Project Search** — Full-text search across every skill in every project, with filters for tags, models, and projects
-- **Bulk Operations** — Select multiple skills and apply tags, assign to agents, move between projects, or delete in batch
-- **Skill Dependencies** — Skills can include other skills, building composable instruction sets. Orkestr resolves the full chain and detects circular references
-- **Template Variables** — Use `{{variable}}` placeholders in skills with different values per project. Write a skill once, customize it for each codebase
-- **Visualization** — Interactive graphs show how skills, agents, and providers connect across your projects
+### Organization and Discovery
 
----
+- **Tags** — Color-coded labels for skills, filterable across projects
+- **Command Palette** — `Ctrl+K` to search skills, projects, agents, and pages instantly
+- **Cross-Project Search** — Full-text search across every skill in every project
+- **Visualization** — Interactive graphs showing how skills, agents, and providers connect
+- **Bulk Operations** — Multi-select skills for tagging, assignment, move, or deletion
 
-## Sharing and Collaboration
+### Sharing and Reuse
 
-### Skill Library
+- **Skill Library** — 25 pre-built skills across Laravel, PHP, TypeScript, FinTech, DevOps, and Technical Writing
+- **Marketplace** — Self-hosted platform for publishing, discovering, and installing community skills
+- **Bundles** — Export curated sets of skills and agents as portable archives (ZIP or JSON)
+- **Repository Connections** — Sync skills with GitHub or GitLab repositories
 
-Orkestr ships with 25 pre-built skills across categories like Laravel, PHP, TypeScript, FinTech, DevOps, and Technical Writing. Browse the library, preview any skill, and import it into your project with one click.
+### Infrastructure
 
-### Bundles
-
-Export a curated set of skills and agents as a portable bundle (ZIP or JSON). Share it with teammates, import it into another Orkestr instance, and handle conflicts with clear options: skip, overwrite, or rename.
-
-### Marketplace
-
-A self-hosted marketplace where you can publish skills for others to discover, browse community-contributed skills with ratings and download counts, and install them directly into your projects.
-
-### Repository Connections
-
-Connect your Orkestr projects to GitHub or GitLab repositories. Pull existing AI configurations from your repos, push updated skills back, and keep everything synchronized — scoped to AI configuration files only, so Orkestr never touches your source code.
+- **Self-Hosted** — Runs entirely on your infrastructure. Your data, your keys, your control.
+- **Air-Gap Mode** — Run 100% offline with local models. Zero external network calls.
+- **Deployment Elasticity** — Same codebase runs cloud-only, hybrid, or fully air-gapped. Switching is a config change, not an architecture change.
 
 ---
 
-## Safety and Guardrails
+## How the Layers Relate
 
-AI instructions are powerful — and that power needs responsible handling, especially when skills are shared through a marketplace or used in automated agent workflows.
-
-Orkestr takes a layered approach to safety:
-
-- **Prompt linting** catches common quality issues: vague instructions, contradictory directives, missing output format specifications
-- **Static pattern detection** flags potential security concerns like prompt injection attempts, credential harvesting patterns, or instructions to exfiltrate data
-- **Execution guardrails** enforce budget limits, tool allowlists, and output content checks when agents run
-- **Marketplace review** applies AI-powered content analysis before skills are published to the marketplace, with transparency reports showing exactly what each skill does
-
-The philosophy is: **warn loudly, block rarely, log everything.** Legitimate users get full freedom with clear visibility. Distribution channels (the marketplace) have appropriate review gates.
-
----
-
-## How It Fits Into Your Workflow
-
-Orkestr is not a replacement for your AI coding assistant. It's the management layer that sits above all of them.
+The three layers are not separate products — they are a hierarchy where each layer builds on the one below:
 
 ```
-Your code editor (VS Code, JetBrains, terminal)
-       │
-       ▼
-AI assistant (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI)
-       │
-       ▼  reads config files
-Orkestr output (.claude/, .cursor/, .github/, etc.)
-       │
-       ▼  synced from
-Orkestr (.agentis/ — your single source of truth)
+Skills feed into Agents.
+   Skills are the instructions an agent carries. When you assign skills
+   to an agent, they become part of its reasoning capability.
+
+Agents feed into Orchestration.
+   Agents are the workers in a workflow. Each workflow step runs an agent
+   with a specific goal. The orchestration layer coordinates them.
+
+Provider Sync bridges Components to external tools.
+   Skills can also be synced to AI coding assistants (Claude, Cursor, etc.)
+   independent of agents — this is how the Component Layer serves developers
+   who just want consistent AI instructions across their team's tools.
 ```
 
-You keep using whatever AI assistant you prefer. Orkestr manages the instructions behind the scenes — making sure they're consistent, versioned, tested, and distributed correctly.
+You can start at any layer:
 
-For teams, this means everyone gets the same AI behavior regardless of which editor or assistant they use. For individuals, it means your best prompts are organized, searchable, and portable.
+- **Just want consistent AI instructions?** Use the Component Layer. Create skills, sync to providers. Done.
+- **Want autonomous agents?** Use Components + Agents. Define agents with goals, tools, and memory. Run them.
+- **Want coordinated agent teams?** Use all three layers. Build workflows that chain agents with conditions, checkpoints, and shared context.
 
 ---
 
 ## The CLI
 
-For developers who prefer the terminal, Orkestr includes command-line tools:
+For developers who prefer the terminal:
 
 - `agentis:list` — See all projects and their skills at a glance
 - `agentis:scan` — Scan a project directory for skill files
 - `agentis:sync` — Sync skills to provider configs without opening the UI
-- `agentis:import` — Import existing provider config files into Agentis format (reverse-sync)
+- `agentis:import` — Import existing provider config files into Orkestr format (reverse-sync)
 
-The import command is particularly useful for onboarding: point it at a project that already has `.claude/CLAUDE.md` or `.cursor/rules/`, and it will parse those files back into portable Agentis skills. No manual migration needed.
-
----
-
-## Pricing
-
-Orkestr is **free for open source projects**. If your project has an OSI-approved license, you get full access to build, test, and sync AI skills — no credit card, no trial expiry.
-
-For commercial projects and teams, paid plans start at $12/month for individuals and $29/seat/month for teams, with unlimited skills, full version history, and marketplace access.
+The import command is particularly useful for onboarding: point it at a project that already has `.claude/CLAUDE.md` or `.cursor/rules/`, and it will parse those files back into portable skills. No manual migration needed.
 
 ---
 
 ## Summary
 
-| Problem | Solution |
-|---|---|
-| AI instructions fragmented across providers | Write once in `.agentis/`, sync to all 7 providers |
-| No reuse across projects | Skill library, bundles, marketplace, template variables |
-| No visibility into AI configuration | Version history, diff preview, search, visualization |
-| No way to test instructions before deploying | Multi-model test runner and interactive playground |
-| Instructions are just text files | Full editor, linting, token estimation, dependency resolution |
-| AI agents are hard to design and run | Visual agent builder, workflow canvas, built-in execution engine |
-| Team members use different AI assistants | Everyone syncs from the same source of truth |
-| Sharing prompts is ad hoc | Marketplace, bundles, and repository connections |
-| No safety checks on shared AI instructions | Layered guardrails: linting, pattern detection, execution limits, marketplace review |
+| Layer | What It Provides | Key Capabilities |
+|---|---|---|
+| **Components** | Building blocks | Skills, multi-model access, provider sync, templates, includes |
+| **Agents** | Autonomous entities | Agent loop, tool use (MCP), delegation (A2A), memory, execution |
+| **Orchestration** | Multi-agent coordination | Workflows, canvas, schedules, parallel execution, checkpoints |
+| **Platform** | Supporting infrastructure | Guardrails, marketplace, library, bundles, search, air-gap mode |
 
-Orkestr turns the scattered, invisible, unmanaged configuration files that control your AI assistants into a proper engineering discipline — versioned, tested, reviewed, and shared.
+Orkestr is an agent operating system. Skills are its instruction set. Agents are its processes. Workflows are its job scheduler. Guardrails are its security model. And it all runs on your hardware, with your models, under your control.

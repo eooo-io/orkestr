@@ -141,11 +141,11 @@ Users can upgrade/downgrade freely:
 
 ### Messaging to OSS community
 
-> "Orkestr is free for open source. If your project has an OSI-approved license, you get full access to build, test, and sync AI skills — no credit card, no trial expiry. We believe the tools that shape AI-assisted development should be accessible to everyone building in the open."
+> "Orkestr is free for open source. If your project has an OSI-approved license, you get full access to design agents, build workflows, and manage AI skills — no credit card, no trial expiry. We believe agent infrastructure should be accessible to everyone building in the open."
 
 ### Messaging to commercial users
 
-> "For teams and commercial projects, Orkestr Pro gives you unlimited skills, full version history, and marketplace access starting at $12/month."
+> "For teams and commercial projects, Orkestr Pro gives you unlimited agents, workflows, skills, full version history, and marketplace access starting at $12/month."
 
 ### What we DON'T say
 

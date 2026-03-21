@@ -1,6 +1,6 @@
 # Multi-Model Setup
 
-Orkestr supports testing skills against models from multiple providers: Anthropic (Claude), OpenAI, Google Gemini, and local Ollama models.
+Orkestr connects to models from multiple providers: Anthropic (Claude), OpenAI, Google Gemini, and local Ollama models. Models power everything — skill testing, agent execution, and workflow orchestration. Configure providers once; use them across all three layers.
 
 ## Configuring API Keys
 

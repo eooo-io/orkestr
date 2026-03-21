@@ -1,6 +1,6 @@
 # Creating Skills
 
-Skills are the core unit in Orkestr. Each skill is a reusable AI prompt stored as a Markdown file with YAML frontmatter.
+Skills are the foundation of Orkestr's [Component Layer](/guide/core-concepts#component-layer). Each skill is a reusable AI instruction stored as a Markdown file with YAML frontmatter. Skills can be used standalone (synced to AI coding tools via [Provider Sync](./provider-sync)) or assigned to [agents](./agents) as part of their reasoning capability.
 
 ## The Skill Editor
 

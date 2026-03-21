@@ -4,9 +4,13 @@
 
 ## What This Project Does
 
-Orkestr lets a developer define, edit, and organize reusable AI skills (prompts + config) in a provider-agnostic format, then sync them outward to the native config format of any supported AI provider (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI).
+Orkestr is a self-hosted platform for building and operating AI agent systems. It is organized in three layers:
 
-**Core philosophy:** `.agentis/` is the single source of truth. All provider-specific files are derived outputs — never edited directly.
+1. **Component Layer** — Define reusable AI skills (prompts + config) in a provider-agnostic format, stored in `.agentis/`. Sync skills to the native config format of any supported AI provider (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI).
+2. **Agent Layer** — Design autonomous agents with goals, tools (MCP), delegation (A2A), and persistent memory. Execute them through a built-in runtime with full observability.
+3. **Orchestration Layer** — Wire agents into multi-step workflows with conditional routing, parallel execution, human checkpoints, and shared context.
+
+**Core philosophy:** `.agentis/` is the single source of truth for skills. Skills feed into agents. Agents feed into workflows. All provider-specific files are derived outputs — never edited directly.
 
 ## Tech Stack
 

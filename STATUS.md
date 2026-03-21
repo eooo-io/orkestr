@@ -4,7 +4,7 @@
 
 ## Overview
 
-Orkestr is a self-hosted Agent OS for designing, executing, and managing autonomous AI agents. Developers define reusable AI skills (prompt + config) in a provider-agnostic format under `.agentis/`, then sync them to any supported AI provider's native config format.
+Orkestr is a self-hosted Agent OS for designing, executing, and managing autonomous AI agents. Built in three layers — Components (skills, models, provider sync), Agents (autonomous loops, tools, memory), and Orchestration (workflows, agent teams, scheduling). Skills are defined in a provider-agnostic format under `.agentis/` and can be synced to AI coding tools or composed into agent instructions.
 
 **Stack:** Laravel 12 (PHP 8.4) + Filament 3 + React 19 + TypeScript + Vite 7 + Tailwind v4 + shadcn/ui + Monaco Editor + D3.js + MariaDB 11 + Docker
 
