@@ -145,7 +145,7 @@ Agent systems need guardrails. Orkestr provides them at every layer:
 - **Prompt linting** — Catches quality issues in skills: vague instructions, contradictory directives, missing output format specifications
 - **Execution guardrails** — Budget limits (per-agent, per-run, daily), tool allowlists, output content scanning, approval gates
 - **Organization policies** — Cascading safety policies from organization → project → agent. What's blocked at the org level is blocked everywhere beneath it.
-- **Marketplace review** — AI-powered content analysis before skills are published, with transparency reports
+- **Content review** — AI-powered content analysis for skills, with transparency reports
 
 The philosophy: **warn loudly, block rarely, log everything.** Full freedom with full visibility.
 
@@ -166,7 +166,7 @@ These features support all three layers:
 ### Sharing and Reuse
 
 - **Skill Library** — 25 pre-built skills across Laravel, PHP, TypeScript, FinTech, DevOps, and Technical Writing
-- **Marketplace** — Self-hosted platform for publishing, discovering, and installing community skills
+- **Skills.sh Import** — Discover and import skills from GitHub repositories following the skills.sh convention
 - **Bundles** — Export curated sets of skills and agents as portable archives (ZIP or JSON)
 - **Repository Connections** — Sync skills with GitHub or GitLab repositories
 
@@ -225,6 +225,6 @@ The import command is particularly useful for onboarding: point it at a project 
 | **Components** | Building blocks | Skills, multi-model access, provider sync, templates, includes |
 | **Agents** | Autonomous entities | Agent loop, tool use (MCP), delegation (A2A), memory, execution |
 | **Orchestration** | Multi-agent coordination | Workflows, canvas, schedules, parallel execution, checkpoints |
-| **Platform** | Supporting infrastructure | Guardrails, marketplace, library, bundles, search, air-gap mode |
+| **Platform** | Supporting infrastructure | Guardrails, library, bundles, search, air-gap mode |
 
 Orkestr is an agent operating system. Skills are its instruction set. Agents are its processes. Workflows are its job scheduler. Guardrails are its security model. And it all runs on your hardware, with your models, under your control.

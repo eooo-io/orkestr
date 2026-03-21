@@ -169,8 +169,8 @@ When active:
 
 - Cloud provider API calls are blocked (Anthropic, OpenAI, Gemini, Grok, OpenRouter)
 - Only Ollama and custom endpoints on the local network are available
-- Marketplace, skills.sh import, and other external features are disabled
-- License validation switches to offline mode
+- Skills.sh import and other external features are disabled
+- All features remain fully available offline
 
 ::: warning
 Air-gap mode is a hard block at the service layer. Ensure you have local models configured before enabling it, or you will have no LLM access.

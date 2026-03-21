@@ -126,7 +126,6 @@ orkestr/
 | Playground (multi-turn chat) | React SPA |
 | Version history + diff viewer | React SPA |
 | Agent configuration + compose preview | React SPA |
-| Marketplace (publish/install/vote) | React SPA |
 | Cross-project search | React SPA |
 | Bundle export/import | React SPA |
 | Webhook configuration | React SPA |
@@ -318,13 +317,6 @@ GET            /api/projects/{id}/agents/compose
 # Bundles
 POST           /api/projects/{id}/export
 POST           /api/projects/{id}/import-bundle
-
-# Marketplace
-GET            /api/marketplace
-GET            /api/marketplace/{id}
-POST           /api/marketplace/publish
-POST           /api/marketplace/{id}/install
-POST           /api/marketplace/{id}/vote
 
 # Webhooks
 GET            /api/projects/{id}/webhooks

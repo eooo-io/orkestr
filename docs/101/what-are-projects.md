@@ -102,7 +102,6 @@ While most work is scoped to a single project, some features work across project
 - **Skill duplication** — Clone a skill from one project to another
 - **Library** — Shared skill library available to all projects
 - **Bundles** — Export skills from one project, import into another
-- **Marketplace** — Publish skills for the community
 
 ## Key Takeaway
 

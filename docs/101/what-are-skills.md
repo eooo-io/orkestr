@@ -74,7 +74,7 @@ template_variables:                  # Fill-in-the-blank placeholders
 | Field | Type | Required | What It Does |
 |---|---|---|---|
 | `name` | string | **Yes** | Display name in the UI and provider sync |
-| `description` | string | No | Shown in lists, search results, marketplace |
+| `description` | string | No | Shown in lists, search results, and library |
 | `tags` | string[] | No | Categorization for filtering and organization |
 | `model` | string | No | Which AI model to use when testing/running |
 | `max_tokens` | number | No | Maximum response length |
@@ -195,7 +195,7 @@ Tested (playground, multi-model comparison)
     │
     ├──► Synced to providers (Claude, Cursor, Copilot, etc.)
     │
-    └──► Published to marketplace (shared with community)
+    └──► Exported as bundles (shared with teammates)
 ```
 
 Every save creates a version snapshot. You can view diffs, compare versions, and restore any previous version with one click.

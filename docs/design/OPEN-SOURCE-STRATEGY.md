@@ -1,9 +1,10 @@
 # Open Source & Free Tier Strategy
 
-> Design doc for Orkestr's open source / free tier positioning.
+> **Historical document.** Orkestr is now fully open source under the MIT license. All features are available without restrictions. The strategy below documents the original commercial positioning that was superseded by the decision to go fully open source (see NOTE.md).
+>
 > Created: 2026-03-12
 
-## Decision
+## Original Decision
 
 **Closed-source product with a generous free tier for open source projects.**
 
@@ -16,7 +17,7 @@ Not open-core. Not fully open source. A unified codebase with a free plan gated 
 | Codebase fragmentation | Maintaining OSS + proprietary boundary is constant overhead |
 | Feature gating complexity | Every feature decision becomes "is this free or paid?" at the code level |
 | Community expectations | OSS communities expect governance, RFC processes, contributor docs — real cost |
-| Marketplace risk | An open-core marketplace invites forks that strip out fees |
+| Distribution risk | An open-core model invites forks that strip out fees |
 | Revenue dilution | Self-hosted OSS users never convert — they chose OSS to avoid paying |
 | Speed | Solo/small team moves faster with one codebase, one build, one deploy target |
 
@@ -30,7 +31,7 @@ Open-core works for infrastructure (databases, observability) where enterprises 
 2. **Proven playbook** — GitHub, JetBrains, GitKraken, Snyk, Sentry, Linear all do this
 3. **Network effects** — OSS devs write about tools, recommend them in READMEs, create tutorials
 4. **Pipeline to paid** — Devs use free tier on side projects, bring Orkestr to their company
-5. **Marketplace seeding** — OSS users create and share skills, building marketplace inventory
+5. **Community seeding** — OSS users create and share skills, building the skill library
 6. **Low cost to serve** — OSS projects are typically smaller, lower usage
 
 ### What the OSS community actually wants
@@ -39,7 +40,7 @@ They don't want to self-host your SaaS. They want:
 - Free access for their non-commercial work
 - Assurance you won't rug-pull the free tier
 - Transparency about what's free vs paid
-- A way to contribute back (marketplace skills, not core code)
+- A way to contribute back (shared skills and bundles, not core code)
 
 ## Plan Architecture
 
@@ -53,8 +54,8 @@ They don't want to self-host your SaaS. They want:
 | Skills per project | Up to 25 |
 | Provider sync | All 7 providers |
 | Skill versions | Last 10 per skill |
-| Marketplace | Browse + install free skills |
-| Marketplace publishing | Yes (free skills only) |
+| Skill library | Full access |
+| Bundle import | Yes |
 | Test runner | 50 runs/day |
 | Team members | 1 (solo) |
 | MCP server configs | Up to 3 per project |
@@ -73,8 +74,8 @@ For individual developers on private/commercial projects.
 | Skills per project | Unlimited |
 | Provider sync | All 7 providers |
 | Skill versions | Unlimited history |
-| Marketplace | Full access (free + paid skills) |
-| Marketplace publishing | Yes (free + paid skills, 85/15 rev share) |
+| Skill library | Full access |
+| Bundle export/import | Create + share |
 | Test runner | Unlimited (fair use) |
 | Team members | 1 |
 | MCP / A2A configs | Unlimited |
@@ -125,7 +126,7 @@ MIT, Apache-2.0, GPL-2.0, GPL-3.0, LGPL-2.1, LGPL-3.0, BSD-2-Clause, BSD-3-Claus
 - Rate limit project creation on free tier (5 projects max, not 5 at a time)
 - License file must be present in the actual project directory (not faked in a wrapper repo)
 - Periodic re-validation of OSS status on active projects
-- Free tier users who publish paid marketplace skills get flagged for review
+- Free tier users are limited to the defined project and skill caps
 - GitHub API cross-reference: if project claims OSS but repo is private, doesn't qualify
 
 ## Migration Path
@@ -145,7 +146,7 @@ Users can upgrade/downgrade freely:
 
 ### Messaging to commercial users
 
-> "For teams and commercial projects, Orkestr Pro gives you unlimited agents, workflows, skills, full version history, and marketplace access starting at $12/month."
+> "For teams and commercial projects, Orkestr Pro gives you unlimited agents, workflows, skills, and full version history starting at $12/month."
 
 ### What we DON'T say
 
@@ -194,7 +195,7 @@ ALTER TABLE users ADD COLUMN plan_expires_at TIMESTAMP NULL;
 
 ## Revenue Projections (Conservative)
 
-Assumes marketplace + subscriptions as dual revenue streams:
+Assumes subscriptions as the primary revenue stream:
 
 | Metric | Year 1 | Year 2 |
 |---|---|---|
@@ -203,7 +204,6 @@ Assumes marketplace + subscriptions as dual revenue streams:
 | Team seats | 50 | 300 |
 | Pro MRR | $2,400 | $12,000 |
 | Team MRR | $1,450 | $8,700 |
-| Marketplace MRR | $500 | $5,000 |
-| **Total MRR** | **$4,350** | **$25,700** |
+| **Total MRR** | **$3,850** | **$20,700** |
 
-The free OSS tier is a marketing channel. Its ROI is measured in awareness, marketplace content, and conversion to Pro — not direct revenue.
+The free OSS tier is a marketing channel. Its ROI is measured in awareness, community content, and conversion to Pro — not direct revenue.

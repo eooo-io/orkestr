@@ -17,7 +17,7 @@ Before the layers, there's the kernel — six components without which nothing e
 5. **State Contract** — Agent memory, execution traces, version snapshots. The system remembers what happened.
 6. **Control Hooks** — Budget guards, tool guards, approval gates. The system can halt any agent at any point.
 
-Everything else — the three layers, the UI, the marketplace, the analytics — is built on this kernel.
+Everything else — the three layers, the UI, the library, the analytics — is built on this kernel.
 
 ## Three-Layer Architecture
 

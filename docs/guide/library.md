@@ -41,10 +41,6 @@ The import process:
 
 If the target project already has a skill with the same slug, the import appends a numeric suffix. For example, importing `pest-test-writer` into a project that already has that slug creates `pest-test-writer-1`.
 
-## Library vs. Marketplace
-
-The library is a local, pre-seeded collection that ships with every Orkestr installation. The [Marketplace](./marketplace) is a self-hosted discovery platform for publishing and installing community skills. Library skills are always available offline; marketplace skills require network access to browse and install.
-
 ## Managing Library Skills
 
 Library skills are managed through the Filament Admin panel under **Library Skills**. You can:

@@ -10,14 +10,14 @@ Skills are prompts that get injected into AI coding assistants. Malicious skills
 - **Prompt injection** — Override the host AI's safety instructions ("ignore all previous rules")
 - **Exfiltration instructions** — Tell the AI to leak secrets, env vars, or source code to external URLs
 - **Vulnerability insertion** — Subtly instruct the AI to write insecure code (weak crypto, SQLi, backdoors)
-- **Supply chain attacks** — Marketplace skills that look helpful but contain hidden instructions
+- **Supply chain attacks** — Shared skills that look helpful but contain hidden instructions
 - **Malicious tool config** — MCP servers or A2A agents pointing to attacker-controlled endpoints
 
 ## Design Principle
 
 **Warn loudly, block rarely, log everything.**
 
-Legitimate users get full freedom with clear visibility. Bad actors get caught at the distribution layer (marketplace) where review is justified. Multiple lightweight layers rather than one heavy gate — each layer catches a different class of abuse while staying out of the way for legitimate use.
+Legitimate users get full freedom with clear visibility. Bad actors get caught at the distribution layer (library imports, bundle imports) where review is justified. Multiple lightweight layers rather than one heavy gate — each layer catches a different class of abuse while staying out of the way for legitimate use.
 
 ## Layer 1 — Structural Constraints
 
