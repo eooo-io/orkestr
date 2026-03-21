@@ -32,7 +32,7 @@ The diff is read-only -- you cannot edit directly in the diff view.
 Each version has a **Restore** button. Clicking it opens a confirmation dialog. Confirming the restore:
 
 1. Sets the skill's body and frontmatter to match the selected version
-2. Writes the restored content to the `.agentis/skills/{slug}.md` file
+2. Writes the restored content to the `.orkestr/skills/{slug}.md` file
 3. Creates a **new** version snapshot (the restore itself becomes a new version)
 4. Reloads the skill and version list in the editor
 

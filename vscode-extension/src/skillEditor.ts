@@ -179,12 +179,12 @@ export class SkillDiagnosticProvider implements vscode.Disposable {
     }
 
     private isSkillFile(document: vscode.TextDocument): boolean {
-        // Match .agentis files or files inside .agentis/skills/ directory
-        if (document.languageId === 'agentis-skill') {
+        // Match .orkestr files or files inside .orkestr/skills/ directory
+        if (document.languageId === 'orkestr-skill') {
             return true;
         }
         const path = document.uri.fsPath;
-        return path.includes('.agentis/skills/') || path.endsWith('.agentis');
+        return path.includes('.orkestr/skills/') || path.endsWith('.orkestr');
     }
 
     dispose(): void {

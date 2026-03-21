@@ -105,7 +105,7 @@ curl -X POST https://orkestr.yourcompany.com/api/backups \
 
 Backups include:
 - Database dump (all tables)
-- `.agentis/` skill files
+- `.orkestr/` skill files
 - Configuration files
 
 ### 6. Set Up Monitoring

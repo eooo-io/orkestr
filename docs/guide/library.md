@@ -33,7 +33,7 @@ Click a library skill card to open the import modal:
 The import process:
 
 - Creates a new skill in the target project with the library skill's name, description, tags, and body
-- Writes the `.agentis/skills/{slug}.md` file to disk
+- Writes the `.orkestr/skills/{slug}.md` file to disk
 - Creates a version 1 snapshot
 - Syncs any tags that do not already exist in the system
 

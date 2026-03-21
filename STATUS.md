@@ -4,7 +4,7 @@
 
 ## Overview
 
-Orkestr is a self-hosted Agent OS for designing, executing, and managing autonomous AI agents. Built in three layers — Components (skills, models, provider sync), Agents (autonomous loops, tools, memory), and Orchestration (workflows, agent teams, scheduling). Skills are defined in a provider-agnostic format under `.agentis/` and can be synced to AI coding tools or composed into agent instructions.
+Orkestr is a self-hosted Agent OS for designing, executing, and managing autonomous AI agents. Built in three layers — Components (skills, models, provider sync), Agents (autonomous loops, tools, memory), and Orchestration (workflows, agent teams, scheduling). Skills are defined in a provider-agnostic format under `.orkestr/` and can be synced to AI coding tools or composed into agent instructions.
 
 **Stack:** Laravel 12 (PHP 8.4) + Filament 3 + React 19 + TypeScript + Vite 7 + Tailwind v4 + shadcn/ui + Monaco Editor + D3.js + MariaDB 11 + Docker
 
@@ -31,7 +31,7 @@ Orkestr is a self-hosted Agent OS for designing, executing, and managing autonom
 ## Implemented Features
 
 ### Core Engine
-- [x] YAML frontmatter + Markdown skill file format (`.agentis/skills/`)
+- [x] YAML frontmatter + Markdown skill file format (`.orkestr/skills/`)
 - [x] Skill CRUD with slug auto-generation, unique per project
 - [x] Version snapshots on every skill save
 - [x] Version history with Monaco diff viewer
@@ -56,7 +56,7 @@ Orkestr is a self-hosted Agent OS for designing, executing, and managing autonom
 
 ### Reverse-Sync Import
 - [x] Auto-detect provider config files in a project directory
-- [x] Parse existing provider configs back into Agentis skill format
+- [x] Parse existing provider configs back into Orkestr skill format
 - [x] Supports all 6 original providers (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI)
 - [x] Import UI tab in project detail
 
@@ -73,10 +73,10 @@ Orkestr is a self-hosted Agent OS for designing, executing, and managing autonom
 - [x] Playground mode (freeform prompt testing)
 
 ### CLI Tools (Artisan Commands)
-- [x] `agentis:list` — List all projects and their skills
-- [x] `agentis:scan` — Scan a project directory for skill files
-- [x] `agentis:sync` — Sync skills to provider configs from terminal
-- [x] `agentis:import` — Import skills from provider config files
+- [x] `orkestr:list` — List all projects and their skills
+- [x] `orkestr:scan` — Scan a project directory for skill files
+- [x] `orkestr:sync` — Sync skills to provider configs from terminal
+- [x] `orkestr:import` — Import skills from provider config files
 
 ### D3.js Visualization
 - [x] **Full Project Overview** — Force-directed graph of projects, skills, agents, providers
@@ -172,7 +172,7 @@ Orkestr is a self-hosted Agent OS for designing, executing, and managing autonom
 │  Eloquent Models (22)   Provider Drivers (7)     │
 │       │                    │                     │
 │       ▼                    ▼                     │
-│   MariaDB            .agentis/ files             │
+│   MariaDB            .orkestr/ files             │
 │                            │                     │
 │                            ▼                     │
 │                   Provider Config Files           │

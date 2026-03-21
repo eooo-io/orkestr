@@ -7,7 +7,7 @@
 ## Ingredients
 
 - A GitHub repository with an Orkestr project
-- `.agentis/skills/` directory with skill files
+- `.orkestr/skills/` directory with skill files
 - Orkestr API token (create one in Settings → Infrastructure → API Tokens)
 
 ## Steps
@@ -39,7 +39,7 @@ name: Validate Skills
 on:
   pull_request:
     paths:
-      - '.agentis/skills/**'
+      - '.orkestr/skills/**'
 
 jobs:
   validate:
@@ -51,7 +51,7 @@ jobs:
         uses: eooo-io/orkestr-action@v1
         with:
           command: validate
-          path: .agentis/skills/
+          path: .orkestr/skills/
           api-token: ${{ secrets.ORKESTR_API_TOKEN }}
           orkestr-url: https://orkestr.yourcompany.com
 ```
@@ -74,7 +74,7 @@ on:
   push:
     branches: [main]
     paths:
-      - '.agentis/skills/**'
+      - '.orkestr/skills/**'
 
 jobs:
   sync:
@@ -95,7 +95,7 @@ jobs:
           git config user.name "Orkestr Bot"
           git config user.email "orkestr@yourcompany.com"
           git add .claude/ .cursor/ .github/copilot-instructions.md .windsurf/ .clinerules .openai/
-          git diff --staged --quiet || git commit -m "chore: sync provider configs from .agentis/"
+          git diff --staged --quiet || git commit -m "chore: sync provider configs from .orkestr/"
           git push
 ```
 
@@ -126,7 +126,7 @@ Your CI/CD pipeline:
 - Validates skill files on every PR (blocks merges if invalid)
 - Syncs to all provider config formats on merge to main
 - Commits generated files back to the repo automatically
-- Keeps provider configs always in sync with `.agentis/skills/`
+- Keeps provider configs always in sync with `.orkestr/skills/`
 
 ## Variations
 

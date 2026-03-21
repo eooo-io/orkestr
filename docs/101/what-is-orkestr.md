@@ -28,7 +28,7 @@ Orkestr does the same thing, but for AI agents:
 |---|---|
 | Apps | Agents |
 | App Store | Skill Library |
-| File System | Skills, stored in `.agentis/` |
+| File System | Skills, stored in `.orkestr/` |
 | Networking | MCP (tool connections) and A2A (agent-to-agent) |
 | Task Scheduler | Agent Schedules & Triggers |
 | Security & Permissions | Guardrails, Budgets, Approval Gates |

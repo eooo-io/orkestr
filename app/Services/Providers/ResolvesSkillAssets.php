@@ -3,7 +3,7 @@
 namespace App\Services\Providers;
 
 use App\Models\Skill;
-use App\Services\AgentisManifestService;
+use App\Services\ManifestService;
 use App\Services\SkillFileParser;
 use Illuminate\Support\Facades\File;
 
@@ -32,7 +32,7 @@ trait ResolvesSkillAssets
      */
     protected function buildAssetContext(Skill $skill): string
     {
-        $manifestService = app(AgentisManifestService::class);
+        $manifestService = app(ManifestService::class);
         $project = $skill->project;
 
         if (! $project) {

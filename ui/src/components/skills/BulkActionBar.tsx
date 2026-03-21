@@ -266,7 +266,7 @@ export function BulkActionBar({
           <h4 className="text-sm font-medium mb-2">Confirm Delete</h4>
           <p className="text-sm text-muted-foreground mb-4">
             Are you sure you want to delete {count} skill{count !== 1 ? 's' : ''}? This will also
-            remove the .agentis files. This action cannot be undone.
+            remove the .orkestr files. This action cannot be undone.
           </p>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" size="sm" onClick={() => setActivePopover(null)}>

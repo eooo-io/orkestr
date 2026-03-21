@@ -1826,7 +1826,7 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
   const handlePaletteDragStart = useCallback(
     (e: React.DragEvent, item: { id: string; name: string; type: string }) => {
       dragItemRef.current = item
-      e.dataTransfer.setData('application/agentis-canvas', JSON.stringify(item))
+      e.dataTransfer.setData('application/orkestr-canvas', JSON.stringify(item))
       e.dataTransfer.effectAllowed = 'move'
     },
     [],
@@ -1879,7 +1879,7 @@ function FlowGraphInner({ data, height = 500, onNodeClick, projectId, onRefresh 
     (e: React.DragEvent) => {
       e.preventDefault()
 
-      const rawData = e.dataTransfer.getData('application/agentis-canvas')
+      const rawData = e.dataTransfer.getData('application/orkestr-canvas')
       if (!rawData) return
 
       const item = JSON.parse(rawData) as { id: string; name: string; type: string }

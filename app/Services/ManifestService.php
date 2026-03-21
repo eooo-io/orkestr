@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Project;
 use Illuminate\Support\Facades\File;
 
-class AgentisManifestService
+class ManifestService
 {
     public function __construct(
         protected SkillFileParser $parser,
@@ -20,17 +20,17 @@ class AgentisManifestService
      */
     public function scanProject(string $absolutePath): array
     {
-        $agentisDir = rtrim($absolutePath, '/') . '/.agentis';
+        $orkestrDir = rtrim($absolutePath, '/') . '/.orkestr';
         $manifest = null;
         $skills = [];
         $seen = [];
 
-        $manifestPath = $agentisDir . '/manifest.json';
+        $manifestPath = $orkestrDir . '/manifest.json';
         if (File::exists($manifestPath)) {
             $manifest = json_decode(File::get($manifestPath), true);
         }
 
-        $skillsDir = $agentisDir . '/skills';
+        $skillsDir = $orkestrDir . '/skills';
         if (! File::isDirectory($skillsDir)) {
             return ['manifest' => $manifest, 'skills' => $skills];
         }
@@ -71,7 +71,7 @@ class AgentisManifestService
     }
 
     /**
-     * Write the .agentis/manifest.json from current DB state.
+     * Write the .orkestr/manifest.json from current DB state.
      */
     public function writeManifest(Project $project): void
     {
@@ -88,19 +88,19 @@ class AgentisManifestService
             'synced_at' => $project->synced_at?->toIso8601String(),
         ];
 
-        $dir = rtrim($project->resolved_path, '/') . '/.agentis';
+        $dir = rtrim($project->resolved_path, '/') . '/.orkestr';
         File::ensureDirectoryExists($dir);
         File::put($dir . '/manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
     }
 
     /**
-     * Scaffold a new .agentis/ directory structure.
+     * Scaffold a new .orkestr/ directory structure.
      */
     public function scaffoldProject(string $absolutePath, string $name): void
     {
-        $agentisDir = rtrim($absolutePath, '/') . '/.agentis';
+        $orkestrDir = rtrim($absolutePath, '/') . '/.orkestr';
 
-        File::ensureDirectoryExists($agentisDir . '/skills');
+        File::ensureDirectoryExists($orkestrDir . '/skills');
 
         $manifest = [
             'id' => (string) \Illuminate\Support\Str::uuid(),
@@ -113,11 +113,11 @@ class AgentisManifestService
             'synced_at' => null,
         ];
 
-        File::put($agentisDir . '/manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+        File::put($orkestrDir . '/manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
     }
 
     /**
-     * Write a skill file to the project's .agentis/skills/ directory.
+     * Write a skill file to the project's .orkestr/skills/ directory.
      *
      * If the skill already has a folder structure (slug/skill.md), writes there.
      * Otherwise writes as a flat file (slug.md).
@@ -126,7 +126,7 @@ class AgentisManifestService
     public function writeSkillFile(string $projectPath, array $frontmatter, string $body): void
     {
         $slug = $frontmatter['id'] ?? \Illuminate\Support\Str::slug($frontmatter['name'] ?? 'untitled');
-        $skillsDir = rtrim($projectPath, '/') . '/.agentis/skills';
+        $skillsDir = rtrim($projectPath, '/') . '/.orkestr/skills';
 
         File::ensureDirectoryExists($skillsDir);
 
@@ -144,7 +144,7 @@ class AgentisManifestService
      */
     public function ensureSkillFolder(string $projectPath, string $slug): string
     {
-        $skillsDir = rtrim($projectPath, '/') . '/.agentis/skills';
+        $skillsDir = rtrim($projectPath, '/') . '/.orkestr/skills';
         $folderPath = $skillsDir . '/' . $slug;
         $flatPath = $skillsDir . '/' . $slug . '.md';
 
@@ -164,11 +164,11 @@ class AgentisManifestService
     }
 
     /**
-     * Delete a skill file or folder from the project's .agentis/skills/ directory.
+     * Delete a skill file or folder from the project's .orkestr/skills/ directory.
      */
     public function deleteSkillFile(string $projectPath, string $slug): void
     {
-        $skillsDir = rtrim($projectPath, '/') . '/.agentis/skills';
+        $skillsDir = rtrim($projectPath, '/') . '/.orkestr/skills';
 
         // Delete folder version
         $folderPath = $skillsDir . '/' . $slug;
@@ -184,12 +184,12 @@ class AgentisManifestService
     }
 
     /**
-     * Check if a skill file exists in the project's .agentis/skills/ directory.
+     * Check if a skill file exists in the project's .orkestr/skills/ directory.
      * Checks both flat-file and folder-based formats.
      */
     public function skillExists(string $projectPath, string $slug): bool
     {
-        $skillsDir = rtrim($projectPath, '/') . '/.agentis/skills';
+        $skillsDir = rtrim($projectPath, '/') . '/.orkestr/skills';
 
         return File::exists($skillsDir . '/' . $slug . '.md')
             || $this->parser->isFolderSkill($skillsDir, $slug);
@@ -201,7 +201,7 @@ class AgentisManifestService
      */
     public function getSkillFolderPath(string $projectPath, string $slug): ?string
     {
-        $skillsDir = rtrim($projectPath, '/') . '/.agentis/skills';
+        $skillsDir = rtrim($projectPath, '/') . '/.orkestr/skills';
 
         if ($this->parser->isFolderSkill($skillsDir, $slug)) {
             return $skillsDir . '/' . $slug;

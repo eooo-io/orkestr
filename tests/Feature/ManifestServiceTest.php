@@ -1,30 +1,30 @@
 <?php
 
 use App\Models\Project;
-use App\Services\AgentisManifestService;
+use App\Services\ManifestService;
 use App\Services\SkillFileParser;
 use Illuminate\Support\Facades\File;
 
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->tempDir = sys_get_temp_dir() . '/agentis-test-' . uniqid();
+    $this->tempDir = sys_get_temp_dir() . '/orkestr-test-' . uniqid();
     mkdir($this->tempDir, 0755, true);
-    $this->service = new AgentisManifestService(new SkillFileParser);
+    $this->service = new ManifestService(new SkillFileParser);
 });
 
 afterEach(function () {
     File::deleteDirectory($this->tempDir);
 });
 
-it('scaffolds a new .agentis directory', function () {
+it('scaffolds a new .orkestr directory', function () {
     $this->service->scaffoldProject($this->tempDir, 'Test Project');
 
-    expect(is_dir($this->tempDir . '/.agentis'))->toBeTrue();
-    expect(is_dir($this->tempDir . '/.agentis/skills'))->toBeTrue();
-    expect(file_exists($this->tempDir . '/.agentis/manifest.json'))->toBeTrue();
+    expect(is_dir($this->tempDir . '/.orkestr'))->toBeTrue();
+    expect(is_dir($this->tempDir . '/.orkestr/skills'))->toBeTrue();
+    expect(file_exists($this->tempDir . '/.orkestr/manifest.json'))->toBeTrue();
 
-    $manifest = json_decode(file_get_contents($this->tempDir . '/.agentis/manifest.json'), true);
+    $manifest = json_decode(file_get_contents($this->tempDir . '/.orkestr/manifest.json'), true);
     expect($manifest['name'])->toBe('Test Project');
     expect($manifest['providers'])->toBe([]);
     expect($manifest['skills'])->toBe([]);
@@ -54,8 +54,8 @@ it('deletes a skill file', function () {
 });
 
 it('scans a project directory with multiple skills', function () {
-    // Create .agentis directory with 3 skill files
-    $skillsDir = $this->tempDir . '/.agentis/skills';
+    // Create .orkestr directory with 3 skill files
+    $skillsDir = $this->tempDir . '/.orkestr/skills';
     mkdir($skillsDir, 0755, true);
 
     $parser = new SkillFileParser;
@@ -76,7 +76,7 @@ it('scans a project directory with multiple skills', function () {
     ));
 
     // Write a manifest too
-    file_put_contents($this->tempDir . '/.agentis/manifest.json', json_encode([
+    file_put_contents($this->tempDir . '/.orkestr/manifest.json', json_encode([
         'id' => 'test-uuid',
         'name' => 'Test Project',
     ]));
@@ -107,10 +107,10 @@ it('writes a manifest from project DB state', function () {
         'body' => 'Body one.',
     ]);
 
-    mkdir($this->tempDir . '/.agentis', 0755, true);
+    mkdir($this->tempDir . '/.orkestr', 0755, true);
     $this->service->writeManifest($project);
 
-    $manifest = json_decode(file_get_contents($this->tempDir . '/.agentis/manifest.json'), true);
+    $manifest = json_decode(file_get_contents($this->tempDir . '/.orkestr/manifest.json'), true);
 
     expect($manifest['name'])->toBe('Manifest Test');
     expect($manifest['providers'])->toContain('claude', 'cursor');

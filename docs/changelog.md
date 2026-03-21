@@ -16,7 +16,7 @@
 ### File I/O and Manifest Engine
 
 - `SkillFileParser` for reading/writing YAML frontmatter + Markdown body files
-- `AgentisManifestService` for scanning, scaffolding, and managing `.agentis/` directories
+- `ManifestService` for scanning, scaffolding, and managing `.orkestr/` directories
 - `ProjectScanJob` for upserting skills from disk into the database
 
 ### Provider Sync

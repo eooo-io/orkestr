@@ -77,7 +77,7 @@ You can use any layer independently. Start with skills and provider sync, grow i
 - **Version History** — Every save creates a snapshot with diff viewer and one-click restore
 - **Skill Composition** — `includes` for recursive prompt composition with circular dependency detection
 - **Template Variables** — `{{variable}}` placeholders resolved at compose/sync time
-- **Provider Sync** — Write once in `.agentis/`, sync to 7 AI coding tools (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI)
+- **Provider Sync** — Write once in `.orkestr/`, sync to 7 AI coding tools (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI)
 - **Prompt Linter** — 8 quality rules for prompt analysis
 - **AI Generation** — Describe what you want, get a complete skill
 
@@ -122,7 +122,7 @@ graph TB
 
     LLM --> DB["MariaDB 11"]
     Tools --> MCP["MCP Servers"]
-    Orch --> Files[".agentis/ files"]
+    Orch --> Files[".orkestr/ files"]
 ```
 
 ---

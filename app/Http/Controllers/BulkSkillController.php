@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Skill;
 use App\Models\Tag;
-use App\Services\AgentisManifestService;
+use App\Services\ManifestService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 class BulkSkillController extends Controller
 {
     public function __construct(
-        protected AgentisManifestService $manifestService,
+        protected ManifestService $manifestService,
     ) {}
 
     public function bulkTag(Request $request): JsonResponse

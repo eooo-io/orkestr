@@ -94,9 +94,9 @@
 
 ### TC-02-012: Scan project — discovers new skills
 **Priority:** P0
-**Preconditions:** Project path has `.agentis/skills/` directory with YAML+MD skill files
+**Preconditions:** Project path has `.orkestr/skills/` directory with YAML+MD skill files
 **Steps:**
-1. Add a new skill file to `.agentis/skills/` on disk
+1. Add a new skill file to `.orkestr/skills/` on disk
 2. Click "Scan" button
 **Expected:** New skill discovered and imported. Toast: "Scan complete: 1 new skill found." Skill appears in list.
 
@@ -112,7 +112,7 @@
 **Priority:** P1
 **Preconditions:** A skill file has been deleted from disk
 **Steps:**
-1. Delete a `.agentis/skills/xxx.md` file from disk
+1. Delete a `.orkestr/skills/xxx.md` file from disk
 2. Click "Scan"
 **Expected:** Skill marked as deleted or removed. User notified.
 

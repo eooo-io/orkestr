@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\File;
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->tempDir = sys_get_temp_dir() . '/agentis-sync-' . uniqid();
+    $this->tempDir = sys_get_temp_dir() . '/orkestr-sync-' . uniqid();
     mkdir($this->tempDir, 0755, true);
 
     $this->project = Project::create([

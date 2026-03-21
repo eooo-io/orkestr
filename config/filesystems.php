@@ -56,8 +56,8 @@ return [
 
         'minio' => [
             'driver' => 's3',
-            'key' => env('MINIO_ROOT_USER', 'agentis'),
-            'secret' => env('MINIO_ROOT_PASSWORD', 'agentis123'),
+            'key' => env('MINIO_ROOT_USER', 'orkestr'),
+            'secret' => env('MINIO_ROOT_PASSWORD', 'orkestr123'),
             'region' => env('MINIO_REGION', 'us-east-1'),
             'bucket' => env('MINIO_BUCKET', 'agent-artifacts'),
             'endpoint' => env('MINIO_ENDPOINT', 'http://localhost:9000'),

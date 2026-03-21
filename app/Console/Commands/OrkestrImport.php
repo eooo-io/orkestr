@@ -6,15 +6,15 @@ use App\Models\Project;
 use App\Services\ProviderImportService;
 use Illuminate\Console\Command;
 
-class AgentisImport extends Command
+class OrkestrImport extends Command
 {
-    protected $signature = 'agentis:import
+    protected $signature = 'orkestr:import
                             {path : Path to project directory to import from}
-                            {--into= : Target Agentis project name or ID}
+                            {--into= : Target Orkestr project name or ID}
                             {--provider= : Import only from a specific provider}
                             {--dry-run : Show what would be imported without making changes}';
 
-    protected $description = 'Reverse-sync: import existing provider config files into Agentis skills';
+    protected $description = 'Reverse-sync: import existing provider config files into Orkestr skills';
 
     public function handle(ProviderImportService $importService): int
     {

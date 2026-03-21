@@ -10,7 +10,7 @@ name: Validate Skills
 on:
   pull_request:
     paths:
-      - '.agentis/skills/**'
+      - '.orkestr/skills/**'
 
 jobs:
   validate:
@@ -28,7 +28,7 @@ jobs:
         uses: eooo-io/orkestr-action@v1
         with:
           mode: validate
-          skills-path: '.agentis/skills'
+          skills-path: '.orkestr/skills'
 
       # Write a summary to the GitHub Actions job summary
       - name: Write job summary

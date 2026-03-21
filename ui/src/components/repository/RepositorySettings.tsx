@@ -28,7 +28,7 @@ import { Button } from '@/components/ui/button'
 import type { ProjectRepository, RepositoryStatus, RepositoryFile } from '@/types'
 
 const ALLOWED_PATHS = [
-  '.agentis/',
+  '.orkestr/',
   '.claude/',
   '.cursor/rules/',
   '.github/copilot-instructions.md',

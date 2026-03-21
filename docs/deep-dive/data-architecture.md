@@ -307,7 +307,7 @@ sso_providers
 
 ## File Storage
 
-### `.agentis/` Directory
+### `.orkestr/` Directory
 
 Skills are stored as `.md` files on the local filesystem:
 
@@ -315,7 +315,7 @@ Skills are stored as `.md` files on the local filesystem:
 Read/write operations:
 ├── Disk: Laravel filesystem disk "projects"
 ├── Root: PROJECTS_HOST_PATH environment variable
-├── Path: {project.path}/.agentis/skills/{slug}.md
+├── Path: {project.path}/.orkestr/skills/{slug}.md
 ├── Format: YAML frontmatter + Markdown body
 ├── Parsing: SkillFileParser (symfony/yaml)
 └── Syncing: bidirectional (DB ↔ filesystem)

@@ -22,7 +22,7 @@ class SkillResource extends JsonResource
         if ($this->relationLoaded('project')) {
             $project = $this->project;
             if ($project && $project->resolved_path) {
-                $manifestService = app(\App\Services\AgentisManifestService::class);
+                $manifestService = app(\App\Services\ManifestService::class);
                 $folderPath = $manifestService->getSkillFolderPath($project->resolved_path, $this->slug);
                 if ($folderPath) {
                     $isFolder = true;

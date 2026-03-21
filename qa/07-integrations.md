@@ -250,7 +250,7 @@
 **Steps:**
 1. Select a detected skill
 2. Click "Import"
-**Expected:** Skill imported into eooo format. File created in `.agentis/skills/`.
+**Expected:** Skill imported into eooo format. File created in `.orkestr/skills/`.
 
 ## Search
 

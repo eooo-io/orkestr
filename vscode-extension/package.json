@@ -25,7 +25,7 @@
     "prompt-engineering"
   ],
   "activationEvents": [
-    "workspaceContains:.agentis",
+    "workspaceContains:.orkestr",
     "onView:orkestr.skillBrowser"
   ],
   "main": "./out/extension.js",
@@ -138,22 +138,22 @@
     },
     "languages": [
       {
-        "id": "agentis-skill",
+        "id": "orkestr-skill",
         "aliases": [
-          "Agentis Skill",
-          "agentis"
+          "Orkestr Skill",
+          "orkestr"
         ],
         "extensions": [
-          ".agentis"
+          ".orkestr"
         ],
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
       {
-        "language": "agentis-skill",
-        "scopeName": "source.agentis",
-        "path": "./syntaxes/agentis.tmLanguage.json"
+        "language": "orkestr-skill",
+        "scopeName": "source.orkestr",
+        "path": "./syntaxes/orkestr.tmLanguage.json"
       }
     ]
   },

@@ -12,13 +12,13 @@ Browse all your Orkestr projects and skills in a dedicated sidebar tree view. Sk
 
 Author skill files with YAML frontmatter and Markdown body. The extension provides:
 
-- Syntax highlighting for `.agentis` skill files
+- Syntax highlighting for `.orkestr` skill files
 - Diagnostic reporting for missing or invalid frontmatter fields (`id`, `name` are required)
 - Warnings for duplicate keys, invalid slug format, and invalid `max_tokens` values
 
 ### Sync Manager
 
-Keep local `.agentis/skills/` files in sync with your Orkestr server:
+Keep local `.orkestr/skills/` files in sync with your Orkestr server:
 
 - **Push**: upload local skill changes to the server
 - **Pull**: download skills from the server into your workspace
@@ -54,7 +54,7 @@ All commands are available via the Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+
 | `Orkestr: Filter Skills` | Filter skills by name, tag, or description |
 | `Orkestr: Open Skill` | Open a skill from the tree view |
 | `Orkestr: Push Skills to Server` | Upload local changes to Orkestr |
-| `Orkestr: Pull Skills from Server` | Download skills to `.agentis/skills/` |
+| `Orkestr: Pull Skills from Server` | Download skills to `.orkestr/skills/` |
 | `Orkestr: Run Skill Test` | Run test for the active skill file |
 | `Orkestr: Run All Skill Tests` | Run tests for all skills in the project |
 | `Orkestr: Create New Skill` | Scaffold a new skill file |

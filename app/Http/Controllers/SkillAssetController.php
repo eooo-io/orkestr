@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Skill;
-use App\Services\AgentisManifestService;
+use App\Services\ManifestService;
 use App\Services\SkillFileParser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class SkillAssetController extends Controller
 {
     public function __construct(
-        protected AgentisManifestService $manifestService,
+        protected ManifestService $manifestService,
         protected SkillFileParser $parser,
     ) {}
 

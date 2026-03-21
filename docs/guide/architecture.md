@@ -42,7 +42,7 @@ block-beta
 
 The foundation. Individual skills (prompt + config), model connections, and template resolution.
 
-- **Skills** -- YAML frontmatter + Markdown body, stored in `.agentis/skills/`
+- **Skills** -- YAML frontmatter + Markdown body, stored in `.orkestr/skills/`
 - **LLM Providers** -- Multi-model access via `LLMProviderFactory`, routing by model prefix to Anthropic, OpenAI, Gemini, Grok, or Ollama
 - **Templates** -- `{{variable}}` substitution resolved at compose time
 - **Includes** -- recursive skill composition with circular dependency detection (max depth 5)

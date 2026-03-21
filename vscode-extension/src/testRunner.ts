@@ -151,10 +151,10 @@ export class SkillTestCodeLensProvider implements vscode.CodeLensProvider {
     }
 
     private isSkillFile(document: vscode.TextDocument): boolean {
-        if (document.languageId === 'agentis-skill') {
+        if (document.languageId === 'orkestr-skill') {
             return true;
         }
         const p = document.uri.fsPath;
-        return p.includes('.agentis/skills/') || p.endsWith('.agentis');
+        return p.includes('.orkestr/skills/') || p.endsWith('.orkestr');
     }
 }

@@ -14,13 +14,13 @@ on:
   # Run validation on any PR that touches skill files
   pull_request:
     paths:
-      - '.agentis/skills/**'
+      - '.orkestr/skills/**'
 
   # Run sync when skill changes are merged to main
   push:
     branches: [main]
     paths:
-      - '.agentis/skills/**'
+      - '.orkestr/skills/**'
 
 jobs:
   # ------------------------------------------------------------------
@@ -46,7 +46,7 @@ jobs:
         uses: eooo-io/orkestr-action@v1
         with:
           mode: validate
-          skills-path: '.agentis/skills'
+          skills-path: '.orkestr/skills'
 
       # Post a summary comment on the PR with validation results
       - name: Post validation summary
@@ -91,7 +91,7 @@ jobs:
         uses: eooo-io/orkestr-action@v1
         with:
           mode: sync
-          skills-path: '.agentis/skills'
+          skills-path: '.orkestr/skills'
           server-url: ${{ secrets.ORKESTR_SERVER_URL }}
           api-token: ${{ secrets.ORKESTR_API_TOKEN }}
 

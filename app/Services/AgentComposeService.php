@@ -370,7 +370,7 @@ class AgentComposeService
      */
     protected function resolveAssetContent(Project $project, Skill $skill): string
     {
-        $manifestService = app(AgentisManifestService::class);
+        $manifestService = app(ManifestService::class);
         $folderPath = $manifestService->getSkillFolderPath($project->resolved_path, $skill->slug);
 
         if (! $folderPath) {

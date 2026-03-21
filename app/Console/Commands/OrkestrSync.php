@@ -6,9 +6,9 @@ use App\Models\Project;
 use App\Services\ProviderSyncService;
 use Illuminate\Console\Command;
 
-class AgentisSync extends Command
+class OrkestrSync extends Command
 {
-    protected $signature = 'agentis:sync
+    protected $signature = 'orkestr:sync
                             {project? : Project name, slug, or ID}
                             {--provider= : Sync only a specific provider (claude, cursor, copilot, windsurf, cline, openai, openclaw)}
                             {--preview : Show what would change without writing files}

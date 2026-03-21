@@ -24,8 +24,8 @@ export function activate(context: vscode.ExtensionContext): void {
     context.subscriptions.push(
         vscode.languages.registerCodeLensProvider(
             [
-                { language: 'agentis-skill' },
-                { pattern: '**/.agentis/skills/**' },
+                { language: 'orkestr-skill' },
+                { pattern: '**/.orkestr/skills/**' },
             ],
             codeLensProvider,
         ),
@@ -53,7 +53,7 @@ export function activate(context: vscode.ExtensionContext): void {
             }
             // Open a virtual document with the skill content
             const uri = vscode.Uri.parse(
-                `orkestr-skill://${skill.slug}.agentis?id=${skill.id}`,
+                `orkestr-skill://${skill.slug}.orkestr?id=${skill.id}`,
             );
 
             // Register a content provider if not already done
@@ -128,7 +128,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
             const fs = await import('fs');
             const path = await import('path');
-            const skillsDir = path.join(workspaceFolders[0].uri.fsPath, '.agentis', 'skills');
+            const skillsDir = path.join(workspaceFolders[0].uri.fsPath, '.orkestr', 'skills');
             if (!fs.existsSync(skillsDir)) {
                 fs.mkdirSync(skillsDir, { recursive: true });
             }

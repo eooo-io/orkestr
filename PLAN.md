@@ -497,7 +497,7 @@ C.1 (MCP client) ──► C.2 (agent execution) ──► C.3 (workflow executi
 - [x] #9–#12 — All core tables and Eloquent models
 
 ### Phase 3: File I/O & Manifest Engine — DONE
-- [x] #13–#16 — SkillFileParser, AgentisManifestService, ProjectScanJob, 19 tests
+- [x] #13–#16 — SkillFileParser, ManifestService, ProjectScanJob, 19 tests
 
 ### Phase 4: Provider Sync Engine — DONE
 - [x] #17, #27–#30 — 6 provider drivers, sync orchestration

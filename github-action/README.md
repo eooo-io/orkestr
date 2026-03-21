@@ -1,6 +1,6 @@
 # Orkestr GitHub Action
 
-Validate and sync your AI skill files directly from GitHub. This action ensures your `.agentis/skills/` directory contains well-formed skill definitions and can automatically push them to your Orkestr server on merge.
+Validate and sync your AI skill files directly from GitHub. This action ensures your `.orkestr/skills/` directory contains well-formed skill definitions and can automatically push them to your Orkestr server on merge.
 
 ## Features
 
@@ -14,7 +14,7 @@ Validate and sync your AI skill files directly from GitHub. This action ensures 
 | Input | Required | Default | Description |
 |---|---|---|---|
 | `mode` | No | `validate` | Action mode: `validate` or `sync` |
-| `skills-path` | No | `.agentis/skills` | Path to skills directory relative to repo root |
+| `skills-path` | No | `.orkestr/skills` | Path to skills directory relative to repo root |
 | `server-url` | No | — | Orkestr server URL (required for `sync` mode) |
 | `api-token` | No | — | Orkestr API token (required for `sync` mode) |
 
@@ -36,7 +36,7 @@ name: Validate Skills
 on:
   pull_request:
     paths:
-      - '.agentis/skills/**'
+      - '.orkestr/skills/**'
 
 jobs:
   validate:
@@ -47,7 +47,7 @@ jobs:
       - name: Validate skill files
         uses: eooo-io/orkestr-action@v1
         with:
-          skills-path: '.agentis/skills'
+          skills-path: '.orkestr/skills'
 ```
 
 ### Sync on Merge to Main
@@ -58,7 +58,7 @@ on:
   push:
     branches: [main]
     paths:
-      - '.agentis/skills/**'
+      - '.orkestr/skills/**'
 
 jobs:
   sync:
@@ -70,7 +70,7 @@ jobs:
         uses: eooo-io/orkestr-action@v1
         with:
           mode: sync
-          skills-path: '.agentis/skills'
+          skills-path: '.orkestr/skills'
           server-url: ${{ secrets.ORKESTR_SERVER_URL }}
           api-token: ${{ secrets.ORKESTR_API_TOKEN }}
 ```
