@@ -43,7 +43,7 @@ class WebhookDispatcher
 
         if ($webhook->secret) {
             $signature = hash_hmac('sha256', json_encode($body), $webhook->secret);
-            $headers['X-Agentis-Signature'] = $signature;
+            $headers['X-Orkestr-Signature'] = $signature;
         }
 
         $start = microtime(true);

@@ -13,11 +13,11 @@ return new class extends Migration
             $table->foreignId('project_id')->constrained()->cascadeOnDelete();
             $table->string('provider'); // github, gitlab
             $table->string('owner'); // org or user (e.g. "eooo-io")
-            $table->string('name'); // repo name (e.g. "agentis-studio")
-            $table->string('full_name'); // "eooo-io/agentis-studio"
+            $table->string('name'); // repo name (e.g. "orkestr")
+            $table->string('full_name'); // "eooo-io/orkestr"
             $table->string('default_branch')->default('main');
-            $table->string('url'); // https://github.com/eooo-io/agentis-studio
-            $table->string('clone_url')->nullable(); // https://github.com/eooo-io/agentis-studio.git
+            $table->string('url'); // https://github.com/eooo-io/orkestr
+            $table->string('clone_url')->nullable(); // https://github.com/eooo-io/orkestr.git
             $table->text('access_token')->nullable(); // encrypted PAT or OAuth token
             $table->string('webhook_secret')->nullable(); // for verifying inbound webhooks
             $table->boolean('auto_scan_on_push')->default(true);

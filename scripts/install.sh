@@ -12,7 +12,7 @@ set -euo pipefail
 # 5. Runs migrations and seeds the database
 # 6. Prints access URLs
 
-REPO_URL="https://github.com/eooo-io/agentis-studio.git"
+REPO_URL="https://github.com/eooo-io/orkestr.git"
 INSTALL_DIR="${ORKESTR_DIR:-./orkestr}"
 BRANCH="${ORKESTR_BRANCH:-main}"
 

@@ -170,7 +170,7 @@ class RepositoryController extends Controller
             'commit_message' => 'nullable|string|max:500',
         ]);
 
-        $commitMessage = $validated['commit_message'] ?? 'Update AI skills via Agentis Studio';
+        $commitMessage = $validated['commit_message'] ?? 'Update AI skills via Orkestr';
 
         try {
             $results = $this->fileService->pushSkillFiles(

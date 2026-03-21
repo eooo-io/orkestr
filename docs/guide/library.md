@@ -1,6 +1,6 @@
 # Skill Library
 
-Agentis Studio ships with 25 pre-built skills across 6 categories. Use them as starting points, import them into projects, or study them as examples of well-structured prompts.
+Orkestr ships with 25 pre-built skills across 6 categories. Import them into projects as standalone instructions for [Provider Sync](./provider-sync), assign them to [agents](./agents), or study them as examples of well-structured prompts.
 
 ## Categories
 
@@ -43,7 +43,7 @@ If the target project already has a skill with the same slug, the import appends
 
 ## Library vs. Marketplace
 
-The library is a local, pre-seeded collection that ships with every Agentis Studio installation. The [Marketplace](./marketplace) is a self-hosted discovery platform for publishing and installing community skills. Library skills are always available offline; marketplace skills require network access to browse and install.
+The library is a local, pre-seeded collection that ships with every Orkestr installation. The [Marketplace](./marketplace) is a self-hosted discovery platform for publishing and installing community skills. Library skills are always available offline; marketplace skills require network access to browse and install.
 
 ## Managing Library Skills
 

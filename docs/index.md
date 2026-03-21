@@ -14,7 +14,7 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: View on GitHub
-      link: https://github.com/eooo-io/agentis-studio
+      link: https://github.com/eooo-io/orkestr
 
 features:
   - title: Agent Execution Engine

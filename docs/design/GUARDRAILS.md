@@ -1,6 +1,6 @@
 # Guardrails Design — Preventing Malicious Skills & Agents
 
-> Design doc for Agentis Studio security guardrails.
+> Design doc for Orkestr security guardrails.
 > Created: 2026-03-12
 
 ## Threat Model

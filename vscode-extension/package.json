@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/eooo-io/agentis-studio"
+    "url": "https://github.com/eooo-io/orkestr"
   },
   "engines": {
     "vscode": "^1.85.0"

@@ -1,6 +1,6 @@
 # Marketplace
 
-The marketplace is a self-hosted platform for publishing, discovering, and installing community skills. It runs within your Agentis Studio instance and stores everything in the local database.
+The marketplace is a self-hosted platform for publishing, discovering, and installing community skills. It runs within your Orkestr instance and stores everything in the local database.
 
 ## Browsing
 
@@ -24,7 +24,7 @@ To publish a skill from one of your projects to the marketplace:
    - Author information
    - A snapshot of the current version
 
-Published skills are visible to anyone with access to your Agentis Studio instance.
+Published skills are visible to anyone with access to your Orkestr instance.
 
 ### API
 
@@ -70,5 +70,5 @@ GET /api/marketplace/{id}
 The detail view shows the complete skill body, all metadata, download count, rating, and publication date.
 
 ::: info
-The marketplace is self-hosted. If you run multiple Agentis Studio instances, each has its own independent marketplace. There is no central registry.
+The marketplace is self-hosted. If you run multiple Orkestr instances, each has its own independent marketplace. There is no central registry.
 :::

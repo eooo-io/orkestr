@@ -5,14 +5,14 @@ export default withMermaid(
   defineConfig({
     title: 'Orkestr by eooo.ai',
     description: 'Self-hosted Agent OS — design, execute, and manage autonomous AI agents on your own infrastructure.',
-    base: '/agentis-studio/',
+    base: '/orkestr/',
 
     ignoreDeadLinks: [
       /localhost/,
     ],
 
     head: [
-      ['link', { rel: 'icon', type: 'image/svg+xml', href: '/agentis-studio/logo.svg' }],
+      ['link', { rel: 'icon', type: 'image/svg+xml', href: '/orkestr/logo.svg' }],
     ],
 
     themeConfig: {
@@ -33,7 +33,7 @@ export default withMermaid(
           text: 'v1.0.0',
           items: [
             { text: 'Changelog', link: '/changelog' },
-            { text: 'GitHub', link: 'https://github.com/eooo-io/agentis-studio' },
+            { text: 'GitHub', link: 'https://github.com/eooo-io/orkestr' },
           ],
         },
       ],
@@ -224,7 +224,7 @@ export default withMermaid(
       },
 
       socialLinks: [
-        { icon: 'github', link: 'https://github.com/eooo-io/agentis-studio' },
+        { icon: 'github', link: 'https://github.com/eooo-io/orkestr' },
       ],
 
       search: {

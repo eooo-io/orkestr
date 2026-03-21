@@ -41,7 +41,7 @@
 
   ok, so this has been up until now something for me to use. Could this be monetized?
 
-⏺ Absolutely. Agentis Studio solves a real pain point — managing AI skills/prompts across multiple providers is a mess
+⏺ Absolutely. Orkestr solves a real pain point — managing AI skills/prompts across multiple providers is a mess
   that every team using more than one AI tool faces. Here's how I'd think about monetization:
 
   Strongest paths
@@ -338,7 +338,7 @@ here, I'd like you to have a read of this and give me your thoughs: assets/artic
 
 ⏺ Good read. Here are my thoughts:
 
-  Direct relevance to Agentis Studio — The article validates almost exactly what you're building. The multi-agent architecture diagram
+  Direct relevance to Orkestr — The article validates almost exactly what you're building. The multi-agent architecture diagram
    on lines 129-139 is essentially the workflow DAG model we just implemented in Phase B. The "Planner Agent → Task Graph →
   Sub-Agents" pattern maps directly to your workflow steps with delegation chains.
 
@@ -359,7 +359,7 @@ here, I'd like you to have a read of this and give me your thoughs: assets/artic
   become a differentiator if you bake it into the platform early.
 
   The meta insight on line 198-212 is the strongest point — "the agent becomes the basic programmable unit." That's exactly the bet
-  Agentis Studio is making. Skills are the instruction layer, agents are the execution unit, workflows are the orchestration. You have
+  Orkestr is making. Skills are the instruction layer, agents are the execution unit, workflows are the orchestration. You have
    the full stack designed, two-thirds built.
 
   One thing I'd push back on in the article: The Blitzy claims (lines 36-38) about "80%+ of development work" and "multi-month
@@ -399,7 +399,7 @@ here, I'd like you to have a read of this and give me your thoughs: assets/artic
 
   The Core Problem
 
-  Agentis Studio is 60% design-time configuration UI, 40% runtime. The runtime that exists is solid (real LLM calls in
+  Orkestr is 60% design-time configuration UI, 40% runtime. The runtime that exists is solid (real LLM calls in
   playground/test, real file writes in sync), but the entire orchestration layer (Phase B) is inert — beautiful DAG diagrams that
   don't execute.
 
@@ -621,7 +621,7 @@ good idea and a needed addition to  the AI space evolving' smell test?
   The differentiators are real, you just need to be explicit:
 
   ┌────────────────┬────────────────────────────┬─────────────────────────────────────────────────────┐
-  │                │      Dify / Langflow       │                   Agentis Studio                    │
+  │                │      Dify / Langflow       │                   Orkestr                    │
   ├────────────────┼────────────────────────────┼─────────────────────────────────────────────────────┤
   │ Hosting        │ Cloud-first (their         │ Self-hosted first (your servers)                    │
   │                │ servers)                   │                                                     │

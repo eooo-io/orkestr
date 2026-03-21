@@ -1,6 +1,6 @@
 # Provider Sync
 
-Provider sync takes your skills and composed agents and writes them into the native config format for each AI coding assistant. This is the bridge between your portable `.agentis/` skills and the provider-specific files your tools actually read.
+Provider sync is a [Component Layer](/guide/core-concepts#component-layer) feature that takes your skills and composed agent instructions and writes them into the native config format for each AI coding assistant. This is how Orkestr bridges the gap between your portable `.agentis/` skills and the provider-specific files your tools actually read — one source of truth, seven output formats.
 
 ## Supported Providers
 

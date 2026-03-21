@@ -1,4 +1,4 @@
-# Agentis Studio — Project Plan & Implementation Phases
+# Orkestr — Project Plan & Implementation Phases
 > A universal AI skill/agent configuration manager for multi-provider development workflows.
 
 ---
@@ -6,7 +6,7 @@
 ## 1. Project Overview
 
 ### Purpose
-Agentis Studio is a web-based management interface that allows a developer or small team to:
+Orkestr is a web-based management interface that allows a developer or small team to:
 - Define, edit, and organize reusable AI skills (prompts + config) in a **provider-agnostic format**
 - **Sync those skills outward** to the native config format of any supported AI provider (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI)
 - **Test skills live** against the Claude API with streaming output
@@ -381,7 +381,7 @@ RUN chown -R www-data:www-data /var/www
 ## 10. Full Repository Structure
 
 ```
-agentis-studio/
+orkestr/
 ├── docker-compose.yml
 ├── docker-compose.prod.yml
 ├── .env.example                         # PROJECTS_HOST_PATH=
@@ -488,7 +488,7 @@ agentis-studio/
 PROJECTS_HOST_PATH=/Users/you/dev      # Host path bind-mounted as /projects in containers
 
 # api/.env
-APP_NAME="Agentis Studio"
+APP_NAME="Orkestr"
 APP_ENV=local
 APP_URL=http://localhost:8000
 APP_KEY=
@@ -560,7 +560,7 @@ test:
 
 **Claude CLI instructions:**
 ```
-Create the agentis-studio monorepo with:
+Create the orkestr monorepo with:
   - docker-compose.yml (php, nginx, ui, mariadb, adminer services as specified)
   - docker/php/Dockerfile (php:8.4-fpm + pdo_mysql + mbstring + bcmath + opcache + composer)
   - docker/nginx/api.conf (proxy to php-fpm, root /var/www/api/public)
@@ -1192,6 +1192,6 @@ End-to-end QA checklist:
 
 ---
 
-*Generated for Agentis Studio — Immotege FinTech internal tooling*
+*Generated for Orkestr — Immotege FinTech internal tooling*
 *Stack: PHP 8.4 / Laravel 12 / Filament 3 / Livewire 4 / React + Vite + TypeScript / MariaDB 11 / Docker Compose*
 *LLM Runtime: Claude API (Anthropic) + 6-provider sync engine*

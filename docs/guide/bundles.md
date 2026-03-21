@@ -87,4 +87,4 @@ Accepts a multipart file upload with the bundle file and a `conflict_mode` param
 - **Team sharing** -- Export your project's skills and share the bundle file via Slack, email, or a shared drive
 - **Project bootstrapping** -- Create a bundle of your standard skills and import it into every new project
 - **Backup** -- Export everything before making major changes
-- **Migration** -- Move skills between Agentis Studio instances
+- **Migration** -- Move skills between Orkestr instances

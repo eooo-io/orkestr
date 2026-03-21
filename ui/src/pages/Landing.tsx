@@ -531,7 +531,7 @@ export function Landing() {
             <button onClick={() => scrollTo('faq')} className={navLinkClass('faq')}>
               FAQ
             </button>
-            <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="https://github.com/eooo-io/orkestr" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               GitHub
             </a>
           </nav>
@@ -557,7 +557,7 @@ export function Landing() {
             <Link to="/login" className="hidden md:block">
               <Button variant="ghost" size="sm">Sign In</Button>
             </Link>
-            <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer" className="hidden md:block">
+            <a href="https://github.com/eooo-io/orkestr" target="_blank" rel="noopener noreferrer" className="hidden md:block">
               <Button size="sm">GitHub</Button>
             </a>
           </div>
@@ -579,14 +579,14 @@ export function Landing() {
               <button onClick={() => scrollTo('faq')} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
                 FAQ
               </button>
-              <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
+              <a href="https://github.com/eooo-io/orkestr" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="text-left py-2 px-2 text-muted-foreground hover:text-foreground transition-colors">
                 GitHub
               </a>
               <div className="border-t border-border mt-2 pt-2 flex gap-2">
                 <Link to="/login" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="outline" size="sm" className="w-full">Sign In</Button>
                 </Link>
-                <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                <a href="https://github.com/eooo-io/orkestr" target="_blank" rel="noopener noreferrer" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
                   <Button size="sm" className="w-full">GitHub</Button>
                 </a>
               </div>
@@ -622,7 +622,7 @@ export function Landing() {
               and safety guardrails. Fully air-gappable.
             </p>
             <div className="flex flex-wrap gap-3 mt-8">
-              <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer">
+              <a href="https://github.com/eooo-io/orkestr" target="_blank" rel="noopener noreferrer">
                 <Button size="lg" className="gap-2">
                   View on GitHub
                   <ArrowRight className="h-4 w-4" />
@@ -1156,9 +1156,9 @@ export function Landing() {
               <pre className="text-sm font-mono leading-relaxed overflow-x-auto">
                 <code>
                   <span className="text-muted-foreground">$</span>{' '}
-                  <span className="text-foreground">git clone https://github.com/eooo-io/agentis-studio.git</span>{'\n'}
+                  <span className="text-foreground">git clone https://github.com/eooo-io/orkestr.git</span>{'\n'}
                   <span className="text-muted-foreground">$</span>{' '}
-                  <span className="text-foreground">cd agentis-studio</span>{'\n'}
+                  <span className="text-foreground">cd orkestr</span>{'\n'}
                   <span className="text-muted-foreground">$</span>{' '}
                   <span className="text-foreground">cp .env.example .env</span>{'\n'}
                   <span className="text-muted-foreground">$</span>{' '}
@@ -1169,7 +1169,7 @@ export function Landing() {
                 </code>
               </pre>
               <div className="mt-6 flex flex-wrap gap-3">
-                <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/eooo-io/orkestr" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="gap-2">
                     View on GitHub
                     <ArrowRight className="h-4 w-4" />
@@ -1269,7 +1269,7 @@ export function Landing() {
                 Clone the repo, deploy with Docker Compose, and start orchestrating agents in minutes. MIT licensed, free forever.
               </p>
               <div className="mt-8 flex flex-wrap gap-3 justify-center">
-                <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/eooo-io/orkestr" target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="gap-2">
                     Star on GitHub
                     <ArrowRight className="h-4 w-4" />
@@ -1334,17 +1334,17 @@ export function Landing() {
               </h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="https://github.com/eooo-io/agentis-studio" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <a href="https://github.com/eooo-io/orkestr" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                     GitHub
                   </a>
                 </li>
                 <li>
-                  <a href="https://github.com/eooo-io/agentis-studio/issues" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <a href="https://github.com/eooo-io/orkestr/issues" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                     Issues
                   </a>
                 </li>
                 <li>
-                  <a href="https://github.com/eooo-io/agentis-studio/discussions" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <a href="https://github.com/eooo-io/orkestr/discussions" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                     Discussions
                   </a>
                 </li>

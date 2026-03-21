@@ -1,6 +1,6 @@
 # Version History
 
-Every time you save a skill, Agentis Studio creates an automatic version snapshot. This gives you a full history of changes with the ability to compare and restore any previous version.
+Every time you save a skill, Orkestr creates an automatic version snapshot. This gives you a full history of changes with the ability to compare and restore any previous version.
 
 ## How Versioning Works
 
@@ -42,7 +42,7 @@ Restoring does not delete any versions. The restored state becomes the latest ve
 
 ## Versions and Provider Sync
 
-Versions are internal to Agentis Studio. Provider sync always uses the current (latest) version of each skill. If you need to sync an older version, restore it first, then run the sync.
+Versions are internal to Orkestr. Provider sync always uses the current (latest) version of each skill. If you need to sync an older version, restore it first, then run the sync.
 
 ## API Endpoints
 
