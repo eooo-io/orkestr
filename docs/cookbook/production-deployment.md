@@ -16,8 +16,8 @@
 ### 1. Clone and Configure
 
 ```bash
-git clone https://github.com/eooo-io/agentis-studio.git
-cd agentis-studio
+git clone https://github.com/eooo-io/orkestr.git
+cd orkestr
 cp .env.example .env
 ```
 
@@ -92,7 +92,7 @@ Set up automated backups:
 
 ```bash
 # Cron job for daily backups at 3am
-(crontab -l 2>/dev/null; echo "0 3 * * * cd /path/to/agentis-studio && make backup") | crontab -
+(crontab -l 2>/dev/null; echo "0 3 * * * cd /path/to/orkestr && make backup") | crontab -
 ```
 
 Or via the Orkestr API:

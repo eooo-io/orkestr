@@ -68,7 +68,7 @@ class ComplianceSkillSeeder extends Seeder
                     ],
                     'body' => $skillData['body'],
                     'uuid' => (string) Str::uuid(),
-                    'source' => 'agentis-studio',
+                    'source' => 'orkestr',
                     'created_at' => now(),
                 ],
             );

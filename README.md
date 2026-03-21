@@ -119,8 +119,8 @@ graph TB
 ### With Docker (recommended)
 
 ```bash
-git clone https://github.com/eooo-io/agentis-studio.git
-cd agentis-studio
+git clone https://github.com/eooo-io/orkestr.git
+cd orkestr
 
 cp .env.example .env
 # Edit .env — add your API keys (ANTHROPIC_API_KEY, etc.)
@@ -237,13 +237,13 @@ orkestr/
 
 ## Documentation
 
-Full documentation available at the [Orkestr docs site](https://eooo-io.github.io/agentis-studio/):
+Full documentation available at the [Orkestr docs site](https://eooo-io.github.io/orkestr/):
 
-- **[101](https://eooo-io.github.io/agentis-studio/101/)** — What Orkestr is and how it works
-- **[Guide](https://eooo-io.github.io/agentis-studio/guide/getting-started)** — Setup, configuration, and usage
-- **[Deep Dives](https://eooo-io.github.io/agentis-studio/deep-dive/)** — Architecture internals and design philosophy
-- **[Cookbook](https://eooo-io.github.io/agentis-studio/cookbook/)** — Practical recipes and patterns
-- **[Reference](https://eooo-io.github.io/agentis-studio/reference/skill-format)** — API, formats, and settings
+- **[101](https://eooo-io.github.io/orkestr/101/)** — What Orkestr is and how it works
+- **[Guide](https://eooo-io.github.io/orkestr/guide/getting-started)** — Setup, configuration, and usage
+- **[Deep Dives](https://eooo-io.github.io/orkestr/deep-dive/)** — Architecture internals and design philosophy
+- **[Cookbook](https://eooo-io.github.io/orkestr/cookbook/)** — Practical recipes and patterns
+- **[Reference](https://eooo-io.github.io/orkestr/reference/skill-format)** — API, formats, and settings
 
 ---
 

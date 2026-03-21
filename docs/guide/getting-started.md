@@ -22,8 +22,8 @@ This downloads the latest release, sets up Docker containers, runs migrations, a
 ## Installation with Docker (Recommended)
 
 ```bash
-git clone https://github.com/eooo-io/agentis-studio.git
-cd agentis-studio
+git clone https://github.com/eooo-io/orkestr.git
+cd orkestr
 cp .env.example .env
 ```
 
@@ -67,8 +67,8 @@ cd ui && npm install && npm run dev
 ## Installation without Docker
 
 ```bash
-git clone https://github.com/eooo-io/agentis-studio.git
-cd agentis-studio
+git clone https://github.com/eooo-io/orkestr.git
+cd orkestr
 composer install
 cp .env.example .env
 php artisan key:generate

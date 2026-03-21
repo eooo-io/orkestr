@@ -39,8 +39,8 @@ ollama pull llama3.1:70b   # Requires 48GB+ RAM
 ### 3. Install Orkestr
 
 ```bash
-git clone https://github.com/eooo-io/agentis-studio.git
-cd agentis-studio
+git clone https://github.com/eooo-io/orkestr.git
+cd orkestr
 cp .env.example .env
 ```
 

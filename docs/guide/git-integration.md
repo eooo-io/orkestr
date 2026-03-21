@@ -1,6 +1,6 @@
 # Git Auto-Commit
 
-Agentis Studio can automatically commit skill file changes to your project's git repository after each save. This creates a clean commit history of prompt changes over time.
+Orkestr can automatically commit skill file changes to your project's git repository after each save. This creates a clean commit history of prompt changes over time.
 
 ## Enabling Git Auto-Commit
 
@@ -10,12 +10,12 @@ The `git_auto_commit` setting is a per-project boolean. Enable it in one of two 
 2. **API** -- Include `"git_auto_commit": true` when creating or updating a project
 
 ::: info
-The project directory must be an initialized git repository for auto-commit to work. Agentis Studio does not run `git init` for you.
+The project directory must be an initialized git repository for auto-commit to work. Orkestr does not run `git init` for you.
 :::
 
 ## What Gets Committed
 
-When you save a skill with auto-commit enabled, Agentis Studio:
+When you save a skill with auto-commit enabled, Orkestr:
 
 1. Writes the skill file to `.agentis/skills/{slug}.md`
 2. Stages that specific file with `git add`
@@ -25,7 +25,7 @@ Only the changed skill file is committed -- not the entire `.agentis/` directory
 
 ## Viewing Git History
 
-Agentis Studio exposes git log and diff endpoints for projects:
+Orkestr exposes git log and diff endpoints for projects:
 
 ```
 GET /api/projects/{id}/git-log?file=.agentis/skills/my-skill.md
@@ -48,6 +48,6 @@ Since provider output files are fully derived from `.agentis/skills/`, many team
 
 ## When Auto-Commit Is Off
 
-With auto-commit disabled, Agentis Studio still writes skill files to disk -- it just does not run any git commands. You manage version control yourself using your normal git workflow.
+With auto-commit disabled, Orkestr still writes skill files to disk -- it just does not run any git commands. You manage version control yourself using your normal git workflow.
 
 The [Version History](./versions) feature works independently of git. Versions are stored in the database regardless of the auto-commit setting.

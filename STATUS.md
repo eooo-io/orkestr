@@ -1,10 +1,10 @@
-# Agentis Studio — Project Status
+# Orkestr — Project Status
 
 > Last updated: 2026-03-12 | Commit: `aa7b530` | 38 commits on `main`
 
 ## Overview
 
-Agentis Studio is a universal AI skill/agent configuration manager. Developers define reusable AI skills (prompt + config) in a provider-agnostic format under `.agentis/`, then sync them to any supported AI provider's native config format.
+Orkestr is a self-hosted Agent OS for designing, executing, and managing autonomous AI agents. Developers define reusable AI skills (prompt + config) in a provider-agnostic format under `.agentis/`, then sync them to any supported AI provider's native config format.
 
 **Stack:** Laravel 12 (PHP 8.4) + Filament 3 + React 19 + TypeScript + Vite 7 + Tailwind v4 + shadcn/ui + Monaco Editor + D3.js + MariaDB 11 + Docker
 

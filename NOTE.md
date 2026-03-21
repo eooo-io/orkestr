@@ -2,7 +2,7 @@
 
 ## 1. Open Source Under MIT License
 
-**Decision:** Release Agentis Studio as a free, open-source project under the MIT license.
+**Decision:** Release Orkestr as a free, open-source project under the MIT license.
 
 **Reasoning:**
 - The project was built in ~4 days with heavy AI assistance. The scope (agent runtime, workflow DAGs, MCP/A2A clients, guardrails, SSO, Helm charts, VS Code extension) would normally take a funded team 12-18 months. The code is real and structured, but it's scaffolding-depth — not battle-tested for paying customers.
@@ -15,7 +15,7 @@
 - Rewrote `README.md` for open-source positioning
 - Removed billing routes (Stripe subscriptions, license keys) from `routes/api.php`
 - Removed Stripe env vars from `.env.example`
-- Updated landing page: replaced pricing tiers with open-source deployment section, removed fake testimonials, rebranded from "Orkestr by eooo.ai" to "Agentis Studio", swapped CTAs to GitHub links
+- Updated landing page: replaced pricing tiers with open-source deployment section, removed fake testimonials, rebranded from "Orkestr by eooo.ai" to "Orkestr", swapped CTAs to GitHub links
 - Removed `TRADEMARK_GUIDE.md`
 - Stripped billing/license references from `CLAUDE.md`
 

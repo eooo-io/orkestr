@@ -1,6 +1,6 @@
 # CLI and Makefile
 
-Agentis Studio provides Makefile targets for Docker operations and Composer scripts for local development.
+Orkestr provides Makefile targets for Docker operations and Composer scripts for local development.
 
 ## Makefile Targets (Docker)
 
@@ -97,7 +97,7 @@ Key variables in `.env`:
 |---|---|
 | `PROJECTS_HOST_PATH` | Host path mounted into the PHP container for project file access |
 | `DB_HOST` | `127.0.0.1` for local, `mariadb` for Docker |
-| `DB_DATABASE` | Database name (default: `agentis_studio`) |
+| `DB_DATABASE` | Database name (default: `orkestr`) |
 | `ANTHROPIC_API_KEY` | API key for Claude models |
 | `OPENAI_API_KEY` | API key for OpenAI models |
 | `GEMINI_API_KEY` | API key for Gemini models |

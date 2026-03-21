@@ -1,6 +1,6 @@
 # Creating Skills
 
-Skills are the core unit in Agentis Studio. Each skill is a reusable AI prompt stored as a Markdown file with YAML frontmatter.
+Skills are the core unit in Orkestr. Each skill is a reusable AI prompt stored as a Markdown file with YAML frontmatter.
 
 ## The Skill Editor
 

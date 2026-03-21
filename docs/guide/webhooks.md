@@ -1,6 +1,6 @@
 # Webhooks
 
-Agentis Studio supports outbound webhooks for reacting to skill and project events, plus inbound webhooks for GitHub push-triggered project scans.
+Orkestr supports outbound webhooks for reacting to skill and project events, plus inbound webhooks for GitHub push-triggered project scans.
 
 ## Supported Events
 
@@ -52,13 +52,13 @@ Webhook payloads are sent as JSON POST requests:
 
 ## HMAC-SHA256 Signing
 
-If you set a secret on the webhook, every delivery includes an `X-Agentis-Signature` header containing the HMAC-SHA256 hash of the request body using the secret as the key.
+If you set a secret on the webhook, every delivery includes an `X-Orkestr-Signature` header containing the HMAC-SHA256 hash of the request body using the secret as the key.
 
 Verify the signature on your receiving server:
 
 ```php
 $payload = file_get_contents('php://input');
-$signature = $_SERVER['HTTP_X_AGENTIS_SIGNATURE'];
+$signature = $_SERVER['HTTP_X_ORKESTR_SIGNATURE'];
 $expected = hash_hmac('sha256', $payload, $secret);
 
 if (!hash_equals($expected, $signature)) {
@@ -93,18 +93,18 @@ POST /api/webhooks/{id}/test
 
 ## GitHub Inbound Webhook
 
-Agentis Studio can receive GitHub push webhooks to automatically scan a project for new or changed skills.
+Orkestr can receive GitHub push webhooks to automatically scan a project for new or changed skills.
 
 ### Setup
 
 1. In your GitHub repository settings, add a webhook pointing to:
    ```
-   https://your-agentis-url/api/webhooks/github/{project-id}
+   https://your-orkestr-url/api/webhooks/github/{project-id}
    ```
 2. Set the content type to `application/json`
 3. Select the **Push** event
 
-When a push event is received, Agentis Studio runs a `ProjectScanJob` on the corresponding project, picking up any new or changed `.agentis/skills/*.md` files.
+When a push event is received, Orkestr runs a `ProjectScanJob` on the corresponding project, picking up any new or changed `.agentis/skills/*.md` files.
 
 ::: tip
 Combine the GitHub inbound webhook with [git auto-commit](./git-integration) for a bidirectional sync: changes in the editor auto-commit to git, and pushes from other sources auto-scan into the database.

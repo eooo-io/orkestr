@@ -1,10 +1,10 @@
-# Agentis Studio
+# Orkestr
 
-> Universal AI skill/agent configuration manager for multi-provider development workflows.
+> Self-hosted Agent OS — design, execute, and manage autonomous AI agents on your own infrastructure.
 
 ## What This Project Does
 
-Agentis Studio lets a developer define, edit, and organize reusable AI skills (prompts + config) in a provider-agnostic format, then sync them outward to the native config format of any supported AI provider (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI).
+Orkestr lets a developer define, edit, and organize reusable AI skills (prompts + config) in a provider-agnostic format, then sync them outward to the native config format of any supported AI provider (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI).
 
 **Core philosophy:** `.agentis/` is the single source of truth. All provider-specific files are derived outputs — never edited directly.
 
@@ -31,7 +31,7 @@ Agentis Studio lets a developer define, edit, and organize reusable AI skills (p
 The project is a Laravel 12 app at the repository root. A separate React SPA lives in `ui/`. Documentation site (VitePress) in `docs/`.
 
 ```
-agentis-studio/
+orkestr/
 ├── app/                    # Laravel application
 │   ├── Filament/           # Filament resources & pages
 │   │   ├── Resources/      # ProjectResource, LibrarySkillResource, TagResource

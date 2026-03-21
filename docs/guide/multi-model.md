@@ -1,6 +1,6 @@
 # Multi-Model Setup
 
-Agentis Studio supports testing skills against models from multiple providers: Anthropic (Claude), OpenAI, Google Gemini, and local Ollama models.
+Orkestr supports testing skills against models from multiple providers: Anthropic (Claude), OpenAI, Google Gemini, and local Ollama models.
 
 ## Configuring API Keys
 

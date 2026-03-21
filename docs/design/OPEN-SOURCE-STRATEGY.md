@@ -1,6 +1,6 @@
 # Open Source & Free Tier Strategy
 
-> Design doc for Agentis Studio's open source / free tier positioning.
+> Design doc for Orkestr's open source / free tier positioning.
 > Created: 2026-03-12
 
 ## Decision
@@ -20,7 +20,7 @@ Not open-core. Not fully open source. A unified codebase with a free plan gated 
 | Revenue dilution | Self-hosted OSS users never convert — they chose OSS to avoid paying |
 | Speed | Solo/small team moves faster with one codebase, one build, one deploy target |
 
-Open-core works for infrastructure (databases, observability) where enterprises need on-prem. Agentis Studio is a developer tool — cloud-first is natural.
+Open-core works for infrastructure (databases, observability) where enterprises need on-prem. Orkestr is a developer tool — cloud-first is natural.
 
 ## Why Free-for-Open-Source
 
@@ -29,7 +29,7 @@ Open-core works for infrastructure (databases, observability) where enterprises 
 1. **Credibility without complexity** — Supporting OSS earns goodwill without maintaining a fork
 2. **Proven playbook** — GitHub, JetBrains, GitKraken, Snyk, Sentry, Linear all do this
 3. **Network effects** — OSS devs write about tools, recommend them in READMEs, create tutorials
-4. **Pipeline to paid** — Devs use free tier on side projects, bring Agentis to their company
+4. **Pipeline to paid** — Devs use free tier on side projects, bring Orkestr to their company
 5. **Marketplace seeding** — OSS users create and share skills, building marketplace inventory
 6. **Low cost to serve** — OSS projects are typically smaller, lower usage
 
@@ -141,15 +141,15 @@ Users can upgrade/downgrade freely:
 
 ### Messaging to OSS community
 
-> "Agentis Studio is free for open source. If your project has an OSI-approved license, you get full access to build, test, and sync AI skills — no credit card, no trial expiry. We believe the tools that shape AI-assisted development should be accessible to everyone building in the open."
+> "Orkestr is free for open source. If your project has an OSI-approved license, you get full access to build, test, and sync AI skills — no credit card, no trial expiry. We believe the tools that shape AI-assisted development should be accessible to everyone building in the open."
 
 ### Messaging to commercial users
 
-> "For teams and commercial projects, Agentis Studio Pro gives you unlimited skills, full version history, and marketplace access starting at $12/month."
+> "For teams and commercial projects, Orkestr Pro gives you unlimited skills, full version history, and marketplace access starting at $12/month."
 
 ### What we DON'T say
 
-- "Open source" when referring to Agentis Studio itself (it's not)
+- "Open source" when referring to Orkestr itself (it's not)
 - "Free forever" (free tier terms can evolve, but OSS commitment is durable)
 - "Community edition" (implies an open-core split we don't have)
 

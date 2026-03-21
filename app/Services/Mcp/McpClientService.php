@@ -168,7 +168,7 @@ class McpClientService
                 'protocolVersion' => '2024-11-05',
                 'capabilities' => new \stdClass,
                 'clientInfo' => [
-                    'name' => 'agentis-studio',
+                    'name' => 'orkestr',
                     'version' => '1.0.0',
                 ],
             ])

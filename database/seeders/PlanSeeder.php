@@ -13,7 +13,7 @@ class PlanSeeder extends Seeder
             [
                 'slug' => 'free',
                 'name' => 'Free',
-                'description' => 'Get started with Agentis Studio. Perfect for individual developers exploring AI skill management.',
+                'description' => 'Get started with Orkestr. Perfect for individual developers exploring AI skill management.',
                 'price_monthly' => 0,
                 'price_yearly' => 0,
                 'max_projects' => 3,

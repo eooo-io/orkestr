@@ -1,6 +1,6 @@
 # Skills.sh Import
 
-Agentis Studio can discover and import skills directly from GitHub repositories that follow the [skills.sh](https://skills.sh) convention — Markdown files with YAML frontmatter stored in well-known directories.
+Orkestr can discover and import skills directly from GitHub repositories that follow the [skills.sh](https://skills.sh) convention — Markdown files with YAML frontmatter stored in well-known directories.
 
 ## How It Works
 

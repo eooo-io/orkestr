@@ -4,7 +4,7 @@ The Preview Sync feature lets you see exactly what changes a provider sync will 
 
 ## Opening the Preview
 
-On the project detail page, click **Preview Sync** (next to the Sync button). Agentis Studio performs a dry-run sync that:
+On the project detail page, click **Preview Sync** (next to the Sync button). Orkestr performs a dry-run sync that:
 
 1. Generates the output for each enabled provider
 2. Reads the current content of each provider's config files from disk

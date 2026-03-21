@@ -14,7 +14,7 @@ class OpenApiSpecService
         $spec = [
             'openapi' => '3.1.0',
             'info' => [
-                'title' => config('app.name', 'Agentis Studio') . ' API',
+                'title' => config('app.name', 'Orkestr') . ' API',
                 'version' => '1.0.0',
                 'description' => 'REST API for managing AI skills, agents, projects, and orchestration workflows.',
                 'contact' => [

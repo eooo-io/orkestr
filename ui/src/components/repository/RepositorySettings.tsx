@@ -242,7 +242,7 @@ export function RepositorySettings({ projectId }: Props) {
                 type="text"
                 value={formFullName}
                 onChange={(e) => setFormFullName(e.target.value)}
-                placeholder="eooo-io/agentis-studio"
+                placeholder="eooo-io/orkestr"
                 required
                 className="w-full border border-border bg-background px-3 py-2 text-sm font-mono"
               />

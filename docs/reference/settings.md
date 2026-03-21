@@ -1,6 +1,6 @@
 # Settings
 
-Agentis Studio settings are stored in the `app_settings` table as key-value pairs. Configure them through the Filament Admin panel or the Settings page in the React SPA.
+Orkestr settings are stored in the `app_settings` table as key-value pairs. Configure them through the Filament Admin panel or the Settings page in the React SPA.
 
 ## Where to Configure
 

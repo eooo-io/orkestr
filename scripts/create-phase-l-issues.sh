@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-REPO="eooo-io/agentis-studio"
+REPO="eooo-io/orkestr"
 
 echo "=== Creating Phase L Milestones ==="
 

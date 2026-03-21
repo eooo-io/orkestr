@@ -32,7 +32,7 @@ class MarketplacePaymentService
             'email' => $user->email,
             'metadata' => [
                 'user_id' => $user->id,
-                'platform' => 'agentis_studio',
+                'platform' => 'orkestr',
             ],
         ]);
 

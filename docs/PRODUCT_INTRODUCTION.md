@@ -1,4 +1,4 @@
-# Agentis Studio — Product Introduction
+# Orkestr — Product Introduction
 
 > The control center for AI-assisted development.
 
@@ -28,9 +28,9 @@ Most teams have no visibility into what instructions their AI assistants are act
 
 ---
 
-## What Agentis Studio Does
+## What Orkestr Does
 
-Agentis Studio gives you a single place to write, organize, test, and distribute the instructions that guide your AI coding assistants.
+Orkestr gives you a single place to write, organize, test, and distribute the instructions that guide your AI coding assistants.
 
 ### Write Once, Sync Everywhere
 
@@ -52,7 +52,7 @@ All API endpoints must return responses in this structure:
 Never return raw strings or unstructured objects from API routes.
 ```
 
-When you sync, Agentis Studio translates that single skill into the native format of every AI assistant your team uses — Claude's Markdown, Cursor's MDC files, Copilot's instructions file, and so on. Seven providers supported, all from one source of truth.
+When you sync, Orkestr translates that single skill into the native format of every AI assistant your team uses — Claude's Markdown, Cursor's MDC files, Copilot's instructions file, and so on. Seven providers supported, all from one source of truth.
 
 ### A Real Editor, Not a Text File
 
@@ -60,7 +60,7 @@ Skills are edited in a full-featured code editor (Monaco, the same engine behind
 
 ### Version Everything
 
-Every time you save a skill, Agentis Studio takes a snapshot. You can view the full history of any skill, compare any two versions side by side in a diff viewer, and restore a previous version with one click. Optionally, skill changes can auto-commit to your project's git repository.
+Every time you save a skill, Orkestr takes a snapshot. You can view the full history of any skill, compare any two versions side by side in a diff viewer, and restore a previous version with one click. Optionally, skill changes can auto-commit to your project's git repository.
 
 You'll never lose a good prompt to an accidental edit again.
 
@@ -72,7 +72,7 @@ The Playground goes further: multi-turn conversations, custom system prompts, ag
 
 ### See What Changes Before It Changes
 
-Before writing a single file to your project, Agentis Studio shows you exactly what will change. The sync preview displays a side-by-side diff for every provider file that would be created, modified, or deleted. Review it, then confirm. No surprises.
+Before writing a single file to your project, Orkestr shows you exactly what will change. The sync preview displays a side-by-side diff for every provider file that would be created, modified, or deleted. Review it, then confirm. No surprises.
 
 ---
 
@@ -88,7 +88,7 @@ Think of a skill as a single instruction card. An agent is a worker who carries 
 
 ### Designing Agents
 
-Agentis Studio lets you design agents as complete definitions:
+Orkestr lets you design agents as complete definitions:
 
 - **Identity** — Who is this agent? A code reviewer, a security auditor, a project manager?
 - **Goal** — What is it trying to accomplish? What does success look like?
@@ -103,7 +103,7 @@ The Agent Builder provides a visual interface for configuring each of these dime
 
 Real-world tasks often need more than one agent. A code change might need an architect to plan, a developer to implement, a reviewer to check quality, and a security auditor to scan for vulnerabilities.
 
-Agentis Studio's **workflow builder** lets you arrange agents into multi-step pipelines using a visual canvas:
+Orkestr's **workflow builder** lets you arrange agents into multi-step pipelines using a visual canvas:
 
 - **Drag and connect** agents into directed workflows
 - **Conditional routing** — send work down different paths based on results
@@ -111,11 +111,11 @@ Agentis Studio's **workflow builder** lets you arrange agents into multi-step pi
 - **Checkpoints** — pause the workflow for human review before proceeding
 - **Shared context** — agents pass information forward through a shared context bus
 
-Workflows can be exported to popular orchestration formats (LangGraph, CrewAI) or run directly inside Agentis Studio.
+Workflows can be exported to popular orchestration formats (LangGraph, CrewAI) or run directly inside Orkestr.
 
 ### Running Agents
 
-Agentis Studio includes a lightweight execution engine that brings agent designs to life:
+Orkestr includes a lightweight execution engine that brings agent designs to life:
 
 - **Agent execution** — Run an agent with real tool calls, watch the think-act-observe loop unfold in real time
 - **Workflow execution** — Execute multi-agent workflows, with live status on each step of the pipeline
@@ -127,13 +127,13 @@ Agentis Studio includes a lightweight execution engine that brings agent designs
 
 ## Organization and Discovery
 
-As your skill library grows, finding and managing instructions becomes its own challenge. Agentis Studio provides several tools to keep things organized:
+As your skill library grows, finding and managing instructions becomes its own challenge. Orkestr provides several tools to keep things organized:
 
 - **Tags** — Categorize skills with color-coded labels and filter by them across projects
 - **Command Palette** — Press `Ctrl+K` to instantly search across skills, projects, and pages
 - **Cross-Project Search** — Full-text search across every skill in every project, with filters for tags, models, and projects
 - **Bulk Operations** — Select multiple skills and apply tags, assign to agents, move between projects, or delete in batch
-- **Skill Dependencies** — Skills can include other skills, building composable instruction sets. Agentis Studio resolves the full chain and detects circular references
+- **Skill Dependencies** — Skills can include other skills, building composable instruction sets. Orkestr resolves the full chain and detects circular references
 - **Template Variables** — Use `{{variable}}` placeholders in skills with different values per project. Write a skill once, customize it for each codebase
 - **Visualization** — Interactive graphs show how skills, agents, and providers connect across your projects
 
@@ -143,11 +143,11 @@ As your skill library grows, finding and managing instructions becomes its own c
 
 ### Skill Library
 
-Agentis Studio ships with 25 pre-built skills across categories like Laravel, PHP, TypeScript, FinTech, DevOps, and Technical Writing. Browse the library, preview any skill, and import it into your project with one click.
+Orkestr ships with 25 pre-built skills across categories like Laravel, PHP, TypeScript, FinTech, DevOps, and Technical Writing. Browse the library, preview any skill, and import it into your project with one click.
 
 ### Bundles
 
-Export a curated set of skills and agents as a portable bundle (ZIP or JSON). Share it with teammates, import it into another Agentis Studio instance, and handle conflicts with clear options: skip, overwrite, or rename.
+Export a curated set of skills and agents as a portable bundle (ZIP or JSON). Share it with teammates, import it into another Orkestr instance, and handle conflicts with clear options: skip, overwrite, or rename.
 
 ### Marketplace
 
@@ -155,7 +155,7 @@ A self-hosted marketplace where you can publish skills for others to discover, b
 
 ### Repository Connections
 
-Connect your Agentis Studio projects to GitHub or GitLab repositories. Pull existing AI configurations from your repos, push updated skills back, and keep everything synchronized — scoped to AI configuration files only, so Agentis Studio never touches your source code.
+Connect your Orkestr projects to GitHub or GitLab repositories. Pull existing AI configurations from your repos, push updated skills back, and keep everything synchronized — scoped to AI configuration files only, so Orkestr never touches your source code.
 
 ---
 
@@ -163,7 +163,7 @@ Connect your Agentis Studio projects to GitHub or GitLab repositories. Pull exis
 
 AI instructions are powerful — and that power needs responsible handling, especially when skills are shared through a marketplace or used in automated agent workflows.
 
-Agentis Studio takes a layered approach to safety:
+Orkestr takes a layered approach to safety:
 
 - **Prompt linting** catches common quality issues: vague instructions, contradictory directives, missing output format specifications
 - **Static pattern detection** flags potential security concerns like prompt injection attempts, credential harvesting patterns, or instructions to exfiltrate data
@@ -176,7 +176,7 @@ The philosophy is: **warn loudly, block rarely, log everything.** Legitimate use
 
 ## How It Fits Into Your Workflow
 
-Agentis Studio is not a replacement for your AI coding assistant. It's the management layer that sits above all of them.
+Orkestr is not a replacement for your AI coding assistant. It's the management layer that sits above all of them.
 
 ```
 Your code editor (VS Code, JetBrains, terminal)
@@ -185,13 +185,13 @@ Your code editor (VS Code, JetBrains, terminal)
 AI assistant (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI)
        │
        ▼  reads config files
-Agentis Studio output (.claude/, .cursor/, .github/, etc.)
+Orkestr output (.claude/, .cursor/, .github/, etc.)
        │
        ▼  synced from
-Agentis Studio (.agentis/ — your single source of truth)
+Orkestr (.agentis/ — your single source of truth)
 ```
 
-You keep using whatever AI assistant you prefer. Agentis Studio manages the instructions behind the scenes — making sure they're consistent, versioned, tested, and distributed correctly.
+You keep using whatever AI assistant you prefer. Orkestr manages the instructions behind the scenes — making sure they're consistent, versioned, tested, and distributed correctly.
 
 For teams, this means everyone gets the same AI behavior regardless of which editor or assistant they use. For individuals, it means your best prompts are organized, searchable, and portable.
 
@@ -199,7 +199,7 @@ For teams, this means everyone gets the same AI behavior regardless of which edi
 
 ## The CLI
 
-For developers who prefer the terminal, Agentis Studio includes command-line tools:
+For developers who prefer the terminal, Orkestr includes command-line tools:
 
 - `agentis:list` — See all projects and their skills at a glance
 - `agentis:scan` — Scan a project directory for skill files
@@ -212,7 +212,7 @@ The import command is particularly useful for onboarding: point it at a project 
 
 ## Pricing
 
-Agentis Studio is **free for open source projects**. If your project has an OSI-approved license, you get full access to build, test, and sync AI skills — no credit card, no trial expiry.
+Orkestr is **free for open source projects**. If your project has an OSI-approved license, you get full access to build, test, and sync AI skills — no credit card, no trial expiry.
 
 For commercial projects and teams, paid plans start at $12/month for individuals and $29/seat/month for teams, with unlimited skills, full version history, and marketplace access.
 
@@ -232,4 +232,4 @@ For commercial projects and teams, paid plans start at $12/month for individuals
 | Sharing prompts is ad hoc | Marketplace, bundles, and repository connections |
 | No safety checks on shared AI instructions | Layered guardrails: linting, pattern detection, execution limits, marketplace review |
 
-Agentis Studio turns the scattered, invisible, unmanaged configuration files that control your AI assistants into a proper engineering discipline — versioned, tested, reviewed, and shared.
+Orkestr turns the scattered, invisible, unmanaged configuration files that control your AI assistants into a proper engineering discipline — versioned, tested, reviewed, and shared.
