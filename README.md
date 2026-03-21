@@ -39,9 +39,9 @@ Orkestr is organized in three layers, each building on the one below:
 |---|---|---|
 | **Orchestration** | Coordinates agent teams | Workflows, canvas, parallel execution, checkpoints, schedules |
 | **Agents** | Autonomous entities that think and act | Agent loop, MCP tools, A2A delegation, memory, execution traces |
-| **Components** | Building blocks | Skills, multi-model access, provider sync, templates, version history |
+| **Components** | Building blocks | Skills, multi-model access, templates, version history, provider export |
 
-You can use any layer independently. Start with skills and provider sync, grow into agents and orchestration as your needs evolve.
+You can use any layer independently. Start with skills, grow into agents and orchestration as your needs evolve.
 
 ### Design Principles
 
@@ -73,11 +73,11 @@ You can use any layer independently. Start with skills and provider sync, grow i
 
 ### Component Layer
 
-- **Skill System** — Reusable prompt+config modules (`.orkestr/skills/`) that feed into agents and provider sync
+- **Skill System** — Reusable prompt+config modules (`.orkestr/skills/`) that feed into agents and workflows
 - **Skill Editor** — Monaco editor with YAML frontmatter + Markdown, live token counting
 - **Version History** — Every save creates a snapshot with diff viewer and one-click restore
 - **Composition** — `includes` for recursive prompt assembly, `{{variable}}` templates resolved at compose time
-- **Provider Sync** — Bridge to AI coding tools: one source of truth synced to Claude, Cursor, Copilot, Windsurf, Cline, OpenAI
+- **Provider Export** — Export skills to native config formats: Claude, Cursor, Copilot, Windsurf, Cline, OpenAI
 - **Quality Tools** — 8-rule prompt linter, AI-assisted skill generation
 
 ### Multi-Model Support
