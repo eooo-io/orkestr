@@ -96,11 +96,10 @@
 - Cross-project FULLTEXT search with tag, project, and model filters
 - Color-coded tags with global management
 
-### Library and Marketplace
+### Library
 
 - 25 pre-seeded library skills across 6 categories
 - Library import with slug collision handling
-- Self-hosted marketplace with publish, install, vote, and download tracking
 - Category browsing and full-text search
 
 ### Sharing

@@ -27,7 +27,7 @@ Orkestr does the same thing, but for AI agents:
 | Operating System Concept | Orkestr Equivalent |
 |---|---|
 | Apps | Agents |
-| App Store | Marketplace |
+| App Store | Skill Library |
 | File System | Skills, stored in `.agentis/` |
 | Networking | MCP (tool connections) and A2A (agent-to-agent) |
 | Task Scheduler | Agent Schedules & Triggers |

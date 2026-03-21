@@ -50,11 +50,7 @@ After changing API keys, the model selector across the app updates automatically
 
 ### License
 
-Manage your Orkestr license for self-hosted deployments.
-
-- **Status** -- shows current license tier (free, pro, teams), expiration date, and activation status
-- **Activation** -- enter a license key to activate or upgrade
-- **Usage** -- current month's token usage against plan limits
+Orkestr is free and open source under the MIT license. No license key or activation is required.
 
 ```
 GET  /api/license/status

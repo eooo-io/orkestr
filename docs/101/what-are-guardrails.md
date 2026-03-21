@@ -128,7 +128,7 @@ Beyond runtime guardrails, Orkestr includes a static security scanner that check
 - **Credential harvesting** — Requests for API keys, passwords, or tokens
 - **Obfuscation** — Base64 encoding, hex encoding, or other tricks to hide malicious content
 
-The scanner runs on demand or automatically during marketplace publishing.
+The scanner runs on demand or as part of automated review workflows.
 
 ## Guardrail Reports
 

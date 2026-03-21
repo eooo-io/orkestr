@@ -18,7 +18,7 @@ That claim is only meaningful if the architecture earns it.
 
 ## The Irreducible Kernel
 
-Strip away the UI, the marketplace, the analytics dashboards, the convenience features. What remains — the thing without which nothing else functions — is the kernel:
+Strip away the UI, the library, the analytics dashboards, the convenience features. What remains — the thing without which nothing else functions — is the kernel:
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -56,7 +56,7 @@ Strip away the UI, the marketplace, the analytics dashboards, the convenience fe
 └─────────────────────────────────────────────────────┘
 ```
 
-Everything else — the workflow builder, the canvas, the marketplace, the provider sync, the analytics — is secondary. Important, but secondary. If the kernel is clean, those features grow naturally. If the kernel is muddled, they become ceremonial middleware.
+Everything else — the workflow builder, the canvas, the library, the provider sync, the analytics — is secondary. Important, but secondary. If the kernel is clean, those features grow naturally. If the kernel is muddled, they become ceremonial middleware.
 
 ### Why These Six?
 
@@ -180,7 +180,7 @@ Workflows compose agents into execution graphs. Each workflow step wraps an agen
 
 Because the alternative is monolithic prompts. And monolithic prompts don't scale — they can't be shared across projects, can't be tested independently, can't be versioned granularly, and can't be recombined for new use cases without copy-paste.
 
-Making composition a primitive means every piece of the system — a skill, an agent, a workflow — is inherently built from smaller, reusable parts. This isn't just engineering hygiene. It's what makes the marketplace possible (share skills, not monoliths), what makes agent teams manageable (assign skills per agent, not one giant prompt per team), and what makes provider sync work (translate composed output into six formats).
+Making composition a primitive means every piece of the system — a skill, an agent, a workflow — is inherently built from smaller, reusable parts. This isn't just engineering hygiene. It's what makes sharing possible (export skills as bundles, not monoliths), what makes agent teams manageable (assign skills per agent, not one giant prompt per team), and what makes provider sync work (translate composed output into six formats).
 
 ### 4. Cheap-Hardware Realism as a Design Constraint
 

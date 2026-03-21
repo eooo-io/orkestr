@@ -86,11 +86,10 @@ Orkestr is a self-hosted Agent OS for designing, executing, and managing autonom
 - [x] Zoom, pan, drag, hover tooltips on all views
 - [x] Available as project tab and full-screen page
 
-### Marketplace & Library
+### Library & Sharing
 - [x] 25+ seeded library skills across categories
 - [x] Library import into projects
 - [x] Skills.sh integration (discover, preview, import)
-- [x] Marketplace publish/install/vote
 - [x] Bundle export/import (portable skill packages)
 
 ### Monetization & Billing (Stripe)
@@ -99,7 +98,7 @@ Orkestr is a self-hosted Agent OS for designing, executing, and managing autonom
 - [x] Plan changes (upgrade/downgrade) and cancellation/resume
 - [x] Usage metering and budget tracking
 - [x] Invoice history
-- [x] Stripe Connect for marketplace seller payouts
+- [x] Stripe Connect for seller payouts
 - [x] Stripe webhook handler for payment events
 - [x] Plan-based feature gating middleware (`CheckPlanFeature`, `CheckPlanLimit`, `CheckUsageBudget`)
 
@@ -203,7 +202,6 @@ Orkestr is a self-hosted Agent OS for designing, executing, and managing autonom
 | Skills.sh | discover, preview, import |
 | Agents | CRUD, toggle, compose |
 | Bundles | export, import |
-| Marketplace | list, show, publish, install, vote |
 | Webhooks | CRUD, deliveries, test, inbound |
 | Repositories | connect, status, branches, files, pull, push |
 | OpenClaw | show, update |

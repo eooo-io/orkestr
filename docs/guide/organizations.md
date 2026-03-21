@@ -13,7 +13,7 @@ Each organization has:
 | **Name** | Display name |
 | **Slug** | URL-friendly identifier (auto-generated) |
 | **Description** | Optional description |
-| **Plan** | `free`, `pro`, or `teams` |
+| **Plan** | Organization plan (all features available under MIT license) |
 
 ## Roles
 
@@ -21,7 +21,7 @@ Every organization member has one of five roles. Roles are hierarchical -- highe
 
 | Role | Permissions |
 |---|---|
-| **Owner** | Full control. Transfer ownership, delete the org, manage billing. One owner per org. |
+| **Owner** | Full control. Transfer ownership, delete the org, manage all settings. One owner per org. |
 | **Admin** | Manage members, configure SSO and guardrails, create/delete projects. Cannot delete the org or transfer ownership. |
 | **Editor** | Create and edit skills, agents, and workflows. Run executions. Cannot manage members or org settings. |
 | **Viewer** | Read-only access to all projects, skills, and execution history. Cannot create or modify anything. |
@@ -107,35 +107,13 @@ This initiates a test authentication flow and reports whether the handshake succ
 Always test SSO configuration with a non-admin account first. If SSO is misconfigured and you enforce it for all users, you could lock yourself out.
 :::
 
-## Plan-Based Feature Gating
+## Feature Access
 
-Organizations operate under one of three plans, each with different feature limits.
+Orkestr is fully open source under the MIT license. All features are available to all organizations with no plan-based restrictions:
 
-| Feature | Free | Pro | Teams |
-|---|---|---|---|
-| Projects | 3 | Unlimited | Unlimited |
-| Skills per project | 25 | Unlimited | Unlimited |
-| Team members | 1 | 5 | Unlimited |
-| Execution history | 7 days | 90 days | Unlimited |
-| Guardrail policies | Basic | Full | Full + audit |
-| SSO/SAML | -- | -- | Yes |
-| Priority support | -- | Email | Dedicated |
-
-Plan enforcement happens at three levels:
-
-1. **Feature gates** -- `CheckPlanFeature` middleware blocks access to features not available on the current plan
-2. **Usage limits** -- `CheckPlanLimit` middleware enforces numeric limits (projects, skills, members)
-3. **Budget controls** -- `CheckUsageBudget` middleware tracks monthly token usage against plan allowances
-
-### Upgrading
-
-Upgrade your plan at **Settings > License** or via the billing API:
-
-```
-POST /api/billing/subscribe
-{ "plan": "pro" }
-```
-
-::: warning
-Downgrading a plan does not delete resources that exceed the new plan's limits. Existing resources remain accessible, but you cannot create new ones until you are within limits.
-:::
+- Unlimited projects and skills
+- Unlimited team members
+- Full execution history
+- All guardrail policies including audit
+- SSO/SAML support
+- All LLM providers and integrations

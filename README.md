@@ -9,8 +9,8 @@
  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝
 ```
 
-**Provider-agnostic, deployment-flexible agent runtime.**
-**Compose, orchestrate, and operate multi-agent systems on your own infrastructure.**
+**Self-hosted Agent OS.**
+**Design, execute, and manage autonomous AI agents on your own infrastructure.**
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -29,68 +29,81 @@
 
 ## What is Orkestr?
 
-Orkestr is a self-hosted agent runtime for designing AI agents, wiring them into multi-agent workflows, and executing them with real tool calls — all from a visual UI. No Python framework required.
+Orkestr is a self-hosted platform for building and operating AI agent systems. Design agents with goals, tools, and memory. Wire them into multi-agent workflows. Execute them with real tool calls and full observability. All from a visual UI, on your own infrastructure.
 
-It connects to any LLM provider (Anthropic, OpenAI, Gemini, Grok, OpenRouter, Ollama) and any tool server via MCP and A2A protocols. Your models, your data, your infrastructure.
+### Three Layers
 
-### Core ideas
+Orkestr is organized in three layers, each building on the one below:
+
+| Layer | What It Does | Key Capabilities |
+|---|---|---|
+| **Orchestration** | Coordinates agent teams | Workflows, canvas, parallel execution, checkpoints, schedules |
+| **Agents** | Autonomous entities that think and act | Agent loop, MCP tools, A2A delegation, memory, execution traces |
+| **Components** | Building blocks | Skills, multi-model access, provider sync, templates, version history |
+
+You can use any layer independently. Start with skills and provider sync, grow into agents and orchestration as your needs evolve.
+
+### Design Principles
 
 - **Agent-first** — Agents are complete loop definitions: Goal → Perceive → Reason → Act → Observe
-- **Provider-agnostic** — Mix cloud and local models in the same project. Go fully air-gapped with Ollama
+- **Provider-agnostic** — Mix cloud and local models in the same project. Go fully air-gapped with Ollama.
+- **Sovereign by default** — Self-hosted, air-gap capable, no SaaS dependency. You control the security perimeter.
 - **Visual orchestration** — DAG workflow builder with conditional branching, parallel execution, and human-in-the-loop checkpoints
-- **Real execution** — Not just config. Agents run live with real MCP tool calls, cost tracking, and safety guardrails
-- **Skill system** — Reusable prompt+config modules composed into agent instructions. Recursive includes, template variables, version history
-- **Sovereign by default** — Self-hosted, air-gap capable, no SaaS dependency. You control the security perimeter
+- **Real execution** — Not just config. Agents run live with real MCP tool calls, cost tracking, and safety guardrails.
 
 ---
 
 ## Features
 
-### Agent Design & Execution
-- **Agent Builder** — Visual form-based agent configuration (identity, goals, reasoning, tools, autonomy)
-- **18 Pre-built Agents** — Semi-autonomous org archetypes with personas and specializations
-- **Execution Engine** — Run agent loops with real MCP tool calls, memory persistence, and execution traces
-- **Multi-turn Playground** — Interactive chat with any agent, any model, streaming responses
+### Orchestration Layer
 
-### Orchestration
-- **Workflow Builder** — Drag-and-drop DAG editor with React Flow
-- **Step Types** — Start, end, agent, checkpoint, condition, parallel split/join
+- **Workflow Builder** — Drag-and-drop DAG editor with React Flow. Step types: agent, checkpoint, condition, parallel split/join.
+- **Visual Canvas** — WYSIWYG composition surface for agent teams. Drag agents, skills, MCP servers, and A2A connections.
 - **Delegation Chains** — Agent-to-agent handoffs with shared context via A2A protocol
+- **Schedules & Triggers** — Cron schedules, webhook triggers, and event-driven execution
 - **Export** — LangGraph YAML, CrewAI config, generic JSON
 
+### Agent Layer
+
+- **Agent Builder** — Visual form-based agent configuration: identity, goals, reasoning, tools, autonomy level
+- **18 Pre-built Agents** — Semi-autonomous org archetypes with personas and specializations
+- **Execution Engine** — Run agent loops with real MCP tool calls, memory persistence, and execution traces
+- **Agent Memory** — Conversation, working, and long-term memory that persists across sessions
+- **Multi-turn Playground** — Interactive chat with any agent, any model, streaming responses
+
+### Component Layer
+
+- **Skill Editor** — Monaco editor with YAML frontmatter + Markdown, live token counting
+- **Version History** — Every save creates a snapshot with diff viewer and one-click restore
+- **Skill Composition** — `includes` for recursive prompt composition with circular dependency detection
+- **Template Variables** — `{{variable}}` placeholders resolved at compose/sync time
+- **Provider Sync** — Write once in `.agentis/`, sync to 7 AI coding tools (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI)
+- **Prompt Linter** — 8 quality rules for prompt analysis
+- **AI Generation** — Describe what you want, get a complete skill
+
 ### Multi-Model Support
+
 - **7 LLM Providers** — Anthropic, OpenAI, Gemini, Grok (xAI), OpenRouter (200+ models), custom OpenAI-compatible, Ollama
 - **Per-agent model assignment** — Route complex tasks to Claude, routine work to local Llama
 - **Fallback chains** — Automatic failover with health monitoring and cost-optimized routing
 - **Air-gap mode** — Zero external network calls, all local inference
 
-### Skill Management
-- **Monaco Editor** — Full code editor with YAML frontmatter + Markdown
-- **Version History** — Every save creates a snapshot with diff viewer and one-click restore
-- **Skill Composition** — `includes` for recursive prompt composition with circular dependency detection
-- **Template Variables** — `{{variable}}` placeholders resolved at compose/sync time
-- **Prompt Linter** — 8 quality rules for prompt analysis
-- **AI Generation** — Describe what you want, get a complete skill
-
 ### Safety & Guardrails
+
 - **Budget limits** — Per-run, per-agent, and daily token/cost budgets with enforcement
 - **Tool allowlists** — Control which MCP tools each agent can call
 - **Output guards** — PII detection, credential redaction, content filtering
 - **Approval gates** — Human-in-the-loop for sensitive tool calls (supervised / semi-autonomous / autonomous)
 - **Guardrail profiles** — Strict, moderate, permissive presets cascading from org → project → agent
 
-### Organization & Collaboration
+### Platform
+
 - **Multi-tenant** — Organizations with role-based access (owner, admin, editor, viewer)
-- **Bundle export/import** — ZIP/JSON with conflict resolution
-- **Skill marketplace** — Community skill sharing with ratings
+- **Skill Library** — 25 pre-built skills across Laravel, PHP, TypeScript, FinTech, DevOps, and Technical Writing
+- **Bundle export/import** — ZIP/JSON with conflict resolution for sharing skills and agents
 - **Webhook system** — Outbound HMAC-signed webhooks + GitHub push receiver
 - **Command palette** — Cmd+K fuzzy search across everything
-
-### Observability
-- **Execution traces** — Full log of every step, tool call, and LLM response
-- **Execution replay** — Step-through with timeline scrubber and auto-advance
-- **Cost analytics** — Per-agent, per-run token usage and cost tracking
-- **Performance dashboard** — Success rates, latency, model comparison
+- **Observability** — Full execution traces, replay with timeline scrubber, cost analytics, performance dashboard
 
 ---
 
@@ -216,7 +229,7 @@ orkestr/
 │   ├── Services/           # Business logic
 │   │   ├── Execution/      # Agent & workflow execution engine
 │   │   ├── LLM/            # Multi-model provider layer (7 providers)
-│   │   ├── Guards/          # Budget, tool, approval, output guards
+│   │   ├── Guards/         # Budget, tool, approval, output guards
 │   │   ├── Mcp/            # MCP protocol client
 │   │   └── A2a/            # Agent-to-agent delegation
 │   └── Jobs/

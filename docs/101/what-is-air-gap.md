@@ -31,7 +31,6 @@ When you enable air-gap mode:
 2. **Only local models are available** — Ollama, vLLM, TGI, LM Studio
 3. **MCP servers must be local** — Remote MCP endpoints are blocked
 4. **Network enforcement** — Orkestr validates that no outbound HTTP requests escape the local network
-5. **Marketplace is disabled** — No publishing or downloading from the community marketplace
 
 ## Setting Up Air-Gap
 
@@ -84,4 +83,4 @@ Air-gap mode is Orkestr running as a fully self-contained system. Zero external 
 
 ---
 
-**Next:** [What is the Marketplace?](./what-is-the-marketplace) →
+Return to the [Orkestr 101 index](/101/) →

@@ -270,7 +270,7 @@ SecurityRuleSet:
 
 The scanner runs:
 - On demand via the Skill Editor "Scan" button
-- Automatically when publishing to the marketplace
+- As part of automated review workflows
 - Optionally on every skill save
 
 ## Reporting Dashboard

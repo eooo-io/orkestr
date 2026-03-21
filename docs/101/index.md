@@ -79,7 +79,6 @@ Everything in Orkestr is organized into three layers:
 | [What is Provider Sync?](./what-is-provider-sync) | How do skills reach AI coding tools? | Translating a cookbook into 6 languages |
 | [What is Multi-Model?](./what-is-multi-model) | Can I use different AI brains? | A multilingual team |
 | [What is Air-Gap Mode?](./what-is-air-gap) | Can I run fully offline? | A submarine — self-contained |
-| [What is the Marketplace?](./what-is-the-marketplace) | How do I share with others? | An app store for agent skills |
 
 ## Before You Start
 

@@ -148,15 +148,9 @@ Use these for load balancer health probes and monitoring:
 curl -sf https://orkestr.yourcompany.com/api/health || echo "Orkestr is down"
 ```
 
-## License Activation
+## License
 
-Orkestr requires a license key for production use. Set it in your `.env`:
-
-```env
-ORKESTR_LICENSE_KEY=ork_live_...
-```
-
-Or activate via the admin panel at **Settings > License**. The license is validated on startup and periodically thereafter. Air-gapped deployments can use offline license files -- contact support@eooo.ai for details.
+Orkestr is free and open source under the MIT license. No license key or activation is required.
 
 ## Resource Requirements
 
@@ -180,6 +174,5 @@ Or activate via the admin panel at **Settings > License**. The license is valida
 | `GEMINI_API_KEY` | Google Gemini API key | -- |
 | `GROK_API_KEY` | xAI Grok API key | -- |
 | `OLLAMA_URL` | Ollama server URL | `http://localhost:11434` |
-| `ORKESTR_LICENSE_KEY` | Production license key | -- |
 | `SESSION_SECURE_COOKIE` | Require HTTPS for cookies | `false` |
 | `PROJECTS_HOST_PATH` | Host path for project mounts | -- |

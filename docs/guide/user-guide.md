@@ -163,7 +163,6 @@ For multi-agent orchestration, use the visual **Workflow Builder**.
 - **Budget Controls** — Set per-run and daily budgets to prevent runaway costs
 - **Performance Dashboard** — Track KPIs, agent leaderboards, and cost trends across your organization
 - **Audit Log** — Review every action taken by your agents for compliance and debugging
-- **Marketplace** — Publish your best skills for others to use, or install community skills
 
 ## Quick Reference
 

@@ -94,8 +94,8 @@ When air-gap mode is active:
 
 - All cloud provider API calls are blocked (Anthropic, OpenAI, Gemini, Grok)
 - Only local models (Ollama, custom endpoints on the local network) are available
-- Marketplace, skills.sh import, and other external features are disabled
-- License validation switches to offline mode
+- Skills.sh import and other external features are disabled
+- All features remain fully available offline
 
 Air-gap mode is indicated in the UI header and enforced at the service layer.
 
