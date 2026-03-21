@@ -188,10 +188,10 @@ ALTER TABLE users ADD COLUMN plan_expires_at TIMESTAMP NULL;
 
 ### UI changes
 
-- Plan badge in Filament sidebar and React SPA header
+- Plan badge in React SPA sidebar and header
 - Upgrade prompts when hitting limits (non-blocking, informational)
 - Project settings show detected license and OSS status
-- Billing page in Filament settings
+- Billing page in React SPA settings
 
 ## Revenue Projections (Conservative)
 

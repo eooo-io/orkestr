@@ -67,7 +67,7 @@ Without an active license, Orkestr runs in free-tier mode with limited projects,
 
 ### Agents
 
-Default agent definitions that are available across all projects. This tab replaces the former Filament-based agent management.
+Default agent definitions that are available across all projects.
 
 - **List** -- view all global agents with name, role, model, and sort order
 - **Create** -- add a new agent with full configuration (name, role, system prompt, model, tools, autonomy level, planning mode)

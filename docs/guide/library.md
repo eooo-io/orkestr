@@ -43,7 +43,7 @@ If the target project already has a skill with the same slug, the import appends
 
 ## Managing Library Skills
 
-Library skills are managed through the Filament Admin panel under **Library Skills**. You can:
+Library skills are managed through the React SPA under **Library Skills**. You can:
 
 - Add new library skills
 - Edit existing entries

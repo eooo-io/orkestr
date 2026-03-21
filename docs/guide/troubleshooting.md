@@ -40,7 +40,7 @@ Use the Model Health dashboard to quickly identify which providers are online an
 **Fix:**
 
 1. Verify the project path exists and is writable by the PHP process
-2. Check that providers are enabled for the project in the Filament Admin
+2. Check that providers are enabled for the project in the React SPA
 3. For Docker, ensure the project path is inside the `PROJECTS_HOST_PATH` mount
 4. Check the Laravel log for detailed errors: `make logs` or `tail -f storage/logs/laravel.log`
 

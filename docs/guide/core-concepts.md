@@ -127,7 +127,7 @@ A project maps to a directory on your filesystem. It holds:
 - Workflow definitions
 - Optional settings like `git_auto_commit`
 
-Projects are created and configured in the Filament Admin panel. Day-to-day skill editing, agent configuration, and workflow execution happens in the React SPA.
+Projects are created and configured in the React SPA. Skill editing, agent configuration, and workflow execution all happen there as well.
 
 ## How the Pieces Fit Together
 

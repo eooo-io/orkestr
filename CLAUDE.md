@@ -18,8 +18,6 @@ Orkestr is a self-hosted platform for building and operating AI agent systems. I
 |---|---|---|
 | Runtime | PHP | 8.4 |
 | Framework | Laravel | 12.x |
-| Admin UI | Filament | 3.x |
-| Reactive | Livewire | 4.x |
 | Frontend SPA | React + Vite + TypeScript | Latest |
 | Styling | Tailwind CSS | v4 |
 | Components | shadcn/ui | Latest |
@@ -37,9 +35,6 @@ The project is a Laravel 12 app at the repository root. A separate React SPA liv
 ```
 orkestr/
 ├── app/                    # Laravel application
-│   ├── Filament/           # Filament resources & pages
-│   │   ├── Resources/      # ProjectResource, LibrarySkillResource, TagResource
-│   │   └── Pages/          # Dashboard, Settings
 │   ├── Http/Controllers/   # API controllers consumed by React SPA
 │   │   ├── AgentController.php
 │   │   ├── BulkSkillController.php
@@ -99,7 +94,7 @@ orkestr/
 ├── docs/                   # VitePress documentation site
 ├── routes/
 │   ├── api.php             # REST API for React SPA
-│   └── web.php             # Filament auto-registers here
+│   └── web.php             # Web routes
 ├── ui/                     # React + Vite + TypeScript SPA
 │   └── src/
 │       ├── pages/          # Projects, ProjectDetail, SkillEditor, Playground, Library, Marketplace, Search, Settings
@@ -112,33 +107,9 @@ orkestr/
 └── Makefile
 ```
 
-## Architecture Split: Filament vs React SPA
+## Architecture
 
-| Concern | Handled By |
-|---|---|
-| Project registry (CRUD) | Filament |
-| Provider config per project | Filament |
-| Global library management | Filament |
-| App settings (API keys, defaults) | Filament |
-| Tag management | Filament |
-| Skill CRUD + Monaco editor | React SPA |
-| Live test runner (SSE streaming) | React SPA |
-| Playground (multi-turn chat) | React SPA |
-| Version history + diff viewer | React SPA |
-| Agent configuration + compose preview | React SPA |
-| Cross-project search | React SPA |
-| Bundle export/import | React SPA |
-| Webhook configuration | React SPA |
-| Command palette | React SPA |
-| API token management | React SPA |
-| Custom endpoints CRUD | React SPA |
-| Model health dashboard | React SPA |
-| Local model browser | React SPA |
-| Guardrail policies/profiles/violations | React SPA |
-| Skill analytics & reports | React SPA |
-| Skill reviews & ownership | React SPA |
-| Notifications | React SPA |
-| GitHub org import | React SPA |
+The React SPA handles all user-facing concerns: project management, skill editing, agent configuration, testing, analytics, guardrails, and settings. The Laravel backend serves as the API layer and execution engine.
 
 ## Database Schema
 
@@ -196,7 +167,6 @@ Required frontmatter fields: `id`, `name`. All others are optional.
 - **Session-based auth** using Laravel's `auth:web` guard — cookies, not tokens
 - **Multi-auth:** email/password, GitHub OAuth, Apple Sign In
 - **Multi-tenant:** Organizations with role-based access (owner, admin, editor, viewer, member)
-- **Filament admin** protected with Filament's `Authenticate` middleware
 - **API routes** protected with `auth:web` middleware (session cookies shared with SPA)
 - **Organization resolution:** `ResolveOrganization` middleware resolves via `X-Organization-Id` header or user's `current_organization_id`
 - **Default seeded user:** `admin@admin.com` / `password`
@@ -533,6 +503,5 @@ cd docs && npm run build  # Build static site
 | Interface | URL |
 |---|---|
 | React SPA | http://localhost:5173 (run `cd ui && npm run dev` locally) |
-| Filament Admin | http://localhost:8000/admin |
 | Laravel API | http://localhost:8000/api |
 | Documentation | http://localhost:5174 (run `cd docs && npm run dev`) |

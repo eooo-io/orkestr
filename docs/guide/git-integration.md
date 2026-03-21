@@ -6,7 +6,7 @@ Orkestr can automatically commit skill file changes to your project's git reposi
 
 The `git_auto_commit` setting is a per-project boolean. Enable it in one of two ways:
 
-1. **Filament Admin** -- Edit the project and toggle the "Git Auto-Commit" checkbox
+1. **React SPA** -- Edit the project and toggle the "Git Auto-Commit" checkbox
 2. **API** -- Include `"git_auto_commit": true` when creating or updating a project
 
 ::: info

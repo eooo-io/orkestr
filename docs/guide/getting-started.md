@@ -121,15 +121,14 @@ Orkestr also supports GitHub OAuth and Apple Sign In. See [Self-Hosted Deploymen
 
 | Interface | URL | Purpose |
 |---|---|---|
-| React SPA | http://localhost:5173 | Skill editing, agent design, workflows, testing |
-| Filament Admin | http://localhost:8000/admin | Project registry, provider config, organization settings |
+| React SPA | http://localhost:5173 | Project management, skill editing, agent design, workflows, testing, settings |
 | API | http://localhost:8000/api | REST API consumed by the SPA |
 
 ## Your First Project
 
 ### 1. Log in and create a project
 
-Open the Filament Admin at http://localhost:8000/admin, log in with the default credentials, and create a new project. Give it a name and set the **path** to the root directory of an existing codebase.
+Open the React SPA at http://localhost:5173, log in with the default credentials, and create a new project. Give it a name and set the **path** to the root directory of an existing codebase.
 
 ::: tip
 When using Docker, the path is relative to the `PROJECTS_HOST_PATH` mount defined in `.env`.
@@ -153,7 +152,7 @@ If you already have `.orkestr/skills/*.md` files, click **Scan** on the project 
 
 ### 4. Enable providers and sync
 
-Edit your project in the Filament Admin and check the providers you want to sync to (e.g., Claude, Cursor). Then open the React SPA, navigate to your project, and click **Sync**. You can [preview the diff](./diff-preview) before writing anything to disk.
+Edit your project in the React SPA and check the providers you want to sync to (e.g., Claude, Cursor). Then navigate to your project and click **Sync**. You can [preview the diff](./diff-preview) before writing anything to disk.
 
 ## Next Steps
 

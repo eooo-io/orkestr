@@ -68,7 +68,7 @@ The `.orkestr/` directory is the single source of truth. The `.claude/`, `.curso
 
 ## Creating a Project
 
-Projects are created in the Settings panel or Filament admin:
+Projects are created in the Settings panel:
 
 1. **Name** — "Backend API"
 2. **Path** — `/home/user/projects/backend-api`

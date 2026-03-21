@@ -14,7 +14,7 @@
 
 ### 1. Create the Project
 
-If you haven't already, go to **Settings → Projects** (or Filament Admin) and create a project:
+If you haven't already, go to **Settings → Projects** and create a project:
 
 - **Name:** "My App"
 - **Path:** `/path/to/your/codebase`

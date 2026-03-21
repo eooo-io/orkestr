@@ -4,7 +4,7 @@ Orkestr connects to models from multiple providers: Anthropic (Claude), OpenAI, 
 
 ## Configuring API Keys
 
-Set up API keys in the Filament Admin panel at http://localhost:8000/admin under **Settings**, or use the Settings page in the React SPA.
+Set up API keys in the Settings page in the React SPA at http://localhost:5173.
 
 ### Anthropic (Claude)
 
