@@ -20,7 +20,7 @@ A project is a container for your agents, skills, and workflows. Think of it as 
 5. Click **Save**
 
 ::: tip Advanced: Filesystem Path
-If you want to sync skills to a local directory (for use with Claude Code, Cursor, etc.), expand the **Advanced** section and set a filesystem path. This enables the legacy provider sync feature from Skillr.
+If you want to sync skills to a local directory (for use with Claude Code, Cursor, etc.), expand the **Advanced** section and set a filesystem path. This enables provider sync.
 :::
 
 ## Step 2: Create an Agent
