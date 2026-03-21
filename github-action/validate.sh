@@ -2,7 +2,7 @@
 #
 # Orkestr Skill Validator & Sync
 #
-# Validates .agentis/skills/*.md files for correct YAML frontmatter,
+# Validates .orkestr/skills/*.md files for correct YAML frontmatter,
 # checks for duplicate IDs and broken include references, and optionally
 # syncs skills to an Orkestr server.
 #
@@ -19,7 +19,7 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 
 MODE="${INPUT_MODE:-validate}"
-SKILLS_PATH="${INPUT_SKILLS_PATH:-.agentis/skills}"
+SKILLS_PATH="${INPUT_SKILLS_PATH:-.orkestr/skills}"
 SERVER_URL="${INPUT_SERVER_URL:-}"
 API_TOKEN="${INPUT_API_TOKEN:-}"
 

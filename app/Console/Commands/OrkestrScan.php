@@ -3,18 +3,18 @@
 namespace App\Console\Commands;
 
 use App\Models\Project;
-use App\Services\AgentisManifestService;
+use App\Services\ManifestService;
 use Illuminate\Console\Command;
 
-class AgentisScan extends Command
+class OrkestrScan extends Command
 {
-    protected $signature = 'agentis:scan
+    protected $signature = 'orkestr:scan
                             {project? : Project name, slug, or ID}
                             {--all : Scan all projects}';
 
-    protected $description = 'Scan project .agentis/ directory and sync skills to database';
+    protected $description = 'Scan project .orkestr/ directory and sync skills to database';
 
-    public function handle(AgentisManifestService $manifestService): int
+    public function handle(ManifestService $manifestService): int
     {
         $projects = $this->resolveProjects();
 

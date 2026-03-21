@@ -12,7 +12,7 @@
 4. Add tags: "summarization", "documents"
 5. Write prompt body in Monaco editor
 6. Click Save (or Ctrl+S)
-**Expected:** Skill created. Appears in skill list. File written to `.agentis/skills/summarize-document.md` on disk. Toast: "Skill saved."
+**Expected:** Skill created. Appears in skill list. File written to `.orkestr/skills/summarize-document.md` on disk. Toast: "Skill saved."
 
 ### TC-03-002: Edit existing skill
 **Priority:** P0

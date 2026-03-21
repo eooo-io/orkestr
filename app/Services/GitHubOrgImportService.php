@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Http;
 class GitHubOrgImportService
 {
     /**
-     * Discover repositories in a GitHub organization that contain .agentis/ directories.
+     * Discover repositories in a GitHub organization that contain .orkestr/ directories.
      */
     public function discoverRepos(string $orgName, ?string $token = null): array
     {
@@ -35,9 +35,9 @@ class GitHubOrgImportService
             $discovered = [];
 
             foreach ($repos as $repo) {
-                $hasAgentis = $this->checkForAgentisDir($repo['full_name'], $repo['default_branch'] ?? 'main', $token);
+                $hasOrkestrDir = $this->checkForOrkestrDir($repo['full_name'], $repo['default_branch'] ?? 'main', $token);
 
-                if ($hasAgentis) {
+                if ($hasOrkestrDir) {
                     $discovered[] = [
                         'name' => $repo['name'],
                         'full_name' => $repo['full_name'],
@@ -53,7 +53,7 @@ class GitHubOrgImportService
                 'success' => true,
                 'organization' => $orgName,
                 'total_repos' => count($repos),
-                'repos_with_agentis' => count($discovered),
+                'repos_with_orkestr' => count($discovered),
                 'repos' => $discovered,
             ];
         } catch (\Throwable $e) {
@@ -66,7 +66,7 @@ class GitHubOrgImportService
     }
 
     /**
-     * Import skills from a GitHub repo's .agentis/skills/ directory.
+     * Import skills from a GitHub repo's .orkestr/skills/ directory.
      */
     public function importFromRepo(string $repoFullName, string $branch = 'main', ?string $token = null): array
     {
@@ -76,16 +76,16 @@ class GitHubOrgImportService
         }
 
         try {
-            // List files in .agentis/skills/
+            // List files in .orkestr/skills/
             $response = Http::withHeaders($headers)
-                ->get("https://api.github.com/repos/{$repoFullName}/contents/.agentis/skills", [
+                ->get("https://api.github.com/repos/{$repoFullName}/contents/.orkestr/skills", [
                     'ref' => $branch,
                 ]);
 
             if (! $response->successful()) {
                 return [
                     'success' => false,
-                    'error' => 'No .agentis/skills/ directory found or inaccessible.',
+                    'error' => 'No .orkestr/skills/ directory found or inaccessible.',
                     'skills' => [],
                 ];
             }
@@ -135,9 +135,9 @@ class GitHubOrgImportService
     }
 
     /**
-     * Check if a repo has a .agentis/ directory.
+     * Check if a repo has a .orkestr/ directory.
      */
-    private function checkForAgentisDir(string $repoFullName, string $branch, ?string $token): bool
+    private function checkForOrkestrDir(string $repoFullName, string $branch, ?string $token): bool
     {
         $headers = ['Accept' => 'application/vnd.github+json'];
         if ($token) {
@@ -146,7 +146,7 @@ class GitHubOrgImportService
 
         try {
             $response = Http::withHeaders($headers)
-                ->get("https://api.github.com/repos/{$repoFullName}/contents/.agentis", [
+                ->get("https://api.github.com/repos/{$repoFullName}/contents/.orkestr", [
                     'ref' => $branch,
                 ]);
 

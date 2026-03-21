@@ -53,7 +53,7 @@ Template variables are resolved **at compose/sync time**, not at edit time. This
 - Provider sync outputs contain resolved values
 - Agent compose uses resolved values
 
-This design keeps the skill files portable. The same `.agentis/skills/code-style.md` file works across projects without modification -- only the per-project variable values change.
+This design keeps the skill files portable. The same `.orkestr/skills/code-style.md` file works across projects without modification -- only the per-project variable values change.
 
 ## Using Variables in the Body
 

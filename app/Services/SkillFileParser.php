@@ -15,8 +15,8 @@ class SkillFileParser
     /**
      * Parse a skill file or folder into its components.
      *
-     * Supports both flat files (.agentis/skills/slug.md) and
-     * folder-based skills (.agentis/skills/slug/skill.md).
+     * Supports both flat files (.orkestr/skills/slug.md) and
+     * folder-based skills (.orkestr/skills/slug/skill.md).
      *
      * @return array{frontmatter: array, body: string, assets: array}
      */

@@ -104,7 +104,7 @@ Orkestr can receive GitHub push webhooks to automatically scan a project for new
 2. Set the content type to `application/json`
 3. Select the **Push** event
 
-When a push event is received, Orkestr runs a `ProjectScanJob` on the corresponding project, picking up any new or changed `.agentis/skills/*.md` files.
+When a push event is received, Orkestr runs a `ProjectScanJob` on the corresponding project, picking up any new or changed `.orkestr/skills/*.md` files.
 
 ::: tip
 Combine the GitHub inbound webhook with [git auto-commit](./git-integration) for a bidirectional sync: changes in the editor auto-commit to git, and pushes from other sources auto-scan into the database.

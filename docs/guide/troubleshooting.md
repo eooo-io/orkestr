@@ -157,10 +157,10 @@ Yes. Install PHP 8.4, Composer, Node.js 20+, and MariaDB 11+ locally, then run `
 Pull the latest code (`git pull`), rebuild containers (`make build`), and run migrations (`make migrate`).
 
 **Q: Where are skill files stored on disk?**
-In `{project_path}/.agentis/skills/{slug}.md`. The project path is configured per project.
+In `{project_path}/.orkestr/skills/{slug}.md`. The project path is configured per project.
 
 **Q: Can I edit provider config files directly?**
-You can, but they will be overwritten on the next sync. Always edit in `.agentis/` and sync outward.
+You can, but they will be overwritten on the next sync. Always edit in `.orkestr/` and sync outward.
 
 **Q: How do I enable air-gap mode?**
 Go to **Settings > General** and toggle **Air-Gap Mode**, or set `AIR_GAP_MODE=true` in `.env`. This blocks all external API calls -- only local models (Ollama, custom endpoints) will work.

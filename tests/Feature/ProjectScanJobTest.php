@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\File;
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->tempDir = sys_get_temp_dir() . '/agentis-scan-' . uniqid();
-    $skillsDir = $this->tempDir . '/.agentis/skills';
+    $this->tempDir = sys_get_temp_dir() . '/orkestr-scan-' . uniqid();
+    $skillsDir = $this->tempDir . '/.orkestr/skills';
     mkdir($skillsDir, 0755, true);
 
     $parser = new SkillFileParser;
@@ -42,7 +42,7 @@ it('scans a project directory and creates skills in DB', function () {
         'path' => $this->tempDir,
     ]);
 
-    (new ProjectScanJob($project))->handle(app(App\Services\AgentisManifestService::class));
+    (new ProjectScanJob($project))->handle(app(App\Services\ManifestService::class));
 
     expect(Skill::where('project_id', $project->id)->count())->toBe(3);
 
@@ -64,7 +64,7 @@ it('creates v1 snapshots for new skills', function () {
         'path' => $this->tempDir,
     ]);
 
-    (new ProjectScanJob($project))->handle(app(App\Services\AgentisManifestService::class));
+    (new ProjectScanJob($project))->handle(app(App\Services\ManifestService::class));
 
     $skills = Skill::where('project_id', $project->id)->get();
 
@@ -84,7 +84,7 @@ it('syncs tags from frontmatter', function () {
         'path' => $this->tempDir,
     ]);
 
-    (new ProjectScanJob($project))->handle(app(App\Services\AgentisManifestService::class));
+    (new ProjectScanJob($project))->handle(app(App\Services\ManifestService::class));
 
     $summarize = Skill::where('slug', 'summarize')->first();
     expect($summarize->tags->pluck('name')->sort()->values()->all())->toBe(['ai', 'docs']);
@@ -103,7 +103,7 @@ it('updates synced_at on the project', function () {
 
     expect($project->synced_at)->toBeNull();
 
-    (new ProjectScanJob($project))->handle(app(App\Services\AgentisManifestService::class));
+    (new ProjectScanJob($project))->handle(app(App\Services\ManifestService::class));
 
     $project->refresh();
     expect($project->synced_at)->not->toBeNull();
@@ -115,7 +115,7 @@ it('upserts skills on re-scan without duplicating versions', function () {
         'path' => $this->tempDir,
     ]);
 
-    $service = app(App\Services\AgentisManifestService::class);
+    $service = app(App\Services\ManifestService::class);
 
     // First scan
     (new ProjectScanJob($project))->handle($service);

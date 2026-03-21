@@ -56,7 +56,7 @@ All specs live in `tests/`. Run with `php artisan test` or `composer test`.
 |---|---|---|
 | `Feature/ProjectApiTest.php` | Projects API | CRUD, scan, sync, git-log, git-diff endpoints |
 | `Feature/ProviderSyncTest.php` | Provider Sync | All 6 provider drivers (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI) |
-| `Feature/AgentisManifestServiceTest.php` | Manifest | `.agentis/` directory read/write, skill file parsing |
+| `Feature/ManifestServiceTest.php` | Manifest | `.orkestr/` directory read/write, skill file parsing |
 | `Feature/ProjectScanJobTest.php` | Scan Job | Filesystem scan, skill discovery, import |
 | `Unit/SkillFileParserTest.php` | Parser | YAML frontmatter + Markdown body parsing |
 | `Feature/AgentModelTest.php` | Agent Models | Agent Eloquent relationships, scopes |
@@ -124,7 +124,7 @@ Items that require human judgment or are difficult to automate reliably.
 
 ### File Downloads & Exports
 - [ ] Bundle export produces valid ZIP file
-- [ ] ZIP contains correct `.agentis/` structure
+- [ ] ZIP contains correct `.orkestr/` structure
 - [ ] JSON bundle export is valid and importable
 - [ ] PDF export (if applicable) renders correctly
 - [ ] SDK download links return valid TypeScript/PHP packages

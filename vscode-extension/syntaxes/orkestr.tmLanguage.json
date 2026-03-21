@@ -1,5 +1,5 @@
 {
-  "scopeName": "source.agentis",
+  "scopeName": "source.orkestr",
   "patterns": [
     { "include": "#frontmatter" },
     { "include": "#template-variable" },
@@ -10,10 +10,10 @@
       "begin": "\\A(---\\s*$)",
       "end": "^(---\\s*$)",
       "beginCaptures": {
-        "1": { "name": "punctuation.definition.frontmatter.begin.agentis" }
+        "1": { "name": "punctuation.definition.frontmatter.begin.orkestr" }
       },
       "endCaptures": {
-        "1": { "name": "punctuation.definition.frontmatter.end.agentis" }
+        "1": { "name": "punctuation.definition.frontmatter.end.orkestr" }
       },
       "contentName": "meta.embedded.block.yaml",
       "patterns": [
@@ -48,9 +48,9 @@
     },
     "template-variable": {
       "match": "\\{\\{\\s*(\\w+)\\s*\\}\\}",
-      "name": "variable.other.template.agentis",
+      "name": "variable.other.template.orkestr",
       "captures": {
-        "1": { "name": "variable.other.readwrite.agentis" }
+        "1": { "name": "variable.other.readwrite.orkestr" }
       }
     },
     "markdown": {

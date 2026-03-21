@@ -13,7 +13,7 @@ class GitHubImportController extends Controller
     ) {}
 
     /**
-     * POST /api/import/github/discover — discover repos with .agentis/ in a GitHub org.
+     * POST /api/import/github/discover — discover repos with .orkestr/ in a GitHub org.
      */
     public function discover(Request $request): JsonResponse
     {

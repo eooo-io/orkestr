@@ -6,11 +6,11 @@
 
 Orkestr is a self-hosted platform for building and operating AI agent systems. It is organized in three layers:
 
-1. **Component Layer** — Define reusable AI skills (prompts + config) in a provider-agnostic format, stored in `.agentis/`. Sync skills to the native config format of any supported AI provider (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI).
+1. **Component Layer** — Define reusable AI skills (prompts + config) in a provider-agnostic format, stored in `.orkestr/`. Sync skills to the native config format of any supported AI provider (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI).
 2. **Agent Layer** — Design autonomous agents with goals, tools (MCP), delegation (A2A), and persistent memory. Execute them through a built-in runtime with full observability.
 3. **Orchestration Layer** — Wire agents into multi-step workflows with conditional routing, parallel execution, human checkpoints, and shared context.
 
-**Core philosophy:** `.agentis/` is the single source of truth for skills. Skills feed into agents. Agents feed into workflows. All provider-specific files are derived outputs — never edited directly.
+**Core philosophy:** `.orkestr/` is the single source of truth for skills. Skills feed into agents. Agents feed into workflows. All provider-specific files are derived outputs — never edited directly.
 
 ## Tech Stack
 
@@ -66,7 +66,7 @@ orkestr/
 │   ├── Models/             # Eloquent models
 │   ├── Services/           # Business logic
 │   │   ├── AgentComposeService.php      # Merge agent base + custom + skills
-│   │   ├── AgentisManifestService.php   # .agentis/ directory management
+│   │   ├── ManifestService.php   # .orkestr/ directory management
 │   │   ├── BundleExportService.php      # ZIP/JSON bundle export
 │   │   ├── BundleImportService.php      # Bundle import with conflict resolution
 │   │   ├── GitService.php              # Git auto-commit, log, diff
@@ -155,7 +155,7 @@ Tables: `projects`, `project_providers`, `skills`, `skill_versions`, `tags`, `sk
 
 ## Skill File Format
 
-Canonical format is YAML frontmatter + Markdown body, stored in `.agentis/skills/`:
+Canonical format is YAML frontmatter + Markdown body, stored in `.orkestr/skills/`:
 
 ```markdown
 ---

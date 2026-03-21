@@ -20,8 +20,8 @@ export class SyncManager implements vscode.Disposable {
         this.updateStatusBar();
         this.statusBarItem.show();
 
-        // Watch for file changes in .agentis directories
-        this.fileWatcher = vscode.workspace.createFileSystemWatcher('**/.agentis/skills/**');
+        // Watch for file changes in .orkestr directories
+        this.fileWatcher = vscode.workspace.createFileSystemWatcher('**/.orkestr/skills/**');
         this.disposables.push(
             this.fileWatcher.onDidChange(() => this.onFileChanged()),
             this.fileWatcher.onDidCreate(() => this.onFileChanged()),
@@ -108,7 +108,7 @@ export class SyncManager implements vscode.Disposable {
             return;
         }
 
-        const targetDir = path.join(workspaceFolders[0].uri.fsPath, '.agentis', 'skills');
+        const targetDir = path.join(workspaceFolders[0].uri.fsPath, '.orkestr', 'skills');
 
         try {
             this.statusBarItem.text = '$(sync~spin) Orkestr: Pulling...';
@@ -128,7 +128,7 @@ export class SyncManager implements vscode.Disposable {
             }
 
             this.setState('synced');
-            vscode.window.showInformationMessage(`Orkestr: Pulled ${written} skill(s) to .agentis/skills/.`);
+            vscode.window.showInformationMessage(`Orkestr: Pulled ${written} skill(s) to .orkestr/skills/.`);
         } catch (err) {
             this.setState('error');
             const message = err instanceof Error ? err.message : String(err);
@@ -178,7 +178,7 @@ export class SyncManager implements vscode.Disposable {
     }
 
     private isSkillFile(filePath: string): boolean {
-        return filePath.includes('.agentis/skills/') || filePath.endsWith('.agentis');
+        return filePath.includes('.orkestr/skills/') || filePath.endsWith('.orkestr');
     }
 
     dispose(): void {

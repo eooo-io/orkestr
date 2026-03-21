@@ -21,13 +21,13 @@ You can use any layer independently. Start with components and grow into agents 
 
 ## Component Layer
 
-### The `.agentis/` Directory
+### The `.orkestr/` Directory
 
-Every project managed by Orkestr has a `.agentis/` directory at its root. This directory is the **single source of truth** for all AI skills in that project.
+Every project managed by Orkestr has a `.orkestr/` directory at its root. This directory is the **single source of truth** for all AI skills in that project.
 
 ```
 my-project/
-  .agentis/
+  .orkestr/
     skills/
       code-review.md
       testing-strategy.md
@@ -121,7 +121,7 @@ The visual canvas provides a WYSIWYG surface for composing agent teams. Drag age
 
 A project maps to a directory on your filesystem. It holds:
 
-- A collection of skills (stored in `.agentis/skills/`)
+- A collection of skills (stored in `.orkestr/skills/`)
 - Agent configuration (which agents are active, custom instructions, skill assignments)
 - MCP server and A2A agent connections
 - Workflow definitions

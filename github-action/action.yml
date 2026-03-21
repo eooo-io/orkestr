@@ -14,7 +14,7 @@ inputs:
   skills-path:
     description: 'Path to the skills directory relative to the repository root'
     required: false
-    default: '.agentis/skills'
+    default: '.orkestr/skills'
   server-url:
     description: 'Orkestr server URL (required for sync mode)'
     required: false

@@ -12,7 +12,7 @@ class RepositoryFileService
      * This ensures repository access is strictly scoped to AI config files.
      */
     public const ALLOWED_PATHS = [
-        '.agentis/',
+        '.orkestr/',
         '.claude/',
         '.cursor/rules/',
         '.github/copilot-instructions.md',
@@ -194,14 +194,14 @@ class RepositoryFileService
     }
 
     /**
-     * Pull skill files from the repository (reads all .agentis/skills/ files).
+     * Pull skill files from the repository (reads all .orkestr/skills/ files).
      */
     public function pullSkillFiles(ProjectRepository $repository, ?string $branch = null): array
     {
         $allowedFiles = $this->listAllowedFiles($repository, $branch);
 
         $skillFiles = collect($allowedFiles)
-            ->filter(fn (array $f) => str_starts_with($f['path'], '.agentis/skills/'))
+            ->filter(fn (array $f) => str_starts_with($f['path'], '.orkestr/skills/'))
             ->all();
 
         $results = [];

@@ -199,7 +199,7 @@ it('exports workflow as JSON', function () {
     $response = $this->getJson("/api/projects/{$this->project->id}/workflows/{$workflow->id}/export");
 
     $response->assertOk();
-    $response->assertJsonPath('format', 'agentis-workflow');
+    $response->assertJsonPath('format', 'orkestr-workflow');
     $response->assertJsonPath('workflow.name', 'Export Test');
 });
 

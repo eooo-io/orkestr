@@ -46,7 +46,7 @@ Every project maps to a real directory:
 
 ```
 /home/user/projects/backend-api/
-├── .agentis/                    ← Orkestr's directory
+├── .orkestr/                    ← Orkestr's directory
 │   └── skills/                  ← Skill files live here
 │       ├── coding-standards.md
 │       ├── api-design-guide.md
@@ -64,7 +64,7 @@ Every project maps to a real directory:
 └── ...
 ```
 
-The `.agentis/` directory is the single source of truth. The `.claude/`, `.cursor/`, etc. directories are **generated outputs** — you never edit them directly.
+The `.orkestr/` directory is the single source of truth. The `.claude/`, `.cursor/`, etc. directories are **generated outputs** — you never edit them directly.
 
 ## Creating a Project
 
@@ -77,7 +77,7 @@ Projects are created in the Settings panel or Filament admin:
 
 ## Scanning Existing Skills
 
-If your project already has `.agentis/skills/*.md` files (maybe from another team member or a previous installation), click **Scan**. Orkestr reads every file, parses the YAML frontmatter, and imports the skills into the database.
+If your project already has `.orkestr/skills/*.md` files (maybe from another team member or a previous installation), click **Scan**. Orkestr reads every file, parses the YAML frontmatter, and imports the skills into the database.
 
 ## Per-Project Configuration
 
@@ -105,7 +105,7 @@ While most work is scoped to a single project, some features work across project
 
 ## Key Takeaway
 
-Projects are the organizational unit of Orkestr. Each project maps to a codebase, contains its own skills, agents, and configuration, and keeps everything isolated. The `.agentis/` directory is the single source of truth that lives in your git repo.
+Projects are the organizational unit of Orkestr. Each project maps to a codebase, contains its own skills, agents, and configuration, and keeps everything isolated. The `.orkestr/` directory is the single source of truth that lives in your git repo.
 
 ---
 

@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\Models\Project;
 use App\Models\Skill;
 use App\Models\Tag;
-use App\Services\AgentisManifestService;
+use App\Services\ManifestService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -21,7 +21,7 @@ class ProjectScanJob implements ShouldQueue
         public Project $project,
     ) {}
 
-    public function handle(AgentisManifestService $manifestService): void
+    public function handle(ManifestService $manifestService): void
     {
         $result = $manifestService->scanProject($this->project->resolved_path);
 

@@ -221,7 +221,7 @@ class EndpointGuard
         }
 
         // HTTPS enforcement in production
-        $requireHttps = config('app.env') === 'production' && config('agentis.endpoints.require_https', true);
+        $requireHttps = config('app.env') === 'production' && config('orkestr.endpoints.require_https', true);
         if ($requireHttps && $parsed['scheme'] !== 'https') {
             if (! $this->isLocalUrl($url)) {
                 $violations[] = "HTTPS is required in production for non-local URLs: '{$url}'";
@@ -229,7 +229,7 @@ class EndpointGuard
         }
 
         // Reject raw IP addresses unless explicitly allowed
-        $allowRawIps = config('agentis.endpoints.allow_raw_ips', false);
+        $allowRawIps = config('orkestr.endpoints.allow_raw_ips', false);
         if (! $allowRawIps && $this->isRawIp($parsed['host'])) {
             if (! $this->isLocalUrl($url)) {
                 $violations[] = "Raw IP addresses are not allowed — use a domain name: '{$url}'";

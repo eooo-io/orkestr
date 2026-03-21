@@ -32,7 +32,7 @@ The foundation — skills, provider sync, search, and the React SPA.
 | **Cross-Project Search** | Full-text search across all skills, projects, and tags |
 | **Bundle Export/Import** | Export projects as ZIP/JSON bundles, import with conflict resolution |
 | **Git Integration** | Auto-commit on sync, git log, git diff per project |
-| **Project Scanning** | Scan filesystem for `.agentis/` skill files and import |
+| **Project Scanning** | Scan filesystem for `.orkestr/` skill files and import |
 | **Command Palette** | Cmd+K global search and navigation |
 | **Dark/Light/System Theme** | Three-mode theme switcher with system detection |
 | **React SPA** | Full single-page application with React, Vite, TypeScript, shadcn/ui |

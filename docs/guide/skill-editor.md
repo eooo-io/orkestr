@@ -30,7 +30,7 @@ Only `name` is required. The slug is auto-generated from the name and must be un
 
 ### Example Frontmatter
 
-When saved to disk as `.agentis/skills/code-review.md`, the YAML frontmatter looks like:
+When saved to disk as `.orkestr/skills/code-review.md`, the YAML frontmatter looks like:
 
 ```yaml
 ---
@@ -151,7 +151,7 @@ Inheritance is different from [includes](./includes). Includes compose multiple 
 Press `Ctrl+S` (or `Cmd+S` on macOS) to save. Every save:
 
 1. Updates the skill in the database
-2. Writes the `.agentis/skills/{slug}.md` file to disk
+2. Writes the `.orkestr/skills/{slug}.md` file to disk
 3. Creates a new version snapshot
 4. Optionally auto-commits to git if enabled
 

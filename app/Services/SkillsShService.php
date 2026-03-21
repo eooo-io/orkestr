@@ -168,7 +168,7 @@ class SkillsShService
     {
         $request = Http::timeout(15)
             ->withHeaders([
-                'User-Agent' => 'Agentis-Studio/1.0',
+                'User-Agent' => 'Orkestr/1.0',
                 'Accept' => 'application/vnd.github.v3+json',
             ]);
 

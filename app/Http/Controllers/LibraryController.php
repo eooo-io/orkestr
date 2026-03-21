@@ -6,7 +6,7 @@ use App\Http\Resources\SkillResource;
 use App\Models\LibrarySkill;
 use App\Models\Project;
 use App\Models\Tag;
-use App\Services\AgentisManifestService;
+use App\Services\ManifestService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -89,7 +89,7 @@ class LibraryController extends Controller
         return response()->json(null, 204);
     }
 
-    public function import(Request $request, LibrarySkill $librarySkill, AgentisManifestService $manifestService): SkillResource
+    public function import(Request $request, LibrarySkill $librarySkill, ManifestService $manifestService): SkillResource
     {
         $validated = $request->validate([
             'project_id' => 'required|exists:projects,id',

@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Resources\VersionResource;
 use App\Models\Skill;
 use App\Models\SkillVersion;
-use App\Services\AgentisManifestService;
+use App\Services\ManifestService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class VersionController extends Controller
 {
     public function __construct(
-        protected AgentisManifestService $manifestService,
+        protected ManifestService $manifestService,
     ) {}
 
     public function index(Skill $skill): AnonymousResourceCollection

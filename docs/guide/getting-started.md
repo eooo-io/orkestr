@@ -135,13 +135,13 @@ Open the Filament Admin at http://localhost:8000/admin, log in with the default 
 When using Docker, the path is relative to the `PROJECTS_HOST_PATH` mount defined in `.env`.
 :::
 
-### 2. Scaffold the `.agentis/` directory
+### 2. Scaffold the `.orkestr/` directory
 
-If your project does not already have an `.agentis/` directory, Orkestr creates one the first time you add a skill:
+If your project does not already have an `.orkestr/` directory, Orkestr creates one the first time you add a skill:
 
 ```
 my-app/
-  .agentis/
+  .orkestr/
     skills/
       my-first-skill.md
       another-skill.md
@@ -149,7 +149,7 @@ my-app/
 
 ### 3. Scan existing skills
 
-If you already have `.agentis/skills/*.md` files, click **Scan** on the project card. This reads every skill file, parses YAML frontmatter, upserts skills into the database, and creates version snapshots.
+If you already have `.orkestr/skills/*.md` files, click **Scan** on the project card. This reads every skill file, parses YAML frontmatter, upserts skills into the database, and creates version snapshots.
 
 ### 4. Enable providers and sync
 

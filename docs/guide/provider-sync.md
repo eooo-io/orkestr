@@ -1,6 +1,6 @@
 # Provider Sync
 
-Provider sync is a [Component Layer](/guide/core-concepts#component-layer) feature that takes your skills and composed agent instructions and writes them into the native config format for each AI coding assistant. This is how Orkestr bridges the gap between your portable `.agentis/` skills and the provider-specific files your tools actually read — one source of truth, seven output formats.
+Provider sync is a [Component Layer](/guide/core-concepts#component-layer) feature that takes your skills and composed agent instructions and writes them into the native config format for each AI coding assistant. This is how Orkestr bridges the gap between your portable `.orkestr/` skills and the provider-specific files your tools actually read — one source of truth, seven output formats.
 
 ## Supported Providers
 
@@ -30,7 +30,7 @@ From the project detail page in the React SPA, click **Sync**. This:
 5. Writes the output files to the project directory
 
 ::: warning
-Sync overwrites the provider config files completely. Any manual edits to files like `.claude/CLAUDE.md` or `.cursor/rules/*.mdc` will be lost. The `.agentis/` directory is the source of truth -- always edit there.
+Sync overwrites the provider config files completely. Any manual edits to files like `.claude/CLAUDE.md` or `.cursor/rules/*.mdc` will be lost. The `.orkestr/` directory is the source of truth -- always edit there.
 :::
 
 ## What Gets Synced

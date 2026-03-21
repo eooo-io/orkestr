@@ -38,7 +38,7 @@ class WebhookDispatcher
 
         $headers = [
             'Content-Type' => 'application/json',
-            'X-Agentis-Event' => $event,
+            'X-Orkestr-Event' => $event,
         ];
 
         if ($webhook->secret) {

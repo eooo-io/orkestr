@@ -184,7 +184,7 @@ it('exports workflow as generic JSON', function () {
     $exporter = app(WorkflowExportService::class);
     $json = $exporter->exportJson($workflow);
 
-    expect($json['format'])->toBe('agentis-workflow');
+    expect($json['format'])->toBe('orkestr-workflow');
     expect($json['workflow']['name'])->toBe('Export Test');
     expect($json['steps'])->toHaveCount(2);
     expect($json['edges'])->toHaveCount(1);

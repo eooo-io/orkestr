@@ -16,7 +16,7 @@ it('has knowledge database connection configured', function () {
 
     expect($config)->not->toBeNull()
         ->and($config['driver'])->toBe('pgsql')
-        ->and($config['database'])->toBe('agentis_knowledge')
+        ->and($config['database'])->toBe('orkestr_knowledge')
         ->and($config['schema'])->toBe('public');
 });
 

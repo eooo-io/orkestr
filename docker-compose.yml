@@ -15,21 +15,21 @@ services:
     command: >
       sh -c "php artisan serve --host=0.0.0.0 --port=8000 --env=docker"
     networks:
-      - agentis
+      - orkestr
 
   mariadb:
     image: mariadb:11
     environment:
       MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: agentis
-      MARIADB_USER: agentis
+      MARIADB_DATABASE: orkestr
+      MARIADB_USER: orkestr
       MARIADB_PASSWORD: secret
     volumes:
       - mariadb_data:/var/lib/mysql
     ports:
       - "3306:3306"
     networks:
-      - agentis
+      - orkestr
 
   redis:
     image: redis:7-alpine
@@ -38,7 +38,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - agentis
+      - orkestr
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -48,28 +48,28 @@ services:
   postgres:
     image: pgvector/pgvector:pg16
     environment:
-      POSTGRES_DB: agentis_knowledge
-      POSTGRES_USER: agentis
-      POSTGRES_PASSWORD: ${KNOWLEDGE_DB_PASSWORD:-agentis}
+      POSTGRES_DB: orkestr_knowledge
+      POSTGRES_USER: orkestr
+      POSTGRES_PASSWORD: ${KNOWLEDGE_DB_PASSWORD:-orkestr}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U agentis"]
+      test: ["CMD-SHELL", "pg_isready -U orkestr"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - agentis
+      - orkestr
     restart: unless-stopped
 
   minio:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-agentis}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-agentis123}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-orkestr}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-orkestr123}
     volumes:
       - minio_data:/data
     ports:
@@ -81,7 +81,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - agentis
+      - orkestr
     restart: unless-stopped
 
   queue-worker:
@@ -99,7 +99,7 @@ services:
       - mariadb
       - redis
     networks:
-      - agentis
+      - orkestr
     restart: unless-stopped
 
 volumes:
@@ -115,5 +115,5 @@ volumes:
       device: ${PROJECTS_HOST_PATH:-.}
 
 networks:
-  agentis:
+  orkestr:
     driver: bridge

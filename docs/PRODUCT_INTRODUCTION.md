@@ -48,7 +48,7 @@ All API endpoints must return responses in this structure:
 - Error: { "error": { "code": "...", "message": "...", "details": [...] } }
 ```
 
-Skills are stored in `.agentis/skills/` — plain files you can version-control, share, and compose. They support includes (one skill embedding another), template variables (`{{language}}`), and dependency resolution.
+Skills are stored in `.orkestr/skills/` — plain files you can version-control, share, and compose. They support includes (one skill embedding another), template variables (`{{language}}`), and dependency resolution.
 
 ### Multi-Model Access
 
@@ -56,7 +56,7 @@ Orkestr routes to any model from any provider — Anthropic (Claude), OpenAI, Go
 
 ### Provider Sync
 
-Skills can be delivered to AI coding tools (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI) in each tool's native format. Write once in `.agentis/`, sync to seven providers. This is how Orkestr bridges the gap between your agent definitions and your everyday development workflow — one source of truth for all AI instructions.
+Skills can be delivered to AI coding tools (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI) in each tool's native format. Write once in `.orkestr/`, sync to seven providers. This is how Orkestr bridges the gap between your agent definitions and your everyday development workflow — one source of truth for all AI instructions.
 
 ### Skill Tooling
 
@@ -209,10 +209,10 @@ You can start at any layer:
 
 For developers who prefer the terminal:
 
-- `agentis:list` — See all projects and their skills at a glance
-- `agentis:scan` — Scan a project directory for skill files
-- `agentis:sync` — Sync skills to provider configs without opening the UI
-- `agentis:import` — Import existing provider config files into Orkestr format (reverse-sync)
+- `orkestr:list` — See all projects and their skills at a glance
+- `orkestr:scan` — Scan a project directory for skill files
+- `orkestr:sync` — Sync skills to provider configs without opening the UI
+- `orkestr:import` — Import existing provider config files into Orkestr format (reverse-sync)
 
 The import command is particularly useful for onboarding: point it at a project that already has `.claude/CLAUDE.md` or `.cursor/rules/`, and it will parse those files back into portable skills. No manual migration needed.
 

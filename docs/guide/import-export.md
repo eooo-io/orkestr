@@ -24,7 +24,7 @@ POST /api/projects/{id}/export
 
 | Format | Contents |
 |---|---|
-| `zip` | A ZIP archive containing `.agentis/skills/*.md` files and a `manifest.json` |
+| `zip` | A ZIP archive containing `.orkestr/skills/*.md` files and a `manifest.json` |
 | `json` | A single JSON file with all skill data, frontmatter, and agent configuration |
 
 Omit `skill_ids` to export all skills. The manifest includes project metadata, tag definitions, and agent assignments.
@@ -70,7 +70,7 @@ POST /api/import/github/discover
 }
 ```
 
-Orkestr scans each repository for `.agentis/skills/`, `.cursor/rules/`, `.claude/CLAUDE.md`, and other recognized skill file patterns.
+Orkestr scans each repository for `.orkestr/skills/`, `.cursor/rules/`, `.claude/CLAUDE.md`, and other recognized skill file patterns.
 
 ### Step 3: Select Skills
 
@@ -86,14 +86,14 @@ POST /api/import/github/import
 {
   "org": "my-github-org",
   "selections": [
-    { "repo": "my-github-org/api-service", "path": ".agentis/skills/review.md" },
+    { "repo": "my-github-org/api-service", "path": ".orkestr/skills/review.md" },
     { "repo": "my-github-org/frontend", "path": ".cursor/rules/components.mdc" }
   ],
   "project_id": "target-project-uuid"
 }
 ```
 
-Imported skills are converted to the `.agentis/` format regardless of their source format.
+Imported skills are converted to the `.orkestr/` format regardless of their source format.
 
 ## Skills.sh Discovery
 
@@ -168,7 +168,7 @@ If you already have provider-specific config files (`.claude/CLAUDE.md`, `.curso
 POST /api/import/detect
 ```
 
-This scans a project directory for recognized provider files. Then import them into the `.agentis/` format:
+This scans a project directory for recognized provider files. Then import them into the `.orkestr/` format:
 
 ```
 POST /api/projects/{id}/import

@@ -14,7 +14,7 @@ class BundleExportService
 {
     public function __construct(
         protected SkillFileParser $parser,
-        protected AgentisManifestService $manifestService,
+        protected ManifestService $manifestService,
     ) {}
 
     /**
@@ -25,7 +25,7 @@ class BundleExportService
      */
     public function exportZip(Project $project, array $skillIds, array $agentIds, string $contentFormat = 'markdown', array $workflowIds = []): string
     {
-        $tempPath = tempnam(sys_get_temp_dir(), 'agentis_bundle_') . '.zip';
+        $tempPath = tempnam(sys_get_temp_dir(), 'orkestr_bundle_') . '.zip';
         $zip = new ZipArchive();
         $zip->open($tempPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 

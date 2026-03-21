@@ -165,11 +165,11 @@ Different projects fill in different values — same skill, adapted to each cont
 
 ## How Skills Are Stored
 
-On disk, skills are plain `.md` files in the `.agentis/` directory:
+On disk, skills are plain `.md` files in the `.orkestr/` directory:
 
 ```
 my-project/
-  .agentis/
+  .orkestr/
     skills/
       security-checklist.md
       coding-standards.md

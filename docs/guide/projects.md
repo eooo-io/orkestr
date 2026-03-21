@@ -1,6 +1,6 @@
 # Projects
 
-A project in Orkestr maps to a codebase directory on your filesystem. It is the container for skills, agents, provider sync, workflows, and all configuration. Every project points to a path where the `.agentis/` directory lives.
+A project in Orkestr maps to a codebase directory on your filesystem. It is the container for skills, agents, provider sync, workflows, and all configuration. Every project points to a path where the `.orkestr/` directory lives.
 
 ## Creating a Project
 
@@ -38,7 +38,7 @@ The toolbar at the top of the project detail page contains buttons for common op
 | Button | Action |
 |---|---|
 | **Settings** | Open project settings (name, description, repository config, import, webhooks) |
-| **Scan** | Read `.agentis/skills/*.md` files from disk, upsert into the database, and create version snapshots |
+| **Scan** | Read `.orkestr/skills/*.md` files from disk, upsert into the database, and create version snapshots |
 | **Preview** | Show a diff of what provider sync will write before committing |
 | **Sync** | Write all skills and composed agents to provider config files on disk |
 | **Library** | Open the skill library to import pre-built skills into this project |
@@ -82,7 +82,7 @@ Each skill card shows the skill name, description, model, tags, and token estima
 
 ## Scanning
 
-The **Scan** button reads the project's filesystem for `.agentis/skills/*.md` files. For each file found:
+The **Scan** button reads the project's filesystem for `.orkestr/skills/*.md` files. For each file found:
 
 1. YAML frontmatter is parsed to extract metadata
 2. The skill is upserted into the database (matched by slug)

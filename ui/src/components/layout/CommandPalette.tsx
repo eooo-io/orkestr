@@ -25,7 +25,7 @@ interface CommandItem {
   action: () => void
 }
 
-const RECENT_KEY = 'agentis-command-palette-recent'
+const RECENT_KEY = 'orkestr-command-palette-recent'
 const MAX_RECENT = 5
 
 function getRecentIds(): string[] {

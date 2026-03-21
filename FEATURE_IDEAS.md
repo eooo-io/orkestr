@@ -12,7 +12,7 @@ These were on the original brainstorm and have since been implemented:
 - ✅ **Review & Approval Workflow** — Submit → review → approve/reject with notifications (#219)
 - ✅ **Skill Ownership & CODEOWNERS** — Owner assignment, auto-review-request (#220)
 - ✅ **Skill Inheritance** — `extends_skill_id` with merge resolution, max depth 5 (#231)
-- ✅ **Bulk Import from GitHub Repos** — Scan GitHub org for .agentis/ directories (#241)
+- ✅ **Bulk Import from GitHub Repos** — Scan GitHub org for .orkestr/ directories (#241)
 - ✅ **REST API SDK** — TypeScript and PHP clients auto-generated from OpenAPI spec (#213, #214)
 - ✅ **OpenAPI Spec Generation** — OpenAPI 3.1 with Swagger UI at /api/docs (#212)
 - ✅ **Export Reports (CSV)** — Skill inventory, usage, audit log exports (#240)
@@ -56,7 +56,7 @@ These matter most for the self-hosted product — they make Orkestr indispensabl
 
 15. **VS Code Extension** — Browse/edit/test skills from VS Code. Sync status indicator. This is the highest-leverage DX feature for adoption.
 16. **GitHub Action for CI/CD** — Validate skill format in PRs, auto-sync on merge to main. `.github/workflows/orkestr-sync.yml` template.
-17. **Hot Reload Sync** — File watcher that auto-syncs `.agentis/` changes to provider configs on save. `orkestr:watch` command.
+17. **Hot Reload Sync** — File watcher that auto-syncs `.orkestr/` changes to provider configs on save. `orkestr:watch` command.
 18. **Skill Scaffolding** — `orkestr:new` interactive command with category-specific starter templates.
 
 ### Enterprise & Compliance

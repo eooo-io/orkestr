@@ -143,5 +143,5 @@ The configuration covers:
 - Shared context and variable definitions
 
 ::: tip
-Think of OpenClaw as the `.agentis/` directory for agent orchestration -- a single source of truth for how your agents are configured, portable across tools.
+Think of OpenClaw as the `.orkestr/` directory for agent orchestration -- a single source of truth for how your agents are configured, portable across tools.
 :::

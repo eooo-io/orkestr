@@ -32,7 +32,7 @@ class OpenClawDriver implements ProviderDriverInterface
                 'description' => $skill->description ?? $skill->name,
             ];
 
-            // Map Agentis tags to OpenClaw metadata
+            // Map Orkestr tags to OpenClaw metadata
             if ($skill->tags->isNotEmpty()) {
                 $frontmatter['metadata'] = json_encode([
                     'openclaw' => [
@@ -194,7 +194,7 @@ class OpenClawDriver implements ProviderDriverInterface
             }
         }
 
-        // Composed agents from Agentis
+        // Composed agents from Orkestr
         if (! empty($composedAgents)) {
             $output .= "## Composed Agents\n\n";
             foreach ($composedAgents as $composed) {

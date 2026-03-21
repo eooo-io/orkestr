@@ -16,7 +16,7 @@ class WorkflowExportService
         $workflow->loadMissing(['steps.agent', 'edges', 'project']);
 
         return [
-            'format' => 'agentis-workflow',
+            'format' => 'orkestr-workflow',
             'version' => '1.0',
             'workflow' => [
                 'name' => $workflow->name,

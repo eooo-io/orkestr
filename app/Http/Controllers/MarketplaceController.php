@@ -7,7 +7,7 @@ use App\Models\MarketplaceSkill;
 use App\Models\Project;
 use App\Models\Skill;
 use App\Models\Tag;
-use App\Services\AgentisManifestService;
+use App\Services\ManifestService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -96,7 +96,7 @@ class MarketplaceController extends Controller
         return response()->json(['data' => $marketplaceSkill], 201);
     }
 
-    public function install(Request $request, MarketplaceSkill $marketplaceSkill, AgentisManifestService $manifestService): JsonResponse
+    public function install(Request $request, MarketplaceSkill $marketplaceSkill, ManifestService $manifestService): JsonResponse
     {
         $validated = $request->validate([
             'target' => 'required|in:library,project',

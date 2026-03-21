@@ -6,7 +6,7 @@ use App\Http\Resources\SkillResource;
 use App\Models\Project;
 use App\Models\Skill;
 use App\Models\Tag;
-use App\Services\AgentisManifestService;
+use App\Services\ManifestService;
 use App\Services\GitService;
 use App\Services\PromptLinter;
 use App\Services\SkillCompositionService;
@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
 class SkillController extends Controller
 {
     public function __construct(
-        protected AgentisManifestService $manifestService,
+        protected ManifestService $manifestService,
         protected SkillCompositionService $compositionService,
         protected GitService $gitService,
         protected WebhookDispatcher $webhookDispatcher,
@@ -288,13 +288,13 @@ class SkillController extends Controller
                 // Folder skills use the directory path, flat skills use the .md file
                 $folderPath = $this->manifestService->getSkillFolderPath($project->resolved_path, $skill->slug);
                 $relativePath = $folderPath
-                    ? ".agentis/skills/{$skill->slug}/"
-                    : ".agentis/skills/{$skill->slug}.md";
+                    ? ".orkestr/skills/{$skill->slug}/"
+                    : ".orkestr/skills/{$skill->slug}.md";
 
                 $this->gitService->commit(
                     $project->resolved_path,
                     $relativePath,
-                    "agentis: update {$skill->name}",
+                    "orkestr: update {$skill->name}",
                 );
             } catch (\RuntimeException) {
                 // Silently skip if git fails (not a git repo, etc.)

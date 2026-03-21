@@ -6,7 +6,7 @@ use App\Http\Resources\SkillResource;
 use App\Models\LibrarySkill;
 use App\Models\Project;
 use App\Models\Tag;
-use App\Services\AgentisManifestService;
+use App\Services\ManifestService;
 use App\Services\SkillsShService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +16,7 @@ class SkillsShController extends Controller
 {
     public function __construct(
         protected SkillsShService $skillsSh,
-        protected AgentisManifestService $manifestService,
+        protected ManifestService $manifestService,
     ) {}
 
     /**

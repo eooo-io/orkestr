@@ -24,7 +24,7 @@ Provider sync is the translator. Your skills are the English cookbook. Each AI c
 ## How It Works
 
 ```
-Your skills in .agentis/skills/
+Your skills in .orkestr/skills/
     │
     │  + Composed agent instructions
     │    (base instructions + custom + assigned skills)

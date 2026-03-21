@@ -5,9 +5,9 @@ namespace App\Console\Commands;
 use App\Models\Project;
 use Illuminate\Console\Command;
 
-class AgentisList extends Command
+class OrkestrList extends Command
 {
-    protected $signature = 'agentis:list
+    protected $signature = 'orkestr:list
                             {project? : Project name, slug, or ID}
                             {--tags= : Filter by tags (comma-separated)}
                             {--model= : Filter by model}

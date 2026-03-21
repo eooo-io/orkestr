@@ -1,12 +1,12 @@
 # Skill File Format
 
-Skills are stored as Markdown files with YAML frontmatter in `.agentis/skills/`. This page is the complete specification.
+Skills are stored as Markdown files with YAML frontmatter in `.orkestr/skills/`. This page is the complete specification.
 
 ## File Location
 
 ```
 project-root/
-  .agentis/
+  .orkestr/
     skills/
       my-skill.md
 ```

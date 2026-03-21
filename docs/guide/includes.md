@@ -83,7 +83,7 @@ The resolved body (with all includes prepended) is used in:
 - **Agent compose** -- When a skill is assigned to an agent, its resolved body is used
 - **Playground** -- When selecting a skill as system prompt source
 
-The raw (unresolved) body is what you see in the Monaco editor and what gets saved to `.agentis/skills/{slug}.md`.
+The raw (unresolved) body is what you see in the Monaco editor and what gets saved to `.orkestr/skills/{slug}.md`.
 
 ## Example: Layered Prompts
 

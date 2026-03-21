@@ -17,22 +17,22 @@ The project directory must be an initialized git repository for auto-commit to w
 
 When you save a skill with auto-commit enabled, Orkestr:
 
-1. Writes the skill file to `.agentis/skills/{slug}.md`
+1. Writes the skill file to `.orkestr/skills/{slug}.md`
 2. Stages that specific file with `git add`
 3. Creates a commit with a descriptive message
 
-Only the changed skill file is committed -- not the entire `.agentis/` directory or any provider output files.
+Only the changed skill file is committed -- not the entire `.orkestr/` directory or any provider output files.
 
 ## Viewing Git History
 
 Orkestr exposes git log and diff endpoints for projects:
 
 ```
-GET /api/projects/{id}/git-log?file=.agentis/skills/my-skill.md
-GET /api/projects/{id}/git-diff?file=.agentis/skills/my-skill.md&ref=abc1234
+GET /api/projects/{id}/git-log?file=.orkestr/skills/my-skill.md
+GET /api/projects/{id}/git-diff?file=.orkestr/skills/my-skill.md&ref=abc1234
 ```
 
-The `git-log` endpoint returns commit history for a specific file (or the whole `.agentis/` directory if no file is specified). Each entry includes the commit hash, author, date, and message.
+The `git-log` endpoint returns commit history for a specific file (or the whole `.orkestr/` directory if no file is specified). Each entry includes the commit hash, author, date, and message.
 
 The `git-diff` endpoint shows the diff between the current file and a specific commit ref.
 
@@ -43,7 +43,7 @@ Auto-commits are scoped to individual skill saves. If you save three skills in q
 Provider sync output files (`.claude/CLAUDE.md`, `.cursor/rules/`, etc.) are **not** auto-committed. You can commit those separately with your own git workflow, or add them to `.gitignore` if you prefer to regenerate them on demand.
 
 ::: tip
-Since provider output files are fully derived from `.agentis/skills/`, many teams choose to gitignore them and regenerate via sync after checkout.
+Since provider output files are fully derived from `.orkestr/skills/`, many teams choose to gitignore them and regenerate via sync after checkout.
 :::
 
 ## When Auto-Commit Is Off
