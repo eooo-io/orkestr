@@ -73,13 +73,12 @@ You can use any layer independently. Start with skills and provider sync, grow i
 
 ### Component Layer
 
+- **Skill System** — Reusable prompt+config modules (`.orkestr/skills/`) that feed into agents and provider sync
 - **Skill Editor** — Monaco editor with YAML frontmatter + Markdown, live token counting
 - **Version History** — Every save creates a snapshot with diff viewer and one-click restore
-- **Skill Composition** — `includes` for recursive prompt composition with circular dependency detection
-- **Template Variables** — `{{variable}}` placeholders resolved at compose/sync time
-- **Provider Sync** — Write once in `.orkestr/`, sync to 7 AI coding tools (Claude, Cursor, Copilot, Windsurf, Cline, OpenAI)
-- **Prompt Linter** — 8 quality rules for prompt analysis
-- **AI Generation** — Describe what you want, get a complete skill
+- **Composition** — `includes` for recursive prompt assembly, `{{variable}}` templates resolved at compose time
+- **Provider Sync** — Bridge to AI coding tools: one source of truth synced to Claude, Cursor, Copilot, Windsurf, Cline, OpenAI
+- **Quality Tools** — 8-rule prompt linter, AI-assisted skill generation
 
 ### Multi-Model Support
 
@@ -122,7 +121,7 @@ graph TB
 
     LLM --> DB["MariaDB 11"]
     Tools --> MCP["MCP Servers"]
-    Orch --> Files[".orkestr/ files"]
+    Orch --> Files["Skill Store<br/>.orkestr/ files"]
 ```
 
 ---
