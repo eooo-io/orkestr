@@ -27,11 +27,11 @@
 - Resolved includes and template variables in sync output
 - Composed agent output included in provider files
 
-### Filament Admin Panel
+### Admin UI (React SPA)
 
-- `ProjectResource` with provider checkboxes and Scan/Sync actions
-- `LibrarySkillResource` with category filter and tag management
-- `TagResource` with color picker and skill count
+- Project management with provider checkboxes and Scan/Sync actions
+- Library skill management with category filter and tag management
+- Tag management with color picker and skill count
 - Settings page for API keys, default model, and provider reference
 - Dashboard with stats overview
 

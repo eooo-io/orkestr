@@ -1,16 +1,12 @@
 # Settings
 
-Orkestr settings are stored in the `app_settings` table as key-value pairs. Configure them through the Filament Admin panel or the Settings page in the React SPA.
+Orkestr settings are stored in the `app_settings` table as key-value pairs. Configure them through the Settings page in the React SPA.
 
 ## Where to Configure
 
-### Filament Admin
-
-Navigate to http://localhost:8000/admin and click **Settings** in the sidebar. This page provides form fields for all settings.
-
 ### React SPA Settings Page
 
-The React SPA includes a Settings page (accessible from the sidebar) that shows API key status and provider configuration.
+The React SPA includes a Settings page (accessible from the sidebar at http://localhost:5173) that shows API key status and provider configuration.
 
 ### Environment Variables
 

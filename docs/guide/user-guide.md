@@ -180,5 +180,4 @@ For multi-agent orchestration, use the visual **Workflow Builder**.
 | Interface | URL |
 |---|---|
 | React SPA | `http://localhost:5173` |
-| Filament Admin | `http://localhost:8000/admin` |
 | API | `http://localhost:8000/api` |

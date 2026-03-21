@@ -15,7 +15,7 @@ Provider sync is a [Component Layer](/guide/core-concepts#component-layer) featu
 
 ## Configuring Providers
 
-Providers are configured per project in the Filament Admin panel (http://localhost:8000/admin). Edit a project and check the providers you want to enable.
+Providers are configured per project in the React SPA Settings (http://localhost:5173). Edit a project and check the providers you want to enable.
 
 Each provider is stored as a row in the `project_providers` table with the provider key (e.g., `claude`, `cursor`) and an enabled flag.
 

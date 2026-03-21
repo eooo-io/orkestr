@@ -4,7 +4,7 @@ A project in Orkestr maps to a codebase directory on your filesystem. It is the 
 
 ## Creating a Project
 
-Open the Filament Admin at `http://localhost:8000/admin` and create a new project. Provide:
+Open the React SPA at `http://localhost:5173` and create a new project. Provide:
 
 - **Name** -- a display name for the project (e.g., "My SaaS App")
 - **Description** -- optional summary of what the project does

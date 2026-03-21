@@ -164,7 +164,6 @@ composer dev   # starts server, queue, pail, vite
 | Interface | URL |
 |---|---|
 | React SPA | http://localhost:5173 |
-| Filament Admin | http://localhost:8000/admin |
 | API | http://localhost:8000/api |
 | Documentation | http://localhost:5174 |
 
@@ -178,7 +177,6 @@ Default login: `admin@admin.com` / `password`
 |---|---|
 | Runtime | PHP 8.4 |
 | Framework | Laravel 12.x |
-| Admin UI | Filament 3.x + Livewire 4.x |
 | Frontend SPA | React 19 + Vite + TypeScript |
 | Styling | Tailwind CSS v4 + shadcn/ui |
 | Code Editor | Monaco Editor |
