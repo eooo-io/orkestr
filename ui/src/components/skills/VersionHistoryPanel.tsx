@@ -158,9 +158,14 @@ export function VersionHistoryPanel({
                   </span>
                 )}
               </div>
-              <span className="text-[10px] text-muted-foreground">
-                {new Date(version.saved_at).toLocaleString()}
-              </span>
+              <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                <span>{new Date(version.saved_at).toLocaleString()}</span>
+                {version.tuned_for_model && (
+                  <span className="font-mono px-1 py-0.5 rounded bg-muted/60">
+                    {version.tuned_for_model}
+                  </span>
+                )}
+              </div>
             </div>
 
             <Button

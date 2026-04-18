@@ -14,6 +14,7 @@ class SkillVersion extends Model
         'version_number',
         'frontmatter',
         'body',
+        'tuned_for_model',
         'note',
         'saved_at',
     ];

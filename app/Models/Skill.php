@@ -30,6 +30,10 @@ class Skill extends Model
         'codeowners',
         'extends_skill_id',
         'override_sections',
+        'tuned_for_model',
+        'last_validated_model',
+        'last_validated_at',
+        'last_validated_eval_run_id',
     ];
 
     protected function casts(): array
@@ -42,6 +46,7 @@ class Skill extends Model
             'codeowners' => 'array',
             'override_sections' => 'array',
             'max_tokens' => 'integer',
+            'last_validated_at' => 'datetime',
         ];
     }
 

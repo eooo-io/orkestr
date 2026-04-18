@@ -187,6 +187,10 @@ export interface Skill {
   category_id: number | null
   category: { slug: string; name: string; icon: string | null; color: string | null } | null
   skill_type: 'capability_uplift' | 'encoded_preference' | 'hybrid' | null
+  tuned_for_model: string | null
+  last_validated_model: string | null
+  last_validated_at: string | null
+  last_validated_eval_run_id: number | null
   is_folder: boolean
   assets: SkillAsset[]
   asset_count: number
@@ -210,6 +214,7 @@ export interface SkillVersion {
   version_number: number
   frontmatter: Record<string, unknown>
   body: string
+  tuned_for_model: string | null
   note: string | null
   saved_at: string
 }

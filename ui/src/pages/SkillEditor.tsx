@@ -8,6 +8,7 @@ import {
   updateSkill,
   deleteSkill,
   duplicateSkill,
+  updateStalenessTuning,
 } from '@/api/client'
 import { useAppStore } from '@/store/useAppStore'
 import { FrontmatterForm } from '@/components/skills/FrontmatterForm'
@@ -23,6 +24,7 @@ import { InheritancePanel } from '@/components/skills/InheritancePanel'
 import { AssetsPanel } from '@/components/skills/AssetsPanel'
 import { GotchaPanel } from '@/components/skills/GotchaPanel'
 import { InlineGotchaStrip } from '@/components/skills/InlineGotchaStrip'
+import { StalenessBanner } from '@/components/skills/StalenessBanner'
 import { EvalPanel } from '@/components/skills/EvalPanel'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -53,6 +55,7 @@ export function SkillEditor() {
   const [activeTab, setActiveTab] = useState<'test' | 'versions' | 'lint' | 'gotchas' | 'evals' | 'assets' | 'security' | 'review' | 'regression' | 'inherit'>('test')
   const [showGenerate, setShowGenerate] = useState(false)
   const [gotchaRefreshKey, setGotchaRefreshKey] = useState(0)
+  const [stalenessRefreshKey, setStalenessRefreshKey] = useState(0)
   const { isDirty, setDirty, showToast, loadProjects } = useAppStore()
   const confirm = useConfirm()
   const initialBody = useRef<string>('')
@@ -137,6 +140,7 @@ export function SkillEditor() {
         await updateSkill(parseInt(id!), skill)
         showToast('Skill saved')
         setDirty(false)
+        setStalenessRefreshKey((k) => k + 1)
         loadProjects()
       }
     } catch {
@@ -214,7 +218,32 @@ export function SkillEditor() {
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
         {/* Left: Editor */}
         <div className="flex-1 flex flex-col min-w-0 min-h-0">
-          <FrontmatterForm skill={skill} onChange={handleFieldChange} projectSkills={projectSkills} />
+          <FrontmatterForm
+            skill={skill}
+            onChange={handleFieldChange}
+            projectSkills={projectSkills}
+            onTunedForModelChange={
+              isNew || !skill.id
+                ? undefined
+                : async (value) => {
+                    try {
+                      await updateStalenessTuning(skill.id!, value)
+                      setSkill((prev) => ({ ...prev, tuned_for_model: value }))
+                      setStalenessRefreshKey((k) => k + 1)
+                      showToast('Tuned-for model updated')
+                    } catch {
+                      showToast('Failed to update tuned-for model', 'error')
+                    }
+                  }
+            }
+          />
+          {!isNew && skill.id && (
+            <StalenessBanner
+              skillId={skill.id}
+              currentModel={skill.model}
+              refreshKey={stalenessRefreshKey}
+            />
+          )}
           {!isNew && skill.id && (
             <InlineGotchaStrip
               skillId={skill.id}

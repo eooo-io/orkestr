@@ -931,6 +931,30 @@ export const importFromProvider = (projectId: number, path: string, provider?: s
 export const fetchModels = () =>
   api.get<{ data: ModelGroup[] }>('/models').then((r) => r.data.data)
 
+// Skill staleness
+export interface StalenessStatus {
+  is_stale: boolean
+  reason: 'ok' | 'needs_tuning' | 'needs_revalidation' | 'model_deprecated'
+  tuned_for_model: string | null
+  last_validated_model: string | null
+  last_validated_at: string | null
+  suggested_action: string
+}
+
+export const fetchStaleness = (skillId: number, currentModel?: string) =>
+  api
+    .get<{ data: StalenessStatus }>(
+      `/skills/${skillId}/staleness${currentModel ? `?current_model=${encodeURIComponent(currentModel)}` : ''}`,
+    )
+    .then((r) => r.data.data)
+
+export const updateStalenessTuning = (skillId: number, tunedForModel: string | null) =>
+  api
+    .put<{ data: StalenessStatus }>(`/skills/${skillId}/staleness`, {
+      tuned_for_model: tunedForModel,
+    })
+    .then((r) => r.data.data)
+
 // Settings
 export const fetchSettings = () =>
   api
