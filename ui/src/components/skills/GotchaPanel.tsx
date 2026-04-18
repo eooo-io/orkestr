@@ -11,6 +11,7 @@ import type { SkillGotcha } from '@/types'
 
 interface GotchaPanelProps {
   skillId: number
+  onMutate?: () => void
 }
 
 const SEVERITY_STYLES: Record<
@@ -26,7 +27,7 @@ const SEVERITY_STYLES: Record<
   info: { bg: 'bg-blue-500/10', text: 'text-blue-500', label: 'Info' },
 }
 
-export function GotchaPanel({ skillId }: GotchaPanelProps) {
+export function GotchaPanel({ skillId, onMutate }: GotchaPanelProps) {
   const confirm = useConfirm()
   const [gotchas, setGotchas] = useState<SkillGotcha[]>([])
   const [loading, setLoading] = useState(true)
@@ -56,22 +57,26 @@ export function GotchaPanel({ skillId }: GotchaPanelProps) {
     setSeverity('warning')
     setShowForm(false)
     load()
+    onMutate?.()
   }
 
   const handleDelete = async (id: number) => {
     if (!(await confirm({ message: 'Delete this gotcha?', title: 'Confirm Delete' }))) return
     await deleteGotcha(id)
     load()
+    onMutate?.()
   }
 
   const handleResolve = async (id: number) => {
     await resolveGotcha(id)
     load()
+    onMutate?.()
   }
 
   const handleReopen = async (id: number) => {
     await reopenGotcha(id)
     load()
+    onMutate?.()
   }
 
   if (loading) {

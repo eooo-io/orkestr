@@ -161,7 +161,7 @@ class SkillController extends Controller
 
     public function lint(Skill $skill, PromptLinter $linter): JsonResponse
     {
-        $issues = $linter->lint($skill->body ?? '');
+        $issues = $linter->lintSkill($skill);
 
         return response()->json(['data' => $issues]);
     }
