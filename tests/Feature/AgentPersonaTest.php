@@ -160,10 +160,7 @@ test('compose includes persona context in output', function () {
 
     $project->agents()->attach($agent->id, ['is_enabled' => true]);
 
-    $composer = new AgentComposeService(
-        new SkillCompositionService(),
-        new TemplateResolver(),
-    );
+    $composer = app(AgentComposeService::class);
 
     $result = $composer->compose($project, $agent);
 

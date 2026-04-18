@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\ProjectAgent;
 use App\Models\Skill;
 use App\Models\SkillVariable;
+use App\Services\LLM\LLMProviderFactory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
@@ -15,16 +16,22 @@ class AgentComposeService
     public function __construct(
         protected SkillCompositionService $compositionService,
         protected TemplateResolver $templateResolver,
+        protected LLMProviderFactory $llmFactory,
     ) {}
 
     /**
      * Compose the full markdown output for a single project agent.
      *
      * @param  string  $depth  Compose depth: 'index', 'full', or 'deep'
-     * @return array{content: string, token_estimate: int, agent: array, skill_count: int}
+     * @param  string|null  $modelOverride  Preview against a different model than the agent is configured for
+     * @return array{content: string, token_estimate: int, agent: array, skill_count: int, target_model: string|null, model_context_window: int, skill_breakdown: array}
      */
-    public function compose(Project $project, Agent $agent, string $depth = 'full'): array
-    {
+    public function compose(
+        Project $project,
+        Agent $agent,
+        string $depth = 'full',
+        ?string $modelOverride = null,
+    ): array {
         $projectAgent = $project->projectAgents()
             ->where('agent_id', $agent->id)
             ->first();
@@ -32,11 +39,13 @@ class AgentComposeService
         $customInstructions = $projectAgent?->custom_instructions;
 
         $skills = $this->getAssignedSkills($project, $agent);
-        $content = $this->render($project, $agent, $customInstructions, $skills, $depth);
+        $rendered = $this->renderWithOffsets($project, $agent, $customInstructions, $skills, $depth);
+
+        $targetModel = $modelOverride ?? $projectAgent?->model_override ?? $agent->model;
 
         return [
-            'content' => $content,
-            'token_estimate' => $this->estimateTokens($content),
+            'content' => $rendered['content'],
+            'token_estimate' => $this->estimateTokens($rendered['content']),
             'agent' => [
                 'id' => $agent->id,
                 'name' => $agent->name,
@@ -47,6 +56,9 @@ class AgentComposeService
                 'display_name' => $agent->displayName(),
             ],
             'skill_count' => $skills->count(),
+            'target_model' => $targetModel,
+            'model_context_window' => $targetModel ? $this->llmFactory->contextWindowFor($targetModel) : 0,
+            'skill_breakdown' => $rendered['skill_breakdown'],
         ];
     }
 
@@ -410,53 +422,108 @@ class AgentComposeService
      */
     protected function render(Project $project, Agent $agent, ?string $customInstructions, \Illuminate\Support\Collection $skills, string $depth = 'full'): string
     {
+        return $this->renderWithOffsets($project, $agent, $customInstructions, $skills, $depth)['content'];
+    }
+
+    /**
+     * Render the composed markdown output and record per-skill character offsets.
+     *
+     * @return array{content: string, skill_breakdown: array<int, array{slug: string, name: string, token_estimate: int, starts_at_char: int, ends_at_char: int, tuned_for_model: string|null, last_validated_model: string|null}>}
+     */
+    protected function renderWithOffsets(
+        Project $project,
+        Agent $agent,
+        ?string $customInstructions,
+        \Illuminate\Support\Collection $skills,
+        string $depth = 'full',
+    ): array {
         $sections = [];
 
-        // Header — use persona name if available
         $sections[] = "# {$agent->displayName()}";
 
-        // Persona context
         if ($personaContext = $agent->personaContext()) {
             $sections[] = $personaContext;
         }
 
-        // Base instructions
         if ($agent->base_instructions) {
             $sections[] = trim($agent->base_instructions);
         }
 
-        // Custom project-specific instructions
         if ($customInstructions) {
             $sections[] = "## Project-Specific Instructions\n\n" . trim($customInstructions);
         }
 
-        // Resolved skill sections
         $resolvedSkills = $this->resolveSkillBodies($project, $skills, $depth);
+        $skillBreakdown = [];
 
         if (! empty($resolvedSkills)) {
             if ($depth === 'index') {
-                // Index mode: just list skill names and summaries
-                $skillSections = ["## Available Skills"];
+                $skillSections = ['## Available Skills'];
                 foreach ($resolvedSkills as $skill) {
                     $summary = $skill['summary'] ?? $skill['description'] ?? '';
                     $skillSections[] = "- **{$skill['name']}**: {$summary}";
                 }
                 $sections[] = implode("\n", $skillSections);
-            } else {
-                $skillSections = ["## Assigned Skills"];
+
+                $content = implode("\n\n", $sections) . "\n";
+                $skillsById = $skills->keyBy('id');
                 foreach ($resolvedSkills as $skill) {
-                    $skillContent = "### {$skill['name']}";
-                    if ($skill['description']) {
-                        $skillContent .= "\n\n> {$skill['description']}";
-                    }
-                    $skillContent .= "\n\n" . trim($skill['body']);
-                    $skillSections[] = $skillContent;
+                    $model = $skillsById->get($skill['id']);
+                    $skillBreakdown[] = [
+                        'slug' => $skill['slug'],
+                        'name' => $skill['name'],
+                        'token_estimate' => $skill['token_estimate'],
+                        'starts_at_char' => 0,
+                        'ends_at_char' => 0,
+                        'tuned_for_model' => $model?->tuned_for_model,
+                        'last_validated_model' => $model?->last_validated_model,
+                    ];
                 }
-                $sections[] = implode("\n\n", $skillSections);
+
+                return ['content' => $content, 'skill_breakdown' => $skillBreakdown];
             }
+
+            $prefix = implode("\n\n", $sections);
+            // The "## Assigned Skills" header lives above the first skill; include the
+            // join separator so offsets point at the "### {name}" line exactly.
+            $prefix .= "\n\n## Assigned Skills\n\n";
+
+            $skillsById = $skills->keyBy('id');
+            $content = $prefix;
+            foreach ($resolvedSkills as $idx => $skill) {
+                $skillContent = "### {$skill['name']}";
+                if ($skill['description']) {
+                    $skillContent .= "\n\n> {$skill['description']}";
+                }
+                $skillContent .= "\n\n" . trim($skill['body']);
+
+                $startsAt = strlen($content);
+                $content .= $skillContent;
+                $endsAt = strlen($content);
+
+                $model = $skillsById->get($skill['id']);
+                $skillBreakdown[] = [
+                    'slug' => $skill['slug'],
+                    'name' => $skill['name'],
+                    'token_estimate' => $skill['token_estimate'],
+                    'starts_at_char' => $startsAt,
+                    'ends_at_char' => $endsAt,
+                    'tuned_for_model' => $model?->tuned_for_model,
+                    'last_validated_model' => $model?->last_validated_model,
+                ];
+
+                if ($idx < count($resolvedSkills) - 1) {
+                    $content .= "\n\n";
+                }
+            }
+
+            return ['content' => $content . "\n", 'skill_breakdown' => $skillBreakdown];
         }
 
-        return implode("\n\n", $sections) . "\n";
+        return [
+            'content' => implode("\n\n", $sections) . "\n",
+            'skill_breakdown' => $skillBreakdown,
+        ];
     }
 
     /**

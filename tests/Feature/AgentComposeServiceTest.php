@@ -70,6 +70,66 @@ it('composes markdown with assigned skills', function () {
     expect($result['skill_count'])->toBe(1);
 });
 
+it('returns target_model and model_context_window from agent model', function () {
+    $result = $this->service->compose($this->project, $this->agent);
+
+    expect($result['target_model'])->toBe('claude-sonnet-4-6')
+        ->and($result['model_context_window'])->toBe(200000);
+});
+
+it('applies modelOverride to target_model and context window', function () {
+    $result = $this->service->compose($this->project, $this->agent, 'full', 'gpt-5.4');
+
+    expect($result['target_model'])->toBe('gpt-5.4')
+        ->and($result['model_context_window'])->toBe(1048576);
+});
+
+it('returns 0 context_window for an unknown model', function () {
+    $result = $this->service->compose($this->project, $this->agent, 'full', 'mystery-model');
+
+    expect($result['target_model'])->toBe('mystery-model')
+        ->and($result['model_context_window'])->toBe(0);
+});
+
+it('returns skill_breakdown with offsets aligned to content', function () {
+    $skillA = Skill::create([
+        'project_id' => $this->project->id,
+        'name' => 'Alpha Skill',
+        'slug' => 'alpha-skill',
+        'body' => 'Alpha body content.',
+        'tuned_for_model' => 'claude-sonnet-4-6',
+    ]);
+    $skillB = Skill::create([
+        'project_id' => $this->project->id,
+        'name' => 'Beta Skill',
+        'slug' => 'beta-skill',
+        'body' => 'Beta body content.',
+        'last_validated_model' => 'claude-opus-4-6',
+    ]);
+
+    DB::table('agent_skill')->insert([
+        ['project_id' => $this->project->id, 'agent_id' => $this->agent->id, 'skill_id' => $skillA->id],
+        ['project_id' => $this->project->id, 'agent_id' => $this->agent->id, 'skill_id' => $skillB->id],
+    ]);
+
+    $result = $this->service->compose($this->project, $this->agent);
+    $breakdown = $result['skill_breakdown'];
+
+    expect($breakdown)->toHaveCount(2);
+
+    foreach ($breakdown as $entry) {
+        $slice = substr($result['content'], $entry['starts_at_char'], $entry['ends_at_char'] - $entry['starts_at_char']);
+        expect($slice)->toStartWith("### {$entry['name']}");
+    }
+
+    $alphaEntry = collect($breakdown)->firstWhere('slug', 'alpha-skill');
+    $betaEntry = collect($breakdown)->firstWhere('slug', 'beta-skill');
+
+    expect($alphaEntry['tuned_for_model'])->toBe('claude-sonnet-4-6')
+        ->and($betaEntry['last_validated_model'])->toBe('claude-opus-4-6')
+        ->and($alphaEntry['ends_at_char'])->toBeLessThanOrEqual($betaEntry['starts_at_char']);
+});
+
 it('includes custom instructions in compose', function () {
     ProjectAgent::where('project_id', $this->project->id)
         ->where('agent_id', $this->agent->id)
