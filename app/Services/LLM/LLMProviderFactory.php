@@ -8,6 +8,37 @@ use App\Models\CustomEndpoint;
 class LLMProviderFactory
 {
     /**
+     * Static context window lookup. Shared between formatModels() and contextWindowFor().
+     *
+     * @var array<string, int>
+     */
+    public const CONTEXT_WINDOWS = [
+        'claude-opus-4-6' => 200000,
+        'claude-sonnet-4-6' => 200000,
+        'claude-haiku-4-5-20251001' => 200000,
+        'gpt-5.4' => 1048576,
+        'gpt-5.4-thinking' => 1048576,
+        'gpt-5-mini' => 1048576,
+        'gpt-5.3-instant' => 1048576,
+        'o3' => 200000,
+        'gemini-3.1-pro' => 1048576,
+        'gemini-3-flash' => 1048576,
+        'gemini-3.1-flash-lite' => 1048576,
+        'grok-3' => 131072,
+        'grok-3-fast' => 131072,
+        'grok-3-mini' => 131072,
+        'grok-3-mini-fast' => 131072,
+    ];
+
+    /**
+     * Return the context window for a model, or 0 if unknown.
+     */
+    public function contextWindowFor(string $model): int
+    {
+        return self::CONTEXT_WINDOWS[$model] ?? 0;
+    }
+
+    /**
      * Create a provider instance for the given model name.
      */
     public function make(string $model): LLMProviderInterface
@@ -129,24 +160,6 @@ class LLMProviderFactory
 
     protected function formatModels(array $modelIds, string $provider): array
     {
-        $contextWindows = [
-            'claude-opus-4-6' => 200000,
-            'claude-sonnet-4-6' => 200000,
-            'claude-haiku-4-5-20251001' => 200000,
-            'gpt-5.4' => 1048576,
-            'gpt-5.4-thinking' => 1048576,
-            'gpt-5-mini' => 1048576,
-            'gpt-5.3-instant' => 1048576,
-            'o3' => 200000,
-            'gemini-3.1-pro' => 1048576,
-            'gemini-3-flash' => 1048576,
-            'gemini-3.1-flash-lite' => 1048576,
-            'grok-3' => 131072,
-            'grok-3-fast' => 131072,
-            'grok-3-mini' => 131072,
-            'grok-3-mini-fast' => 131072,
-        ];
-
         $labels = [
             'claude-opus-4-6' => 'Claude Opus 4.6',
             'claude-sonnet-4-6' => 'Claude Sonnet 4.6',
@@ -169,7 +182,7 @@ class LLMProviderFactory
             'id' => $id,
             'name' => $labels[$id] ?? $id,
             'provider' => $provider,
-            'context_window' => $contextWindows[$id] ?? 0,
+            'context_window' => self::CONTEXT_WINDOWS[$id] ?? 0,
         ], $modelIds);
     }
 

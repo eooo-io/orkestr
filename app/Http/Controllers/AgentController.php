@@ -482,9 +482,10 @@ class AgentController extends Controller
     public function compose(Request $request, Project $project, Agent $agent): JsonResponse
     {
         $depth = $request->query('depth', 'full');
+        $modelOverride = $request->query('model');
 
         return response()->json([
-            'data' => $this->composeService->compose($project, $agent, $depth),
+            'data' => $this->composeService->compose($project, $agent, $depth, $modelOverride),
         ]);
     }
 

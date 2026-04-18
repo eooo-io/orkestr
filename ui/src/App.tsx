@@ -44,6 +44,7 @@ import { SharedMemory } from '@/pages/SharedMemory'
 import { Observability } from '@/pages/Observability'
 import { MobileApprovals } from '@/pages/MobileApprovals'
 import { Federation } from '@/pages/Federation'
+import { SharedCompose } from '@/pages/SharedCompose'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -56,6 +57,7 @@ function AppContent() {
         <Route path="/compare" element={<Compare />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/share/compose/:uuid" element={<SharedCompose />} />
 
         {/* Setup wizard (full-screen, authenticated) */}
         <Route

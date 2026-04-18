@@ -656,12 +656,46 @@ export const bindAgentA2aAgents = (
   })
 
 // Agent Compose
-export const fetchAgentCompose = (projectId: number, agentId: number) =>
+export const fetchAgentCompose = (projectId: number, agentId: number, model?: string) =>
   api
     .get<ApiResponse<AgentComposed>>(
-      `/projects/${projectId}/agents/${agentId}/compose`,
+      `/projects/${projectId}/agents/${agentId}/compose${model ? `?model=${encodeURIComponent(model)}` : ''}`,
     )
     .then((r) => r.data.data)
+
+// Compose Share Links
+export interface ComposeShareLink {
+  uuid: string
+  url: string
+  expires_at: string
+  is_snapshot: boolean
+}
+
+export interface ComposeShareSecretIssue {
+  rule: string
+  message: string
+  line: number | null
+}
+
+export const createComposeShareLink = (
+  projectId: number,
+  agentId: number,
+  options: {
+    model?: string | null
+    depth?: 'index' | 'full' | 'deep'
+    is_snapshot?: boolean
+    expires_in_days?: number
+  } = {},
+) =>
+  api
+    .post<{ data: ComposeShareLink }>(
+      `/projects/${projectId}/agents/${agentId}/compose/share`,
+      options,
+    )
+    .then((r) => r.data.data)
+
+export const deleteComposeShareLink = (uuid: string) =>
+  api.delete(`/share/compose/${uuid}`)
 
 export const fetchAgentComposeStructured = (projectId: number, agentId: number) =>
   api

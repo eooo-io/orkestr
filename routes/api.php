@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\ComposeShareController;
 use App\Http\Controllers\ArtifactController;
 use App\Http\Controllers\BundleController;
 use App\Http\Controllers\LibraryController;
@@ -96,6 +97,10 @@ Route::post('/a2a/{agentSlug}/execute', [App\Http\Controllers\A2aExecutionContro
 // OpenAPI spec & docs (public)
 Route::get('/openapi.json', [OpenApiController::class, 'spec']);
 Route::get('/docs', [OpenApiController::class, 'docs']);
+
+// Public compose share (rate-limited)
+Route::get('/share/compose/{uuid}', [ComposeShareController::class, 'show'])
+    ->middleware('throttle:30,1');
 
 // ─── Authenticated Routes ────────────────────────────────────
 Route::middleware('auth:web')->group(function () {
@@ -256,6 +261,8 @@ Route::middleware('auth:web')->group(function () {
     Route::put('/projects/{project}/agents/{agent}/a2a-agents', [AgentController::class, 'bindA2aAgents']);
     Route::get('/projects/{project}/agents/{agent}/compose', [AgentController::class, 'compose']);
     Route::get('/projects/{project}/agents/{agent}/compose-structured', [AgentController::class, 'composeStructured']);
+    Route::post('/projects/{project}/agents/{agent}/compose/share', [ComposeShareController::class, 'store'])->middleware('org-role:editor');
+    Route::delete('/share/compose/{uuid}', [ComposeShareController::class, 'destroy']);
     Route::get('/projects/{project}/agents/compose', [AgentController::class, 'composeAll']);
 
     // Bundles (Export/Import)

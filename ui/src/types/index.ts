@@ -370,6 +370,16 @@ export interface SkillsShSkillDetail {
   frontmatter: Record<string, unknown>
 }
 
+export interface SkillBreakdownEntry {
+  slug: string
+  name: string
+  token_estimate: number
+  starts_at_char: number
+  ends_at_char: number
+  tuned_for_model: string | null
+  last_validated_model: string | null
+}
+
 export interface AgentComposed {
   content: string
   token_estimate: number
@@ -381,6 +391,9 @@ export interface AgentComposed {
     icon: string | null
   }
   skill_count: number
+  target_model: string | null
+  model_context_window: number
+  skill_breakdown: SkillBreakdownEntry[]
 }
 
 export interface AgentStructured {
