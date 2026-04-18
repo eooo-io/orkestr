@@ -22,6 +22,7 @@ import { RegressionTestPanel } from '@/components/skills/RegressionTestPanel'
 import { InheritancePanel } from '@/components/skills/InheritancePanel'
 import { AssetsPanel } from '@/components/skills/AssetsPanel'
 import { GotchaPanel } from '@/components/skills/GotchaPanel'
+import { InlineGotchaStrip } from '@/components/skills/InlineGotchaStrip'
 import { EvalPanel } from '@/components/skills/EvalPanel'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -51,6 +52,7 @@ export function SkillEditor() {
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'test' | 'versions' | 'lint' | 'gotchas' | 'evals' | 'assets' | 'security' | 'review' | 'regression' | 'inherit'>('test')
   const [showGenerate, setShowGenerate] = useState(false)
+  const [gotchaRefreshKey, setGotchaRefreshKey] = useState(0)
   const { isDirty, setDirty, showToast, loadProjects } = useAppStore()
   const confirm = useConfirm()
   const initialBody = useRef<string>('')
@@ -213,6 +215,13 @@ export function SkillEditor() {
         {/* Left: Editor */}
         <div className="flex-1 flex flex-col min-w-0 min-h-0">
           <FrontmatterForm skill={skill} onChange={handleFieldChange} projectSkills={projectSkills} />
+          {!isNew && skill.id && (
+            <InlineGotchaStrip
+              skillId={skill.id}
+              refreshKey={gotchaRefreshKey}
+              onManage={() => setActiveTab('gotchas')}
+            />
+          )}
           {!isNew &&
             skill.id &&
             skill.project_id &&
@@ -283,7 +292,10 @@ export function SkillEditor() {
               ) : activeTab === 'lint' ? (
                 <LintPanel skillId={skill.id} />
               ) : activeTab === 'gotchas' ? (
-                <GotchaPanel skillId={skill.id} />
+                <GotchaPanel
+                  skillId={skill.id}
+                  onMutate={() => setGotchaRefreshKey((k) => k + 1)}
+                />
               ) : activeTab === 'evals' ? (
                 <EvalPanel skillId={skill.id} />
               ) : activeTab === 'assets' ? (

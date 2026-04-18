@@ -7,6 +7,7 @@ use App\Models\SkillEvalPrompt;
 use App\Models\SkillEvalRun;
 use App\Models\SkillEvalSuite;
 use App\Services\LLM\LLMProviderFactory;
+use App\Services\PromptLinter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -162,12 +163,10 @@ class EvalSuiteController extends Controller
     {
         $description = $skill->description ?? '';
         $summary = $skill->summary ?? '';
-        $name = $skill->name;
 
         $issues = [];
         $score = 100;
 
-        // Length checks
         if (strlen($description) < 20) {
             $issues[] = 'Description is too short — may not trigger when needed.';
             $score -= 30;
@@ -177,19 +176,15 @@ class EvalSuiteController extends Controller
             $score -= 10;
         }
 
-        // Vagueness checks
-        $vagueWords = ['stuff', 'things', 'various', 'general', 'misc'];
-        foreach ($vagueWords as $word) {
+        foreach (PromptLinter::VAGUE_DESCRIPTION_WORDS as $word) {
             if (stripos($description, $word) !== false) {
                 $issues[] = "Description contains vague word: \"{$word}\".";
                 $score -= 10;
             }
         }
 
-        // Missing actionable verb
-        $actionVerbs = ['generate', 'create', 'analyze', 'review', 'check', 'format', 'convert', 'summarize', 'explain', 'debug', 'test', 'deploy', 'automate', 'enforce'];
         $hasVerb = false;
-        foreach ($actionVerbs as $verb) {
+        foreach (PromptLinter::DESCRIPTION_ACTION_VERBS as $verb) {
             if (stripos($description, $verb) !== false) {
                 $hasVerb = true;
                 break;
@@ -200,7 +195,6 @@ class EvalSuiteController extends Controller
             $score -= 15;
         }
 
-        // Summary check
         if (empty($summary)) {
             $issues[] = 'No summary set — tier-1 progressive disclosure will fall back to description.';
             $score -= 5;
@@ -212,7 +206,7 @@ class EvalSuiteController extends Controller
             'data' => [
                 'score' => $score,
                 'issues' => $issues,
-                'name' => $name,
+                'name' => $skill->name,
                 'description' => $description,
                 'summary' => $summary,
             ],

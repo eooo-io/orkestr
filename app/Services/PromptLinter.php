@@ -2,8 +2,44 @@
 
 namespace App\Services;
 
+use App\Models\Skill;
+
 class PromptLinter
 {
+    /**
+     * Vague words that weaken a skill description's discoverability.
+     *
+     * @var array<int, string>
+     */
+    public const VAGUE_DESCRIPTION_WORDS = ['stuff', 'things', 'various', 'general', 'misc'];
+
+    /**
+     * Action verbs expected in a skill description so agents can route to it.
+     *
+     * @var array<int, string>
+     */
+    public const DESCRIPTION_ACTION_VERBS = [
+        'generate', 'create', 'analyze', 'review', 'check', 'format',
+        'convert', 'summarize', 'explain', 'debug', 'test', 'deploy',
+        'automate', 'enforce',
+    ];
+
+    /**
+     * Lint a full skill (body + metadata).
+     *
+     * @return array<int, array{severity: string, rule: string, message: string, suggestion: string, line: int|null}>
+     */
+    public function lintSkill(Skill $skill): array
+    {
+        $issues = $this->lint($skill->body ?? '');
+
+        $this->checkMissingSummary($skill->summary ?? '', $issues);
+        $this->checkMissingDescription($skill->description ?? '', $issues);
+        $this->checkNoProgressiveDisclosure($skill->body ?? '', $issues);
+
+        return $issues;
+    }
+
     /**
      * Lint a skill body and return an array of issues.
      *
@@ -199,6 +235,100 @@ class PromptLinter
 
             $normalized[] = [$idx, $trimmed];
         }
+    }
+
+    protected function checkMissingSummary(string $summary, array &$issues): void
+    {
+        if (trim($summary) === '') {
+            $issues[] = [
+                'severity' => 'suggestion',
+                'rule' => 'missing_summary',
+                'message' => 'No summary set — tier-1 progressive disclosure will fall back to description.',
+                'suggestion' => 'Add a one-line summary describing when to use this skill.',
+                'line' => null,
+            ];
+        }
+    }
+
+    protected function checkMissingDescription(string $description, array &$issues): void
+    {
+        $trimmed = trim($description);
+
+        if ($trimmed === '') {
+            $issues[] = [
+                'severity' => 'warning',
+                'rule' => 'missing_description',
+                'message' => 'Description is empty — agents may not know when to use this skill.',
+                'suggestion' => 'Add a description with an actionable verb explaining when the skill applies.',
+                'line' => null,
+            ];
+
+            return;
+        }
+
+        if (strlen($trimmed) < 20) {
+            $issues[] = [
+                'severity' => 'warning',
+                'rule' => 'missing_description',
+                'message' => 'Description is too short — may not trigger when needed.',
+                'suggestion' => 'Expand to at least 20 characters with an actionable verb and trigger conditions.',
+                'line' => null,
+            ];
+        }
+
+        foreach (self::VAGUE_DESCRIPTION_WORDS as $word) {
+            if (stripos($trimmed, $word) !== false) {
+                $issues[] = [
+                    'severity' => 'warning',
+                    'rule' => 'missing_description',
+                    'message' => "Description contains vague word: \"{$word}\".",
+                    'suggestion' => 'Replace vague words with specific triggers or subjects.',
+                    'line' => null,
+                ];
+                break;
+            }
+        }
+
+        $hasVerb = false;
+        foreach (self::DESCRIPTION_ACTION_VERBS as $verb) {
+            if (stripos($trimmed, $verb) !== false) {
+                $hasVerb = true;
+                break;
+            }
+        }
+
+        if (! $hasVerb) {
+            $issues[] = [
+                'severity' => 'warning',
+                'rule' => 'missing_description',
+                'message' => 'Description lacks an actionable verb — agents may not know when to use this skill.',
+                'suggestion' => 'Add a verb like "generate", "analyze", "review", or "summarize".',
+                'line' => null,
+            ];
+        }
+    }
+
+    protected function checkNoProgressiveDisclosure(string $body, array &$issues): void
+    {
+        if (strlen($body) <= 500) {
+            return;
+        }
+
+        $firstLines = array_slice(explode("\n", $body), 0, 40);
+
+        foreach ($firstLines as $line) {
+            if (preg_match('/^\s{0,3}#{2,3}\s+\S/', $line)) {
+                return;
+            }
+        }
+
+        $issues[] = [
+            'severity' => 'suggestion',
+            'rule' => 'no_progressive_disclosure',
+            'message' => 'Long skill without ## or ### headings in the first 40 lines.',
+            'suggestion' => 'Add section headings so the model can skim before committing to details.',
+            'line' => null,
+        ];
     }
 
     protected function checkSecrets(array $lines, array &$issues): void
