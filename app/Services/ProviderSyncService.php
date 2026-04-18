@@ -30,7 +30,41 @@ class ProviderSyncService
         protected AgentComposeService $composeService,
         protected SkillCompositionService $compositionService,
         protected TemplateResolver $templateResolver,
+        protected SkillEvalGateService $gateService,
     ) {}
+
+    /**
+     * Thrown when a skill's eval gate blocks sync.
+     */
+    public function assertCanSync(Project $project): void
+    {
+        $project->loadMissing(['skills.evalGate']);
+        $blocked = [];
+
+        foreach ($project->skills as $skill) {
+            if (! $this->gateService->canSync($skill)) {
+                $gate = $skill->evalGate;
+                $latest = null;
+                if ($gate && ! empty($gate->required_suite_ids ?? [])) {
+                    $latest = \App\Models\SkillEvalRun::whereIn('eval_suite_id', $gate->required_suite_ids)
+                        ->orderByDesc('completed_at')
+                        ->first();
+                }
+
+                $blocked[] = [
+                    'skill_id' => $skill->id,
+                    'skill_slug' => $skill->slug,
+                    'skill_name' => $skill->name,
+                    'last_delta' => $latest?->delta_score,
+                    'last_run_id' => $latest?->id,
+                ];
+            }
+        }
+
+        if (! empty($blocked)) {
+            throw new EvalGateBlockedException($blocked);
+        }
+    }
 
     public function getDriver(string $slug): ProviderDriverInterface
     {
@@ -45,6 +79,8 @@ class ProviderSyncService
 
     public function syncProject(Project $project): void
     {
+        $this->assertCanSync($project);
+
         $project->loadMissing(['providers', 'skills.tags']);
         $skills = $project->skills;
 

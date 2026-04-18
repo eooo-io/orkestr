@@ -11,6 +11,8 @@ import {
   scoreDescription,
 } from '@/api/client'
 import { useConfirm } from '@/hooks/useConfirm'
+import { useEvalRunStatus } from '@/hooks/useEvalRunStatus'
+import { GateConfigPanel } from '@/components/skills/GateConfigPanel'
 import type {
   SkillEvalSuite,
   SkillEvalRun,
@@ -38,6 +40,16 @@ export function EvalPanel({ skillId }: EvalPanelProps) {
   const [runModel, setRunModel] = useState('claude-sonnet-4-6')
   const [runMode, setRunMode] = useState<string>('with_skill')
   const [running, setRunning] = useState(false)
+  const [activeRunId, setActiveRunId] = useState<number | null>(null)
+  const { run: pollingRun, isLive: pollingLive } = useEvalRunStatus(activeRunId)
+
+  useEffect(() => {
+    if (!pollingRun || pollingLive) return
+    if (selectedSuite) {
+      fetchEvalRuns(selectedSuite.id).then(setRuns)
+    }
+    setActiveRunId(null)
+  }, [pollingRun, pollingLive, selectedSuite])
 
   const load = useCallback(() => {
     fetchEvalSuites(skillId)
@@ -97,7 +109,8 @@ export function EvalPanel({ skillId }: EvalPanelProps) {
     if (!selectedSuite) return
     setRunning(true)
     try {
-      await runEval(selectedSuite.id, { model: runModel, mode: runMode })
+      const newRun = await runEval(selectedSuite.id, { model: runModel, mode: runMode })
+      setActiveRunId(newRun.id)
       fetchEvalRuns(selectedSuite.id).then(setRuns)
     } finally {
       setRunning(false)
@@ -119,6 +132,8 @@ export function EvalPanel({ skillId }: EvalPanelProps) {
 
   return (
     <div className="flex flex-col h-full">
+      <GateConfigPanel skillId={skillId} skillName="this skill" suites={suites} />
+
       {/* Description Score */}
       <div className="p-3 border-b border-border">
         <button

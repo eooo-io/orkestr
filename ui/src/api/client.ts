@@ -349,6 +349,65 @@ export const fetchEvalRuns = (suiteId: number) =>
     .get<ApiResponse<SkillEvalRun[]>>(`/eval-suites/${suiteId}/runs`)
     .then((r) => r.data.data)
 
+export const fetchEvalRun = (runId: number) =>
+  api
+    .get<ApiResponse<SkillEvalRun>>(`/eval-runs/${runId}`)
+    .then((r) => r.data.data)
+
+// Skill Eval Gate
+export interface SkillEvalGateConfig {
+  id?: number
+  skill_id: number
+  enabled: boolean
+  required_suite_ids: number[] | null
+  fail_threshold_delta: string | number
+  auto_run_on_save: boolean
+  block_sync: boolean
+}
+
+export interface GateStatus {
+  enabled: boolean
+  pending_count: number
+  can_sync: boolean
+  runs: Array<{
+    suite_id: number
+    run_id: number
+    status: 'pending' | 'running' | 'completed' | 'failed'
+    overall_score: number | null
+    delta: {
+      overall_delta: number
+      per_prompt: Array<{
+        prompt_id: number | null
+        current: number
+        baseline: number | null
+        delta: number | null
+      }>
+    } | null
+  }>
+}
+
+export const fetchEvalGate = (skillId: number) =>
+  api
+    .get<{ data: SkillEvalGateConfig }>(`/skills/${skillId}/eval-gate`)
+    .then((r) => r.data.data)
+
+export const updateEvalGate = (skillId: number, data: Partial<SkillEvalGateConfig>) =>
+  api
+    .put<{ data: SkillEvalGateConfig }>(`/skills/${skillId}/eval-gate`, data)
+    .then((r) => r.data.data)
+
+export const runGateNow = (skillId: number) =>
+  api
+    .post<{ data: { enqueued_run_ids: number[]; baseline_info: Array<Record<string, unknown>>; est_duration_seconds: number; reason: string } }>(
+      `/skills/${skillId}/eval-gate/run-now`,
+    )
+    .then((r) => r.data.data)
+
+export const fetchGateStatus = (skillId: number) =>
+  api
+    .get<{ data: GateStatus }>(`/skills/${skillId}/eval-gate/status`)
+    .then((r) => r.data.data)
+
 export const scoreDescription = (skillId: number) =>
   api
     .get<ApiResponse<DescriptionScore>>(

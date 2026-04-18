@@ -133,6 +133,11 @@ class Skill extends Model
         return $this->hasMany(SkillEvalSuite::class);
     }
 
+    public function evalGate(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SkillEvalGate::class);
+    }
+
     public function activeGotchas(): HasMany
     {
         return $this->hasMany(SkillGotcha::class)->whereNull('resolved_at');

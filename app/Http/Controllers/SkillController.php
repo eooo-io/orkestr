@@ -10,6 +10,7 @@ use App\Services\ManifestService;
 use App\Services\GitService;
 use App\Services\PromptLinter;
 use App\Services\SkillCompositionService;
+use App\Services\SkillEvalGateService;
 use App\Services\SkillStalenessService;
 use App\Services\WebhookDispatcher;
 use Illuminate\Http\JsonResponse;
@@ -158,11 +159,14 @@ class SkillController extends Controller
             $this->syncTags($skill, $validated['tags'] ?? []);
         }
 
-        $this->createVersion($skill);
+        $version = $this->createVersion($skill);
         $this->writeFile($skill->project, $skill);
         $this->dispatchWebhook('skill.updated', $skill->project, $skill);
 
-        return new SkillResource($skill->load('tags'));
+        $gateDecision = app(SkillEvalGateService::class)->evaluateSkillSave($skill, $version);
+
+        return (new SkillResource($skill->load('tags')))
+            ->additional(['gate_decision' => $gateDecision]);
     }
 
     public function lint(Skill $skill, PromptLinter $linter): JsonResponse
@@ -251,11 +255,11 @@ class SkillController extends Controller
         $skill->tags()->sync($tagIds);
     }
 
-    protected function createVersion(Skill $skill): void
+    protected function createVersion(Skill $skill): \App\Models\SkillVersion
     {
         $nextVersion = ($skill->versions()->max('version_number') ?? 0) + 1;
 
-        $skill->versions()->create([
+        return $skill->versions()->create([
             'version_number' => $nextVersion,
             'frontmatter' => [
                 'id' => $skill->slug,
