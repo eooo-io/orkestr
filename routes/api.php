@@ -152,6 +152,8 @@ Route::middleware('auth:web')->group(function () {
     Route::delete('/skills/{skill}', [SkillController::class, 'destroy'])->middleware('org-role:editor');
     Route::post('/skills/{skill}/duplicate', [SkillController::class, 'duplicate']);
     Route::get('/skills/{skill}/lint', [SkillController::class, 'lint']);
+    Route::get('/skills/{skill}/staleness', [SkillController::class, 'staleness']);
+    Route::put('/skills/{skill}/staleness', [SkillController::class, 'updateStaleness'])->middleware('org-role:editor');
 
     // Skill Assets (folder-based skills)
     Route::get('/skills/{skill}/assets', [SkillAssetController::class, 'index']);

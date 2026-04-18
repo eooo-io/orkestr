@@ -10,6 +10,7 @@ use App\Services\ManifestService;
 use App\Services\GitService;
 use App\Services\PromptLinter;
 use App\Services\SkillCompositionService;
+use App\Services\SkillStalenessService;
 use App\Services\WebhookDispatcher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -96,6 +97,7 @@ class SkillController extends Controller
             'description' => $validated['description'] ?? null,
             'summary' => $validated['summary'] ?? null,
             'model' => $validated['model'] ?? null,
+            'tuned_for_model' => $validated['model'] ?? null,
             'max_tokens' => $validated['max_tokens'] ?? null,
             'tools' => $validated['tools'] ?? [],
             'includes' => $validated['includes'] ?? [],
@@ -148,6 +150,10 @@ class SkillController extends Controller
 
         $skill->update(collect($validated)->except('tags')->toArray());
 
+        if ($skill->tuned_for_model === null && ! empty($skill->model)) {
+            $skill->update(['tuned_for_model' => $skill->model]);
+        }
+
         if (array_key_exists('tags', $validated)) {
             $this->syncTags($skill, $validated['tags'] ?? []);
         }
@@ -164,6 +170,26 @@ class SkillController extends Controller
         $issues = $linter->lintSkill($skill);
 
         return response()->json(['data' => $issues]);
+    }
+
+    public function staleness(Skill $skill, Request $request, SkillStalenessService $staleness): JsonResponse
+    {
+        return response()->json([
+            'data' => $staleness->statusFor($skill, $request->query('current_model')),
+        ]);
+    }
+
+    public function updateStaleness(Skill $skill, Request $request, SkillStalenessService $staleness): JsonResponse
+    {
+        $validated = $request->validate([
+            'tuned_for_model' => 'nullable|string|max:100',
+        ]);
+
+        $skill->update(['tuned_for_model' => $validated['tuned_for_model'] ?? null]);
+
+        return response()->json([
+            'data' => $staleness->statusFor($skill->fresh()),
+        ]);
     }
 
     public function destroy(Skill $skill): JsonResponse
@@ -242,6 +268,7 @@ class SkillController extends Controller
                 'template_variables' => $skill->template_variables,
             ],
             'body' => $skill->body,
+            'tuned_for_model' => $skill->tuned_for_model,
             'saved_at' => now(),
         ]);
     }

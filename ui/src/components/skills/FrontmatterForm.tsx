@@ -25,6 +25,7 @@ function formatTokens(n: number): string {
 interface FrontmatterFormProps {
   skill: Partial<Skill>
   onChange: (field: string, value: unknown) => void
+  onTunedForModelChange?: (value: string | null) => void
   projectSkills?: Skill[]
 }
 
@@ -34,7 +35,7 @@ const MODELS = [
   { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5' },
 ]
 
-export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterFormProps) {
+export function FrontmatterForm({ skill, onChange, onTunedForModelChange, projectSkills }: FrontmatterFormProps) {
   const [categories, setCategories] = useState<SkillCategory[]>([])
   const currentIncludes = (skill.includes as string[]) || []
   const availableSkills = (projectSkills || []).filter(
@@ -85,6 +86,29 @@ export function FrontmatterForm({ skill, onChange, projectSkills }: FrontmatterF
           </select>
         </div>
       </div>
+
+      {onTunedForModelChange && (
+        <div>
+          <label className="text-xs font-medium text-muted-foreground">
+            Tuned for model{' '}
+            <span className="text-muted-foreground/60 font-normal">
+              (baseline for staleness tracking)
+            </span>
+          </label>
+          <select
+            value={skill.tuned_for_model || ''}
+            onChange={(e) => onTunedForModelChange(e.target.value || null)}
+            className="mt-1 w-full px-2.5 py-1.5 text-sm border border-input bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="">Not set</option>
+            {MODELS.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <label className="text-xs font-medium text-muted-foreground">

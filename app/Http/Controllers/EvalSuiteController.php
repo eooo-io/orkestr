@@ -282,6 +282,12 @@ class EvalSuiteController extends Controller
                 'results' => $results,
                 'completed_at' => now(),
             ]);
+
+            $skill->update([
+                'last_validated_model' => $run->model,
+                'last_validated_at' => now(),
+                'last_validated_eval_run_id' => $run->id,
+            ]);
         } catch (\Throwable $e) {
             $run->update([
                 'status' => 'failed',
