@@ -1024,6 +1024,112 @@ export const importFromProvider = (projectId: number, path: string, provider?: s
 export const fetchModels = () =>
   api.get<{ data: ModelGroup[] }>('/models').then((r) => r.data.data)
 
+// Phase 6: Compound learning
+export interface CapabilitySuggestion {
+  key: string
+  type: 'unused_tool' | 'popular_skill' | 'new_combo'
+  title: string
+  rationale: string
+  example_prompt: string
+  action_url: string
+}
+
+export interface SkillUpdateProposal {
+  id: number
+  skill_id: number | null
+  agent_id: number
+  title: string
+  rationale: string | null
+  proposed_body: string | null
+  evidence_memory_ids: number[] | null
+  pattern_key: string
+  status: 'draft' | 'accepted' | 'rejected' | 'superseded'
+  created_at: string
+  skill?: { id: number; slug: string; name: string } | null
+  agent?: { id: number; slug: string; name: string }
+}
+
+export interface SkillPropagation {
+  id: number
+  source_skill_id: number
+  target_project_id: number
+  target_agent_id: number | null
+  status: 'suggested' | 'accepted' | 'dismissed' | 'modified'
+  suggestion_score: string
+  suggested_at: string
+  source_skill?: {
+    id: number
+    slug: string
+    name: string
+    project?: { id: number; name: string }
+  }
+  target_project?: { id: number; name: string }
+  target_agent?: { id: number; slug: string; name: string } | null
+}
+
+export const fetchCapabilitySuggestions = (agentId: number) =>
+  api
+    .get<{ data: CapabilitySuggestion[] }>(`/agents/${agentId}/capability-suggestions`)
+    .then((r) => r.data.data)
+
+export const dismissCapabilitySuggestion = (agentId: number, suggestionKey: string, expiresInDays?: number) =>
+  api.post(`/agents/${agentId}/capability-suggestions/dismiss`, {
+    suggestion_key: suggestionKey,
+    expires_in_days: expiresInDays,
+  })
+
+export const fetchSkillProposals = (params: { skill_id?: number } = {}) =>
+  api
+    .get<{ data: SkillUpdateProposal[] }>('/skill-proposals', { params })
+    .then((r) => r.data.data)
+
+export const acceptSkillProposal = (id: number) =>
+  api
+    .post<{ data: { proposal: SkillUpdateProposal; new_version_id: number; new_version_number: number } }>(
+      `/skill-proposals/${id}/accept`,
+    )
+    .then((r) => r.data.data)
+
+export const rejectSkillProposal = (id: number, suppressDays?: number) =>
+  api
+    .post<{ data: SkillUpdateProposal }>(`/skill-proposals/${id}/reject`, {
+      suppress_days: suppressDays,
+    })
+    .then((r) => r.data.data)
+
+export const fetchSkillPropagations = (orgId: number) =>
+  api
+    .get<{ data: SkillPropagation[] }>(`/orgs/${orgId}/skill-propagations`)
+    .then((r) => r.data.data)
+
+export const acceptSkillPropagation = (id: number, bodyOverride?: string) =>
+  api
+    .post<{ data: { propagation: SkillPropagation; new_skill_id: number; new_skill_slug: string } }>(
+      `/skill-propagations/${id}/accept`,
+      { body_override: bodyOverride },
+    )
+    .then((r) => r.data.data)
+
+export const dismissSkillPropagation = (id: number) =>
+  api
+    .post<{ data: SkillPropagation }>(`/skill-propagations/${id}/dismiss`)
+    .then((r) => r.data.data)
+
+export const fetchSkillLineage = (skillId: number) =>
+  api
+    .get<{
+      data: {
+        source_skill_id: number
+        source_skill_slug: string
+        source_skill_name: string
+        source_project_id: number
+        source_project_name: string
+        status: string
+        resolved_at: string | null
+      } | null
+    }>(`/skills/${skillId}/lineage`)
+    .then((r) => r.data.data)
+
 // Phase 5: Social layer
 export interface AgentProfile {
   id: number
