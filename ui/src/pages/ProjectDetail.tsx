@@ -32,6 +32,7 @@ import { ImportLibraryModal } from '@/components/library/ImportLibraryModal'
 import { SkillsShImportModal } from '@/components/library/SkillsShImportModal'
 import { AgentsTab } from '@/components/agents/AgentsTab'
 import { AgentTeamTab } from '@/components/agents/AgentTeamTab'
+import { RoleMap } from '@/components/projects/RoleMap'
 import { ConnectionsTab } from '@/components/integrations/ConnectionsTab'
 import VisualizationTab from '@/components/visualization/VisualizationTab'
 import { SchedulesTab } from '@/components/schedules/SchedulesTab'
@@ -376,7 +377,12 @@ export function ProjectDetail() {
       )}
 
       {activeTab === 'team' && (
-        <AgentTeamTab projectId={project.id} />
+        <div className="space-y-6">
+          <AgentTeamTab projectId={project.id} />
+          <div className="bg-card elevation-1 rounded-lg p-4">
+            <RoleMap projectId={project.id} />
+          </div>
+        </div>
       )}
 
       {activeTab === 'artifacts' && (

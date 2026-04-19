@@ -27,6 +27,7 @@ class Organization extends Model
         'max_agent_turns_per_run',
         'default_run_token_budget',
         'default_run_cost_budget_usd',
+        'default_run_visibility',
     ];
 
     protected function casts(): array

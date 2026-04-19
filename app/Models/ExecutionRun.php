@@ -35,6 +35,8 @@ class ExecutionRun extends Model
         'halt_step_id',
         'token_budget',
         'cost_budget_microcents',
+        'visibility',
+        'forked_from_run_id',
     ];
 
     protected $attributes = [

@@ -79,6 +79,9 @@ class Agent extends Model
         // Meta
         'is_template',
         'created_by',
+        'owner_user_id',
+        'reputation_score',
+        'reputation_last_computed_at',
     ];
 
     protected function casts(): array
@@ -111,6 +114,8 @@ class Agent extends Model
             'daily_budget_limit_usd' => 'decimal:4',
             'run_token_budget' => 'integer',
             'run_cost_budget_usd' => 'decimal:4',
+            'reputation_score' => 'decimal:2',
+            'reputation_last_computed_at' => 'datetime',
             'allowed_tools' => 'array',
             'blocked_tools' => 'array',
             'data_access_scope' => 'array',
@@ -170,6 +175,11 @@ class Agent extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_user_id');
     }
 
     public function mcpServers(): BelongsToMany
