@@ -33,6 +33,8 @@ class ExecutionController extends Controller
             'input.goal' => 'nullable|string',
             'config' => 'nullable|array',
             'config.max_tokens' => 'nullable|integer|min:1|max:32000',
+            'token_budget' => 'nullable|integer|min:1',
+            'cost_budget_usd' => 'nullable|numeric|min:0',
         ]);
 
         $run = $this->executionService->execute(
@@ -42,6 +44,15 @@ class ExecutionController extends Controller
             config: $validated['config'] ?? [],
             createdBy: $request->user()?->id,
         );
+
+        if (isset($validated['token_budget']) || isset($validated['cost_budget_usd'])) {
+            $run->update([
+                'token_budget' => $validated['token_budget'] ?? null,
+                'cost_budget_microcents' => isset($validated['cost_budget_usd'])
+                    ? (int) round(((float) $validated['cost_budget_usd']) * 1_000_000)
+                    : null,
+            ]);
+        }
 
         $run->load('steps');
 

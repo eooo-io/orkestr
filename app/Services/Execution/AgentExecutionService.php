@@ -31,6 +31,7 @@ class AgentExecutionService
         private CostOptimizedRouter $costRouter,
         private McpServerManager $serverManager,
         private BudgetGuard $budgetGuard,
+        private ExecutionGuardrailService $guardrails,
         private ApprovalGuard $approvalGuard = new ApprovalGuard,
         private DataAccessGuard $dataAccessGuard = new DataAccessGuard,
     ) {}
@@ -115,11 +116,24 @@ class AgentExecutionService
                 return;
             }
 
-            if ($run->fresh()->isCancelled()) {
+            $freshRun = $run->fresh();
+            if ($freshRun->isCancelled()) {
                 return;
             }
 
-            // Budget check before each iteration
+            // Org-level turn cap
+            if ($turnCapReason = $this->guardrails->checkTurnCap($freshRun, $iteration + 1)) {
+                $this->guardrails->halt($freshRun, $turnCapReason);
+                return;
+            }
+
+            // Per-run token/cost budget
+            if ($budgetReason = $this->guardrails->checkBudget($freshRun)) {
+                $this->guardrails->halt($freshRun, $budgetReason);
+                return;
+            }
+
+            // Budget check before each iteration (per-agent cumulative)
             $budgetError = $this->budgetGuard->check($run->fresh(), $config);
             if ($budgetError) {
                 AuditLogger::log('agent.budget_exceeded', "Budget exceeded for agent '{$agent->name}': {$budgetError}", [
@@ -238,6 +252,21 @@ class AgentExecutionService
                 'tool_calls' => array_map(fn ($tc) => ['name' => $tc['name'], 'input' => $tc['input']], $toolUseCalls),
             ]);
             $actStep->markRunning();
+
+            // Loop detection: any repeated tool call past threshold halts.
+            foreach ($toolUseCalls as $toolCall) {
+                $loopReason = $this->guardrails->detectLoop(
+                    $run->fresh(),
+                    $agent->id,
+                    $toolCall['name'],
+                    $toolCall['input'] ?? [],
+                );
+                if ($loopReason) {
+                    $actStep->markFailed('Halted: loop detected');
+                    $this->guardrails->halt($run->fresh(), $loopReason, $actStep);
+                    return;
+                }
+            }
 
             // Add assistant message with tool_use to conversation
             $messages[] = ['role' => 'assistant', 'content' => $llmResponse['content']];

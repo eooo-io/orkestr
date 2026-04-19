@@ -12,6 +12,7 @@ use App\Services\AgentComposeService;
 use App\Services\AuditLogger;
 use App\Services\Execution\BudgetEnforcer;
 use App\Services\Execution\CostCalculator;
+use App\Services\Execution\ExecutionGuardrailService;
 use App\Services\Execution\Guards\ApprovalGuard;
 use App\Services\Execution\Guards\DataAccessGuard;
 use App\Services\Execution\Guards\OutputGuard;
@@ -61,6 +62,7 @@ class RunAgentJob implements ShouldQueue
         McpServerManager $serverManager,
         BudgetEnforcer $budgetEnforcer,
         CostCalculator $costCalculator,
+        ExecutionGuardrailService $guardrails,
     ): void {
         $project = Project::find($this->projectId);
         $agent = Agent::find($this->agentId);
@@ -101,7 +103,7 @@ class RunAgentJob implements ShouldQueue
             $this->runLoop(
                 $run, $project, $agent,
                 $composeService, $modelRouter, $costRouter,
-                $serverManager, $budgetEnforcer, $costCalculator,
+                $serverManager, $budgetEnforcer, $costCalculator, $guardrails,
             );
         } catch (\Throwable $e) {
             $run->markFailed($e->getMessage());
@@ -127,6 +129,7 @@ class RunAgentJob implements ShouldQueue
         McpServerManager $serverManager,
         BudgetEnforcer $budgetEnforcer,
         CostCalculator $costCalculator,
+        ExecutionGuardrailService $guardrails,
     ): void {
         $projectAgent = $project->projectAgents()->where('agent_id', $agent->id)->first();
 
@@ -207,7 +210,23 @@ class RunAgentJob implements ShouldQueue
                 return;
             }
 
-            // Budget enforcement
+            // Org-level turn cap (separate from per-agent max_iterations)
+            if ($turnCapReason = $guardrails->checkTurnCap($freshRun, $iteration + 1)) {
+                $guardrails->halt($freshRun, $turnCapReason);
+                $this->publishEvent($run, 'status', ['status' => 'halted_guardrail', 'reason' => $turnCapReason]);
+
+                return;
+            }
+
+            // Per-run token/cost budget (separate from per-agent cumulative budgets below)
+            if ($budgetReason = $guardrails->checkBudget($freshRun)) {
+                $guardrails->halt($freshRun, $budgetReason);
+                $this->publishEvent($run, 'status', ['status' => 'halted_guardrail', 'reason' => $budgetReason]);
+
+                return;
+            }
+
+            // Budget enforcement (per-agent cumulative)
             $costUsd = $freshRun->total_cost_microcents / 1_000_000;
             $budgetResult = $budgetEnforcer->check($agent, $freshRun->total_tokens, $costUsd);
             if (! $budgetResult['allowed']) {
@@ -384,6 +403,23 @@ class RunAgentJob implements ShouldQueue
                 'tool_calls' => array_map(fn ($tc) => ['name' => $tc['name'], 'input' => $tc['input']], $toolUseCalls),
             ]);
             $actStep->markRunning();
+
+            // Loop detection: if *any* of the pending tool calls has repeated past threshold, halt.
+            foreach ($toolUseCalls as $toolCall) {
+                $loopReason = $guardrails->detectLoop(
+                    $run->fresh(),
+                    $agent->id,
+                    $toolCall['name'],
+                    $toolCall['input'] ?? [],
+                );
+                if ($loopReason) {
+                    $actStep->markFailed('Halted: loop detected');
+                    $guardrails->halt($run->fresh(), $loopReason, $actStep);
+                    $this->publishEvent($run, 'status', ['status' => 'halted_guardrail', 'reason' => $loopReason]);
+
+                    return;
+                }
+            }
 
             $messages[] = ['role' => 'assistant', 'content' => $llmResponse['content']];
 
