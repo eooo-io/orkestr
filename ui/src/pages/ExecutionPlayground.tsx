@@ -183,6 +183,18 @@ export function ExecutionPlayground() {
         {/* Execution result */}
         {currentRun && (
           <div className="flex-1 overflow-auto">
+            {/* Guardrail halt banner */}
+            {currentRun.status === 'halted_guardrail' && currentRun.halt_reason && (
+              <div className="mb-3 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                <div className="font-semibold">
+                  Halted by guardrail: {formatHaltReason(currentRun.halt_reason)}
+                </div>
+                <div className="text-xs text-red-400/80 mt-0.5">
+                  Review the execution trace — the run was stopped before completion to protect budget/resources.
+                </div>
+              </div>
+            )}
+
             {/* Run header */}
             <div className="flex items-center gap-3 mb-4 p-3 rounded-lg bg-zinc-800/50 border border-zinc-700">
               <RunStatusBadge status={currentRun.status} />
@@ -190,7 +202,8 @@ export function ExecutionPlayground() {
                 {currentRun.agent?.name ?? `Agent #${currentRun.agent_id}`}
               </span>
               <span className="text-xs text-zinc-500">
-                <Hash className="h-3 w-3 inline" /> {currentRun.total_tokens} tokens
+                <Hash className="h-3 w-3 inline" /> {currentRun.total_tokens}
+                {currentRun.token_budget != null && `/${currentRun.token_budget}`} tokens
               </span>
               <span className="text-xs text-zinc-500">
                 <Clock className="h-3 w-3 inline" /> {currentRun.total_duration_ms}ms
@@ -265,6 +278,16 @@ export function ExecutionPlayground() {
   )
 }
 
+function formatHaltReason(reason: string): string {
+  const map: Record<string, string> = {
+    loop_detected: 'Loop detected',
+    turn_cap_exceeded: 'Turn cap exceeded',
+    budget_token_exceeded: 'Token budget exhausted',
+    budget_cost_exceeded: 'Cost budget exhausted',
+  }
+  return map[reason] ?? reason
+}
+
 function RunStatusBadge({ status, size = 'md' }: { status: string; size?: 'sm' | 'md' }) {
   const colors: Record<string, string> = {
     pending: 'bg-zinc-600 text-zinc-300',
@@ -272,6 +295,7 @@ function RunStatusBadge({ status, size = 'md' }: { status: string; size?: 'sm' |
     completed: 'bg-emerald-600/20 text-emerald-400',
     failed: 'bg-red-600/20 text-red-400',
     cancelled: 'bg-amber-600/20 text-amber-400',
+    halted_guardrail: 'bg-red-600/20 text-red-400',
   }
 
   const Icon = STATUS_ICONS[status] ?? Clock

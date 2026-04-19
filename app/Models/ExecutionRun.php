@@ -31,6 +31,10 @@ class ExecutionRun extends Model
         'approval_required',
         'approved_by',
         'approved_at',
+        'halt_reason',
+        'halt_step_id',
+        'token_budget',
+        'cost_budget_microcents',
     ];
 
     protected $attributes = [

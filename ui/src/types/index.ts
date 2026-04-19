@@ -843,7 +843,14 @@ export interface ExecutionRun {
     slug: string
     icon: string | null
   }
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'awaiting_approval'
+  status:
+    | 'pending'
+    | 'running'
+    | 'completed'
+    | 'failed'
+    | 'cancelled'
+    | 'awaiting_approval'
+    | 'halted_guardrail'
   approval_required?: boolean
   approved_by?: number | null
   approved_at?: string | null
@@ -856,6 +863,10 @@ export interface ExecutionRun {
   total_tokens: number
   total_cost_microcents: number
   total_duration_ms: number
+  token_budget?: number | null
+  cost_budget_microcents?: number | null
+  halt_reason?: 'loop_detected' | 'turn_cap_exceeded' | 'budget_token_exceeded' | 'budget_cost_exceeded' | null
+  halt_step_id?: number | null
   model_used?: string | null
   steps?: ExecutionStep[]
   steps_count?: number

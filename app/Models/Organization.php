@@ -24,6 +24,9 @@ class Organization extends Model
         'stripe_id',
         'pm_type',
         'pm_last_four',
+        'max_agent_turns_per_run',
+        'default_run_token_budget',
+        'default_run_cost_budget_usd',
     ];
 
     protected function casts(): array
@@ -32,6 +35,9 @@ class Organization extends Model
             'plan_limits' => 'array',
             'trial_ends_at' => 'datetime',
             'subscription_ends_at' => 'datetime',
+            'max_agent_turns_per_run' => 'integer',
+            'default_run_token_budget' => 'integer',
+            'default_run_cost_budget_usd' => 'decimal:4',
         ];
     }
 
