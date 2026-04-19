@@ -258,6 +258,22 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/agents/{agent}/profile', [AgentController::class, 'profile']);
     Route::post('/agents/route', [AgentRouteController::class, 'route']);
 
+    // Capability discovery
+    Route::get('/agents/{agent}/capability-suggestions', [\App\Http\Controllers\CapabilityDiscoveryController::class, 'index']);
+    Route::post('/agents/{agent}/capability-suggestions/dismiss', [\App\Http\Controllers\CapabilityDiscoveryController::class, 'dismiss']);
+
+    // Skill update proposals (compound engineering)
+    Route::get('/skill-proposals', [\App\Http\Controllers\SkillProposalController::class, 'index']);
+    Route::get('/skill-proposals/{proposal}', [\App\Http\Controllers\SkillProposalController::class, 'show']);
+    Route::post('/skill-proposals/{proposal}/accept', [\App\Http\Controllers\SkillProposalController::class, 'accept'])->middleware('org-role:editor');
+    Route::post('/skill-proposals/{proposal}/reject', [\App\Http\Controllers\SkillProposalController::class, 'reject'])->middleware('org-role:editor');
+
+    // Cross-project skill propagation
+    Route::get('/orgs/{organization}/skill-propagations', [\App\Http\Controllers\SkillPropagationController::class, 'index']);
+    Route::post('/skill-propagations/{propagation}/accept', [\App\Http\Controllers\SkillPropagationController::class, 'accept'])->middleware('org-role:editor');
+    Route::post('/skill-propagations/{propagation}/dismiss', [\App\Http\Controllers\SkillPropagationController::class, 'dismiss'])->middleware('org-role:editor');
+    Route::get('/skills/{skill}/lineage', [\App\Http\Controllers\SkillPropagationController::class, 'lineage']);
+
     // Work feed + run visibility + fork
     Route::get('/work-feed', [WorkFeedController::class, 'index']);
     Route::post('/runs/{run}/fork', [WorkFeedController::class, 'fork']);

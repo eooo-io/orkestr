@@ -11,3 +11,5 @@ Artisan::command('inspire', function () {
 Schedule::command('schedules:process')->everyMinute()->withoutOverlapping();
 Schedule::command('orkestr:run-schedules')->everyMinute()->withoutOverlapping();
 Schedule::job(new \App\Jobs\RecomputeAgentReputationJob())->dailyAt('03:00');
+Schedule::job(new \App\Jobs\ExtractMemoryPatternsJob())->dailyAt('03:30');
+Schedule::job(new \App\Jobs\SuggestSkillPropagationsJob())->dailyAt('04:00');

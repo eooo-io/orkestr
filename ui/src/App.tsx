@@ -48,6 +48,8 @@ import { SharedCompose } from '@/pages/SharedCompose'
 import { AgentProfile } from '@/pages/AgentProfile'
 import { AgentDirectory } from '@/pages/AgentDirectory'
 import { WorkFeed } from '@/pages/WorkFeed'
+import { SkillProposals } from '@/pages/SkillProposals'
+import { SkillPropagations } from '@/pages/SkillPropagations'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -113,6 +115,8 @@ function AppContent() {
                   <Route path="/agents/:id" element={<AgentBuilder />} />
                   <Route path="/agents/:id/profile" element={<AgentProfile />} />
                   <Route path="/work-feed" element={<WorkFeed />} />
+                  <Route path="/skill-proposals" element={<SkillProposals />} />
+                  <Route path="/skill-propagations" element={<SkillPropagations />} />
                   <Route path="/library" element={<Library />} />
                   {/* <Route path="/marketplace" element={<Marketplace />} /> */}
                   <Route path="/playground" element={<Playground />} />
