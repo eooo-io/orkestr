@@ -512,4 +512,57 @@ class AgentController extends Controller
             'data' => $this->composeService->composeAll($project, $depth),
         ]);
     }
+
+    /**
+     * Public-facing agent profile: owner, specialization, reputation, recent runs.
+     * Used by the directory + routing views.
+     */
+    public function profile(Agent $agent): JsonResponse
+    {
+        $agent->load(['owner']);
+
+        $skillNames = \Illuminate\Support\Facades\DB::table('agent_skill')
+            ->join('skills', 'skills.id', '=', 'agent_skill.skill_id')
+            ->where('agent_skill.agent_id', $agent->id)
+            ->pluck('skills.name', 'skills.slug');
+
+        $runCount = \App\Models\ExecutionRun::where('agent_id', $agent->id)->count();
+        $recentRunsQuery = \App\Models\ExecutionRun::where('agent_id', $agent->id)
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->select(['id', 'uuid', 'status', 'created_at', 'total_tokens', 'total_duration_ms']);
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('execution_runs', 'visibility')) {
+            $recentRunsQuery->where('visibility', '!=', 'private');
+        }
+
+        $recentRuns = $recentRunsQuery->get();
+
+        $domainSummary = $skillNames->isEmpty()
+            ? 'No attached skills'
+            : 'Specializes in: ' . $skillNames->values()->take(5)->implode(', ');
+
+        return response()->json([
+            'data' => [
+                'id' => $agent->id,
+                'uuid' => $agent->uuid,
+                'name' => $agent->name,
+                'slug' => $agent->slug,
+                'icon' => $agent->icon,
+                'role' => $agent->role,
+                'description' => $agent->description,
+                'owner' => $agent->owner ? [
+                    'id' => $agent->owner->id,
+                    'name' => $agent->owner->name,
+                    'email' => $agent->owner->email,
+                ] : null,
+                'reputation_score' => $agent->reputation_score,
+                'reputation_last_computed_at' => $agent->reputation_last_computed_at?->toIso8601String(),
+                'domain_summary' => $domainSummary,
+                'skill_slugs' => $skillNames->keys()->values(),
+                'total_invocations' => $runCount,
+                'recent_runs' => $recentRuns,
+            ],
+        ]);
+    }
 }

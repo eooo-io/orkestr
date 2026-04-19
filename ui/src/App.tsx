@@ -45,6 +45,9 @@ import { Observability } from '@/pages/Observability'
 import { MobileApprovals } from '@/pages/MobileApprovals'
 import { Federation } from '@/pages/Federation'
 import { SharedCompose } from '@/pages/SharedCompose'
+import { AgentProfile } from '@/pages/AgentProfile'
+import { AgentDirectory } from '@/pages/AgentDirectory'
+import { WorkFeed } from '@/pages/WorkFeed'
 
 function AppContent() {
   const { isOpen, close } = useCommandPalette()
@@ -105,8 +108,11 @@ function AppContent() {
                   <Route path="/skills/:id" element={<SkillEditor />} />
                   <Route path="/projects/:id/workflows" element={<Workflows />} />
                   <Route path="/agents" element={<Agents />} />
+                  <Route path="/agents/directory" element={<AgentDirectory />} />
                   <Route path="/agents/new" element={<AgentBuilder />} />
                   <Route path="/agents/:id" element={<AgentBuilder />} />
+                  <Route path="/agents/:id/profile" element={<AgentProfile />} />
+                  <Route path="/work-feed" element={<WorkFeed />} />
                   <Route path="/library" element={<Library />} />
                   {/* <Route path="/marketplace" element={<Marketplace />} /> */}
                   <Route path="/playground" element={<Playground />} />

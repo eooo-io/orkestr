@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\AgentRouteController;
 use App\Http\Controllers\ComposeShareController;
+use App\Http\Controllers\WorkFeedController;
 use App\Http\Controllers\ArtifactController;
 use App\Http\Controllers\BundleController;
 use App\Http\Controllers\LibraryController;
@@ -253,6 +255,19 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/agents/overview', [PerformanceDashboardController::class, 'agentsOverview']);
     Route::post('/agents', [AgentController::class, 'store'])->middleware('org-role:editor');
     Route::get('/agents/{agent}', [AgentController::class, 'show']);
+    Route::get('/agents/{agent}/profile', [AgentController::class, 'profile']);
+    Route::post('/agents/route', [AgentRouteController::class, 'route']);
+
+    // Work feed + run visibility + fork
+    Route::get('/work-feed', [WorkFeedController::class, 'index']);
+    Route::post('/runs/{run}/fork', [WorkFeedController::class, 'fork']);
+    Route::put('/runs/{run}/visibility', [WorkFeedController::class, 'setVisibility']);
+
+    // Project role assignments (IC / DRI / coach)
+    Route::get('/projects/{project}/role-assignments', [\App\Http\Controllers\ProjectRoleAssignmentController::class, 'index']);
+    Route::post('/projects/{project}/role-assignments', [\App\Http\Controllers\ProjectRoleAssignmentController::class, 'store'])->middleware('org-role:editor');
+    Route::put('/projects/{project}/role-assignments/{assignment}', [\App\Http\Controllers\ProjectRoleAssignmentController::class, 'update'])->middleware('org-role:editor');
+    Route::delete('/projects/{project}/role-assignments/{assignment}', [\App\Http\Controllers\ProjectRoleAssignmentController::class, 'destroy'])->middleware('org-role:editor');
     Route::put('/agents/{agent}', [AgentController::class, 'update'])->middleware('org-role:editor');
     Route::delete('/agents/{agent}', [AgentController::class, 'destroy'])->middleware('org-role:editor');
     Route::post('/agents/{agent}/duplicate', [AgentController::class, 'duplicate']);

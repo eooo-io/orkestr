@@ -1024,6 +1024,120 @@ export const importFromProvider = (projectId: number, path: string, provider?: s
 export const fetchModels = () =>
   api.get<{ data: ModelGroup[] }>('/models').then((r) => r.data.data)
 
+// Phase 5: Social layer
+export interface AgentProfile {
+  id: number
+  uuid: string
+  name: string
+  slug: string
+  icon: string | null
+  role: string
+  description: string | null
+  owner: { id: number; name: string; email: string } | null
+  reputation_score: number | null
+  reputation_last_computed_at: string | null
+  domain_summary: string
+  skill_slugs: string[]
+  total_invocations: number
+  recent_runs: Array<{
+    id: number
+    uuid: string
+    status: string
+    created_at: string
+    total_tokens: number
+    total_duration_ms: number
+  }>
+}
+
+export interface AgentRankMatch {
+  agent_id: number
+  slug: string
+  name: string
+  icon: string | null
+  role: string
+  score: number
+  reasoning: string
+  reputation_score: number | null
+  owner: { id: number; name: string } | null
+}
+
+export interface WorkFeedEntry {
+  id: number
+  uuid: string
+  status: string
+  visibility: 'private' | 'team' | 'org'
+  created_at: string
+  agent: {
+    id: number
+    name: string
+    slug: string
+    icon: string | null
+    owner: { id: number; name: string } | null
+  } | null
+  creator: { id: number; name: string } | null
+  input_summary: string
+  total_tokens: number
+  halt_reason: string | null
+}
+
+export interface ProjectRoleAssignment {
+  id: number
+  project_id: number
+  user_id: number
+  role: 'ic' | 'dri' | 'coach'
+  scope: string | null
+  started_at: string | null
+  ended_at: string | null
+  user?: { id: number; name: string; email: string }
+}
+
+export const fetchAgentProfile = (id: number) =>
+  api.get<{ data: AgentProfile }>(`/agents/${id}/profile`).then((r) => r.data.data)
+
+export const routeAgents = (question: string, projectId?: number) =>
+  api
+    .post<{ data: AgentRankMatch[] }>('/agents/route', {
+      question,
+      project_id: projectId,
+    })
+    .then((r) => r.data.data)
+
+export const fetchWorkFeed = (params: { agent_id?: number; user_id?: number; project_id?: number; per_page?: number } = {}) =>
+  api
+    .get<{ data: WorkFeedEntry[]; meta: { current_page: number; last_page: number; total: number } }>(
+      '/work-feed',
+      { params },
+    )
+    .then((r) => r.data)
+
+export const forkRun = (runId: number) =>
+  api
+    .post<{ data: { id: number; uuid: string; forked_from_run_id: number } }>(
+      `/runs/${runId}/fork`,
+    )
+    .then((r) => r.data.data)
+
+export const setRunVisibility = (runId: number, visibility: 'private' | 'team' | 'org') =>
+  api
+    .put<{ data: { visibility: string } }>(`/runs/${runId}/visibility`, { visibility })
+    .then((r) => r.data.data)
+
+export const fetchProjectRoles = (projectId: number) =>
+  api
+    .get<{ data: ProjectRoleAssignment[] }>(`/projects/${projectId}/role-assignments`)
+    .then((r) => r.data.data)
+
+export const createProjectRole = (
+  projectId: number,
+  data: { user_id: number; role: 'ic' | 'dri' | 'coach'; scope?: string },
+) =>
+  api
+    .post<{ data: ProjectRoleAssignment }>(`/projects/${projectId}/role-assignments`, data)
+    .then((r) => r.data.data)
+
+export const endProjectRole = (projectId: number, assignmentId: number) =>
+  api.delete(`/projects/${projectId}/role-assignments/${assignmentId}`)
+
 // Skill staleness
 export interface StalenessStatus {
   is_stale: boolean

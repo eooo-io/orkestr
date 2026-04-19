@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('schedules:process')->everyMinute()->withoutOverlapping();
 Schedule::command('orkestr:run-schedules')->everyMinute()->withoutOverlapping();
+Schedule::job(new \App\Jobs\RecomputeAgentReputationJob())->dailyAt('03:00');
