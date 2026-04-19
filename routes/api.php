@@ -16,6 +16,7 @@ use App\Http\Controllers\EvalSuiteController;
 use App\Http\Controllers\GotchaController;
 use App\Http\Controllers\SkillAssetController;
 use App\Http\Controllers\SkillController;
+use App\Http\Controllers\SkillEvalGateController;
 use App\Http\Controllers\SkillGenerateController;
 use App\Http\Controllers\SkillTestController;
 use App\Http\Controllers\SkillVariableController;
@@ -159,6 +160,12 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/skills/{skill}/lint', [SkillController::class, 'lint']);
     Route::get('/skills/{skill}/staleness', [SkillController::class, 'staleness']);
     Route::put('/skills/{skill}/staleness', [SkillController::class, 'updateStaleness'])->middleware('org-role:editor');
+
+    // Eval gate per skill
+    Route::get('/skills/{skill}/eval-gate', [SkillEvalGateController::class, 'show']);
+    Route::put('/skills/{skill}/eval-gate', [SkillEvalGateController::class, 'update'])->middleware('org-role:editor');
+    Route::post('/skills/{skill}/eval-gate/run-now', [SkillEvalGateController::class, 'runNow'])->middleware('org-role:editor');
+    Route::get('/skills/{skill}/eval-gate/status', [SkillEvalGateController::class, 'status']);
 
     // Skill Assets (folder-based skills)
     Route::get('/skills/{skill}/assets', [SkillAssetController::class, 'index']);

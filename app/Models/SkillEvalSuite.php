@@ -8,7 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SkillEvalSuite extends Model
 {
-    protected $fillable = ['skill_id', 'name', 'description'];
+    protected $fillable = ['skill_id', 'name', 'description', 'scorer'];
+
+    protected $attributes = [
+        'scorer' => 'keyword',
+    ];
 
     public function skill(): BelongsTo
     {

@@ -25,6 +25,7 @@ import { AssetsPanel } from '@/components/skills/AssetsPanel'
 import { GotchaPanel } from '@/components/skills/GotchaPanel'
 import { InlineGotchaStrip } from '@/components/skills/InlineGotchaStrip'
 import { StalenessBanner } from '@/components/skills/StalenessBanner'
+import { RegressionGateBanner } from '@/components/skills/RegressionGateBanner'
 import { EvalPanel } from '@/components/skills/EvalPanel'
 import { GenerateSkillModal } from '@/components/skills/GenerateSkillModal'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -244,6 +245,7 @@ export function SkillEditor() {
               refreshKey={stalenessRefreshKey}
             />
           )}
+          {!isNew && skill.id && <RegressionGateBanner skillId={skill.id} />}
           {!isNew && skill.id && (
             <InlineGotchaStrip
               skillId={skill.id}

@@ -116,10 +116,13 @@ export interface SkillEvalPrompt {
 export interface SkillEvalRun {
   id: number
   eval_suite_id: number
+  skill_version_id: number | null
+  baseline_run_id: number | null
   model: string
   mode: 'with_skill' | 'without_skill' | 'ab_test'
   status: 'pending' | 'running' | 'completed' | 'failed'
   overall_score: number | null
+  delta_score: number | null
   results: unknown[] | null
   started_at: string | null
   completed_at: string | null

@@ -6,7 +6,7 @@ use App\Models\Skill;
 use App\Models\SkillEvalPrompt;
 use App\Models\SkillEvalRun;
 use App\Models\SkillEvalSuite;
-use App\Services\LLM\LLMProviderFactory;
+use App\Jobs\RunEvalSuiteJob;
 use App\Services\PromptLinter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -126,14 +126,19 @@ class EvalSuiteController extends Controller
             'mode' => 'required|string|in:with_skill,without_skill,ab_test',
         ]);
 
+        $skill = $evalSuite->skill;
+        $currentVersion = $skill
+            ? $skill->versions()->orderByDesc('version_number')->first()
+            : null;
+
         $run = $evalSuite->runs()->create([
             'model' => $validated['model'],
             'mode' => $validated['mode'],
             'status' => 'pending',
+            'skill_version_id' => $currentVersion?->id,
         ]);
 
-        // Dispatch async job (placeholder — runs synchronously for now)
-        $this->executeRun($run);
+        RunEvalSuiteJob::dispatch($run->id);
 
         return response()->json(['data' => $run->fresh()], 201);
     }
@@ -213,87 +218,4 @@ class EvalSuiteController extends Controller
         ]);
     }
 
-    /**
-     * Execute an eval run synchronously (will be async via job later).
-     */
-    protected function executeRun(SkillEvalRun $run): void
-    {
-        $run->update(['status' => 'running', 'started_at' => now()]);
-
-        try {
-            $suite = $run->suite;
-            $skill = $suite->skill;
-            $prompts = $suite->prompts;
-            $factory = app(LLMProviderFactory::class);
-            $provider = $factory->make($run->model);
-
-            $results = [];
-            $totalScore = 0;
-
-            foreach ($prompts as $prompt) {
-                try {
-                    $messages = [['role' => 'user', 'content' => $prompt->prompt]];
-                    $withResponse = null;
-                    $withoutResponse = null;
-
-                    if ($run->mode === 'with_skill' || $run->mode === 'ab_test') {
-                        $withResponse = $provider->chat($messages, [
-                            'system' => $skill->body ?? '',
-                            'max_tokens' => $skill->max_tokens ?? 2048,
-                        ]);
-                    }
-
-                    if ($run->mode === 'without_skill' || $run->mode === 'ab_test') {
-                        $withoutResponse = $provider->chat($messages, [
-                            'max_tokens' => $skill->max_tokens ?? 2048,
-                        ]);
-                    }
-
-                    // Simple scoring: length and presence of expected behavior keywords
-                    $promptResult = [
-                        'prompt_id' => $prompt->id,
-                        'prompt_text' => $prompt->prompt,
-                        'score' => 70, // Default baseline
-                        'with_skill_response' => $withResponse ?? null,
-                        'without_skill_response' => $withoutResponse ?? null,
-                    ];
-
-                    if ($run->mode === 'ab_test') {
-                        $promptResult['winner'] = 'with_skill'; // placeholder
-                    }
-
-                    $results[] = $promptResult;
-                    $totalScore += $promptResult['score'];
-                } catch (\Throwable $e) {
-                    $results[] = [
-                        'prompt_id' => $prompt->id,
-                        'prompt_text' => $prompt->prompt,
-                        'score' => 0,
-                        'error' => $e->getMessage(),
-                    ];
-                }
-            }
-
-            $overall = count($results) > 0 ? $totalScore / count($results) : 0;
-
-            $run->update([
-                'status' => 'completed',
-                'overall_score' => $overall,
-                'results' => $results,
-                'completed_at' => now(),
-            ]);
-
-            $skill->update([
-                'last_validated_model' => $run->model,
-                'last_validated_at' => now(),
-                'last_validated_eval_run_id' => $run->id,
-            ]);
-        } catch (\Throwable $e) {
-            $run->update([
-                'status' => 'failed',
-                'results' => ['error' => $e->getMessage()],
-                'completed_at' => now(),
-            ]);
-        }
-    }
 }
