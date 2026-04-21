@@ -6,10 +6,22 @@ The Skill Editor is where you author, test, lint, review, and manage individual 
 
 The editor is split into two panels:
 
-- **Left panel** -- Frontmatter form at the top, Monaco code editor below
-- **Right panel** -- Seven tabs for testing and management
+- **Left panel** -- Frontmatter form, status banner stack, Monaco code editor
+- **Right panel** -- Tabs for testing and management
 
 The left panel is where you write. The right panel is where you validate.
+
+## The banner stack
+
+Between the frontmatter form and the Monaco editor, the editor mounts a stack of compact status strips. Each hides when it has nothing to say, so on a clean skill you see none of them; on a problematic one, several may appear.
+
+| Banner | Source | When it shows |
+|---|---|---|
+| [`StalenessBanner`](./staleness) | `SkillStalenessService` | When the skill's `tuned_for_model` is missing, deprecated, or diverges from its last validated model |
+| `RegressionGateBanner` | [`SkillEvalGateService`](./eval-gates) | When an eval gate is configured and runs are queued, running, or outside the fail-threshold delta |
+| `InlineGotchaStrip` | `SkillGotcha` records | When the skill has open (unresolved) gotchas |
+
+Follow-up banners tracked in [#561](https://github.com/eooo-io/orkestr/issues/561) (`ProposalBanner`) and [#562](https://github.com/eooo-io/orkestr/issues/562) (lineage strip).
 
 ## Frontmatter Form
 

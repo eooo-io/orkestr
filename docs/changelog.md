@@ -1,5 +1,65 @@
 # Changelog
 
+## v1.1.0 — 2026 Roadmap (Phases 0–6)
+
+Seven phases shipped across seven PRs. Harness engineering (0–3) turned the skill editor into a quality-tracking surface; the org-design layer (4–6) made runs bounded, agents social, and learning compound. 26 new migrations, 106 new Pest tests.
+
+### Phase 0 — Quick wins ([PR #549](https://github.com/eooo-io/orkestr/pull/549))
+
+- **Inline gotcha strip** above Monaco in the skill editor shows open-gotcha counts + top critical titles without switching tabs
+- **Progressive-disclosure lint rule** — `PromptLinter::lintSkill(Skill)` overload checking `summary`, `description`, and `body` structure. Three new rules: `missing_summary`, `missing_description`, `no_progressive_disclosure`
+
+### Phase 1 — Model staleness tracking ([PR #550](https://github.com/eooo-io/orkestr/pull/550))
+
+- New columns: `skills.tuned_for_model`, `last_validated_model`, `last_validated_at`, `last_validated_eval_run_id`; `skill_versions.tuned_for_model` freezes intent per snapshot
+- **`SkillStalenessService`** returns `{is_stale, reason, tuned_for_model, last_validated_model, last_validated_at, suggested_action}` with reasons `ok`, `needs_tuning`, `needs_revalidation`, `model_deprecated`
+- **`StalenessBanner`** surfaces state above Monaco; **"Tuned for model"** dropdown in the frontmatter form
+- **Version history** shows per-version tuned-for model badges
+- Endpoints: `GET|PUT /api/skills/{skill}/staleness`
+
+### Phase 2 — Compose preview + sharing ([PR #551](https://github.com/eooo-io/orkestr/pull/551))
+
+- `AgentComposeService::compose()` gains `?string $modelOverride`; response includes `target_model`, `model_context_window`, and `skill_breakdown` with per-skill char offsets (`starts_at_char`/`ends_at_char`) for hover highlighting
+- **`ComposeShareLink`** with UUID, expiry (7-day default), snapshot-by-default, secret-scan gate via `PromptLinter`
+- **Public `GET /api/share/compose/{uuid}`** route with `throttle:30,1`, 410/404 handling, access counting
+- New SPA page **`/share/compose/:uuid`** (no sidebar, no auth); share button + modal in `AgentComposePreview`
+
+### Phase 3 — Eval regression gates ([PR #552](https://github.com/eooo-io/orkestr/pull/552))
+
+- **`ScorerInterface`** with `KeywordScorer` (deterministic) + opt-in `LlmJudgeScorer`; resolved per-suite via `skill_eval_suites.scorer` column
+- **`RunEvalSuiteJob`** (`ShouldQueue`, 900s timeout) replaces the synchronous run path; `useEvalRunStatus(runId)` polling hook
+- `skill_eval_runs` linked to `skill_version_id` + `baseline_run_id` + `delta_score`
+- **`skill_eval_gates`** table + **`SkillEvalGateService`** — `evaluateSkillSave`, `findBaselineFor` (most recent run for `(suite, model)`), `computeDelta`, `canSync`
+- `SkillController::update` returns `gate_decision`; `ProviderSyncService::syncProject` raises `EvalGateBlockedException` (409) on failing deltas
+- **`RegressionGateBanner`** + **`RegressionDeltaModal`** + **`GateConfigPanel`** in `EvalPanel`; Zustand `pendingEvalGates` slice survives navigation
+- **⚠️ `QUEUE_CONNECTION=sync` is no longer safe after this phase**
+
+### Phase 4 — Runtime safety guardrails ([PR #553](https://github.com/eooo-io/orkestr/pull/553))
+
+- **`ExecutionGuardrailService`** — loop detection (`xxh128((agent, tool, input))` signature, 6-step window, 3-repeat threshold), turn caps (org-level `max_agent_turns_per_run`, default 40), per-run token + cost budgets
+- Budget precedence: **per-run override → per-agent → org default**
+- New halt reasons: `loop_detected`, `turn_cap_exceeded`, `budget_token_exceeded`, `budget_cost_exceeded` — status `halted_guardrail`, owner notification via `agent.halt`
+- `POST /api/projects/{p}/agents/{a}/execute` accepts `token_budget` + `cost_budget_usd` overrides
+- Halt banner in `ExecutionPlayground` with human-readable reason
+
+### Phase 5 — Agent social layer ([PR #554](https://github.com/eooo-io/orkestr/pull/554))
+
+- `agents.owner_user_id` (backfilled from creator), `reputation_score`, `reputation_last_computed_at`
+- **`AgentReputationService`** formula: baseline 50 + success-rate − halt-rate − failure-rate + review signal. Scheduled nightly at 03:00
+- **`/agents/:id/profile`** page with owner, reputation, specialization, recent runs
+- **`POST /api/agents/route`** — "Who should I ask about X?" routing via skill + past-run overlap
+- **`/agents/directory`** page with routing search
+- `execution_runs.visibility` (`private`/`team`/`org`) + `forked_from_run_id` for the **work feed** at `/work-feed` with **fork** action
+- **`project_role_assignments`** (IC / DRI / coach) + `RoleMap` component in project Team tab
+
+### Phase 6 — Compound learning ([PR #555](https://github.com/eooo-io/orkestr/pull/555))
+
+- **`CapabilityDiscoveryService`** — ranks unused MCP servers, peer skills, library starters. Per-user dismissals with expiry via `capability_suggestion_dismissals`
+- **`PatternExtractionService`** + **`ExtractMemoryPatternsJob`** (daily 03:30) — scans `agent_memories` for recurring feedback, opens `skill_update_proposals` when canonical text repeats ≥3 times in 30 days
+- **`SkillPropagationService`** + **`SuggestSkillPropagationsJob`** (daily 04:00) — cross-project suggestions for high-performing skills with model-family compatibility gating
+- New SPA pages: **`/skill-proposals`** (inbox) and **`/skill-propagations`** (org-wide)
+- Endpoints for accept/reject/dismiss, `/api/skills/{id}/lineage` for provenance
+
 ## v1.0.0
 
 ### Infrastructure

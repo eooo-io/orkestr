@@ -111,12 +111,21 @@ export default withMermaid(
               { text: 'Includes & Composition', link: '/guide/includes' },
               { text: 'Template Variables', link: '/guide/templates' },
               { text: 'Prompt Linting', link: '/guide/linting' },
+              { text: 'Model Staleness', link: '/guide/staleness' },
               { text: 'Version History', link: '/guide/versions' },
               { text: 'Agent Configuration', link: '/guide/agents' },
               { text: 'Agent Teams', link: '/guide/agent-teams' },
               { text: 'Agent Compose', link: '/guide/agent-compose' },
+              { text: 'Compose Preview & Sharing', link: '/guide/compose-sharing' },
               { text: 'Canvas', link: '/guide/canvas' },
               { text: 'Workflows', link: '/guide/workflows' },
+            ],
+          },
+          {
+            text: 'Quality & Safety',
+            items: [
+              { text: 'Eval Regression Gates', link: '/guide/eval-gates' },
+              { text: 'Runtime Safety Guardrails', link: '/guide/runtime-safety' },
             ],
           },
           {
@@ -131,6 +140,13 @@ export default withMermaid(
               { text: 'Execution', link: '/guide/execution' },
               { text: 'Schedules', link: '/guide/schedules' },
               { text: 'Connections', link: '/guide/connections' },
+            ],
+          },
+          {
+            text: 'Social Layer & Learning',
+            items: [
+              { text: 'Agent Social Layer', link: '/guide/social-layer' },
+              { text: 'Compound Learning', link: '/guide/compound-learning' },
             ],
           },
           {
