@@ -86,7 +86,7 @@ Event schedules respond to internal Orkestr events -- such as a skill being upda
 ```
 
 ::: warning
-Event triggers use template variables from the event payload. Wrap dynamic values in `{{event.field_name}}` syntax within the input template.
+Event triggers use template variables from the event payload. Wrap dynamic values in <span v-pre>`{{event.field_name}}`</span> syntax within the input template.
 :::
 
 ## Managing Schedules

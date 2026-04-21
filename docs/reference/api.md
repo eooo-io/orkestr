@@ -998,3 +998,281 @@ POST /api/import/github/import
   "project_id": "target-project-uuid"
 }
 ```
+
+---
+
+# 2026 Roadmap additions (Phases 0–6)
+
+## Model staleness (Phase 1)
+
+### Get staleness status
+
+```http
+GET /api/skills/{skill}/staleness?current_model=claude-sonnet-4-6
+```
+
+Response:
+
+```json
+{
+  "data": {
+    "is_stale": true,
+    "reason": "needs_revalidation",
+    "tuned_for_model": "claude-sonnet-4-6",
+    "last_validated_model": null,
+    "last_validated_at": null,
+    "suggested_action": "Run an eval suite against claude-sonnet-4-6 to confirm behavior."
+  }
+}
+```
+
+`reason` values: `ok`, `needs_tuning`, `needs_revalidation`, `model_deprecated`. `current_model` is optional.
+
+### Update tuned-for model
+
+```http
+PUT /api/skills/{skill}/staleness        (editor+)
+{ "tuned_for_model": "claude-opus-4-6" }
+```
+
+Returns the fresh staleness status.
+
+## Compose preview + sharing (Phase 2)
+
+### Compose with model override
+
+```http
+GET /api/projects/{project}/agents/{agent}/compose?model=gpt-5.4&depth=full
+```
+
+Response now includes `target_model`, `model_context_window`, and `skill_breakdown[]` with per-skill `starts_at_char` / `ends_at_char` offsets for UI highlighting.
+
+### Create a share link
+
+```http
+POST /api/projects/{project}/agents/{agent}/compose/share    (editor+)
+{
+  "model": null,
+  "depth": "full",
+  "expires_in_days": 7,
+  "is_snapshot": true
+}
+```
+
+Response on success (201):
+
+```json
+{
+  "data": {
+    "uuid": "…",
+    "url": "/share/compose/…",
+    "expires_at": "2026-04-26T…Z",
+    "is_snapshot": true
+  }
+}
+```
+
+Response on secret-scan refusal (422):
+
+```json
+{
+  "error": "Refusing to create share link: composed output contains potential secrets.",
+  "secrets": [
+    { "rule": "secret_in_prompt", "message": "Potential Anthropic API key detected.", "line": 14 }
+  ]
+}
+```
+
+### Public share
+
+```http
+GET /api/share/compose/{uuid}         (public, throttle:30,1)
+```
+
+Returns the composed payload. `410` on expired, `404` on missing. Increments `access_count` + `last_accessed_at`.
+
+### Delete a share
+
+```http
+DELETE /api/share/compose/{uuid}      (creator only)
+```
+
+Returns `403` for anyone else.
+
+## Eval regression gates (Phase 3)
+
+### Gate config
+
+```http
+GET  /api/skills/{skill}/eval-gate
+PUT  /api/skills/{skill}/eval-gate    (editor+)
+{
+  "enabled": true,
+  "required_suite_ids": [7],
+  "fail_threshold_delta": -5.00,
+  "auto_run_on_save": true,
+  "block_sync": false
+}
+```
+
+### Run gate now
+
+```http
+POST /api/skills/{skill}/eval-gate/run-now   (editor+)
+```
+
+Returns `{ enqueued_run_ids, baseline_info, est_duration_seconds, reason }`.
+
+### Gate status (polled by banner)
+
+```http
+GET /api/skills/{skill}/eval-gate/status
+```
+
+Returns `{ enabled, pending_count, can_sync, runs: [{ run_id, status, overall_score, delta }, …] }`.
+
+### Eval run status (polled during runs)
+
+```http
+GET /api/eval-runs/{eval_run}
+```
+
+Returns the current `SkillEvalRun` row including `status`, `overall_score`, `delta_score`, and `results[]`.
+
+### Sync blocked (409)
+
+When `ProviderSyncService::syncProject` hits an eval gate in block-sync mode:
+
+```http
+POST /api/projects/{project}/sync    → 409
+{
+  "error": "Sync blocked by one or more skill eval gates.",
+  "blocked_skills": [
+    {
+      "skill_id": 42,
+      "skill_slug": "invoice-helper",
+      "skill_name": "Invoice Helper",
+      "last_delta": -8.50,
+      "last_run_id": 118
+    }
+  ]
+}
+```
+
+## Runtime safety (Phase 4)
+
+### Execute with per-run budget
+
+```http
+POST /api/projects/{project}/agents/{agent}/execute     (editor+)
+{
+  "input": { "message": "…" },
+  "token_budget": 50000,
+  "cost_budget_usd": 2.50
+}
+```
+
+### Run detail exposes budget + halt info
+
+`GET /api/runs/{run}` now returns:
+
+```json
+{
+  "status": "halted_guardrail",
+  "halt_reason": "loop_detected",
+  "halt_step_id": 142,
+  "token_budget": 50000,
+  "cost_budget_microcents": 2500000,
+  "total_tokens": 18400,
+  "total_cost_microcents": 87500
+}
+```
+
+`halt_reason` values: `loop_detected`, `turn_cap_exceeded`, `budget_token_exceeded`, `budget_cost_exceeded`.
+
+## Agent social layer (Phase 5)
+
+### Agent profile
+
+```http
+GET /api/agents/{agent}/profile
+```
+
+Returns owner, reputation, domain summary, total invocations, last 10 non-private runs.
+
+### Agent routing
+
+```http
+POST /api/agents/route
+{
+  "question": "Who handles invoice refunds?",
+  "project_id": 14
+}
+```
+
+Returns an ordered list of matches with `score` + human-readable `reasoning`.
+
+### Work feed
+
+```http
+GET /api/work-feed?agent_id=&user_id=&project_id=&per_page=25
+```
+
+Paginated feed of `team` + `org` visible runs scoped to the caller's current org. Only includes `completed` + `halted_guardrail` runs.
+
+### Fork a run
+
+```http
+POST /api/runs/{run}/fork
+```
+
+Clones `input` + `config` into a new pending private run owned by the forker. Linked via `forked_from_run_id`.
+
+### Set run visibility
+
+```http
+PUT /api/runs/{run}/visibility     (creator only)
+{ "visibility": "org" }    // private | team | org
+```
+
+### Project role assignments
+
+```http
+GET    /api/projects/{project}/role-assignments
+POST   /api/projects/{project}/role-assignments          (editor+)
+PUT    /api/projects/{project}/role-assignments/{id}     (editor+)
+DELETE /api/projects/{project}/role-assignments/{id}     (editor+)
+```
+
+Body for create: `{ user_id, role: 'ic' | 'dri' | 'coach', scope?, started_at? }`. `DELETE` sets `ended_at` rather than removing the row.
+
+## Compound learning (Phase 6)
+
+### Capability discovery
+
+```http
+GET  /api/agents/{agent}/capability-suggestions
+POST /api/agents/{agent}/capability-suggestions/dismiss
+{ "suggestion_key": "unused_mcp:42", "expires_in_days": 30 }
+```
+
+### Skill proposals
+
+```http
+GET  /api/skill-proposals[?skill_id=X]
+GET  /api/skill-proposals/{proposal}
+POST /api/skill-proposals/{proposal}/accept   (editor+)
+POST /api/skill-proposals/{proposal}/reject   (editor+)
+{ "suppress_days": 30 }
+```
+
+### Cross-project propagation
+
+```http
+GET  /api/orgs/{organization}/skill-propagations
+POST /api/skill-propagations/{propagation}/accept    (editor+)
+{ "body_override": "Customized for this project…" }
+POST /api/skill-propagations/{propagation}/dismiss   (editor+)
+GET  /api/skills/{skill}/lineage
+```
+

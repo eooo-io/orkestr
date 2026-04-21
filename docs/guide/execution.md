@@ -15,7 +15,9 @@ Execution flows through four phases per iteration:
 | **Act** | Tool calls execute via MCP |
 | **Observe** | Agent evaluates results and decides whether to continue |
 
-The agent loops through these phases until a termination condition is met: goal achieved, max iterations reached, timeout, or manual stop.
+The agent loops through these phases until a termination condition is met: goal achieved, max iterations reached, timeout, manual stop, or **[runtime guardrail halt](./runtime-safety)** (loop detection, turn cap, or token/cost budget exhaustion).
+
+Halted runs transition to `status=halted_guardrail` with a human-readable `halt_reason` on the run record. The playground surfaces a red banner above the trace when this happens.
 
 ## Real-Time SSE Streaming
 
@@ -72,6 +74,25 @@ The execution detail view shows a cost breakdown table:
 | Output tokens | 3,616 |
 | Estimated cost | $0.0384 |
 | Duration | 8,420 ms |
+
+### Per-run budgets
+
+You can set a hard token or cost ceiling on individual runs via the execute endpoint:
+
+```http
+POST /api/projects/{project}/agents/{agent}/execute
+{
+  "input": { "message": "…" },
+  "token_budget": 50000,
+  "cost_budget_usd": 2.50
+}
+```
+
+Precedence: per-run override → per-agent (`run_token_budget` / `run_cost_budget_usd`) → org default (`default_run_token_budget` / `default_run_cost_budget_usd`). When a live counter crosses the resolved budget, the run halts with `halt_reason=budget_token_exceeded` or `budget_cost_exceeded` and the owner is notified. See [Runtime Safety Guardrails](./runtime-safety).
+
+### Run visibility and forking
+
+Each run has a `visibility` field (`private` default, `team`, `org`). Team- and org-visible runs show up in the [Work Feed](./social-layer#work-feed-fork) where teammates can fork them — copy `input` + `config` into a new draft run — to remix a successful prompt without starting from scratch.
 
 ## Execution Replay
 

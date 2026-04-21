@@ -89,6 +89,18 @@ Agents can be exported to multiple orchestration framework formats:
 
 Export from the agent configuration modal by selecting the target format. The export includes the composed instructions, tool definitions, model settings, and autonomy level.
 
+## Ownership, reputation, and the social layer
+
+Every agent has a named `owner_user_id` (who's accountable for its behavior) and a `reputation_score` computed nightly from run history. The dedicated profile page at `/agents/:id/profile` shows both, plus the agent's derived specialization (from attached skills) and its recent public runs.
+
+The full social-layer surface — profile page, org directory, "Who should I ask about X?" routing, work feed with fork, and IC/DRI/coach project roles — is documented in [Agent Social Layer](./social-layer).
+
+## Runtime safety when agents execute
+
+Each run an agent triggers is bounded by three independent guardrails: **loop detection** (same tool+input 3+ times in 6 act steps halts), **turn caps** (org-level `max_agent_turns_per_run`, default 40), and **per-run token/cost budgets** with precedence `run > agent > org`. Halted runs transition to `status=halted_guardrail` with a `halt_reason` and notify the owner. See [Runtime Safety Guardrails](./runtime-safety).
+
 ## Agents and Provider Sync
 
 When you run a provider sync, all enabled agents are composed (base instructions + custom instructions + assigned skill bodies) and included in the output alongside individual skills. See [Agent Compose](./agent-compose) for details on how composition works and [Provider Sync](./provider-sync) for how the output maps to provider files.
+
+Note: if any of the synced skills have an [eval regression gate](./eval-gates) with `block_sync=true` and the latest run is below the fail threshold, sync will fail with a 409 Conflict listing the blocking skills.

@@ -1,6 +1,6 @@
 # Prompt Linting
 
-The prompt linter analyzes your skill's body for common prompt engineering issues and suggests improvements. It runs 8 rule-based checks that catch vague instructions, conflicting directives, and structural problems.
+The prompt linter analyzes your skill's body and frontmatter for common prompt engineering issues and suggests improvements. It runs 11 rule-based checks — 8 on the body, 3 on the frontmatter — that catch vague instructions, conflicting directives, weak metadata, and structural problems.
 
 ## Using the Lint Tab
 
@@ -97,6 +97,34 @@ Flags skills that mention complexity (words like "complex", "nuanced", "edge cas
 Detects lines that are more than 85% similar to other lines in the same skill. Repeated instructions waste tokens without adding value.
 
 **Fix:** Remove the duplicate instruction.
+
+## Frontmatter rules (`lintSkill`)
+
+When the linter runs against a full `Skill` (not just a body string), it also checks the skill's metadata. These rules were added in Phase 0 alongside the progressive-disclosure structural check.
+
+### 9. Missing Summary
+
+**Severity:** Suggestion
+
+Fires when `summary` is empty. The summary is the tier-1 progressive-disclosure hint — without it, agent context indexes fall back to the longer `description` and waste tokens.
+
+**Fix:** Add a one-line summary (≤500 chars) describing when to use this skill.
+
+### 10. Missing Description
+
+**Severity:** Warning
+
+Fires when `description` is empty, under 20 chars, contains a vague word (`stuff`, `things`, `various`, `general`, `misc`), or lacks an actionable verb (generate, analyze, review, summarize, etc.). Agents use the description to decide whether to invoke the skill — vague descriptions mean the skill never triggers when needed.
+
+**Fix:** Write a concrete description with an action verb and trigger conditions.
+
+### 11. No Progressive Disclosure
+
+**Severity:** Suggestion
+
+Fires when the body is >500 chars and has no `##` or `###` heading in the first 40 lines. Long skills without section headings force the model to read everything before deciding what matters.
+
+**Fix:** Add section headings so the model can skim before committing to details.
 
 ## Linting via API
 
