@@ -53,7 +53,7 @@ You can use any layer independently. Start with skills, grow into agents and orc
 
 ### Related
 
-- [`ai-native-engineering-harness`](https://github.com/eooo-io/ai-native-engineering-harness) — the doctrine layer that lives above any runtime: standards, skill formats, agent operating principles, and review rubrics that inform *what* you put into Orkestr (or any other harness). Orkestr is the runtime; the harness is the doctrine.
+- [`ai-native-engineering-doctrine`](https://github.com/eooo-io/ai-native-engineering-doctrine) — the doctrine layer that lives above any runtime: standards, skill formats, agent operating principles, and review rubrics that inform *what* you put into Orkestr (or any other harness). Orkestr is the runtime; the doctrine is, well, the doctrine.
 
 ---
 
